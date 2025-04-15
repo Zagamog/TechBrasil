@@ -315,15 +315,16 @@ SELECT *
 # read database
 # one time only, then save to AWS
 db_IM1a_vinculos_AL <- read_sql(query)
-update_data_from_s3("working/rais/db_IM1a_vinculosAL.rda", 
-                    "rais/db_IM1a_vinculosAL.rda", 
-                    bucket=bucket_name)
-
-# save data
-save(db_IM1a_vinculosAL, file = "working/rais/db_IM1a_vinculosAL.rda")
-upload_processed_data("working/rais/db_IM1a_vinculosAL.rda", 
-                      "rais/db_IM1a_vinculosAL.rda", 
-                      bucket=bucket_name)
+glimpse(db_IM1a_vinculos_AL)
+# update_data_from_s3("working/rais/db_IM1a_vinculosAL.rda", 
+#                     "rais/db_IM1a_vinculosAL.rda", 
+#                     bucket=bucket_name)
+# 
+# # save data
+save(db_IM1a_vinculos_AL, file = "working/rais/db_IM1a_vinculos_AL.rda")
+# upload_processed_data("working/rais/db_IM1a_vinculosAL.rda", 
+#                       "rais/db_IM1a_vinculosAL.rda", 
+#                       bucket=bucket_name)
 
 
 
