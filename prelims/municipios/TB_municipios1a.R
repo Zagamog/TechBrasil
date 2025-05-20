@@ -1,31 +1,100 @@
-# Load required package
-library(DBI)
+# TB_municipios1a.R
 
-# Define path to your SQLite database
+# This script reads an SQLite database for Brazilian municipalities data (PIB),
+# prioritizing a local copy and downloading from AWS S3 if not found.
+
+library(DBI)
+library(RSQLite) # Make sure RSQLite is loaded for dbConnect
+library(aws.s3) # Added for S3 interaction
+library(dotenv) # Added for secure AWS credentials
+library(dplyr) # For data manipulation
+# --- S3 Configuration and Utility Function ---
+# Ensure your .env file with AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY is in the project directory
+dotenv::load_dot_env()
+
+bucket_name <- "techbrazildata"
+s3_db_path <- "working/sqlite/TB_municipios.sqlite" # S3 path for your SQLite DB
+
+# Function to download file from S3 if not present locally
+# (Copied from br_pop1a.R or techbrasil_awsui.R)
+update_data_from_s3 <- function(local_path, s3_path, bucket) {
+  if (!file.exists(local_path)) {
+    tryCatch({
+      save_object(object = s3_path, bucket = bucket, file = local_path)
+      message("✅ File downloaded from S3: ", local_path)
+    }, error = function(e) {
+      message("❌ Error downloading from S3: ", e$message)
+    })
+  } else {
+    message("✅ Using local version: ", local_path)
+  }
+}
+
+# Define local path to your SQLite database
 db_path <- "D:/Country/Brazil/TechBrazil/working/sqlite/TB_municipios.sqlite"
 
-# Connect to the database
+# Ensure the local directory exists before attempting to download
+db_dir <- dirname(db_path)
+if (!dir.exists(db_dir)) {
+  dir.create(db_dir, recursive = TRUE)
+  message("Created local directory: ", db_dir)
+}
+
+# --- Step 1: Ensure SQLite DB is available locally (download from S3 if necessary) ---
+update_data_from_s3(local_path = db_path, s3_path = s3_db_path, bucket = bucket_name)
+
+# --- Step 2: Connect to the database ---
 con <- dbConnect(RSQLite::SQLite(), dbname = db_path)
 
+# --- Step 3: Perform database operations ---
 # List all tables in the database
-dbListTables(con)
+message("\nTables in the database:")
+print(dbListTables(con))
 
 # Preview the first few rows of your PIB table
-dbGetQuery(con, "SELECT * FROM PIB_dos_Municipios LIMIT 10")
+message("\nPreview of PIB_dos_Municipios:")
+print(dbGetQuery(con, "SELECT * FROM PIB_dos_Municipios LIMIT 10"))
 
 # Quick summary of columns
-dbListFields(con, "PIB_dos_Municipios")
+message("\nFields in PIB_dos_Municipios:")
+print(dbListFields(con, "PIB_dos_Municipios"))
 
-
+# Read the entire table into a dataframe
 df_pib <- dbReadTable(con, "PIB_dos_Municipios")
 
 # Optional: Check year range
-dbGetQuery(con, "SELECT MIN(Ano) AS min_year, MAX(Ano) AS max_year FROM PIB_dos_Municipios")
+message("\nYear range in PIB_dos_Municipios:")
+print(dbGetQuery(con, "SELECT MIN(Ano) AS min_year, MAX(Ano) AS max_year FROM PIB_dos_Municipios"))
 
-# Always disconnect when done
+# Example: Table of 'Nome.da.Grande.Região'
+message("\nTable of 'Nome.da.Grande.Região':")
+print(table(df_pib$`Nome.da.Grande.Região`))
+
+# Convert alphanumeric to numeric
+
+
+cols_to_convert_indices <- c(1, 2, 4, 7, 10, 12, 14, 17, 20, 23, 27, 33:40)
+for (col_idx in cols_to_convert_indices) {
+  df_pib[[col_idx]] <- as.numeric(gsub("\\.", "", gsub(",", ".", df_pib[[col_idx]])))
+}
+
+
+glimpse(df_pib)
+
+# --- Step 4: Always disconnect when done ---
 dbDisconnect(con)
+message("\nDisconnected from the database.")
+# --- Step 5: Upload processed data back to S3 ---
+# Save the processed data to a local file
+save(df_pib, file = "working/ibge/TB_municipios.rda")
+# Upload the processed file back to S3
 
-table(df_pib$`Nome.da.Grande.Região`)
+tryCatch({
+  put_object(file = "working/ibge/TB_municipios.rda", object = "working/ibge/TB_municipios.rda", bucket = bucket_name)
+  message("✅ Uploaded to S3: working/ibge/TB_municipios.rda")
+}, error = function(e) {
+  message("❌ Error uploading to S3: ", e$message)
+})
 
 
 

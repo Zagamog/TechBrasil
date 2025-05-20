@@ -326,5 +326,76 @@ save(db_IM1a_vinculos_AL, file = "working/rais/db_IM1a_vinculos_AL.rda")
 #                       "rais/db_IM1a_vinculosAL.rda", 
 #                       bucket=bucket_name)
 
+# --- Add-on Script to Reorganize S3 Pnad Data ---
+
+library(aws.s3) # Ensure this is loaded
+library(dotenv) # Ensure this is loaded
+
+# Make sure your AWS credentials are loaded
+dotenv::load_dot_env()
+
+bucket_name <- "techbrazildata" # Confirm your bucket name
+
+# Define the old and new S3 paths for PNAD data
+old_s3_pnad_object_key <- "pnad/db_IM1a.rda" # This is the object key
+new_s3_pnad_object_key <- "working/ibge/pnad/db_IM1a.rda" # The desired new location
+
+message("Attempting to copy Pnad data in S3...")
+
+tryCatch({
+  # Copy the object from the old path to the new path
+  # Source and Destination are specified relative to the bucket.
+  # Setting ACL to "private" or "public-read" as per your bucket's policy
+  copy_object(
+    from_object = old_s3_pnad_object_key,
+    to_object = new_s3_pnad_object_key,
+    from_bucket = bucket_name,
+    to_bucket = bucket_name,
+    acl = "private" # Adjust ACL if needed, e.g., "public-read"
+  )
+  message(paste0("✅ Successfully copied S3 object from s3://", bucket_name, "/", old_s3_pnad_object_key, " to s3://", bucket_name, "/", new_s3_pnad_object_key))
+  
+  # Optional: Delete the old object after successful copy
+  # Uncomment the lines below if you want to remove the file from the old location
+  # message("Attempting to delete old S3 object...")
+  # delete_object(object = old_s3_pnad_object_key, bucket = bucket_name)
+  # message(paste0("🗑️ Successfully deleted old S3 object: s3://", bucket_name, "/", old_s3_pnad_object_key))
+  
+}, error = function(e) {
+  message(paste0("❌ Error copying S3 object: ", e$message))
+})
+
+
+# Now for rais
+
+
+# Define the old and new S3 paths for RAIS establishments data
+old_s3_rais_est_object_key <- "rais/db_IM1a_establecimentos.rda"
+new_s3_rais_est_object_key <- "working/minfazenda/rais/db_IM1a_establecimentos.rda" # The desired new location
+
+message("Attempting to copy RAIS establishments data in S3...")
+
+tryCatch({
+  # Copy the object from the old path to the new path
+  copy_object(
+    from_object = old_s3_rais_est_object_key,
+    to_object = new_s3_rais_est_object_key,
+    from_bucket = bucket_name,
+    to_bucket = bucket_name,
+    acl = "private" # Adjust ACL if needed, e.g., "public-read"
+  )
+  message(paste0("✅ Successfully copied S3 object from s3://", bucket_name, "/", old_s3_rais_est_object_key, " to s3://", bucket_name, "/", new_s3_rais_est_object_key))
+  
+  # Optional: Delete the old object after successful copy
+  # Uncomment the lines below if you want to remove the file from the old location
+  # message("Attempting to delete old S3 object...")
+  # delete_object(object = old_s3_rais_est_object_key, bucket = bucket_name)
+  # message(paste0("🗑️ Successfully deleted old S3 object: s3://", bucket_name, "/", old_s3_rais_est_object_key))
+  
+}, error = function(e) {
+  message(paste0("❌ Error copying S3 object: ", e$message))
+})
+
+# --- End of Add-on Script ---
 
 
