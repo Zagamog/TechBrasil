@@ -8,6 +8,7 @@ library(RSQLite) # Make sure RSQLite is loaded for dbConnect
 library(aws.s3) # Added for S3 interaction
 library(dotenv) # Added for secure AWS credentials
 library(dplyr) # For data manipulation
+library(here)
 # --- S3 Configuration and Utility Function ---
 # Ensure your .env file with AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY is in the project directory
 dotenv::load_dot_env()
@@ -60,7 +61,7 @@ message("\nFields in PIB_dos_Municipios:")
 print(dbListFields(con, "PIB_dos_Municipios"))
 
 # Read the entire table into a dataframe
-df_pib <- dbReadTable(con, "PIB_dos_Municipios")
+df_pibmunis <- dbReadTable(con, "PIB_dos_Municipios")
 
 # Optional: Check year range
 message("\nYear range in PIB_dos_Municipios:")
@@ -68,30 +69,31 @@ print(dbGetQuery(con, "SELECT MIN(Ano) AS min_year, MAX(Ano) AS max_year FROM PI
 
 # Example: Table of 'Nome.da.Grande.Região'
 message("\nTable of 'Nome.da.Grande.Região':")
-print(table(df_pib$`Nome.da.Grande.Região`))
+print(table(df_pibmunis$`Nome.da.Grande.Região`))
 
 # Convert alphanumeric to numeric
 
 
 cols_to_convert_indices <- c(1, 2, 4, 7, 10, 12, 14, 17, 20, 23, 27, 33:40)
 for (col_idx in cols_to_convert_indices) {
-  df_pib[[col_idx]] <- as.numeric(gsub("\\.", "", gsub(",", ".", df_pib[[col_idx]])))
+  df_pibmunis[[col_idx]] <- as.numeric(gsub(",", "", df_pibmunis[[col_idx]]))
 }
 
 
-glimpse(df_pib)
+glimpse(df_pibmunis)
 
 # --- Step 4: Always disconnect when done ---
 dbDisconnect(con)
 message("\nDisconnected from the database.")
 # --- Step 5: Upload processed data back to S3 ---
 # Save the processed data to a local file
-save(df_pib, file = "working/ibge/TB_municipios.rda")
+save(df_pibmunis, file = "working/ibge/df_pibmunis.rda")
 # Upload the processed file back to S3
 
 tryCatch({
-  put_object(file = "working/ibge/TB_municipios.rda", object = "working/ibge/TB_municipios.rda", bucket = bucket_name)
-  message("✅ Uploaded to S3: working/ibge/TB_municipios.rda")
+  put_object(file = "working/ibge/df_pibmunis.rda", object = "working/ibge/df_pibmunis.rda",
+             bucket = bucket_name)
+  message("✅ Uploaded to S3: working/ibge/df_pibmunis.rda")
 }, error = function(e) {
   message("❌ Error uploading to S3: ", e$message)
 })

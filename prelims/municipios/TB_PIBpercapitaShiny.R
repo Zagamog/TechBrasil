@@ -10,11 +10,10 @@ library(plotly)
 library(shinyWidgets)
 library(dplyr)
 library(scales)
-library(here) # For managing file paths if you save df_pib
+# library(here) # Not needed as we're using a direct absolute path
 
 # --- Data Loading and Preparation ---
-# Load the processed df_pib directly into memory before UI/Server definitions.
-# This ensures column names are as they are in the loaded data.
+# Load the processed df_pib directly into memory using the absolute path.
 load("D:/Country/Brazil/TechBrazil/working/ibge/TB_municipios.rda")
 
 # --- IMPORTANT: Ensure numeric conversion happened correctly before saving TB_municipios.rda ---
@@ -27,20 +26,19 @@ all_df_pib_names <- names(df_pib)
 
 # Define column names for numerical variables using their *exact* positions and names from the loaded df_pib
 # Based on your TB_municipios1a.txt, these are the columns from index 33 to 40
-pib_value_columns <- all_df_pib_names[33:40] # Use exact names from loaded df_pib
+pib_value_columns <- all_df_pib_names[33:40]
 
 # Define the geographical columns by their exact names
+ano_col <- all_df_pib_names[1] # "Ano"
 nome_grande_regiao_col <- all_df_pib_names[3] # "Nome da Grande Região"
 nome_uf_col <- all_df_pib_names[6] # "Nome da Unidade da Federação"
-ano_col <- all_df_pib_names[1] # "Ano"
 
 
 # --- Create "Brasil" aggregate ---
-# Fix: Use anonymous function for `across` to avoid deprecation warning
 df_pib_brasil <- df_pib %>%
   group_by(!!sym(ano_col)) %>% # Dynamically refer to 'Ano' column
   summarise(
-    across(all_of(pib_value_columns), \(x) sum(x, na.rm = TRUE)), # Fix: Use \(x) sum(x, ...)
+    across(all_of(pib_value_columns), \(x) sum(x, na.rm = TRUE)),
     # Assign placeholder names using the exact column names
     !!sym(nome_grande_regiao_col) := "Brasil",
     !!sym(nome_uf_col) := "Brasil",
@@ -48,7 +46,6 @@ df_pib_brasil <- df_pib %>%
   )
 
 # Combine Brasil aggregate with the original data
-# Ensure consistent column names and structure for combining
 df_pib_processed <- bind_rows(
   df_pib_brasil %>%
     select(!!sym(ano_col), !!sym(nome_grande_regiao_col), !!sym(nome_uf_col), all_of(pib_value_columns)),
@@ -56,19 +53,24 @@ df_pib_processed <- bind_rows(
     select(!!sym(ano_col), !!sym(nome_grande_regiao_col), !!sym(nome_uf_col), all_of(pib_value_columns))
 )
 
-# Define choices for location picker
-# Get unique regions and states, plus 'Brasil'
-# Ensure these match the exact column names from df_pib_processed
-location_choices <- c("Brasil",
-                      unique(df_pib_processed[[nome_grande_regiao_col]][df_pib_processed[[nome_grande_regiao_col]] != "Brasil"]),
-                      unique(df_pib_processed[[nome_uf_col]][df_pib_processed[[nome_uf_col]] != "Brasil"]))
-location_choices <- sort(unique(location_choices)) # Sort for cleaner UI
+# --- Define choices for location picker with groups ---
+# Get unique regions and states, sorted alphabetically within their groups
+country_choice <- "Brasil"
+region_choices <- sort(unique(df_pib_processed[[nome_grande_regiao_col]][df_pib_processed[[nome_grande_regiao_col]] != "Brasil"]))
+uf_choices <- sort(unique(df_pib_processed[[nome_uf_col]][df_pib_processed[[nome_uf_col]] != "Brasil"]))
+
+# Create a named list for pickerInput choices to create groups
+grouped_location_choices <- list(
+  "Country" = country_choice,
+  "Major Regions" = region_choices,
+  "States (UF)" = uf_choices
+)
 
 # Define a predefined color palette for each geographical unit
-# Extend your color palette from AmazEduPopu1_ShinyEN.R if needed, or define a new one.
-# For simplicity, I'll use a generic palette here. You might want to assign specific colors.
-pib_colors <- scales::hue_pal()(length(location_choices))
-names(pib_colors) <- location_choices
+# Ensure this palette can cover all possible locations.
+pib_colors <- scales::hue_pal()(length(unique(unlist(grouped_location_choices))))
+names(pib_colors) <- unique(unlist(grouped_location_choices))
+
 
 # --- UI ---
 ui <- fluidPage(
@@ -89,7 +91,7 @@ ui <- fluidPage(
       pickerInput(
         "localInput",
         label = "Select Location(s):",
-        choices = location_choices,
+        choices = grouped_location_choices, # Use the grouped choices here
         options = list(`actions-box` = TRUE),
         multiple = TRUE,
         selected = "Brasil"
@@ -98,7 +100,7 @@ ui <- fluidPage(
         "yVariable",
         label = "Select PIB Variable:",
         choices = pib_value_columns,
-        options = list(`actions-box` = FALSE), # Only one variable for Y-axis
+        options = list(`actions-box` = FALSE),
         selected = pib_value_columns[7] # Default to "Produto Interno Bruto, a preços correntes (R$ 1.000)"
       )
     ),
@@ -121,12 +123,15 @@ server <- function(input, output, session) {
     # Filter data based on selected locations
     filtered_data <- df_pib_processed %>%
       filter(
+        # Check if 'Brasil' is selected and filter for the Brasil aggregate
         (input$localInput == "Brasil" & !!sym(nome_grande_regiao_col) == "Brasil") |
+          # Check if a Major Region is selected and filter for it (excluding the 'Brasil' placeholder)
           (!!sym(nome_grande_regiao_col) %in% input$localInput & !!sym(nome_grande_regiao_col) != "Brasil") |
+          # Check if a UF is selected and filter for it (excluding the 'Brasil' placeholder)
           (!!sym(nome_uf_col) %in% input$localInput & !!sym(nome_uf_col) != "Brasil")
       )
     
-    # If "Brasil" is NOT selected, explicitly remove the Brasil aggregate row
+    # If "Brasil" is NOT selected, explicitly remove the Brasil aggregate row from final filtered data
     if (!("Brasil" %in% input$localInput)) {
       filtered_data <- filtered_data %>% filter(!!sym(nome_grande_regiao_col) != "Brasil")
     }
@@ -134,13 +139,15 @@ server <- function(input, output, session) {
     # Prepare data for plotting, mapping selected location to a 'Display_Location' column
     plot_data <- filtered_data %>%
       mutate(Display_Location = case_when(
-        # Prioritize matching exact location selected by user
-        !!sym(nome_grande_regiao_col) %in% input$localInput & !!sym(nome_grande_regiao_col) == "Brasil" ~ "Brasil", # Handle Brasil specifically
+        # Handle Brasil specifically (if selected)
+        !!sym(nome_grande_regiao_col) == "Brasil" & "Brasil" %in% input$localInput ~ "Brasil",
+        # Assign Grande Região name if it's selected
         !!sym(nome_grande_regiao_col) %in% input$localInput ~ !!sym(nome_grande_regiao_col),
+        # Assign UF name if it's selected
         !!sym(nome_uf_col) %in% input$localInput ~ !!sym(nome_uf_col),
-        TRUE ~ "Unknown Location" # Fallback if none match (shouldn't happen with correct choices)
+        TRUE ~ "Unknown Location" # Fallback, should ideally not be hit with correct logic
       )) %>%
-      # Ensure distinct data points for plotting if any duplicates arise from filtering logic
+      # Ensure distinct data points for plotting
       distinct(!!sym(ano_col), Display_Location, .keep_all = TRUE) %>%
       # Filter out 'Unknown Location' if it appears due to filtering logic not perfectly aligning
       filter(Display_Location != "Unknown Location")
@@ -153,8 +160,8 @@ server <- function(input, output, session) {
     p <- ggplot(plot_data, aes(x = !!sym(ano_col), color = Display_Location)) +
       labs(
         x = "Year",
-        y = input$yVariable, # Dynamic Y-axis label
-        title = paste("Brazilian PIB Trends (2002-2021) -", input$yVariable),
+        y = input$yVariable,
+        title = paste("Brazilian PIB Trends (", min(plot_data[[ano_col]], na.rm = TRUE), "-", max(plot_data[[ano_col]], na.rm = TRUE), ") - ", input$yVariable, sep=""),
         color = "Location"
       ) +
       theme_minimal() +
@@ -170,9 +177,9 @@ server <- function(input, output, session) {
     # Add lines for the selected variable
     y_sym <- sym(input$yVariable)
     p <- p + geom_line(aes(y = !!y_sym), linewidth = 1) +
-      geom_point(aes(y = !!y_sym), size = 2) # Add points for clarity
+      geom_point(aes(y = !!y_sym), size = 2)
     
-    # Add Plotly annotations (similar to your population app)
+    # Add Plotly annotations
     annotations <- list()
     for (loc_display in unique(plot_data$Display_Location)) {
       loc_data_subset <- plot_data %>% filter(Display_Location == loc_display)
@@ -181,7 +188,6 @@ server <- function(input, output, session) {
         filter(!!sym(ano_col) == last_year) %>%
         pull(!!y_sym)
       
-      # Construct the label text
       label_text <- paste(loc_display, "-", scales::comma(last_value, accuracy = 1))
       
       annotations <- append(annotations, list(
