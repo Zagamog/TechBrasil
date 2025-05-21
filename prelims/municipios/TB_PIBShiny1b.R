@@ -14,7 +14,6 @@ library(scales)
 
 # --- Data Loading and Initial Preparation ---
 # Load the processed data from the specified absolute path.
-# This loads an object named 'df_pib' (as per your save command in TB_municipios1a.R).
 load("D:/Country/Brazil/TechBrazil/working/ibge/df_pibmunis.rda")
 
 # Rename the loaded object from 'df_pib' to 'df_pibmunis' for consistency in this app.
@@ -29,21 +28,16 @@ all_df_pibmunis_names <- names(df_pibmunis)
 
 # Define column names using their *exact* names from the loaded df_pibmunis
 # Geographical columns
-ano_col <- all_df_pibmunis_names[1] # "Ano"
-# cod_grande_regiao_col <- all_df_pibmunis_names[2] # "Código da Grande Região"
-nome_grande_regiao_col <- all_df_pibmunis_names[3] # "Nome da Grande Região"
-# cod_uf_col <- all_df_pibmunis_names[4] # "Código da Unidade da Federação"
-# sigla_uf_col <- all_df_pibmunis_names[5] # "Sigla da Unidade da Federação"
-nome_uf_col <- all_df_pibmunis_names[6] # "Nome da Unidade da Federação"
-# cod_municipio_col <- all_df_pibmunis_names[7] # "Código do Município"
-nome_municipio_col <- all_df_pibmunis_names[8] # "Nome do Município"
-# nome_regiao_geog_imediata_col <- all_df_pibmunis_names[15] # "Nome da Região Geográfica Imediata"
-nome_regiao_geog_intermediaria_col <- all_df_pibmunis_names[18] # "Nome da Região Geográfica Intermediária"
-nome_regiao_geog_imediata_col <- all_df_pibmunis_names[15] # "Nome da Região Geográfica Imediata"
+ano_col <- all_df_pibmunis_names[1]
+nome_grande_regiao_col <- all_df_pibmunis_names[3]
+nome_uf_col <- all_df_pibmunis_names[6]
+nome_municipio_col <- all_df_pibmunis_names[8]
+nome_regiao_geog_intermediaria_col <- all_df_pibmunis_names[18]
+nome_regiao_geog_imediata_col <- all_df_pibmunis_names[15]
 
 # Specific PIB columns for calculation
-total_pib_col <- all_df_pibmunis_names[39] # "Produto Interno Bruto, a preços correntes (R$ 1.000)"
-pib_per_capita_col <- all_df_pibmunis_names[40] # "Produto Interno Bruto per capita, a preços correntes (R$ 1,00)"
+total_pib_col <- all_df_pibmunis_names[39]
+pib_per_capita_col <- all_df_pibmunis_names[40]
 
 # All PIB value columns for UI selection
 pib_value_columns_all <- all_df_pibmunis_names[33:40]
@@ -61,34 +55,37 @@ df_pibmunis_base <- df_pibmunis %>%
 # --- Define choices for location pickers ---
 uf_choices_all <- sort(unique(df_pibmunis_base[[nome_uf_col]]))
 
-default_uf <- "Maranhão"
+default_uf <- "Alagoas"
 default_intermediate_regions <- df_pibmunis_base %>%
   filter(!!sym(nome_uf_col) == default_uf) %>%
   pull(!!sym(nome_regiao_geog_intermediaria_col)) %>%
   unique() %>%
   sort()
 
-default_immediate_muni_choices <- if (length(default_intermediate_regions) > 0) {
-  df_filtered_by_default_inter_region <- df_pibmunis_base %>%
-    filter(!!sym(nome_regiao_geog_intermediaria_col) == default_intermediate_regions[1])
-  
-  immediate_regions_default <- df_filtered_by_default_inter_region %>%
+# Default immediate regions based on the first default intermediate region
+# These will be the initial choices for the "Immediate Region" dropdown
+default_immediate_regions_choices <- if (length(default_intermediate_regions) > 0) {
+  df_pibmunis_base %>%
+    filter(!!sym(nome_regiao_geog_intermediaria_col) == default_intermediate_regions[1]) %>%
     pull(!!sym(nome_regiao_geog_imediata_col)) %>%
     unique() %>%
     sort()
-  
-  municipalities_default <- df_filtered_by_default_inter_region %>%
+} else {
+  character(0)
+}
+
+# The initial "Municipality" selection will be all municipalities within the *first default immediate region*
+# This is the key change for the default selected value in the third picker
+default_muni_selection <- if (length(default_immediate_regions_choices) > 0) {
+  df_pibmunis_base %>%
+    filter(!!sym(nome_regiao_geog_imediata_col) %in% default_immediate_regions_choices) %>% # Changed to %in% for multiple defaults
     pull(!!sym(nome_municipio_col)) %>%
     unique() %>%
     sort()
-  
-  list(
-    "Regiões Geográficas Imediatas" = immediate_regions_default, # Changed to Portuguese
-    "Municípios" = municipalities_default # Changed to Portuguese
-  )
 } else {
-  list()
+  character(0)
 }
+
 
 all_possible_display_locations <- c(
   uf_choices_all,
@@ -106,11 +103,11 @@ ui <- fluidPage(
     style = "text-align: center; margin-bottom: 20px;",
     div(
       style = "font-size: 28px; font-weight: bold; color: #333;",
-      "Brasil: Tendências do PIB por Hierarquia Geográfica" # Changed to Portuguese
+      "Brasil: Tendências do PIB por Hierarquia Geográfica"
     ),
     div(
       style = "font-size: 18px; font-weight: normal; color: #555;",
-      "Análise Detalhada por Estado, Região Intermediária, Região Imediata e Município" # Changed to Portuguese
+      "Análise Detalhada por Estado, Região Intermediária, Região Imediata e Município"
     )
   ),
   
@@ -119,7 +116,7 @@ ui <- fluidPage(
       # 1. State (UF) Selection (always visible)
       pickerInput(
         "ufInput",
-        label = "Selecionar Estado(s) (UF):", # Changed to Portuguese
+        label = "Selecionar Estado(s) (UF):",
         choices = uf_choices_all,
         options = list(`actions-box` = TRUE, `live-search` = TRUE),
         multiple = TRUE,
@@ -128,26 +125,28 @@ ui <- fluidPage(
       # 2. Intermediate Region Selection (always visible, dynamically updated)
       pickerInput(
         "intermediateRegionInput",
-        label = "Selecionar Região(ões) Geográfica(s) Intermediária(s):", # Changed to Portuguese
+        label = "Selecionar Região(ões) Geográfica(s) Intermediária(s):",
         choices = default_intermediate_regions,
         options = list(`actions-box` = TRUE, `live-search` = TRUE),
         multiple = TRUE,
         selected = default_intermediate_regions
       ),
-      # 3. Immediate Region / Municipality Selection (always visible, dynamically updated)
+      # 3. Immediate Region Selection (always visible, dynamically updated)
       pickerInput(
-        "immediateRegionMunicipalityInput",
-        label = "Selecionar Região(ões) Geográfica(s) Imediata(s) / Município(s):", # Changed to Portuguese
-        choices = default_immediate_muni_choices,
+        "immediateRegionInput",
+        label = "Selecionar Região(ões) Geográfica(s) Imediata(s):",
+        choices = default_immediate_regions_choices,
         options = list(`actions-box` = TRUE, `live-search` = TRUE),
         multiple = TRUE,
-        selected = unlist(default_immediate_muni_choices)
+        selected = default_immediate_regions_choices
       ),
+      # 4. Municipality Selection (new picker, reactive to Immediate Region)
+      uiOutput("municipalityInput"), # New UI element for municipalities
       
       # PIB Variable Selection
       pickerInput(
         "yVariable",
-        label = "Selecionar Variável Econômica:", # Changed to Portuguese
+        label = "Selecionar Variável Econômica:",
         choices = pib_value_columns_all,
         options = list(`actions-box` = FALSE),
         selected = pib_value_columns_all[7]
@@ -158,7 +157,7 @@ ui <- fluidPage(
       HTML("<p style='font-size: 12px; color: #555; margin-top: 10px;'>
         Fonte: <a href='https://www.ibge.gov.br/estatisticas/economicas/contas-nacionais/9088-produto-interno-bruto-dos-municipios.html'
         target='_blank'>IBGE Produto Interno Bruto dos Municípios</a>
-       </p>") # Changed to Portuguese
+       </p>")
     )
   )
 )
@@ -181,11 +180,11 @@ server <- function(input, output, session) {
     }
   }, ignoreNULL = FALSE, ignoreInit = FALSE)
   
-  # Reactive expression for Immediate Region / Municipality choices
-  actual_immediate_muni_choices_list <- reactive({
+  # Reactive expression to update Immediate Region choices based on Intermediate Region selection
+  immediate_region_choices_reactive <- reactive({
     current_inter_region_selection <- input$intermediateRegionInput
     if (is.null(current_inter_region_selection) || length(current_inter_region_selection) == 0) {
-      return(list("Regiões Geográficas Imediatas" = character(0), "Municípios" = character(0))) # Changed to Portuguese
+      return(character(0))
     } else {
       df_filtered_by_inter_region <- df_pibmunis_base %>%
         filter(!!sym(nome_regiao_geog_intermediaria_col) %in% current_inter_region_selection)
@@ -194,68 +193,97 @@ server <- function(input, output, session) {
         pull(!!sym(nome_regiao_geog_imediata_col)) %>%
         unique() %>%
         sort()
-      
-      municipalities <- df_filtered_by_inter_region %>%
-        pull(!!sym(nome_municipio_col)) %>%
-        unique() %>%
-        sort()
-      
-      return(list(
-        "Regiões Geográficas Imediatas" = immediate_regions, # Changed to Portuguese
-        "Municípios" = municipalities # Changed to Portuguese
-      ))
+      return(immediate_regions)
     }
   })
   
-  observeEvent(actual_immediate_muni_choices_list(), {
-    choices <- actual_immediate_muni_choices_list()
-    if (is.null(choices) || (length(choices$`Regiões Geográficas Imediatas`) == 0 && length(choices$Municípios) == 0)) { # Changed to Portuguese
-      updatePickerInput(session, "immediateRegionMunicipalityInput", choices = list(), selected = character(0))
-    } else {
-      updatePickerInput(session, "immediateRegionMunicipalityInput", choices = choices, selected = unlist(choices))
-    }
+  observeEvent(immediate_region_choices_reactive(), {
+    choices <- immediate_region_choices_reactive()
+    updatePickerInput(session, "immediateRegionInput", choices = choices, selected = choices)
   }, ignoreNULL = FALSE, ignoreInit = FALSE)
+  
+  
+  # NEW: Reactive expression for Municipality choices based on Immediate Region selection
+  municipality_choices_reactive <- reactive({
+    req(input$immediateRegionInput) # Requires Immediate Region input
+    current_immediate_region_selection <- input$immediateRegionInput
+    if (is.null(current_immediate_region_selection) || length(current_immediate_region_selection) == 0) {
+      return(character(0))
+    } else {
+      df_filtered_by_immediate_region <- df_pibmunis_base %>%
+        filter(!!sym(nome_regiao_geog_imediata_col) %in% current_immediate_region_selection)
+      
+      municipalities <- df_filtered_by_immediate_region %>%
+        pull(!!sym(nome_municipio_col)) %>%
+        unique() %>%
+        sort()
+      return(municipalities)
+    }
+  })
+  
+  # NEW: ObserveEvent to update Municipality picker
+  output$municipalityInput <- renderUI({
+    choices <- municipality_choices_reactive()
+    if (is.null(choices) || length(choices) == 0) {
+      return(NULL) # Only show if there are municipalities
+    }
+    pickerInput(
+      "municipalityInput",
+      label = "Selecionar Município(s):",
+      choices = choices,
+      options = list(`actions-box` = TRUE, `live-search` = TRUE),
+      multiple = TRUE,
+      selected = choices # Default to selecting all municipalities
+    )
+  })
   
   
   # Reactive expression to perform aggregation based on user selection
   aggregated_data <- reactive({
-    req(input$ufInput)
+    req(input$ufInput) # UF input is always required, as it's the top level.
     
     current_selection_ufs <- input$ufInput
     current_selection_inter_regions <- input$intermediateRegionInput
-    current_selection_immediate_or_mun <- input$immediateRegionMunicipalityInput
-    
-    possible_immediate_muni_choices_at_this_moment <- actual_immediate_muni_choices_list()
+    current_selection_immediate_regions <- input$immediateRegionInput # Renamed input
+    current_selection_municipalities <- input$municipalityInput # New input for municipalities
     
     data_to_plot <- data.frame()
     grouping_var_sym <- NULL
+    df_filtered <- df_pibmunis_base # Start with base data
     
-    if (!is.null(current_selection_immediate_or_mun) && length(current_selection_immediate_or_mun) > 0) {
-      munis_in_input <- intersect(current_selection_immediate_or_mun, possible_immediate_muni_choices_at_this_moment$Municipalities)
-      immediates_in_input <- intersect(current_selection_immediate_or_mun, possible_immediate_muni_choices_at_this_moment$`Regiões Geográficas Imediatas`) # Changed to Portuguese
-      
-      if (length(munis_in_input) > 0) {
-        grouping_var_sym <- sym(nome_municipio_col)
-        df_filtered <- df_pibmunis_base %>%
-          filter(!!sym(nome_municipio_col) %in% munis_in_input)
-      } else if (length(immediates_in_input) > 0) {
-        grouping_var_sym <- sym(nome_regiao_geog_imediata_col)
-        df_filtered <- df_pibmunis_base %>%
-          filter(!!sym(nome_regiao_geog_imediata_col) %in% immediates_in_input)
-      } else {
-        df_filtered <- df_pibmunis_base %>%
-          filter(!!sym(nome_uf_col) %in% current_selection_ufs)
-      }
-    } else if (!is.null(input$intermediateRegionInput) && length(input$intermediateRegionInput) > 0) {
-      grouping_var_sym <- sym(nome_regiao_geog_intermediaria_col)
-      df_filtered <- df_pibmunis_base %>%
-        filter(!!sym(nome_regiao_geog_intermediaria_col) %in% current_selection_inter_regions)
-    } else {
-      grouping_var_sym <- sym(nome_uf_col)
-      df_filtered <- df_pibmunis_base %>%
-        filter(!!sym(nome_uf_col) %in% current_selection_ufs)
+    # Apply filters hierarchically
+    if (!is.null(current_selection_ufs) && length(current_selection_ufs) > 0) {
+      df_filtered <- df_filtered %>% filter(!!sym(nome_uf_col) %in% current_selection_ufs)
+    }
+    if (!is.null(current_selection_inter_regions) && length(current_selection_inter_regions) > 0) {
+      df_filtered <- df_filtered %>% filter(!!sym(nome_regiao_geog_intermediaria_col) %in% current_selection_inter_regions)
+    }
+    if (!is.null(current_selection_immediate_regions) && length(current_selection_immediate_regions) > 0) {
+      df_filtered <- df_filtered %>% filter(!!sym(nome_regiao_geog_imediata_col) %in% current_selection_immediate_regions)
+    }
+    if (!is.null(current_selection_municipalities) && length(current_selection_municipalities) > 0) {
+      df_filtered <- df_filtered %>% filter(!!sym(nome_municipio_col) %in% current_selection_municipalities)
     }
     
+    # Determine the most granular level selected by the user for aggregation and plotting
+    if (!is.null(current_selection_municipalities) && length(current_selection_municipalities) > 0) {
+      grouping_var_sym <- sym(nome_municipio_col)
+    } else if (!is.null(current_selection_immediate_regions) && length(current_selection_immediate_regions) > 0) {
+      grouping_var_sym <- sym(nome_regiao_geog_imediata_col)
+    } else if (!is.null(current_selection_inter_regions) && length(current_selection_inter_regions) > 0) {
+      grouping_var_sym <- sym(nome_regiao_geog_intermediaria_col)
+    } else if (!is.null(current_selection_ufs) && length(current_selection_ufs) > 0) {
+      grouping_var_sym <- sym(nome_uf_col)
+    } else {
+      # Fallback if no selection, return empty data
+      return(data.frame(
+        !!sym(ano_col) := numeric(0),
+        Display_Location = character(0),
+        !!!setNames(lapply(pib_value_columns_all, function(x) numeric(0)), pib_value_columns_all)
+      ))
+    }
+    
+    # Ensure there's data after filtering
     if (nrow(df_filtered) == 0) {
       return(data.frame(
         !!sym(ano_col) := numeric(0),
@@ -307,17 +335,17 @@ server <- function(input, output, session) {
       filter(!is.na(!!sym(input$yVariable)))
     
     if (nrow(plot_data) == 0) {
-      return(ggplotly(ggplot() + annotate("text", x = 0.5, y = 0.5, label = "Não há dados para exibir com os filtros selecionados.") + theme_void())) # Changed to Portuguese
+      return(ggplotly(ggplot() + annotate("text", x = 0.5, y = 0.5, label = "Não há dados para exibir com os filtros selecionados.") + theme_void()))
     }
     
     y_labels <- scales::comma
     
     p <- ggplot(plot_data, aes(x = !!sym(ano_col), color = Display_Location)) +
       labs(
-        x = "Ano", # Changed to Portuguese
+        x = "Ano",
         y = input$yVariable,
-        title = paste("Tendências do PIB Brasileiro (", min(plot_data[[ano_col]], na.rm = TRUE), "-", max(plot_data[[ano_col]], na.rm = TRUE), ") - ", input$yVariable, sep=""), # Changed to Portuguese
-        color = "Localidade" # Changed to Portuguese
+        title = paste("Tendências do PIB Brasileiro (", min(plot_data[[ano_col]], na.rm = TRUE), "-", max(plot_data[[ano_col]], na.rm = TRUE), ") - ", input$yVariable, sep=""),
+        color = "Localidade"
       ) +
       theme_minimal() +
       theme(
