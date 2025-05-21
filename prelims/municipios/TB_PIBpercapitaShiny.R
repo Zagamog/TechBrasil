@@ -1,6 +1,6 @@
 # TB_PIBpercapitaShiny.R
 # This script creates a Shiny app to visualize Brazilian GDP (PIB) data
-# by geographical aggregates (Brazil, Major Regions, States).
+# by geographical aggregates (Brazil, Major Regions, States), calculated on the fly.
 
 options(scipen = 999) # To prevent scientific notation on large numbers
 
@@ -12,65 +12,79 @@ library(dplyr)
 library(scales)
 # library(here) # Not needed as we're using a direct absolute path
 
-# --- Data Loading and Preparation ---
-# Load the processed df_pib directly into memory using the absolute path.
-load("D:/Country/Brazil/TechBrazil/working/ibge/TB_municipios.rda")
-
-# --- IMPORTANT: Ensure numeric conversion happened correctly before saving TB_municipios.rda ---
-# If your TB_municipios.rda was saved *before* the numeric conversion loop in TB_municipios1a.R,
-# you will need to run the conversion here. Otherwise, the data will be character/factor.
-# Assuming you've already ensured the conversion happened in TB_municipios1a.R before saving.
+# --- Data Loading and Initial Preparation (only what's always needed) ---
+# Load the processed df_pibmunis directly into memory using the absolute path.
+load("D:/Country/Brazil/TechBrazil/working/ibge/df_pibmunis.rda")
 
 # Get the exact column names after loading
-all_df_pib_names <- names(df_pib)
+all_df_pibmunis_names <- names(df_pibmunis)
 
-# Define column names for numerical variables using their *exact* positions and names from the loaded df_pib
-# Based on your TB_municipios1a.txt, these are the columns from index 33 to 40
-pib_value_columns <- all_df_pib_names[33:40]
+# Define column names for numerical variables using their *exact* positions and names from the loaded df_pibmunis
+pib_value_columns_all <- all_df_pibmunis_names[33:40] # All variables for UI selection
 
-# Define the geographical columns by their exact names
-ano_col <- all_df_pib_names[1] # "Ano"
-nome_grande_regiao_col <- all_df_pib_names[3] # "Nome da Grande Região"
-nome_uf_col <- all_df_pib_names[6] # "Nome da Unidade da Federação"
+# Define the geographical columns by their exact names (using the provided column indices)
+ano_col <- all_df_pibmunis_names[1] # "Ano"
+cod_grande_regiao_col <- all_df_pibmunis_names[2] # "Código da Grande Região"
+nome_grande_regiao_col <- all_df_pibmunis_names[3] # "Nome da Grande Região"
+cod_uf_col <- all_df_pibmunis_names[4] # "Código da Unidade da Federação"
+sigla_uf_col <- all_df_pibmunis_names[5] # "Sigla da Unidade da Federação"
+nome_uf_col <- all_df_pibmunis_names[6] # "Nome da Unidade da Federação"
+cod_municipio_col <- all_df_pibmunis_names[7] # "Código do Município"
+nome_municipio_col <- all_df_pibmunis_names[8] # "Nome do Município"
+regiao_metropolitana_col <- all_df_pibmunis_names[9] # "Região Metropolitana"
+cod_mesorregiao_col <- all_df_pibmunis_names[10] # "Código da Mesorregião"
+nome_mesorregiao_col <- all_df_pibmunis_names[11] # "Nome da Mesorregião"
+cod_microrregiao_col <- all_df_pibmunis_names[12] # "Código da Microrregião"
+nome_microrregiao_col <- all_df_pibmunis_names[13] # "Nome da Microrregião"
+cod_regiao_geog_imediata_col <- all_df_pibmunis_names[14] # "Código da Região Geográfica Imediata"
+nome_regiao_geog_imediata_col <- all_df_pibmunis_names[15] # "Nome da Região Geográfica Imediata"
+cod_regiao_geog_intermediaria_col <- all_df_pibmunis_names[17] # "Código da Região Geográfica Intermediária"
+nome_regiao_geog_intermediaria_col <- all_df_pibmunis_names[18] # "Nome da Região Geográfica Intermediária"
+cod_concentracao_urbana_col <- all_df_pibmunis_names[20] # "Código Concentração Urbana"
+nome_concentracao_urbana_col <- all_df_pibmunis_names[21] # "Nome Concentração Urbana"
+cod_arranjo_populacional_col <- all_df_pibmunis_names[23] # "Código Arranjo Populacional"
+nome_arranjo_populacional_col <- all_df_pibmunis_names[24] # "Nome Arranjo Populacional"
+cod_regiao_rural_col <- all_df_pibmunis_names[27] # "Código da Região Rural"
+nome_regiao_rural_col <- all_df_pibmunis_names[28] # "Nome da Região Rural"
 
+# Specific PIB columns for calculation
+total_pib_col <- all_df_pibmunis_names[39] # "Produto Interno Bruto, a preços correntes (R$ 1.000)"
+pib_per_capita_col <- all_df_pibmunis_names[40] # "Produto Interno Bruto per capita, a preços correntes (R$ 1,00)"
 
-# --- Create "Brasil" aggregate ---
-df_pib_brasil <- df_pib %>%
-  group_by(!!sym(ano_col)) %>% # Dynamically refer to 'Ano' column
-  summarise(
-    across(all_of(pib_value_columns), \(x) sum(x, na.rm = TRUE)),
-    # Assign placeholder names using the exact column names
-    !!sym(nome_grande_regiao_col) := "Brasil",
-    !!sym(nome_uf_col) := "Brasil",
-    .groups = "drop" # Good practice for summarise
+# --- Step 1: Calculate Inferred Municipal Population upfront ---
+# This is done once when the app starts, as it's a base calculation.
+df_pibmunis_base <- df_pibmunis %>%
+  mutate(
+    # Handle division by zero or NA in pib_per_capita_col
+    # If per capita is 0 or NA, population cannot be inferred, set to NA
+    # Multiply total PIB by 1000 because it's in thousands of R$
+    Inferred_Population = if_else(
+      is.na(!!sym(pib_per_capita_col)) | !!sym(pib_per_capita_col) == 0,
+      NA_real_,
+      (!!sym(total_pib_col) * 1000) / !!sym(pib_per_capita_col)
+    )
   )
-
-# Combine Brasil aggregate with the original data
-df_pib_processed <- bind_rows(
-  df_pib_brasil %>%
-    select(!!sym(ano_col), !!sym(nome_grande_regiao_col), !!sym(nome_uf_col), all_of(pib_value_columns)),
-  df_pib %>%
-    select(!!sym(ano_col), !!sym(nome_grande_regiao_col), !!sym(nome_uf_col), all_of(pib_value_columns))
-)
 
 # --- Define choices for location picker with groups ---
 # Get unique regions and states, sorted alphabetically within their groups
 country_choice <- "Brasil"
-region_choices <- sort(unique(df_pib_processed[[nome_grande_regiao_col]][df_pib_processed[[nome_grande_regiao_col]] != "Brasil"]))
-uf_choices <- sort(unique(df_pib_processed[[nome_uf_col]][df_pib_processed[[nome_uf_col]] != "Brasil"]))
+# Get unique regions and states from the original df_pibmunis (before any aggregation)
+region_choices <- sort(unique(df_pibmunis_base[[nome_grande_regiao_col]]))
+uf_choices <- sort(unique(df_pibmunis_base[[nome_uf_col]]))
 
 # Create a named list for pickerInput choices to create groups
 grouped_location_choices <- list(
   "Country" = country_choice,
   "Major Regions" = region_choices,
   "States (UF)" = uf_choices
+  # Add other geographical aggregations if desired, e.g.:
+  # "Metropolitan Regions" = sort(unique(df_pibmunis_base[[regiao_metropolitana_col]])),
+  # "Mesorregions" = sort(unique(df_pibmunis_base[[nome_mesorregiao_col]]))
 )
 
 # Define a predefined color palette for each geographical unit
-# Ensure this palette can cover all possible locations.
 pib_colors <- scales::hue_pal()(length(unique(unlist(grouped_location_choices))))
 names(pib_colors) <- unique(unlist(grouped_location_choices))
-
 
 # --- UI ---
 ui <- fluidPage(
@@ -99,9 +113,9 @@ ui <- fluidPage(
       pickerInput(
         "yVariable",
         label = "Select PIB Variable:",
-        choices = pib_value_columns,
+        choices = pib_value_columns_all, # All variables are available in UI
         options = list(`actions-box` = FALSE),
-        selected = pib_value_columns[7] # Default to "Produto Interno Bruto, a preços correntes (R$ 1.000)"
+        selected = pib_value_columns_all[7] # Default to "Produto Interno Bruto, a preços correntes (R$ 1.000)"
       )
     ),
     mainPanel(
@@ -117,41 +131,100 @@ ui <- fluidPage(
 # --- Server ---
 server <- function(input, output, session) {
   
-  output$pibLinePlot <- renderPlotly({
-    req(input$localInput, input$yVariable)
+  # Reactive expression to perform aggregation based on user selection
+  aggregated_data <- reactive({
+    req(input$localInput)
     
-    # Filter data based on selected locations
-    filtered_data <- df_pib_processed %>%
-      filter(
-        # Check if 'Brasil' is selected and filter for the Brasil aggregate
-        (input$localInput == "Brasil" & !!sym(nome_grande_regiao_col) == "Brasil") |
-          # Check if a Major Region is selected and filter for it (excluding the 'Brasil' placeholder)
-          (!!sym(nome_grande_regiao_col) %in% input$localInput & !!sym(nome_grande_regiao_col) != "Brasil") |
-          # Check if a UF is selected and filter for it (excluding the 'Brasil' placeholder)
-          (!!sym(nome_uf_col) %in% input$localInput & !!sym(nome_uf_col) != "Brasil")
-      )
+    current_selection <- input$localInput
+    data_to_plot <- data.frame() # Initialize empty dataframe
     
-    # If "Brasil" is NOT selected, explicitly remove the Brasil aggregate row from final filtered data
-    if (!("Brasil" %in% input$localInput)) {
-      filtered_data <- filtered_data %>% filter(!!sym(nome_grande_regiao_col) != "Brasil")
+    for (selection in current_selection) {
+      temp_df <- NULL
+      if (selection == "Brasil") {
+        # Aggregate for Brazil
+        temp_df <- df_pibmunis_base %>%
+          group_by(!!sym(ano_col)) %>%
+          summarise(
+            across(all_of(all_df_pibmunis_names[33:39]), \(x) sum(x, na.rm = TRUE)), # Sum total values
+            Sum_Inferred_Population = sum(Inferred_Population, na.rm = TRUE),
+            # Calculate correct per capita for Brasil
+            !!sym(pib_per_capita_col) := if_else(
+              Sum_Inferred_Population == 0, NA_real_,
+              (sum(!!sym(total_pib_col), na.rm = TRUE) * 1000) / Sum_Inferred_Population
+            ),
+            Display_Location = "Brasil", # Assign Display_Location
+            .groups = "drop"
+          ) %>%
+          select(-Sum_Inferred_Population)
+        
+      } else if (selection %in% region_choices) {
+        # Aggregate for Major Regions
+        temp_df <- df_pibmunis_base %>%
+          filter(!!sym(nome_grande_regiao_col) == selection) %>%
+          group_by(!!sym(ano_col), !!sym(nome_grande_regiao_col)) %>%
+          summarise(
+            across(all_of(all_df_pibmunis_names[33:39]), \(x) sum(x, na.rm = TRUE)),
+            Sum_Inferred_Population = sum(Inferred_Population, na.rm = TRUE),
+            !!sym(pib_per_capita_col) := if_else(
+              Sum_Inferred_Population == 0, NA_real_,
+              (sum(!!sym(total_pib_col), na.rm = TRUE) * 1000) / Sum_Inferred_Population
+            ),
+            Display_Location = selection,
+            .groups = "drop"
+          ) %>%
+          select(-Sum_Inferred_Population, -!!sym(nome_grande_regiao_col)) # Remove original region column
+        
+      } else if (selection %in% uf_choices) {
+        # Aggregate for States (UF)
+        temp_df <- df_pibmunis_base %>%
+          filter(!!sym(nome_uf_col) == selection) %>%
+          group_by(!!sym(ano_col), !!sym(nome_uf_col)) %>%
+          summarise(
+            across(all_of(all_df_pibmunis_names[33:39]), \(x) sum(x, na.rm = TRUE)),
+            Sum_Inferred_Population = sum(Inferred_Population, na.rm = TRUE),
+            !!sym(pib_per_capita_col) := if_else(
+              Sum_Inferred_Population == 0, NA_real_,
+              (sum(!!sym(total_pib_col), na.rm = TRUE) * 1000) / Sum_Inferred_Population
+            ),
+            Display_Location = selection,
+            .groups = "drop"
+          ) %>%
+          select(-Sum_Inferred_Population, -!!sym(nome_uf_col)) # Remove original UF column
+      }
+      # If you add more aggregation levels (e.g., Mesorregião, Microrregião),
+      # you would add more `else if` blocks here following a similar pattern.
+      # For individual municipalities, you might filter directly without summarising further
+      # if they are part of the 'Display_Location' choice.
+      
+      if (!is.null(temp_df)) {
+        data_to_plot <- bind_rows(data_to_plot, temp_df)
+      }
     }
     
-    # Prepare data for plotting, mapping selected location to a 'Display_Location' column
-    plot_data <- filtered_data %>%
-      mutate(Display_Location = case_when(
-        # Handle Brasil specifically (if selected)
-        !!sym(nome_grande_regiao_col) == "Brasil" & "Brasil" %in% input$localInput ~ "Brasil",
-        # Assign Grande Região name if it's selected
-        !!sym(nome_grande_regiao_col) %in% input$localInput ~ !!sym(nome_grande_regiao_col),
-        # Assign UF name if it's selected
-        !!sym(nome_uf_col) %in% input$localInput ~ !!sym(nome_uf_col),
-        TRUE ~ "Unknown Location" # Fallback, should ideally not be hit with correct logic
-      )) %>%
-      # Ensure distinct data points for plotting
-      distinct(!!sym(ano_col), Display_Location, .keep_all = TRUE) %>%
-      # Filter out 'Unknown Location' if it appears due to filtering logic not perfectly aligning
-      filter(Display_Location != "Unknown Location")
+    # Ensure all selected pib_value_columns_all are present in final data_to_plot
+    # Fill missing columns with NA if a specific aggregation type doesn't produce them.
+    missing_cols <- setdiff(pib_value_columns_all, names(data_to_plot))
+    for (col in missing_cols) {
+      data_to_plot[[col]] <- NA_real_
+    }
     
+    
+    # Ensure required columns for plotting are present
+    final_cols_needed <- c(ano_col, pib_value_columns_all, "Display_Location")
+    data_to_plot <- data_to_plot %>% select(all_of(final_cols_needed))
+    
+    return(data_to_plot)
+  })
+  
+  
+  output$pibLinePlot <- renderPlotly({
+    req(input$yVariable)
+    
+    plot_data <- aggregated_data() # Use the reactive aggregated data
+    
+    # Filter out NA values for the selected y-variable to prevent plot errors
+    plot_data <- plot_data %>%
+      filter(!is.na(!!sym(input$yVariable)))
     
     # Determine y-axis labels
     y_labels <- scales::comma # All PIB values are numbers, use comma formatting
@@ -181,28 +254,36 @@ server <- function(input, output, session) {
     
     # Add Plotly annotations
     annotations <- list()
-    for (loc_display in unique(plot_data$Display_Location)) {
-      loc_data_subset <- plot_data %>% filter(Display_Location == loc_display)
-      last_year <- max(loc_data_subset[[ano_col]])
-      last_value <- loc_data_subset %>%
-        filter(!!sym(ano_col) == last_year) %>%
-        pull(!!y_sym)
-      
-      label_text <- paste(loc_display, "-", scales::comma(last_value, accuracy = 1))
-      
-      annotations <- append(annotations, list(
-        list(
-          x = last_year,
-          y = last_value,
-          text = label_text,
-          showarrow = TRUE,
-          arrowhead = 2,
-          ax = 0,
-          ay = 40,
-          font = list(color = "black", size = 20, family = "Arial")
-        )
-      ))
+    # Only add annotations if there's data to plot
+    if (nrow(plot_data) > 0) {
+      for (loc_display in unique(plot_data$Display_Location)) {
+        loc_data_subset <- plot_data %>% filter(Display_Location == loc_display)
+        
+        # Ensure there's data for the current location before trying to find max year
+        if (nrow(loc_data_subset) > 0) {
+          last_year <- max(loc_data_subset[[ano_col]], na.rm = TRUE)
+          last_value <- loc_data_subset %>%
+            filter(!!sym(ano_col) == last_year) %>%
+            pull(!!y_sym)
+          
+          label_text <- paste(loc_display, "-", scales::comma(last_value, accuracy = 1))
+          
+          annotations <- append(annotations, list(
+            list(
+              x = last_year,
+              y = last_value,
+              text = label_text,
+              showarrow = TRUE,
+              arrowhead = 2,
+              ax = 0,
+              ay = 40,
+              font = list(color = "black", size = 20, family = "Arial")
+            )
+          ))
+        }
+      }
     }
+    
     
     plotly_obj <- ggplotly(p)
     plotly_obj <- plotly_obj %>% layout(annotations = annotations)
