@@ -10,6 +10,7 @@ library(plotly)
 library(shinyWidgets)
 library(dplyr)
 library(scales)
+library(data.table)
 # library(here) # Not needed as we're using a direct absolute path
 
 # --- Data Loading and Initial Preparation ---
@@ -93,14 +94,15 @@ default_muni_selection_choices_all <- if (length(default_immediate_regions_selec
 default_muni_selection <- c("Água Branca", "Delmiro Gouveia", "Inhapi", "Mata Grande", "Olho D'Água do Casado", "Palestina", "Piranhas")
 
 
-all_possible_display_locations <- c(
-  uf_choices_all,
-  unique(df_pibmunis_base[[nome_regiao_geog_intermediaria_col]]),
-  unique(df_pibmunis_base[[nome_regiao_geog_imediata_col]]),
-  unique(df_pibmunis_base[[nome_municipio_col]])
-)
-pib_colors <- scales::hue_pal()(length(unique(all_possible_display_locations)))
-names(pib_colors) <- unique(all_possible_display_locations)
+# pib_colors será gerado dinamicamente no renderPlotly, não mais aqui
+# all_possible_display_locations <- c(
+#   uf_choices_all,
+#   unique(df_pibmunis_base[[nome_regiao_geog_intermediaria_col]]),
+#   unique(df_pibmunis_base[[nome_regiao_geog_imediata_col]]),
+#   unique(df_pibmunis_base[[nome_municipio_col]])
+# )
+# pib_colors <- scales::hue_pal()(length(unique(all_possible_display_locations)))
+# names(pib_colors) <- unique(all_possible_display_locations)
 
 
 # --- UI ---
@@ -198,7 +200,7 @@ server <- function(input, output, session) {
     if (default_uf %in% current_uf_selection && "Arapiraca" %in% choices && length(current_uf_selection) == 1) {
       selected_value <- "Arapiraca"
     } else {
-      # Try to keep previous valid selections, otherwise select all current choices
+      # Try to keep previous selections if valid, otherwise select all current choices
       previous_selection <- isolate(input$intermediateRegionInput)
       selected_value <- intersect(previous_selection, choices)
       if (length(selected_value) == 0 && length(choices) > 0) {
@@ -206,18 +208,7 @@ server <- function(input, output, session) {
       }
     }
     updatePickerInput(session, "intermediateRegionInput", choices = choices, selected = selected_value)
-  }, ignoreNULL = FALSE, ignoreInit = FALSE) # ignoreInit=FALSE for initial default propagation
-  
-  # Reactive expression for data filtered by Intermediate Region
-  filtered_by_rgi_reactive <- reactive({
-    req(input$intermediateRegionInput) # Ensure Intermediate Region input is available
-    if (length(input$intermediateRegionInput) == 0) { # Check length for empty selection
-      return(filtered_by_uf_reactive())
-    } else {
-      filtered_by_uf_reactive() %>%
-        filter(!!sym(nome_regiao_geog_intermediaria_col) %in% input$intermediateRegionInput)
-    }
-  })
+  }, ignoreNULL = FALSE, ignoreInit = FALSE) # ignoreInit = FALSE for initial default propagation
   
   # Reactive expression to update Immediate Region choices based on Intermediate Region selection
   observeEvent(input$intermediateRegionInput, {
@@ -234,7 +225,7 @@ server <- function(input, output, session) {
     if ("Arapiraca" %in% current_inter_region_selection && "Delmiro Gouveia" %in% choices && length(current_inter_region_selection) == 1) {
       selected_value <- "Delmiro Gouveia"
     } else {
-      # Try to keep previous valid selections, otherwise select all current choices
+      # Try to keep previous selections if valid, otherwise select all current choices
       previous_selection <- isolate(input$immediateRegionInput)
       selected_value <- intersect(previous_selection, choices)
       if (length(selected_value) == 0 && length(choices) > 0) {
@@ -242,7 +233,18 @@ server <- function(input, output, session) {
       }
     }
     updatePickerInput(session, "immediateRegionInput", choices = choices, selected = selected_value)
-  }, ignoreNULL = FALSE, ignoreInit = FALSE) # ignoreInit=FALSE
+  }, ignoreNULL = FALSE, ignoreInit = FALSE) # ignoreInit = FALSE
+  
+  # Reactive expression for data filtered by Intermediate Region
+  filtered_by_rgi_reactive <- reactive({
+    req(input$intermediateRegionInput) # Ensure Intermediate Region input is available
+    if (length(input$intermediateRegionInput) == 0) { # Check length for empty selection
+      return(filtered_by_uf_reactive())
+    } else {
+      filtered_by_uf_reactive() %>%
+        filter(!!sym(nome_regiao_geog_intermediaria_col) %in% input$intermediateRegionInput)
+    }
+  })
   
   # Reactive expression for data filtered by Immediate Region
   filtered_by_rgimed_reactive <- reactive({
@@ -285,8 +287,8 @@ server <- function(input, output, session) {
     
     # Safely check input values before comparison for default path
     is_default_path <- (length(input$ufInput) == 1 && input$ufInput == default_uf &&
-                          length(input$intermediateRegionInput) == 1 && input$intermediateRegionInput == default_intermediate_regions_selected &&
-                          length(input$immediateRegionInput) == 1 && input$immediateRegionInput == default_immediate_regions_selected)
+                          length(input$intermediateRegionInput) == 1 && !is.null(input$intermediateRegionInput) && input$intermediateRegionInput == default_intermediate_regions_selected &&
+                          length(input$immediateRegionInput) == 1 && !is.null(input$immediateRegionInput) && input$immediateRegionInput == default_immediate_regions_selected)
     
     if (is_default_path) {
       selected_muni <- default_muni_selection
@@ -329,8 +331,11 @@ server <- function(input, output, session) {
     
     # Determine the most granular level selected by the user for aggregation and plotting
     grouping_var_sym <- NULL
+    # This logic now ensures the correct grouping variable is picked based on selection granularity
     if (!is.null(current_selection_municipalities) && length(current_selection_municipalities) > 0) {
       grouping_var_sym <- sym(nome_municipio_col)
+      # If municipalities are selected, we want to see individual municipality lines,
+      # even if the user later deselects the immediate region, as long as the municipalities remain selected.
     } else if (!is.null(current_selection_immediate_regions) && length(current_selection_immediate_regions) > 0) {
       grouping_var_sym <- sym(nome_regiao_geog_imediata_col)
     } else if (!is.null(current_selection_inter_regions) && length(current_selection_inter_regions) > 0) {
@@ -338,14 +343,8 @@ server <- function(input, output, session) {
     } else if (!is.null(current_selection_ufs) && length(current_selection_ufs) > 0) {
       grouping_var_sym <- sym(nome_uf_col)
     } else {
-      grouping_var_sym <- sym(nome_grande_regiao_col) # Default to highest level if nothing is selected
-      if (nrow(df_filtered) == 0) {
-        return(data.frame(
-          !!sym(ano_col) := numeric(0),
-          Display_Location = character(0),
-          !!!setNames(lapply(pib_value_columns_all, function(x) numeric(0)), pib_value_columns_all)
-        ))
-      }
+      # Fallback if no selection, group by Grande Região
+      grouping_var_sym <- sym(nome_grande_regiao_col)
     }
     
     # Ensure there's data after filtering
@@ -366,23 +365,28 @@ server <- function(input, output, session) {
         .groups = "drop"
       )
     
-    # Calculate PIB per capita AFTER aggregation and as a separate mutate step
-    # This avoids the dynamic naming issue in summarise and the := error.
+    # Calculate PIB per capita AFTER aggregation
+    # FIX: Use setNames and list for robust dynamic column naming, COMPLETELY AVOIDING ':=
     data_to_plot <- data_to_plot %>%
       mutate(
-        # FIX: Use setNames to dynamically create the pib_per_capita_col.
-        # This is the most robust way to dynamically name a column in dplyr without data.table's :=
-        # The := operator is used in rlang for unquoting, which dplyr uses internally.
-        # So, the original form '!!sym(col_name) := value' should work if rlang is correctly interpreting.
-        # However, to be extra safe and avoid parser issues, we explicitly wrap in setNames.
-        !!sym(pib_per_capita_col) := if_else( # Re-tested this with latest dplyr/rlang, it should now work.
-          Sum_Inferred_Population == 0, NA_real_,
-          (!!sym(total_pib_col) * 1000) / Sum_Inferred_Population
-        ),
-        Display_Location = as.character(!!grouping_var_sym) # Add Display_Location after grouping
+        # This is the corrected line to create the pib_per_capita_col dynamically
+        # It uses setNames(list(value), name) which is a robust dplyr pattern.
+        setNames(list(
+          if_else(
+            Sum_Inferred_Population == 0, NA_real_,
+            (!!sym(total_pib_col) * 1000) / Sum_Inferred_Population
+          )
+        ), pib_per_capita_col), # This creates the column with the name from pib_per_capita_col
+        # Create a more descriptive Display_Location
+        Display_Location = case_when(
+          grouping_var_sym == sym(nome_municipio_col) ~ paste0("Município - ", as.character(!!grouping_var_sym)),
+          grouping_var_sym == sym(nome_regiao_geog_imediata_col) ~ paste0("Região Imediata - ", as.character(!!grouping_var_sym)),
+          grouping_var_sym == sym(nome_regiao_geog_intermediaria_col) ~ paste0("Região Intermediária - ", as.character(!!grouping_var_sym)),
+          grouping_var_sym == sym(nome_uf_col) ~ paste0("Estado - ", as.character(!!grouping_var_sym)),
+          TRUE ~ as.character(!!grouping_var_sym) # Fallback
+        )
       ) %>%
-      select(-Sum_Inferred_Population, -!!grouping_var_sym) # Remove temporary column and grouping variable
-    # (grouping variable is captured in Display_Location)
+      select(-Sum_Inferred_Population) # Remove temporary column
     
     missing_cols <- setdiff(pib_value_columns_all, names(data_to_plot))
     for (col in missing_cols) {
@@ -405,16 +409,26 @@ server <- function(input, output, session) {
       filter(!is.na(!!sym(input$yVariable)))
     
     if (nrow(plot_data) == 0) {
-      return(ggplotly(ggplot() + annotate("text", x = 0.5, y = 0.5, label = "Não há dados para exibir com os filtros selecionados.") + theme_void()))
+      return(ggplotly(ggplot() + 
+                        annotate("text", x = 0.5, y = 0.5, label = "Não há dados para exibir com os filtros selecionados.") +
+                        theme_void()))
     }
     
     y_labels <- scales::comma
+    
+    # Dynamically create color mapping based on actual Display_Location values
+    unique_locations <- unique(plot_data$Display_Location)
+    dynamic_colors <- scales::hue_pal()(length(unique_locations))
+    names(dynamic_colors) <- unique_locations
     
     p <- ggplot(plot_data, aes(x = !!sym(ano_col), color = Display_Location)) +
       labs(
         x = "Ano",
         y = input$yVariable,
-        title = paste("Tendências do PIB Brasileiro (", min(plot_data[[ano_col]], na.rm = TRUE), "-", max(plot_data[[ano_col]], na.rm = TRUE), ") - ", input$yVariable, sep=""),
+        title = paste("Tendências do PIB Brasileiro (",
+                      min(plot_data[[ano_col]], na.rm = TRUE), "-", 
+                      max(plot_data[[ano_col]], na.rm = TRUE), ") - ",
+                      input$yVariable, sep = ""),
         color = "Localidade"
       ) +
       theme_minimal() +
@@ -425,7 +439,7 @@ server <- function(input, output, session) {
       ) +
       scale_y_continuous(labels = y_labels) +
       scale_x_continuous(breaks = unique(plot_data[[ano_col]])) +
-      scale_color_manual(values = pib_colors)
+      scale_color_manual(values = dynamic_colors)  # use dynamic colors here
     
     y_sym <- sym(input$yVariable)
     p <- p + geom_line(aes(y = !!y_sym), linewidth = 1) +
@@ -464,6 +478,7 @@ server <- function(input, output, session) {
     
     return(plotly_obj)
   })
+  
 }
 
 # Run the application
