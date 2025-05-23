@@ -111,7 +111,7 @@ ui <- fluidPage(
     style = "text-align: center; margin-bottom: 20px;",
     div(
       style = "font-size: 28px; font-weight: bold; color: #333;",
-      "Brasil: Tendências do PIB por Hierarquia Geográfica"
+      "Brasil: Tendências das variaveis econômicas por hierarquia geográfica"
     ),
     div(
       style = "font-size: 18px; font-weight: normal; color: #555;",
@@ -425,7 +425,7 @@ server <- function(input, output, session) {
       labs(
         x = "Ano",
         y = input$yVariable,
-        title = paste("Tendências do PIB Brasileiro (",
+        title = paste("Tendências do (",
                       min(plot_data[[ano_col]], na.rm = TRUE), "-", 
                       max(plot_data[[ano_col]], na.rm = TRUE), ") - ",
                       input$yVariable, sep = ""),
