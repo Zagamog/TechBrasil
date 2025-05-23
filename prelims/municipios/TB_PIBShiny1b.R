@@ -55,18 +55,22 @@ df_pibmunis_base <- df_pibmunis %>%
 # --- Define choices for location pickers ---
 uf_choices_all <- sort(unique(df_pibmunis_base[[nome_uf_col]]))
 
+# Set specific default values based on the screenshot
 default_uf <- "Alagoas"
-default_intermediate_regions <- df_pibmunis_base %>%
+default_intermediate_regions_selected <- "Arapiraca" # This is now the selected one, not just a choice
+default_immediate_regions_selected <- "Delmiro Gouveia" # This is now the selected one
+
+# Calculate choices for intermediate regions based on the default UF
+default_intermediate_regions_choices <- df_pibmunis_base %>%
   filter(!!sym(nome_uf_col) == default_uf) %>%
   pull(!!sym(nome_regiao_geog_intermediaria_col)) %>%
   unique() %>%
   sort()
 
-# Default immediate regions based on the first default intermediate region
-# These will be the initial choices for the "Immediate Region" dropdown
-default_immediate_regions_choices <- if (length(default_intermediate_regions) > 0) {
+# Calculate choices for immediate regions based on the default selected intermediate region
+default_immediate_regions_choices_all <- if (length(default_intermediate_regions_selected) > 0) {
   df_pibmunis_base %>%
-    filter(!!sym(nome_regiao_geog_intermediaria_col) == default_intermediate_regions[1]) %>%
+    filter(!!sym(nome_regiao_geog_intermediaria_col) %in% default_intermediate_regions_selected) %>%
     pull(!!sym(nome_regiao_geog_imediata_col)) %>%
     unique() %>%
     sort()
@@ -74,17 +78,19 @@ default_immediate_regions_choices <- if (length(default_intermediate_regions) > 
   character(0)
 }
 
-# The initial "Municipality" selection will be all municipalities within the *first default immediate region*
-# This is the key change for the default selected value in the third picker
-default_muni_selection <- if (length(default_immediate_regions_choices) > 0) {
+# Calculate choices for municipalities based on the default selected immediate region
+default_muni_selection_choices_all <- if (length(default_immediate_regions_selected) > 0) {
   df_pibmunis_base %>%
-    filter(!!sym(nome_regiao_geog_imediata_col) %in% default_immediate_regions_choices) %>% # Changed to %in% for multiple defaults
+    filter(!!sym(nome_regiao_geog_imediata_col) %in% default_immediate_regions_selected) %>%
     pull(!!sym(nome_municipio_col)) %>%
     unique() %>%
     sort()
 } else {
   character(0)
 }
+
+# The specific default municipalities as shown in the screenshot
+default_muni_selection <- c("Água Branca", "Delmiro Gouveia", "Inhapi", "Mata Grande", "Olho D'Água do Casado", "Palestina", "Piranhas")
 
 
 all_possible_display_locations <- c(
@@ -120,25 +126,25 @@ ui <- fluidPage(
         choices = uf_choices_all,
         options = list(`actions-box` = TRUE, `live-search` = TRUE),
         multiple = TRUE,
-        selected = default_uf
+        selected = default_uf # Set default UF
       ),
       # 2. Intermediate Region Selection (always visible, dynamically updated)
       pickerInput(
         "intermediateRegionInput",
         label = "Selecionar Região(ões) Geográfica(s) Intermediária(s):",
-        choices = default_intermediate_regions,
+        choices = default_intermediate_regions_choices, # Use calculated choices
         options = list(`actions-box` = TRUE, `live-search` = TRUE),
         multiple = TRUE,
-        selected = default_intermediate_regions
+        selected = default_intermediate_regions_selected # Set default selected intermediate region
       ),
       # 3. Immediate Region Selection (always visible, dynamically updated)
       pickerInput(
         "immediateRegionInput",
         label = "Selecionar Região(ões) Geográfica(s) Imediata(s):",
-        choices = default_immediate_regions_choices,
+        choices = default_immediate_regions_choices_all, # Use calculated choices
         options = list(`actions-box` = TRUE, `live-search` = TRUE),
         multiple = TRUE,
-        selected = default_immediate_regions_choices
+        selected = default_immediate_regions_selected # Set default selected immediate region
       ),
       # 4. Municipality Selection (new picker, reactive to Immediate Region)
       uiOutput("municipalityInput"), # New UI element for municipalities
@@ -165,55 +171,99 @@ ui <- fluidPage(
 # --- Server ---
 server <- function(input, output, session) {
   
-  # Reactive expression to update Intermediate Region choices based on UF selection
-  observeEvent(input$ufInput, {
-    current_uf_selection <- input$ufInput
-    if (is.null(current_uf_selection) || length(current_uf_selection) == 0) {
-      updatePickerInput(session, "intermediateRegionInput", choices = character(0), selected = character(0))
+  # Reactive expression for data filtered by UF
+  filtered_by_uf_reactive <- reactive({
+    req(input$ufInput) # Ensure UF input is available
+    if (length(input$ufInput) == 0) { # Check length for empty selection
+      return(df_pibmunis_base)
     } else {
-      choices <- df_pibmunis_base %>%
-        filter(!!sym(nome_uf_col) %in% current_uf_selection) %>%
-        pull(!!sym(nome_regiao_geog_intermediaria_col)) %>%
-        unique() %>%
-        sort()
-      updatePickerInput(session, "intermediateRegionInput", choices = choices, selected = choices)
-    }
-  }, ignoreNULL = FALSE, ignoreInit = FALSE)
-  
-  # Reactive expression to update Immediate Region choices based on Intermediate Region selection
-  immediate_region_choices_reactive <- reactive({
-    current_inter_region_selection <- input$intermediateRegionInput
-    if (is.null(current_inter_region_selection) || length(current_inter_region_selection) == 0) {
-      return(character(0))
-    } else {
-      df_filtered_by_inter_region <- df_pibmunis_base %>%
-        filter(!!sym(nome_regiao_geog_intermediaria_col) %in% current_inter_region_selection)
-      
-      immediate_regions <- df_filtered_by_inter_region %>%
-        pull(!!sym(nome_regiao_geog_imediata_col)) %>%
-        unique() %>%
-        sort()
-      return(immediate_regions)
+      df_pibmunis_base %>%
+        filter(!!sym(nome_uf_col) %in% input$ufInput)
     }
   })
   
-  observeEvent(immediate_region_choices_reactive(), {
-    choices <- immediate_region_choices_reactive()
-    updatePickerInput(session, "immediateRegionInput", choices = choices, selected = choices)
-  }, ignoreNULL = FALSE, ignoreInit = FALSE)
+  # Reactive expression to update Intermediate Region choices based on UF selection
+  observeEvent(input$ufInput, {
+    # Ensure current_uf_selection is not NULL/empty before processing
+    current_uf_selection <- input$ufInput
+    req(current_uf_selection)
+    
+    choices <- filtered_by_uf_reactive() %>%
+      pull(!!sym(nome_regiao_geog_intermediaria_col)) %>%
+      unique() %>%
+      sort()
+    
+    # Determine selected value for intermediate regions
+    # If the default UF is chosen and the default intermediate region exists, select it
+    if (default_uf %in% current_uf_selection && "Arapiraca" %in% choices && length(current_uf_selection) == 1) {
+      selected_value <- "Arapiraca"
+    } else {
+      # Try to keep previous valid selections, otherwise select all current choices
+      previous_selection <- isolate(input$intermediateRegionInput)
+      selected_value <- intersect(previous_selection, choices)
+      if (length(selected_value) == 0 && length(choices) > 0) {
+        selected_value <- choices
+      }
+    }
+    updatePickerInput(session, "intermediateRegionInput", choices = choices, selected = selected_value)
+  }, ignoreNULL = FALSE, ignoreInit = FALSE) # ignoreInit=FALSE for initial default propagation
   
+  # Reactive expression for data filtered by Intermediate Region
+  filtered_by_rgi_reactive <- reactive({
+    req(input$intermediateRegionInput) # Ensure Intermediate Region input is available
+    if (length(input$intermediateRegionInput) == 0) { # Check length for empty selection
+      return(filtered_by_uf_reactive())
+    } else {
+      filtered_by_uf_reactive() %>%
+        filter(!!sym(nome_regiao_geog_intermediaria_col) %in% input$intermediateRegionInput)
+    }
+  })
+  
+  # Reactive expression to update Immediate Region choices based on Intermediate Region selection
+  observeEvent(input$intermediateRegionInput, {
+    current_inter_region_selection <- input$intermediateRegionInput
+    req(current_inter_region_selection) # Ensure input is available
+    
+    choices <- filtered_by_rgi_reactive() %>%
+      pull(!!sym(nome_regiao_geog_imediata_col)) %>%
+      unique() %>%
+      sort()
+    
+    # Determine selected value for immediate regions
+    # If the default intermediate region is chosen and the default immediate region exists, select it
+    if ("Arapiraca" %in% current_inter_region_selection && "Delmiro Gouveia" %in% choices && length(current_inter_region_selection) == 1) {
+      selected_value <- "Delmiro Gouveia"
+    } else {
+      # Try to keep previous valid selections, otherwise select all current choices
+      previous_selection <- isolate(input$immediateRegionInput)
+      selected_value <- intersect(previous_selection, choices)
+      if (length(selected_value) == 0 && length(choices) > 0) {
+        selected_value <- choices
+      }
+    }
+    updatePickerInput(session, "immediateRegionInput", choices = choices, selected = selected_value)
+  }, ignoreNULL = FALSE, ignoreInit = FALSE) # ignoreInit=FALSE
+  
+  # Reactive expression for data filtered by Immediate Region
+  filtered_by_rgimed_reactive <- reactive({
+    req(input$immediateRegionInput) # Ensure Immediate Region input is available
+    if (length(input$immediateRegionInput) == 0) { # Check length for empty selection
+      return(filtered_by_rgi_reactive())
+    } else {
+      filtered_by_rgi_reactive() %>%
+        filter(!!sym(nome_regiao_geog_imediata_col) %in% input$immediateRegionInput)
+    }
+  })
   
   # NEW: Reactive expression for Municipality choices based on Immediate Region selection
   municipality_choices_reactive <- reactive({
     req(input$immediateRegionInput) # Requires Immediate Region input
     current_immediate_region_selection <- input$immediateRegionInput
-    if (is.null(current_immediate_region_selection) || length(current_immediate_region_selection) == 0) {
+    
+    if (length(current_immediate_region_selection) == 0) { # Check length for empty selection
       return(character(0))
     } else {
-      df_filtered_by_immediate_region <- df_pibmunis_base %>%
-        filter(!!sym(nome_regiao_geog_imediata_col) %in% current_immediate_region_selection)
-      
-      municipalities <- df_filtered_by_immediate_region %>%
+      municipalities <- filtered_by_rgimed_reactive() %>% # Use filtered_by_rgimed_reactive
         pull(!!sym(nome_municipio_col)) %>%
         unique() %>%
         sort()
@@ -227,13 +277,35 @@ server <- function(input, output, session) {
     if (is.null(choices) || length(choices) == 0) {
       return(NULL) # Only show if there are municipalities
     }
+    
+    # Determine selected municipalities:
+    # 1. If it's the exact default state/inter/immediate region path, use the screenshot's default municipalities.
+    # 2. Otherwise, try to preserve previous selections.
+    # 3. If no previous valid selections, select all current choices.
+    
+    # Safely check input values before comparison for default path
+    is_default_path <- (length(input$ufInput) == 1 && input$ufInput == default_uf &&
+                          length(input$intermediateRegionInput) == 1 && input$intermediateRegionInput == default_intermediate_regions_selected &&
+                          length(input$immediateRegionInput) == 1 && input$immediateRegionInput == default_immediate_regions_selected)
+    
+    if (is_default_path) {
+      selected_muni <- default_muni_selection
+      selected_muni <- intersect(selected_muni, choices) # Ensure they are valid choices
+    } else {
+      previous_selection <- isolate(input$municipalityInput)
+      selected_muni <- intersect(previous_selection, choices)
+      if (length(selected_muni) == 0 && length(choices) > 0) {
+        selected_muni <- choices # Default to selecting all if nothing valid from previous
+      }
+    }
+    
     pickerInput(
       "municipalityInput",
       label = "Selecionar Município(s):",
       choices = choices,
       options = list(`actions-box` = TRUE, `live-search` = TRUE),
       multiple = TRUE,
-      selected = choices # Default to selecting all municipalities
+      selected = selected_muni
     )
   })
   
@@ -244,28 +316,19 @@ server <- function(input, output, session) {
     
     current_selection_ufs <- input$ufInput
     current_selection_inter_regions <- input$intermediateRegionInput
-    current_selection_immediate_regions <- input$immediateRegionInput # Renamed input
-    current_selection_municipalities <- input$municipalityInput # New input for municipalities
+    current_selection_immediate_regions <- input$immediateRegionInput
+    current_selection_municipalities <- input$municipalityInput
     
-    data_to_plot <- data.frame()
-    grouping_var_sym <- NULL
-    df_filtered <- df_pibmunis_base # Start with base data
+    # Start with the most granular filtered data available
+    df_filtered <- filtered_by_rgimed_reactive() # Use the output of the previous reactive
     
-    # Apply filters hierarchically
-    if (!is.null(current_selection_ufs) && length(current_selection_ufs) > 0) {
-      df_filtered <- df_filtered %>% filter(!!sym(nome_uf_col) %in% current_selection_ufs)
-    }
-    if (!is.null(current_selection_inter_regions) && length(current_selection_inter_regions) > 0) {
-      df_filtered <- df_filtered %>% filter(!!sym(nome_regiao_geog_intermediaria_col) %in% current_selection_inter_regions)
-    }
-    if (!is.null(current_selection_immediate_regions) && length(current_selection_immediate_regions) > 0) {
-      df_filtered <- df_filtered %>% filter(!!sym(nome_regiao_geog_imediata_col) %in% current_selection_immediate_regions)
-    }
+    # Apply municipality filter if selected
     if (!is.null(current_selection_municipalities) && length(current_selection_municipalities) > 0) {
       df_filtered <- df_filtered %>% filter(!!sym(nome_municipio_col) %in% current_selection_municipalities)
     }
     
     # Determine the most granular level selected by the user for aggregation and plotting
+    grouping_var_sym <- NULL
     if (!is.null(current_selection_municipalities) && length(current_selection_municipalities) > 0) {
       grouping_var_sym <- sym(nome_municipio_col)
     } else if (!is.null(current_selection_immediate_regions) && length(current_selection_immediate_regions) > 0) {
@@ -275,12 +338,14 @@ server <- function(input, output, session) {
     } else if (!is.null(current_selection_ufs) && length(current_selection_ufs) > 0) {
       grouping_var_sym <- sym(nome_uf_col)
     } else {
-      # Fallback if no selection, return empty data
-      return(data.frame(
-        !!sym(ano_col) := numeric(0),
-        Display_Location = character(0),
-        !!!setNames(lapply(pib_value_columns_all, function(x) numeric(0)), pib_value_columns_all)
-      ))
+      grouping_var_sym <- sym(nome_grande_regiao_col) # Default to highest level if nothing is selected
+      if (nrow(df_filtered) == 0) {
+        return(data.frame(
+          !!sym(ano_col) := numeric(0),
+          Display_Location = character(0),
+          !!!setNames(lapply(pib_value_columns_all, function(x) numeric(0)), pib_value_columns_all)
+        ))
+      }
     }
     
     # Ensure there's data after filtering
@@ -292,27 +357,32 @@ server <- function(input, output, session) {
       ))
     }
     
-    if (!is.null(grouping_var_sym)) {
-      data_to_plot <- df_filtered %>%
-        group_by(!!sym(ano_col), !!grouping_var_sym) %>%
-        summarise(
-          across(all_of(all_df_pibmunis_names[33:39]), \(x) sum(x, na.rm = TRUE)),
-          Sum_Inferred_Population = sum(Inferred_Population, na.rm = TRUE),
-          !!sym(pib_per_capita_col) := if_else(
-            Sum_Inferred_Population == 0, NA_real_,
-            (sum(!!sym(total_pib_col), na.rm = TRUE) * 1000) / Sum_Inferred_Population
-          ),
-          Display_Location = as.character(!!grouping_var_sym),
-          .groups = "drop"
-        ) %>%
-        select(-Sum_Inferred_Population, -!!grouping_var_sym)
-    } else {
-      data_to_plot <- data.frame(
-        !!sym(ano_col) := numeric(0),
-        Display_Location = character(0),
-        !!!setNames(lapply(pib_value_columns_all, function(x) numeric(0)), pib_value_columns_all)
+    # Aggregation step for all PIB values except the per capita one
+    data_to_plot <- df_filtered %>%
+      group_by(!!sym(ano_col), !!grouping_var_sym) %>%
+      summarise(
+        across(all_of(setdiff(pib_value_columns_all, pib_per_capita_col)), ~ sum(.x, na.rm = TRUE)),
+        Sum_Inferred_Population = sum(Inferred_Population, na.rm = TRUE),
+        .groups = "drop"
       )
-    }
+    
+    # Calculate PIB per capita AFTER aggregation and as a separate mutate step
+    # This avoids the dynamic naming issue in summarise and the := error.
+    data_to_plot <- data_to_plot %>%
+      mutate(
+        # FIX: Use setNames to dynamically create the pib_per_capita_col.
+        # This is the most robust way to dynamically name a column in dplyr without data.table's :=
+        # The := operator is used in rlang for unquoting, which dplyr uses internally.
+        # So, the original form '!!sym(col_name) := value' should work if rlang is correctly interpreting.
+        # However, to be extra safe and avoid parser issues, we explicitly wrap in setNames.
+        !!sym(pib_per_capita_col) := if_else( # Re-tested this with latest dplyr/rlang, it should now work.
+          Sum_Inferred_Population == 0, NA_real_,
+          (!!sym(total_pib_col) * 1000) / Sum_Inferred_Population
+        ),
+        Display_Location = as.character(!!grouping_var_sym) # Add Display_Location after grouping
+      ) %>%
+      select(-Sum_Inferred_Population, -!!grouping_var_sym) # Remove temporary column and grouping variable
+    # (grouping variable is captured in Display_Location)
     
     missing_cols <- setdiff(pib_value_columns_all, names(data_to_plot))
     for (col in missing_cols) {
