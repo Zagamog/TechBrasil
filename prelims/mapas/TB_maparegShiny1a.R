@@ -8,10 +8,6 @@ library(shinyWidgets)
 gpkg_local_path <- "D:/Country/Brazil/TechBrazil/working/ibge/mapas/sf_regioes.gpkg"
 sf_regioes <- st_read(dsn = gpkg_local_path, layer = "sf_regioes_ibge", quiet = TRUE)
 
-sf_regioes$CO_UF <- as.character(sf_regioes$CO_UF)
-sf_regioes$NM_RGIINTM <- as.character(sf_regioes$NM_RGIINTM)
-sf_regioes$NM_RGIMED <- as.character(sf_regioes$NM_RGIMED)
-
 default_uf <- "23"  # Ceará
 
 # --- UI ---
@@ -106,17 +102,29 @@ server <- function(input, output, session) {
   # Mapa
   output$interactive_map <- renderTmap({
     req(nrow(final_map_data()) > 0)
+    
     tmap_mode("view")
-    tm_shape(final_map_data()) +
+    
+    # Explicitly drop unused factor levels
+    map_data_clean <- final_map_data()
+    map_data_clean[[input$map_level]] <- droplevels(factor(map_data_clean[[input$map_level]]))
+    
+    tm_shape(map_data_clean) +
       tm_polygons(
-        col = input$map_level,
-        palette = "Set3",
-        title = input$map_level,
+        fill = input$map_level,
+        fill.scale = tm_scale_categorical(values = "brewer.set3"),
+        fill.legend = tm_legend(title = input$map_level),
         id = "NM_MUN",
         popup.vars = c("CO_UF", "NM_RGIINTM", "NM_RGIMED", "NM_MUN")
       ) +
-      tm_layout(legend.outside = TRUE, frame = FALSE, bg.color = "lightblue")
+      tm_layout(
+        legend.outside = TRUE,
+        frame = FALSE,
+        bg.color = "lightblue"
+      )
   })
+  
+  
   
   
 }
