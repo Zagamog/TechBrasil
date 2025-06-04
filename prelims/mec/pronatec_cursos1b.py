@@ -16,18 +16,20 @@ with open("D:/Country/Brazil/TechBrazil/rawdata/mec/catalogo_cursos_pronatec_fic
 # Prepare storage for extracted fields
 detail_rows = []
 
+
 # Define field extraction patterns
 field_patterns = {
-    "codigo_curso": r"C[oó]digo do Curso:\s*(\d+)",
-    "eixo_tecnologico": r"Eixo Tecnol[oó]gico:\s*(.*?)\n",
-    "escolaridade_minima": r"Escolaridade M[ií]nima:\s*(.*?)\n",
-    "perfil_profissional": r"Perfil Profissional:\s*(.*?)\n(?:Idade:|Outros pr[eé]-requisitos:)",
-    "idade": r"Idade:\s*(.*?)\n",
-    "outros_pre_requisitos": r"Outros pr[eé]-requisitos:\s*(.*?)\n",
-    "ocupacoes_cbo": r"Ocupações Associadas \(CBO\):\s*(.*?)\n",
-    "observacao": r"Observa[cç][aã]o:\s*(.*?)\n",
+    "codigo_curso": r"^Código do Curso:\s*(\d+)",
+    "eixo_tecnologico": r"^Eixo Tecnológico:\s*(.+)",
+    "escolaridade_minima": r"^Escolaridade Mínima:\s*(.+)",
+    "perfil_profissional": r"^Perfil Profissional:\s*(.*?)^(Idade:|Outros pré-requisitos:|Ocupações Associadas|Observação:)",
+    "idade": r"^Idade:\s*(.*?)^(Outros pré-requisitos:|Ocupações Associadas|Observação:)",
+    "outros_pre_requisitos": r"^Outros pré-requisitos:\s*(.*?)^(Ocupações Associadas|Observação:)",
+    "ocupacoes_cbo": r"^Ocupações Associadas \(CBO\):\s*(.*?)^(Observação:)",
+    "observacao": r"^Observação:\s*(.*?)^(\\d{2,4})\s*Horas|$",
     "carga_horaria": r"(\d{2,4})\s*Horas"
 }
+
 
 # Iterate through TOC entries and extract course detail pages
 for _, row in df_list_pronatec2016.iterrows():
@@ -37,10 +39,16 @@ for _, row in df_list_pronatec2016.iterrows():
         if pg_num + offset < len(catalog_doc):
             text += catalog_doc[pg_num + offset].get_text()
 
-    parsed = {"curso_id": row["curso_id"], "course_name": row["course_name"], "page_number": row["page_number"]}
+    parsed = {
+        "curso_id": row["curso_id"],
+        "course_name": row["course_name"],
+        "page_number": row["page_number"]
+    }
     for field, pattern in field_patterns.items():
-        match = re.search(pattern, text, re.DOTALL)
-        parsed[field] = match.group(1).strip() if match else None
+        match = re.search(pattern, text, re.DOTALL | re.MULTILINE)
+        parsed[field] = match.group(1).strip() if match and match.group(1) else "NA"
+
+
 
     detail_rows.append(parsed)
 
