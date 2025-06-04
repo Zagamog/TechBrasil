@@ -55,7 +55,7 @@ df_pibmunis_base <- df_pibmunis %>%
 # --- Define choices for location pickers ---
 uf_choices_all <- sort(unique(df_pibmunis_base[[nome_uf_col]]))
 
-default_uf <- "Alagoas"
+default_uf <- "Bahia"
 default_intermediate_regions <- df_pibmunis_base %>%
   filter(!!sym(nome_uf_col) == default_uf) %>%
   pull(!!sym(nome_regiao_geog_intermediaria_col)) %>%
@@ -355,7 +355,8 @@ server <- function(input, output, session) {
       ) +
       scale_y_continuous(labels = y_labels) +
       scale_x_continuous(breaks = unique(plot_data[[ano_col]])) +
-      scale_color_manual(values = pib_colors)
+      scale_color_manual(values = setNames(scales::hue_pal()(length(unique(plot_data$Display_Location))), unique(plot_data$Display_Location)))
+    
     
     y_sym <- sym(input$yVariable)
     p <- p + geom_line(aes(y = !!y_sym), linewidth = 1) +

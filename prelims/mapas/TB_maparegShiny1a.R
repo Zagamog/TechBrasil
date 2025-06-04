@@ -121,4 +121,7 @@ server <- function(input, output, session) {
   
 }
 
-shinyApp(ui = ui, server = server)
+app <- shinyApp(ui = ui, server = server)
+runApp(app, launch.browser = TRUE)
+
+
