@@ -3,9 +3,17 @@
 library(simulador.fundeb)
 library(dplyr)
 
+load("D:/Country/Brazil/TechBrazil/rawdata/fundeb/pesos.rda")
+load("D:/Country/Brazil/TechBrazil/rawdata/fundeb/matriculas.rda")
+load("D:/Country/Brazil/TechBrazil/rawdata/fundeb/complementar.rda")
+
 data("matriculas")
 data("complementar")
-data("peso")
+data("pesos")
+
+
+# save pesos as csv
+write.csv(pesos, "D:/Country/Brazil/TechBrazil/rawdata/fundeb/pesos.csv", row.names = FALSE)
 
 df_teste = simulador.fundeb::simula_fundeb(
   dados_matriculas = matriculas,
