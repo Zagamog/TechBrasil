@@ -61,6 +61,7 @@ fin_choices <- setNames(allowed_vars, sapply(allowed_vars, function(v) var_label
 ui <- dashboardPage(
   dashboardHeader(title = HTML('Adira à <span style="color: #ffcc00;">Propag</span> !')),
   dashboardSidebar(
+    width=500,
     #       selectizeInput(
     #   "NM_UF",
     #   "Selecionar Unidade da Federação",
@@ -72,6 +73,7 @@ ui <- dashboardPage(
     
     # In your UI:
     selectizeInput(
+      width="100%",
       "fin_variable",
       "Selecionar variável financeira",
       choices = fin_choices,
@@ -100,6 +102,23 @@ ui <- dashboardPage(
   dashboardBody(
     tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")),
     
+    
+    tags$head(
+      tags$style(HTML("
+    .main-header {
+      display: none;
+    }
+    .content-wrapper, .right-side {
+      margin-top: 0px !important;
+    }
+  ")),  tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
+    ),
+    
+    # Moved title: full-width, styled, independent of sidebar/header limits
+    tags$div(
+      style = "padding: 10px 20px; font-size: 24px; font-weight: bold; color: #0000ff;",
+      HTML('Faça adesão ao <span style="color: #FFD700; text-shadow: 1px 1px #333;">Propag</span> !')
+    ),
     fluidRow(
       column(
         12,
