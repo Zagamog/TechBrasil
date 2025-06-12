@@ -59,7 +59,7 @@ fin_choices <- setNames(allowed_vars, sapply(allowed_vars, function(v) var_label
 
 
 ui <- dashboardPage(
-  dashboardHeader(title = HTML('Adira à <span style="color: #ffcc00;">Propag</span> !')),
+  dashboardHeader(title = HTML('Faça adesão ao Propag')),
   dashboardSidebar(
     width=500,
     #       selectizeInput(
@@ -114,6 +114,7 @@ ui <- dashboardPage(
   ")),  tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
     ),
     
+
     # Moved title: full-width, styled, independent of sidebar/header limits
     tags$div(
       style = "padding: 10px 20px; font-size: 24px; font-weight: bold; color: #0000ff;",
@@ -146,8 +147,9 @@ ui <- dashboardPage(
                            plotOutput("tab1_fin_plot", height = "600px"),
                            
                            br(),
-                           
+                           h3("Tabela 1: Variaveis Financeiras", style = "color: #1f5673; font-weight: bold; margin-top: 30px;"),
                            DT::dataTableOutput("tab1_fin_table")
+                          
                          )
                 ),
                 
@@ -388,8 +390,7 @@ server <- function(input, output, session) {
   
   
   
-  
-  
+  h3("Tabela 1: Variáveis Financeiras", style = "color: #1f5673; font-weight: bold; margin-top: 30px;")
   output$tab1_fin_table <- DT::renderDataTable({
     df <- financeiro_dt_all()
     
@@ -397,16 +398,42 @@ server <- function(input, output, session) {
     num_cols <- names(df)[sapply(df, function(x) all(grepl("^[0-9,.]+$", x[!is.na(x)])))]
     df[num_cols] <- lapply(df[num_cols], function(x) as.numeric(gsub(",", "", x)))
     
-    # Drop the `fef_share_pct` column
+    # Drop unused column
     df <- df[, !(names(df) %in% c("fef_share_pct"))]
     
     DT::datatable(
       df,
-      options = list(pageLength = 30, scrollX = TRUE),
-      rownames = FALSE
+      extensions = 'Buttons',
+      options = list(
+        pageLength = 30,
+        scrollX = TRUE,
+        scrollY = "600px",
+        autoWidth = FALSE,
+        dom = 'Bfrtip',
+        buttons = list(
+          list(extend = "copy", text = "Copiar"),
+          list(extend = "csv", filename = "Tabela_Financeira_PROPAG", text = "CSV"),
+          list(extend = "excel", filename = "Tabela_Financeira_PROPAG", text = "Excel"),
+          list(
+            extend = "pdf",
+            filename = "Tabela_Financeira_PROPAG",
+            text = "PDF",
+            orientation = "landscape",
+            pageSize = "A4",
+            messageTop = "Tabela 1: Variáveis Financeiras"
+          )
+        ),
+        columnDefs = list(
+          list(className = 'dt-nowrap', targets = "_all")
+        )
+      ),
+      rownames = FALSE,
+      class = "stripe nowrap display"
     ) %>%
       formatRound(columns = names(df)[sapply(df, is.numeric)], digits = 0)
   })
+  
+  
   
   
 }
