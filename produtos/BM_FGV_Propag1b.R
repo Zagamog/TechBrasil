@@ -194,29 +194,33 @@ server <- function(input, output, session) {
   financeiro_dt_all <- reactive({
     df <- propag_ept_financeiro
     
-    # Convert all numeric-looking columns to numeric
-    numeric_cols <- names(df)[sapply(df, function(x) all(grepl("^[0-9,.]+$", x[!is.na(x)])))]
-    df[numeric_cols] <- lapply(df[numeric_cols], function(x) as.numeric(gsub(",", "", x)))
+    # Remove coluna indesejada
+    df <- df[, !(names(df) %in% "fef_share_pct")]
     
-    # Create total row with NA for character columns
+    # Identifica colunas a serem somadas (todas exceto UF e Estado)
+    data_cols <- setdiff(names(df), c("UF", "Estado"))
+    
+    # Converte as colunas numéricas
+    df[data_cols] <- lapply(df[data_cols], function(x) suppressWarnings(as.numeric(gsub(",", "", x))))
+    
+    # Cria linha de totais
     total_row <- as.list(rep(NA, ncol(df)))
     names(total_row) <- names(df)
     
-    # Fill in totals for numeric columns
-    for (col in numeric_cols) {
+    # Preenche totais nas colunas numéricas
+    for (col in data_cols) {
       total_row[[col]] <- sum(df[[col]], na.rm = TRUE)
     }
     
-    # Fill in identifiers
+    # Preenche identificadores
     total_row$UF <- "Todos"
     total_row$Estado <- "Todos"
     
-    # Convert to data.frame before binding
-    total_row <- as.data.frame(total_row, stringsAsFactors = FALSE)
-    df_final <- rbind(df, total_row)
-    
+    # Concatena
+    df_final <- rbind(df, as.data.frame(total_row, stringsAsFactors = FALSE))
     return(df_final)
   })
+  
   
   
   
@@ -393,13 +397,16 @@ server <- function(input, output, session) {
   h3("Tabela 1: Variáveis Financeiras", style = "color: #1f5673; font-weight: bold; margin-top: 30px;")
   output$tab1_fin_table <- DT::renderDataTable({
     df <- financeiro_dt_all()
-    
-    # Identify numeric-looking columns and convert
-    num_cols <- names(df)[sapply(df, function(x) all(grepl("^[0-9,.]+$", x[!is.na(x)])))]
-    df[num_cols] <- lapply(df[num_cols], function(x) as.numeric(gsub(",", "", x)))
-    
     # Drop unused column
     df <- df[, !(names(df) %in% c("fef_share_pct"))]
+    
+    # Identifica colunas numéricas (exceto UF/Estado)
+    data_cols <- setdiff(names(df), c("UF", "Estado"))
+    
+    # Formata para exibição: números com separador de milhar
+    df[data_cols] <- lapply(df[data_cols], function(x) {
+      if (is.numeric(x)) format(round(x, 0), big.mark = ".", decimal.mark = ",") else x
+    })
     
     DT::datatable(
       df,
@@ -429,8 +436,7 @@ server <- function(input, output, session) {
       ),
       rownames = FALSE,
       class = "stripe nowrap display"
-    ) %>%
-      formatRound(columns = names(df)[sapply(df, is.numeric)], digits = 0)
+    )
   })
   
   
