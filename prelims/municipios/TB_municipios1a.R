@@ -13,6 +13,14 @@ library(here)
 # Ensure your .env file with AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY is in the project directory
 dotenv::load_dot_env()
 
+
+# I download the xlsx file from
+# https://ftp.ibge.gov.br/Pib_Municipios/2021/base/ 
+# base_de_dados_2002_2009_xls.zip
+# base_de_dados_2010_2021_xlsx.zip 
+# Created sqlite database with dbeaver: TB_municipios.sqlite; table PIB_dos_Municipios for 2002-2021
+
+
 bucket_name <- "techbrazildata"
 s3_db_path <- "working/sqlite/TB_municipios.sqlite" # S3 path for your SQLite DB
 

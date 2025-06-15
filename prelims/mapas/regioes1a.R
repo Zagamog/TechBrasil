@@ -1,7 +1,9 @@
-# regioes1a.R
+regioes1a.R
 
 # Este script prepara dados para mapas regionais, carregando códigos geográficos
 # e dados espaciais do IBGE, com fallback para S3.
+
+# Creating the database sf_regioes.gpkg - initial layer
 
 # Carrega as bibliotecas necessárias
 library(sf)        # Para trabalhar com dados espaciais (shapefiles)
@@ -195,3 +197,30 @@ tryCatch({
   # Este 'stop' será acionado se houver um erro no upload para o S3
   stop(paste("❌ Erro ao fazer upload do GeoPackage para S3: ", e$message))
 })
+
+
+# Examine contents of sf_regioes.gpkg
+
+# Replace with your path
+gpkg_path <- "D:/Country/Brazil/TechBrazil/working/ibge/mapas/sf_regioes.gpkg"
+
+# List available layers (just like listing tables in a database)
+st_layers(gpkg_path)
+# indicates currently one layer - sf_regioes_ibge
+
+sf_regioes <- st_read(gpkg_path, layer = "sf_regioes_ibge")
+
+# That is an sf object and a data.frame
+class(sf_regioes)
+
+# Bounding box:  xmin: -50.08704 ymin: -17.89904 xmax: -46.8737 ymax: -14.67194
+# Geodetic CRS:  SIRGAS 2000
+
+
+
+
+
+
+
+
+

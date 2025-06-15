@@ -56,10 +56,9 @@ df_pibmunis_base <- df_pibmunis %>%
 # --- Define choices for location pickers ---
 uf_choices_all <- sort(unique(df_pibmunis_base[[nome_uf_col]]))
 
-<<<<<<< HEAD
+
 default_uf <- "Bahia"
-default_intermediate_regions <- df_pibmunis_base %>%
-=======
+default_intermediate_regions <- df_pibmunis_base 
 # Set specific default values based on the screenshot
 default_uf <- "Alagoas"
 default_intermediate_regions_selected <- "Arapiraca" # This is now the selected one, not just a choice
@@ -67,7 +66,6 @@ default_immediate_regions_selected <- "Delmiro Gouveia" # This is now the select
 
 # Calculate choices for intermediate regions based on the default UF
 default_intermediate_regions_choices <- df_pibmunis_base %>%
->>>>>>> 93e0834c91feba83d764064ae49613f9995dfabd
   filter(!!sym(nome_uf_col) == default_uf) %>%
   pull(!!sym(nome_regiao_geog_intermediaria_col)) %>%
   unique() %>%
@@ -444,13 +442,10 @@ server <- function(input, output, session) {
       ) +
       scale_y_continuous(labels = y_labels) +
       scale_x_continuous(breaks = unique(plot_data[[ano_col]])) +
-<<<<<<< HEAD
       scale_color_manual(values = setNames(scales::hue_pal()(length(unique(plot_data$Display_Location))), unique(plot_data$Display_Location)))
     
-=======
       scale_color_manual(values = dynamic_colors)  # use dynamic colors here
->>>>>>> 93e0834c91feba83d764064ae49613f9995dfabd
-    
+
     y_sym <- sym(input$yVariable)
     p <- p + geom_line(aes(y = !!y_sym), linewidth = 1) +
       geom_point(aes(y = !!y_sym), size = 2)

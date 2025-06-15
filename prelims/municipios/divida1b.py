@@ -7,6 +7,8 @@ import pyreadr
 # Redefine both datasets again to preserve context
 
 # Rebuild March 2025 data
+# From the document "FAQ - Perguntas e Respostas - Programa de Pleno Pagamento de Dívidas dos Estados Anexo
+
 data_mar25 = [
     ["SÃO PAULO", "291.684.192.718,19"], ["RIO DE JANEIRO", "178.485.878.129,97"],
     ["MINAS GERAIS", "164.072.322.152,05"], ["RIO GRANDE DO SUL", "101.642.375.981,12"],
@@ -39,6 +41,10 @@ df_mar25["UF"] = df_mar25["Estado"].map(uf_map)
 df_mar25["saldo_mar25"] = df_mar25["Saldo_Devedor"]
 
 # Rebuild July 2024 data
+
+# From the  webpage of FGV-IBRE 
+# https://observatorio-politica-fiscal.ibre.fgv.br/federalismo-fiscal/historico-de-renegociacao-de-divida/renegociacao-das-dividas-estaduais
+
 data_july24 = [
     ["AC", "412.817.174"], ["AL", "8.396.922.777"], ["AM", "342.093.742"],
     ["AP", "504.209.054"], ["BA", "5.530.980.342"], ["CE", "1.177.807.221"],
@@ -65,6 +71,8 @@ merged_df["Saldo_julho24"] = merged_df["Saldo_julho24"].map("{:,.2f}".format)
 merged_df = merged_df.drop(columns=["Saldo_julho24"])
 
 # Manually input amortization values in millions R$ (from the table)
+
+# From the document Quadro 2- Estimativa de Impacto da Lei Complementar nº 212/2025 Nota Técnica Tesouro Nacional, January 2025
 amort_dict = {
     "AC": 85.79, "AL": 1745.81, "AM": 52.29, "AP": 104.38, "BA": 1166.72,
     "CE": 248.40, "DF": 166.05, "ES": 334.18, "GO": 3831.94, "MA": 174.82,
@@ -103,7 +111,11 @@ merged_df["FEF_1ano_cen01"] = merged_df["FEF_1ano_cen01"].map("{:,.2f}".format)
 merged_df["EPT_1ano_cen01"] = merged_df["EPT_1ano_cen01"].map("{:,.2f}".format)
 
 ##
- 
+
+# From STN presentation on Propag, April 2025 with decree promulgation
+# Tesoro Nacional apresentacao-da-regulamentacao-propag abril 2025.pdf
+
+
 fef_shares = {
     "AC": 4.3, "AL": 4.0, "AP": 2.9, "AM": 4.5, "BA": 7.5,
     "CE": 5.9, "DF": 1.2, "ES": 2.5, "GO": 2.3, "MA": 6.7,

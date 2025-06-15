@@ -1,3 +1,13 @@
+# Function to simulate Fundeb distribution based on student enrollments and socio-fiscal factors
+# From the `simulador.fundeb` package 
+
+# https://rdrr.io/github/mellohenrique/simulador.fundeb/src/R/simula_fundeb.R
+
+# https://github.com/mellohenrique/dash_simulador_fundeb
+
+# https://github.com/mellohenrique/sf_limpeza_dados_2024
+
+
 simulador.fundeb::simula_fundeb <- function(
     dados_matriculas,           # Main data frame of student enrollments (matrículas)
     dados_complementar,         # Complementary data for socio-fiscal factors

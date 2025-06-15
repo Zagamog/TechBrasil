@@ -1,31 +1,56 @@
 # cnct1a.py
+
+# Creates dataframe and csv of CNCT technical courses catalogue
+
+import os
 import pandas as pd
 import pyreadr
+import boto3
+from botocore.exceptions import NoCredentialsError, ClientError
+from dotenv import load_dotenv
 
-# Load the newly uploaded CSV file
-csv_path = "D:/Country/Brazil/TechBrazil/rawdata/mec/catalogo_cnct.csv"
+# --- Step 1: Load AWS credentials securely from .env ---
+load_dotenv()
 
-# Retry reading with ISO-8859-1 encoding
-df_full = pd.read_csv(csv_path, delimiter=";", encoding="ISO-8859-1")
+aws_access_key = os.getenv("AWS_ACCESS_KEY_ID")
+aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+aws_region = os.getenv("AWS_DEFAULT_REGION", "us-east-1")
 
-# Extract summary information and a sample for inspection
-df_summary = {
-    "n_rows": df_full.shape[0],
-    "n_columns": df_full.shape[1],
-    "columns": list(df_full.columns),
-    "sample": df_full.head(2).to_dict(orient="records")
-}
+bucket_name = "techbrazildata"
+s3_key = "rawdata/mec_outros/catalogo_cnct.csv"
+local_path = "D:/Country/Brazil/TechBrazil/rawdata/mec_outros/catalogo_cnct.csv"
 
-df_summary
+# --- Step 2: Download from S3 if file not found locally ---
+if not os.path.exists(local_path):
+    print(f"⚠️ File not found locally: {local_path}\n→ Attempting download from S3...")
 
-# Create unique indices for Eixo, then Área within Eixo, then Curso within Área
+    try:
+        s3 = boto3.client(
+            "s3",
+            aws_access_key_id=aws_access_key,
+            aws_secret_access_key=aws_secret_key,
+            region_name=aws_region,
+        )
+
+        os.makedirs(os.path.dirname(local_path), exist_ok=True)
+        s3.download_file(bucket_name, s3_key, local_path)
+        print(f"✅ Downloaded from S3 to: {local_path}")
+
+    except (NoCredentialsError, ClientError) as e:
+        print(f"❌ Failed to download from S3: {e}")
+        raise
+
+else:
+    print(f"✅ Using local file: {local_path}")
+
+# --- Step 3: Load CSV and inspect ---
+df_full = pd.read_csv(local_path, delimiter=";", encoding="ISO-8859-1")
+
+# --- Step 4: Create course_id using hierarchical codes ---
 df_full = df_full.copy()
-
-# Map Eixo to index
 eixo_map = {eixo: f"{i+1:02d}" for i, eixo in enumerate(df_full['Eixo Tecnológico'].unique())}
 df_full['eixo_code'] = df_full['Eixo Tecnológico'].map(eixo_map)
 
-# Create AA: Área index within Eixo
 df_full['eixo_area_key'] = df_full['eixo_code'] + "||" + df_full['Área Tecnológica']
 area_codes = (
     df_full[['eixo_area_key']]
@@ -36,7 +61,6 @@ area_codes = (
 area_codes['area_code'] = area_codes['area_index'].apply(lambda x: f"{x:02d}")
 df_full = df_full.merge(area_codes[['eixo_area_key', 'area_code']], on='eixo_area_key', how='left')
 
-# Create ZZ: Curso index within each Área
 df_full['eixo_area_course_key'] = df_full['eixo_area_key'] + "||" + df_full['Denominação do Curso']
 curso_codes = (
     df_full[['eixo_area_key', 'Denominação do Curso']]
@@ -45,15 +69,9 @@ curso_codes = (
     .cumcount() + 1
 )
 df_full['curso_code'] = curso_codes.apply(lambda x: f"{x:02d}")
-
-# Combine into full ID
 df_full['course_id'] = df_full['eixo_code'] + df_full['area_code'] + df_full['curso_code']
 
-# Sample output
-df_full[['course_id', 'Eixo Tecnológico', 'Área Tecnológica', 'Denominação do Curso']].head(10)
-
-
-# Reorder columns to place 'course_id' first, followed by the original 12
+# --- Step 5: Reorder and finalize output ---
 original_columns = [
     'Eixo Tecnológico', 'Área Tecnológica', 'Denominação do Curso',
     'Perfil Profissional de Conclusão', 'Carga Horária Mínima',
@@ -63,26 +81,14 @@ original_columns = [
 ]
 
 df_ordered = df_full[['course_id'] + original_columns]
+df_ordered['eixo_code'] = df_full['eixo_code']
+df_ordered['area_code'] = df_full['area_code']
+df_ordered['curso_code'] = df_full['curso_code']
 
+# --- Step 6: Save outputs ---
+output_base = "D:/Country/Brazil/TechBrazil/working/mec_outros/df_cnct2025a"
+df_ordered.to_pickle(output_base + ".pkl")
+pyreadr.write_rds(output_base + ".rds", df_ordered)
+df_ordered.to_csv(output_base + ".csv", index=False)
 
-# Re-append the three auxiliary codes to the end of the cleaned DataFrame
-df_final = df_ordered.copy()
-df_final['eixo_code'] = df_full['eixo_code']
-df_final['area_code'] = df_full['area_code']
-df_final['curso_code'] = df_full['curso_code']
-
-
-# Save the DataFrame as a pickle file for efficient Python use
-pickle_path = "D:/Country/Brazil/TechBrazil/working/mec/df_cnct2025a.pkl"
-df_final.to_pickle(pickle_path)
-
-# Load the DataFrame back from the pickle file
-df_cnct2025a = pd.read_pickle("D:/Country/Brazil/TechBrazil/working/mec/df_cnct2025a.pkl")
-
-
-
-# Save as .rds with a single object (e.g., a DataFrame)
-pyreadr.write_rds("D:/Country/Brazil/TechBrazil/working/mec/df_cnct2025a.rds", df_cnct2025a)
-
-# Save as CSV (no index column)
-df_cnct2025a.to_csv("D:/Country/Brazil/TechBrazil/working/mec/df_cnct2025a.csv", index=False)
+print("✅ Saved as .pkl, .rds, and .csv")

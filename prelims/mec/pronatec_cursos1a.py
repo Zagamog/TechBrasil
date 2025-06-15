@@ -1,21 +1,52 @@
 # pronatec_cursos1a.py
 
-import pandas as pd
+# ronatex course list made into dataframe
+
+import os
 import re
+import pandas as pd
 import pyreadr
+import boto3
+from botocore.exceptions import NoCredentialsError, ClientError
+from dotenv import load_dotenv
 
+# --- Step 1: Load AWS credentials ---
+load_dotenv()
 
-# Text file version of Pronatec catalog
+aws_access_key = os.getenv("AWS_ACCESS_KEY_ID")
+aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+aws_region = os.getenv("AWS_DEFAULT_REGION", "us-east-1")
 
-# Try reading the file using 'latin1' encoding instead of 'utf-8'
-with open("D:/Country/Brazil/TechBrazil/rawdata/mec/catalogo_cursos_pronatec_fic_2016.txt", "r", encoding="latin1") as file:
+bucket_name = "techbrazildata"
+s3_key = "rawdata/mec_outros/catalogo_cursos_pronatec_fic_2016.txt"
+local_path = "D:/Country/Brazil/TechBrazil/rawdata/mec_outros/catalogo_cursos_pronatec_fic_2016.txt"
+
+# --- Step 2: Download from S3 if not found locally ---
+if not os.path.exists(local_path):
+    print(f"⚠️ Local file not found. Attempting download from S3...")
+
+    try:
+        s3 = boto3.client(
+            "s3",
+            aws_access_key_id=aws_access_key,
+            aws_secret_access_key=aws_secret_key,
+            region_name=aws_region,
+        )
+        os.makedirs(os.path.dirname(local_path), exist_ok=True)
+        s3.download_file(bucket_name, s3_key, local_path)
+        print(f"✅ Downloaded from S3: {local_path}")
+    except (NoCredentialsError, ClientError) as e:
+        print(f"❌ Failed to download from S3: {e}")
+        raise
+else:
+    print(f"✅ Using local file: {local_path}")
+
+# --- Step 3: Load and parse catalog text ---
+with open(local_path, "r", encoding="latin1") as file:
     text = file.read()
 
-
-# Split text into individual course entries using a numbered course pattern
 entries = re.split(r"\n(?=\d+\.\s)", text)
 
-# Define extraction regex patterns
 patterns = {
     "curso_nome": r"^\d+\.\s+(.*?)\s+\d+\s+Horas",
     "carga_horaria": r"(\d{2,4})\s+Horas",
@@ -29,7 +60,6 @@ patterns = {
     "observacao": r"Observa[cç][aã]o:\s*(.*)"
 }
 
-# Parse each course entry
 parsed_courses = []
 for entry in entries:
     course_data = {}
@@ -38,15 +68,11 @@ for entry in entries:
         course_data[field] = match.group(1).strip() if match else None
     parsed_courses.append(course_data)
 
-# Create DataFrame
 df_detailed_pronatec2016 = pd.DataFrame(parsed_courses)
-
-# Insert curso_id as a running index
 df_detailed_pronatec2016.insert(0, "curso_id", range(1, len(df_detailed_pronatec2016) + 1))
 
-
-# Apply manual fixes to curso_nome for specific curso_id values
-for curso_id, new_name in {
+# --- Step 4: Manual fixes ---
+manual_names = {
     7: "Administrador de Empreendimentos Florestais de Base Comunitária",
     19: "Agente de Inclusão Digital em Centros Públicos de Acesso à Internet",
     87: "Assistente de Planejamento, Programação e Controle de Produção",
@@ -74,12 +100,12 @@ for curso_id, new_name in {
     597: "Revitalizador de Estruturas, Elementos e Construções em Metal",
     607: "Soldador de Estruturas e Tubulação em Aço Carbono no Processo TIG",
     612: "Soldador no Processo Eletrodo Revestido Aço Carbono e Aço Baixa Liga"
-}.items():
-    df_detailed_pronatec2016.loc[df_detailed_pronatec2016["curso_id"] == curso_id, "curso_nome"] = new_name
+}
 
-# Return affected rows for review
-manually_fixed_rows = df_detailed_pronatec2016[df_detailed_pronatec2016["curso_id"].isin([7, 19, 87, 120, 167, 296, 301, 309, 322, 323, 324, 325, 375, 453, 463, 465, 489, 498, 519, 555, 556, 557, 558, 559, 597, 607, 612])]
+for cid, name in manual_names.items():
+    df_detailed_pronatec2016.loc[df_detailed_pronatec2016["curso_id"] == cid, "curso_nome"] = name
 
+# Apply missing names + carga horaria
 manual_missing_fixes = {
     51: ("Algicultor", 180),
     62: ("Armador de Estruturas Pesadas", 180),
@@ -103,61 +129,24 @@ manual_missing_fixes = {
     427: ("Operador de Abastecimento de Aeronaves", 180),
     487: ("Operador de Processos Cerâmicos", 180),
     500: ("Operador de Rampa de Aeronaves", 180),
-    521: ("Organizador de Eventos", 180),  # confirmed in image
-    533: ("Pintor de Obras Imobiliárias", 180),  # confirmed in image
-    539: ("Polidor Automotivo", 180)  # confirmed in image
+    521: ("Organizador de Eventos", 180),
+    533: ("Pintor de Obras Imobiliárias", 180),
+    539: ("Polidor Automotivo", 180)
 }
 
-
-# Apply the fixes to the DataFrame
 for cid, (name, hours) in manual_missing_fixes.items():
     df_detailed_pronatec2016.loc[df_detailed_pronatec2016["curso_id"] == cid, "curso_nome"] = name
     df_detailed_pronatec2016.loc[df_detailed_pronatec2016["curso_id"] == cid, "carga_horaria"] = str(hours)
 
-# Get curso_id values for rows where curso_nome or carga_horaria is None
-# none_rows_ids = df_detailed_pronatec2016[
-#     df_detailed_pronatec2016["curso_nome"].isna() | df_detailed_pronatec2016["carga_horaria"].isna()
-# ]["curso_id"].tolist()
-
-# none_rows_ids
-# Capitalize first letter of curso_nome if lowercase
+# Capitalize curso_nome if lowercase
 df_detailed_pronatec2016["curso_nome"] = df_detailed_pronatec2016["curso_nome"].apply(
     lambda x: x[0].upper() + x[1:] if isinstance(x, str) and x[0].islower() else x
 )
 
+# --- Step 5: Save cleaned files ---
+output_base = "D:/Country/Brazil/TechBrazil/working/mec_outros/df_detailed_pronatec2016"
+df_detailed_pronatec2016.to_pickle(output_base + ".pkl")
+df_detailed_pronatec2016.to_csv(output_base + ".csv", index=False)
+pyreadr.write_rds(output_base + ".rds", df_detailed_pronatec2016)
 
-
-# Save as .pkl
-df_detailed_pronatec2016.to_pickle("D:/Country/Brazil/TechBrazil/working/mec/df_detailed_pronatec2016.pkl")
-
-# Save updated DataFrame
-df_detailed_pronatec2016.to_csv("D:/Country/Brazil/TechBrazil/working/mec/df_detailed_pronatec2016.csv", index=False)
-
-# Load the DataFrame back from the pickle file
-df_detailed_pronatec2016 = pd.read_pickle("D:/Country/Brazil/TechBrazil/working/mec/df_detailed_pronatec2016.pkl")
-
-
-
-# Save as .rds with a single object (e.g., a DataFrame)
-pyreadr.write_rds("D:/Country/Brazil/TechBrazil/working/mec/df_detailed_pronatec2016.rds", df_detailed_pronatec2016)
-
-# Test
-
-# Select the specific curso_ids requested
-selected_ids = [213, 65, 453,557]
-selected_rows = df_detailed_pronatec2016[df_detailed_pronatec2016["curso_id"].isin(selected_ids)]
-
-# Convert to JSON
-selected_json = selected_rows.to_dict(orient="records")
-selected_json
-
-# hardcoded_obs = {
-#     252: "O curso só poderá ser ofertado por unidade acreditada pela Marinha do Brasil, por intermédio da Diretoria de Portos e Costas.",
-#     307: "O curso só poderá ser ofertado por instituições credenciadas pelo DETRAN.",
-#     345: "O curso só poderá ser ofertado por unidade acreditada pela Marinha do Brasil, por intermédio da Diretoria de Portos e Costas.",
-#     346: "O curso só poderá ser ofertado por unidade acreditada pela Marinha do Brasil, por intermédio da Diretoria de Portos e Costas.",
-#     348: "O curso só poderá ser ofertado por unidade acreditada pela Marinha do Brasil, por intermédio da Diretoria de Portos e Costas.",
-#     529: "O curso só poderá ser ofertado por unidade acreditada pela Marinha do Brasil, por intermédio da Diretoria de Portos e Costas.",
-#     530: "O curso só poderá ser ofertado por unidade acreditada pela Marinha do Brasil, por intermédio da Diretoria de Portos e Costas.",
-#     642: "O curso só poderá ser ofertado por unidade autorizada pelo Ministério da Justiça, por intermédio do Departamento de Polícia Federal."
-# }
+print("✅ Saved .pkl, .csv, and .rds outputs.")

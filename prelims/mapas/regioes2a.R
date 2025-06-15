@@ -1,5 +1,9 @@
 # regioes2a.R — versão adaptada para tmap v4
 
+
+# Para examinar as regiões intermediárias e imediatas;
+# usamos exemplo de Sergipe (CO_UF == "28").
+
 # Bibliotecas
 library(sf)
 library(tmap)
@@ -65,7 +69,7 @@ tm_shape(sergipe_sf) +
   )
 
 
-# --- Mapa 2: Regiões Imediatas ---
+
 # --- Mapa 2: Regiões Imediatas de Sergipe ---
 message("\n--- Gerando Mapa: Regiões Imediatas (Sergipe) ---")
 sergipe_sf$NM_RGIMED <- as.factor(sergipe_sf$NM_RGIMED)
