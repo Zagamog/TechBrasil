@@ -11,7 +11,7 @@ library(patchwork)
 load("D:/Country/Brazil/TechBrazil/working/ibge/df_codes_ibge.rda")
 
 # Load Propag scraped data
-propag_ept_financeiro <- readRDS("D:/Country/Brazil/TechBrazil/working/mec/propag_ept_financeiro.rds")
+propag_ept_financeiro <- readRDS("D:/Country/Brazil/TechBrazil/working/mec_outros/propag_ept_financeiro.rds")
 
 nome_ufs <- sort(unique(df_codes_ibge$NM_UF))  # Ensure sorted and unique
 
