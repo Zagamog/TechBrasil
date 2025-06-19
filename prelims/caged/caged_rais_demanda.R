@@ -13,7 +13,8 @@ input_folder <- here("rawdata")
 
 ####STATE-LEVEL ANALYSIS#######
 #Importar regioes gegráficas IBGE
-regioes_ibge <- read_xls(here(input_folder, "regioes_geograficas_composicao_ibge.xls")) %>%
+regioes_ibge <- read_xlsx(here(input_folder, "regioes_geograficas_composicao_por_municipios_2017_20180911.xlsx")) %>%
+rename(id_municipio = CD_GEOCODI) %>%
   select(id_municipio, cod_rgint, nome_rgint) %>%
   mutate(id_municipio = as.numeric(id_municipio))
 
