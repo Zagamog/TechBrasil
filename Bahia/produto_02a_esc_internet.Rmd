@@ -1,0 +1,41 @@
+---
+title: "Proporção de Escolas Estaduais com Internet"
+output: pdf_document
+geometry: margin=1in
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+summary_net1 <- readRDS("D:/Country/Brazil/TechBrazil/working/Bahia/summary_net1_prop.rds")
+```
+
+
+```{r, echo=FALSE}
+
+
+summary_net1_renamed <- summary_net1 %>%
+  rename(
+    `Unidade da Federação` = NM_UF,
+    `Nº Escolas com Internet` = n_scls_net,
+    `Total de Escolas` = n_scls,
+    `% com Internet` = prop_net1
+  )
+
+summary_net1_renamed %>%
+  kable("latex", booktabs = TRUE, align = "lrrr") %>%
+  kable_styling(latex_options = c("striped", "hold_position"), full_width = FALSE) %>%
+  row_spec(
+    which(summary_net1_renamed$`Unidade da Federação` == "Bahia"), 
+    bold = TRUE, 
+    color = "red"
+  )
+
+
+```
+
+\footnotetext{Fonte: Censo Escolar 2024 e SIMET (nic.br), 23/06/25}

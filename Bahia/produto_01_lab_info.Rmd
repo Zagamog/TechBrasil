@@ -1,0 +1,40 @@
+---
+title: "Proporção de Escolas Estaduais com Laboratório de Informática"
+output: pdf_document
+geometry: margin=1in
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+summary_lab <- readRDS("D:/Country/Brazil/TechBrazil/working/Bahia/summary_lab_prop.rds")
+```
+
+
+```{r, echo=FALSE}
+
+summary_lab <- summary_lab %>%
+  rename(
+    `Unidade da Federação` = NM_UF,
+    `Nº Escolas com Lab. Informática` = n_scls_lab,
+    `Total de Escolas` = n_scls,
+    `% com Lab. Informática` = prop_lab_inf
+  )
+
+
+summary_lab %>%
+  kable("latex", booktabs = TRUE, align = "lrrr") %>%
+  kable_styling(latex_options = c("striped", "hold_position"), full_width = FALSE) %>%
+  row_spec(
+    which(summary_lab$`Unidade da Federação` == "Bahia"), 
+    bold = TRUE, 
+    color = "red"
+  )
+
+```
+
+\footnotetext{Fonte: Censo Escolar 2024 e SIMET (nic.br), 23/06/25}
