@@ -22,7 +22,7 @@ conect_esc24$escolar_qt_comp_portatil_aluno[conect_esc24$escolar_qt_comp_portati
 conect_esc24$escolar_qt_tablet_aluno[conect_esc24$escolar_qt_tablet_aluno==88888] <- 0
 
 # Select and  Harmonize variable names
-conect_esc24b <- conect_esc24 %>% select(1,5,6,8:17,19:23,28:31,35,36,43,57:59) %>%
+conect_esc24b <- conect_esc24 %>% select(1,5,6,8:17,19:23,28:31:39,42,43,57:59) %>%
   rename(CO_MUN=escolar_co_municipio,CO_UF=escolar_co_uf)
 
 load("D:/Country/Brazil/TechBrazil/working/ibge/df_codes_ibge.rda")
@@ -48,7 +48,48 @@ conect_esc24c %>% group_by(NM_UF) %>%
 conect_esc24c %>% filter(!is.na(simet_mean_tcp_down_mbps)) %>% filter(escolar_tp_dependencia=="Estadual") %>%  group_by(NM_UF) %>%
   summarise(n_scls_con=sum(summer)) %>% print(n=27)
 
+
+
 ba_esc24c <- conect_esc24c %>% filter(SG_UF=="BA" & escolar_tp_dependencia=="Estadual") 
+
+# For Pleito, baseline of IMQCE
+
+# Cria subconjunto com escolas estaduais da Bahia com medidor
+ba_medidor <- ba_esc24c %>%
+  filter(!is.na(simet_mean_tcp_down_mbps)) %>%
+  mutate(
+    simet_mean_tcp_up_mbps = as.numeric(simet_mean_tcp_up_mbps),
+    simet_mean_jitter_download_ms = as.numeric(simet_mean_jitter_download_ms),
+    simet_mean_rtt_lost_pct = as.numeric(simet_mean_rtt_lost_pct),
+    
+    # Cálculo por critério
+    crit1_download = simet_mean_tcp_down_mbps >= escolar_qtematriculas,  # 1 Mbps por aluno
+    crit2_upload = simet_mean_tcp_up_mbps >= 0.1 * simet_mean_tcp_down_mbps,  # upload ≥ 10%
+    crit3_jitter = simet_mean_jitter_download_ms <= 30,
+    crit4_loss = simet_mean_rtt_lost_pct <= 1,
+    crit5_wifi = grepl("Wireless", escolar_tp_rede_local),  # wi-fi nos ambientes pedagógicos
+    
+    # IMQCE binário (atende a todos)
+    IMQCE_flag = crit1_download & crit2_upload & crit3_jitter & crit4_loss & crit5_wifi
+  )
+
+# % de escolas estaduais da Bahia que atendem a TODOS os critérios
+baseline_imqce <- mean(ba_medidor$IMQCE_flag, na.rm = TRUE) * 100
+cat("Baseline IMQCE (% de escolas estaduais da Bahia que atendem):", round(baseline_imqce, 1), "%\n")
+
+# Total de escolas estaduais com medidor
+n_medidor <- ba_esc24c %>% filter(!is.na(simet_mean_tcp_down_mbps)) %>% nrow()
+
+# Total de escolas estaduais
+n_total <- nrow(ba_esc24c)
+
+# Percentual
+pct_medidor <- n_medidor / n_total * 100
+cat("Percentual de escolas estaduais com medidor:", round(pct_medidor, 1), "%\n")
+
+
+
+
 
 ba_esc24c %>% filter(!is.na(simet_mean_tcp_down_mbps)) %>% filter(escolar_tp_dependencia=="Estadual") %>%  group_by(NM_MUN) %>%
   summarise(mean_speed=round(mean(simet_mean_tcp_down_mbps,na.rm=TRUE)),
