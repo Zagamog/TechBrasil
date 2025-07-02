@@ -208,16 +208,16 @@ merged_df = merged_df.drop(columns=cols_to_drop)
 
 
 # Save the DataFrame as a pickle file for efficient Python use
-pickle_path = "D:/Country/Brazil/TechBrazil/working/mec/propag_ept_financeiro.pkl"
+pickle_path = "D:/Country/Brazil/TechBrazil/working/mec_outros/propag_ept_financeiro.pkl"
 merged_df.to_pickle(pickle_path)
 
 # Load the DataFrame back from the pickle file
-propag_ept_financeiro = pd.read_pickle("D:/Country/Brazil/TechBrazil/working/mec/propag_ept_financeiro.pkl")
+propag_ept_financeiro = pd.read_pickle("D:/Country/Brazil/TechBrazil/working/mec_outros/propag_ept_financeiro.pkl")
 
 # Save the merged_df as .rds (correct way)
-pyreadr.write_rds("D:/Country/Brazil/TechBrazil/working/mec/propag_ept_financeiro.rds", merged_df)
+pyreadr.write_rds("D:/Country/Brazil/TechBrazil/working/mec_outros/propag_ept_financeiro.rds", merged_df)
 # Save as CSV (no index column)
-propag_ept_financeiro.to_csv("D:/Country/Brazil/TechBrazil/working/mec/propag_ept_financeiro.csv", index=False)
+propag_ept_financeiro.to_csv("D:/Country/Brazil/TechBrazil/working/mec_outros/propag_ept_financeiro.csv", index=False)
 
 
 
