@@ -80,7 +80,16 @@ ui <- dashboardPage(
       ")), 
       tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
     ),
-    
+    tags$head(
+      tags$link(rel = "stylesheet", type = "text/css", href = "https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css"),
+      tags$script(src = "https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"),
+      tags$script(src = "https://cdn.datatables.net/buttons/2.4.1/js/buttons.flash.min.js"),
+      tags$script(src = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"),
+      tags$script(src = "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"),
+      tags$script(src = "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"),
+      tags$script(src = "https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"),
+      tags$script(src = "https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js")
+    ),
     # Header title area
     tags$div(
       style = "padding: 10px 20px; font-size: 24px; font-weight: bold; color: #0000ff;",
@@ -179,7 +188,33 @@ ui <- dashboardPage(
                          )
                 ),
                 
-                tabPanel("Painel 4", h4("Placeholder Content for Panel 4")),
+                tabPanel("Situação - Meta 11a",
+                         fluidPage(
+                           h3("Meta 11a: EPT como % do Ensino Médio", style = "color: #1f5673; font-weight: bold;"),
+                           
+                           fluidRow(
+                             column(3,
+                                    selectizeInput("meta11a_uf", "Selecionar UF:", choices = sort(unique(df_codes_ibge$NM_UF)), selected = "Rio Grande do Norte")
+                             ),
+                             column(3,
+                                    selectizeInput("meta11a_ept_var", "Variável EPT:", choices = ept_vars, selected = "QT_MAT_PROF_TEC_PROPAG")
+                             ),
+                             column(3,
+                                    selectizeInput("meta11a_med_var", "Variável Ensino Médio:", choices = other_vars, selected = "QT_MAT_MED")
+                             ),
+                             column(3,
+                                    selectizeInput("meta11a_agreg", "Segmento:", choices = c("UF_TUDO" = "UF_TUDO", "UF_PUB" = "UF_PUB"), selected = "UF_TUDO")
+                             )
+                           ),
+                           
+                           plotOutput("meta11a_plot", height = "500px"),
+                           br(),
+                           h4("Tabela de Dados (EPT, Médio, %)", style = "color: #1f5673; font-weight: bold;"),
+                           DTOutput("meta11a_table")
+                         )
+                ),
+                
+                
                 tabPanel("Painel 5", h4("Placeholder Content for Panel 5")),
                 tabPanel("Painel 6", h4("Placeholder Content for Panel 6")),
                 tabPanel("Painel 7", h4("Placeholder Content for Panel 7")),
@@ -656,24 +691,164 @@ server <- function(input, output, session) {
   
   # --- Table output ---
   output$oferta_ept_table <- DT::renderDT({
-    df <- df_censo_UF |>
+    # Step 1: Filter and aggregate base data
+    df_obs <- df_censo_UF |>
       filter(NM_UF == input$oferta_uf, AGREG == "UF_TUDO") |>
       group_by(ANO) |>
       summarise(
         EPT = sum(.data[[input$oferta_ept_var]], na.rm = TRUE),
         ENSINO_MEDIO = sum(.data[[input$oferta_other_var]], na.rm = TRUE),
         .groups = "drop"
-      )
+      ) |>
+      mutate(TIPO = "OBSERVADO")
     
-    base_2013_val <- df |> filter(ANO == 2013) |> pull(EPT)
+    # Step 2: Generate EPT projection
+    slope_ept <- coef(lm(EPT ~ ANO, data = df_obs |> filter(ANO %in% 2020:2024)))["ANO"]
+    start_ept <- df_obs |> filter(ANO == 2024) |> pull(EPT) |> mean(na.rm = TRUE)
+    future_years <- 2024:2035
+    future_ept <- start_ept + slope_ept * (future_years - 2024)
+    
+    # Step 3: Generate ENSINO_MEDIO projection
+    slope_med <- coef(lm(ENSINO_MEDIO ~ ANO, data = df_obs |> filter(ANO %in% 2020:2024)))["ANO"]
+    start_med <- df_obs |> filter(ANO == 2024) |> pull(ENSINO_MEDIO) |> mean(na.rm = TRUE)
+    future_med <- start_med + slope_med * (future_years - 2024)
+    
+    # Step 4: Create projection dataframe
+    df_proj <- data.frame(
+      ANO = future_years,
+      EPT = future_ept,
+      ENSINO_MEDIO = future_med,
+      TIPO = "PROJECAO"
+    )
+    
+    # Step 5: Combine observed + projection
+    df_all <- bind_rows(df_obs, df_proj)
+    
+    # Step 6: Calculate Meta 11 (Triplo 2013)
+    base_2013_val <- df_all |> filter(ANO == 2013, TIPO == "OBSERVADO") |> pull(EPT)
     triplo_2013 <- if (!is.na(base_2013_val)) 3 * base_2013_val else NA
     
-    df$PNE_META11 <- if (!is.na(triplo_2013)) format(round(triplo_2013), big.mark = ".", decimal.mark = ",") else NA
-    df$EPT <- format(round(df$EPT), big.mark = ".", decimal.mark = ",")
-    df$ENSINO_MEDIO <- format(round(df$ENSINO_MEDIO), big.mark = ".", decimal.mark = ",")
+    df_all$PNE_META11 <- if (!is.na(triplo_2013)) format(round(triplo_2013), big.mark = ".", decimal.mark = ",") else NA
     
-    datatable(df, rownames = FALSE, options = list(pageLength = 30))
+    # Step 7: Format numbers for display
+    df_all$EPT <- format(round(df_all$EPT), big.mark = ".", decimal.mark = ",")
+    df_all$ENSINO_MEDIO <- format(round(df_all$ENSINO_MEDIO), big.mark = ".", decimal.mark = ",")
+    
+    
+    # Step 8: Render DT
+    # Transpose table so ANO becomes columns
+    df_transposed <- df_all |>
+      select(ANO, TIPO, EPT, ENSINO_MEDIO) |>
+      pivot_longer(cols = c(EPT, ENSINO_MEDIO), names_to = "VAR", values_to = "VAL") |>
+      unite("ROW", VAR, TIPO, sep = "_") |>  # e.g. EPT_OBSERVADO
+      pivot_wider(names_from = ANO, values_from = VAL)
+    
+    
+    
+    datatable(
+      df_transposed,
+      rownames = FALSE,
+      extensions = 'Buttons',
+      options = list(
+        pageLength = 50,
+        dom = 'Bfrtip',
+        buttons = list(
+          list(extend = "copy", text = "Copiar"),
+          list(extend = "csv", filename = "Tabela_EPT", text = "CSV"),
+          list(extend = "excel", filename = "Tabela_EPT", text = "Excel"),
+          list(
+            extend = "pdf",
+            filename = "Tabela_EPT",
+            text = "PDF",
+            orientation = "landscape",
+            pageSize = "A4",
+            messageTop = "Tabela Transposta de Matrículas"
+          )
+        ),
+        scrollX = TRUE
+      ),
+      class = "stripe nowrap display"
+    )
+    
+    #### PAINEL META 11a
+    ####
+    
+    #####
+    
+    ######
+    
+    meta11a_data <- reactive({
+      req(input$meta11a_uf, input$meta11a_ept_var, input$meta11a_med_var, input$meta11a_agreg)
+      
+      df <- df_censo_UF |>
+        filter(NM_UF == input$meta11a_uf, AGREG == input$meta11a_agreg) |>
+        group_by(ANO) |>
+        summarise(
+          EPT = sum(.data[[input$meta11a_ept_var]], na.rm = TRUE),
+          MEDIO = sum(.data[[input$meta11a_med_var]], na.rm = TRUE),
+          .groups = "drop"
+        ) |>
+        mutate(PCT_EPT = ifelse(MEDIO > 0, 100 * EPT / MEDIO, NA))
+      
+      return(df)
+    })
+    
+    
+    
+    output$meta11a_plot <- renderPlot({
+      df <- meta11a_data()
+      
+      gg <- ggplot(df, aes(x = ANO, y = PCT_EPT)) +
+        geom_line(color = "#1f5673", size = 1.5) +
+        geom_point(color = "#1f5673", size = 2) +
+        geom_hline(yintercept = 50, color = "darkgreen", linetype = "dashed", linewidth = 1.1) +
+        annotate("text", x = 2008, y = 50, label = "Meta 11a: 50%", color = "darkgreen", vjust = -1, fontface = "bold")
+      
+      if (input$meta11a_agreg == "UF_PUB") {
+        gg <- gg +
+          geom_hline(yintercept = 45, color = "#FF6600", linetype = "dashed", linewidth = 1.1) +
+          annotate("text", x = 2008, y = 45, label = "Meta 11a (Público): 45%", color = "#FF6600", vjust = -1, fontface = "bold")
+      }
+      
+      gg +
+        scale_x_continuous(breaks = 2007:2035, limits = c(2007, 2035)) +
+        scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+        labs(
+          title = paste("UF:", input$meta11a_uf),
+          subtitle = paste("EPT como % do Ensino Médio –", input$meta11a_agreg),
+          x = "Ano",
+          y = "% de Matrículas em EPT"
+        ) +
+        theme_minimal(base_size = 14) +
+        theme(plot.title = element_text(face = "bold"))
+    })
+    
+    
+    
+    output$meta11a_table <- renderDT({
+      df <- meta11a_data()
+      
+      datatable(
+        df |>
+          mutate(
+            EPT = format(round(EPT), big.mark = ".", decimal.mark = ","),
+            MEDIO = format(round(MEDIO), big.mark = ".", decimal.mark = ","),
+            `PCT EPT/Médio` = paste0(round(PCT_EPT, 1), "%")
+          ) |>
+          select(ANO, EPT, MEDIO, `PCT EPT/Médio`),
+        rownames = FALSE,
+        options = list(pageLength = 30)
+      )
+    })
+    
+    
+    
+    
+    
+    
+    
   })
+  
   
 }  
   
