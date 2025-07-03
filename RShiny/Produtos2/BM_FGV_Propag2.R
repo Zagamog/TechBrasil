@@ -203,9 +203,10 @@ ui <- dashboardPage(
                                     selectizeInput("meta11a_med_var", "Variável Ensino Médio:", choices = other_vars, selected = "QT_MAT_MED")
                              ),
                              column(3,
-                                    selectizeInput("meta11a_agreg", "Segmento:", choices = c("UF_TUDO" = "UF_TUDO", "UF_PUB" = "UF_PUB"), selected = "UF_TUDO")
+                                    selectInput("meta11a_target_year", "Meta 11a Pública atingida até o ano:",
+                                                choices = 2024:2035, selected = 2030)
                              )
-                           ),
+                              ),
                            
                            plotOutput("meta11a_plot", height = "500px"),
                            br(),
@@ -776,16 +777,19 @@ server <- function(input, output, session) {
     #####
     
     ######
-    
     meta11a_data <- reactive({
-      req(input$meta11a_uf, input$meta11a_ept_var, input$meta11a_med_var, input$meta11a_agreg)
+      req(input$meta11a_uf)
+      
+      # Hardcoded variable names
+      ept_var <- "QT_MAT_PROF_TEC_PROPAG"
+      med_var <- "QT_MAT_MED"
       
       df <- df_censo_UF |>
-        filter(NM_UF == input$meta11a_uf, AGREG == input$meta11a_agreg) |>
+        filter(NM_UF == input$meta11a_uf, AGREG == "UF_TUDO") |>
         group_by(ANO) |>
         summarise(
-          EPT = sum(.data[[input$meta11a_ept_var]], na.rm = TRUE),
-          MEDIO = sum(.data[[input$meta11a_med_var]], na.rm = TRUE),
+          EPT = sum(.data[[ept_var]], na.rm = TRUE),
+          MEDIO = sum(.data[[med_var]], na.rm = TRUE),
           .groups = "drop"
         ) |>
         mutate(PCT_EPT = ifelse(MEDIO > 0, 100 * EPT / MEDIO, NA))
@@ -794,35 +798,134 @@ server <- function(input, output, session) {
     })
     
     
-    
     output$meta11a_plot <- renderPlot({
-      df <- meta11a_data()
-      
-      gg <- ggplot(df, aes(x = ANO, y = PCT_EPT)) +
-        geom_line(color = "#1f5673", size = 1.5) +
-        geom_point(color = "#1f5673", size = 2) +
-        geom_hline(yintercept = 50, color = "darkgreen", linetype = "dashed", linewidth = 1.1) +
-        annotate("text", x = 2008, y = 50, label = "Meta 11a: 50%", color = "darkgreen", vjust = -1, fontface = "bold")
-      
-      if (input$meta11a_agreg == "UF_PUB") {
-        gg <- gg +
-          geom_hline(yintercept = 45, color = "#FF6600", linetype = "dashed", linewidth = 1.1) +
-          annotate("text", x = 2008, y = 45, label = "Meta 11a (Público): 45%", color = "#FF6600", vjust = -1, fontface = "bold")
-      }
-      
-      gg +
-        scale_x_continuous(breaks = 2007:2035, limits = c(2007, 2035)) +
-        scale_y_continuous(labels = scales::percent_format(scale = 1)) +
-        labs(
-          title = paste("UF:", input$meta11a_uf),
-          subtitle = paste("EPT como % do Ensino Médio –", input$meta11a_agreg),
-          x = "Ano",
-          y = "% de Matrículas em EPT"
-        ) +
-        theme_minimal(base_size = 14) +
-        theme(plot.title = element_text(face = "bold"))
-    })
+  df <- meta11a_data() 
+  
+  
+  
+  
+
+  # Get last available year (2024) value
+  latest_year <- max(df$ANO, na.rm = TRUE)
+  latest_pct <- df |> filter(ANO == latest_year) |> pull(PCT_EPT)
+  target_year <- as.numeric(input$meta11a_target_year)
+  # Current % in 2024
+  current_pct <- df |> filter(ANO == 2024) |> pull(PCT_EPT)
+  
+  # Years remaining to reach target
+  years_left <- as.numeric(input$meta11a_target_year) - 2024
+  
+  # Annual growth needed
+  required_growth <- if (!is.na(current_pct) && years_left > 0) {
+    (50 - current_pct) / years_left
+  } else {
+    NA_real_
+  }
+  
+  # Get Ensino Médio absolute value in 2024
+  current_med <- df |> filter(ANO == 2024) |> pull(MEDIO)
+  
+  # Total students needed to hit 50% in target year
+  target_students <- 0.5 * current_med
+  
+  # Current EPT in 2024 (in % of Ensino Médio)
+  current_students <- (current_pct / 100) * current_med
+  
+  # Annual growth needed in absolute numbers
+  growth_abs <- if (!is.na(current_students) && years_left > 0) {
+    (target_students - current_students) / years_left
+  } else {
+    NA_real_
+  }
+  
+  
+  
+  
+  
+  # Prepare the label
+  growth_text <- paste0(
+    "<b>Para atingir 50%</b><br>",
+    "em ", input$meta11a_target_year, ":<br>",
+    "crescimento de<br>",
+    "<span style='color:#1f5673'><b>", round(required_growth, 1), "%</b></span> ao ano<br>",
+    "(", formatC(growth_abs, format = "d", big.mark = "."), " alunos/ano)"
+  )
+  
+
+  # Base plot: line and points
+  gg <- ggplot(df, aes(x = ANO, y = PCT_EPT)) +
+    geom_line(color = "#1f5673", size = 1.5) +
+    geom_point(color = "#1f5673", size = 2) +
+
+    # Percent label at each point
+    ggtext::geom_richtext(
+      aes(label = paste0("<b>", round(PCT_EPT, 1), "%</b>")),
+      fill = "white", label.color = "#1f5673", color = "black",
+      size = 3.5, label.size = 0.3, label.r = unit(4, "pt"),
+      label.padding = unit(c(2, 4, 2, 4), "pt"), vjust = -0.8
+    ) +
+
+    # Meta 11a fixed line
+    geom_hline(yintercept = 50, color = "darkgreen", linetype = "dashed", linewidth = 1.1) +
+    annotate("text", x = 2008, y = 50, label = "Meta 11a: 50%", color = "darkgreen", vjust = -1, fontface = "bold")
+
+  # Only show effort line and red dot if below 50%
+  if (!is.na(latest_pct) && latest_pct < 50 && target_year > latest_year) {
+    # Create one-row df for red dot
+    dot_df <- data.frame(ANO = target_year, PCT_EPT = 50)
+
+    gg <- gg +
+      geom_segment(
+        aes(x = latest_year, y = latest_pct, xend = target_year, yend = 50),
+        linetype = "dashed", color = "blue", linewidth = 1.2
+      ) +
+      geom_point(data = dot_df, aes(x = ANO, y = PCT_EPT),
+                 color = "red", size = 4, shape = 21, fill = "white", stroke = 1.5)+
+      geom_point(data = dot_df,aes(x = ANO, y = PCT_EPT),
+                 color = "red",size = 2.5, shape = 16)+
+      ggtext::geom_richtext(
+        data = data.frame(x = as.numeric(input$meta11a_target_year), y = 43),
+        aes(x = x, y = y, label = growth_text),
+        fill = "white",
+        label.color = "red",
+        color = "black",
+        size = 3.5,
+        label.size = 0.5,
+        label.r = unit(6, "pt"),
+        label.padding = unit(c(4, 6, 4, 6), "pt"),
+        vjust = 1,
+        hjust = 0.5,
+        inherit.aes = FALSE
+      )+
+      # Arrow pointing upward from label to red circle
+      geom_segment(
+        aes(
+          x = target_year,
+          xend = target_year,
+          y = 49 - 5,         # bottom (label)
+          yend = 49             # top (circle)
+        ),
+        arrow = arrow(length = unit(0.02, "npc"), type = "closed"),
+        color = "red",
+        linewidth = 0.8
+      )
     
+    
+  }
+
+  gg +
+    scale_x_continuous(breaks = 2007:2035, limits = c(2007, 2035)) +
+    scale_y_continuous(limits = c(0, 70), labels = scales::percent_format(scale = 1)) +
+    labs(
+      title = paste("UF:", input$meta11a_uf),
+      subtitle = "EPT como % do Ensino Médio",
+      x = "Ano",
+      y = "% de Matrículas em EPT"
+    ) +
+    theme_minimal(base_size = 14) +
+    theme(plot.title = element_text(face = "bold"))
+})
+
     
     
     output$meta11a_table <- renderDT({
