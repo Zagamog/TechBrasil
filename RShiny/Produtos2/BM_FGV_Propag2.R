@@ -465,7 +465,7 @@ server <- function(input, output, session) {
     
     df_filtered <- df_censo_UF |>
       filter(NM_UF == input$oferta_uf) |>
-      select(ANO, EPT = all_of(input$oferta_ept_var), OUTRA = all_of(input$oferta_other_var))
+      select(ANO, EPT = all_of(input$oferta_ept_var), ENSINO_MEDIO = all_of(input$oferta_other_var))
     
     base_2013_val <- df_filtered |> filter(ANO == 2013) |> summarise(val = sum(EPT, na.rm = TRUE)) |> pull(val)
     triplo_2013 <- if (!is.na(base_2013_val)) 3 * base_2013_val else NA
@@ -484,7 +484,7 @@ server <- function(input, output, session) {
       group_by(ANO) |>
       summarise(
         EPT = sum(.data[[input$oferta_ept_var]], na.rm = TRUE),
-        OUTRA = sum(.data[[input$oferta_other_var]], na.rm = TRUE),
+        ENSINO_MEDIO = sum(.data[[input$oferta_other_var]], na.rm = TRUE),
         .groups = "drop"
       )
     
@@ -518,7 +518,7 @@ server <- function(input, output, session) {
     # ---- OUTRA projection from 2024 to 2035 using slope-preserving shift ----
     
     # 1. Fit linear model to OUTRA from 2020 to 2024
-    lm_outra <- lm(OUTRA ~ ANO, data = df_filtered |> filter(ANO %in% 2020:2024))
+    lm_outra <- lm(ENSINO_MEDIO ~ ANO, data = df_filtered |> filter(ANO %in% 2020:2024))
     
     # 2. Extract only the slope (ignore intercept)
     slope_outra <- coef(lm_outra)["ANO"]
@@ -526,7 +526,7 @@ server <- function(input, output, session) {
     # 3. Get the actual observed value in 2024
     start_val_outra <- df_filtered |> 
       filter(ANO == 2024) |> 
-      pull(OUTRA) |> 
+      pull(ENSINO_MEDIO) |> 
       mean(na.rm = TRUE)
     
     # 4. Generate projected values for 2024–2035
@@ -536,7 +536,7 @@ server <- function(input, output, session) {
     future_outra_df <- data.frame(
       ANO = future_years,
       VALOR = start_val_outra + slope_outra * years_from_start,
-      TIPO = "OUTRA",
+      TIPO = "ENSINO_MEDIO",
       GRUPO = "PROJECAO"
     )
     
@@ -544,8 +544,8 @@ server <- function(input, output, session) {
     # Long format for observed values
     df_long <- df_filtered |>
       mutate(GRUPO = "OBSERVADO") |>
-      pivot_longer(cols = c("EPT", "OUTRA"), names_to = "TIPO", values_to = "VALOR") |>
-      mutate(GRUPO = ifelse(TIPO == "OUTRA", "OUTRA", GRUPO))
+      pivot_longer(cols = c("EPT", "ENSINO_MEDIO"), names_to = "TIPO", values_to = "VALOR") |>
+      mutate(GRUPO = ifelse(TIPO == "ENSINO_MEDIO", "ENSINO_MEDIO", GRUPO))
     
     df_plot <- bind_rows(
       df_long,          # OBSERVADO and OUTRA (observed)
@@ -566,33 +566,56 @@ server <- function(input, output, session) {
     
     # Plot
     ggplot(df_plot, aes(x = ANO, y = VALOR, color = GRUPO)) +
-      geom_line(size = 1.5) +
-      geom_point(size = 2, alpha = 0.8) +
-      geom_hline(yintercept = triplo_2013, linetype = "dashed", color = "darkorange", linewidth = 1.1) +
-      annotate("text", x = 2008, y = triplo_2013,
-               label = paste0("Meta 11 (Triplo 2013): ", format(triplo_2013, big.mark = ".")),
-               color = "darkorange", vjust = -1, fontface = "bold") +
-      scale_x_continuous(breaks = 2007:2035, limits = c(2007, 2035)) +
-      scale_y_continuous(labels = scales::comma) +
-      labs(
-        title = paste("UF:", input$oferta_uf),
-        subtitle = paste(input$oferta_ept_var, "vs", input$oferta_other_var),
-        x = "Ano",
-        y = "Total de Matrículas"
+      
+      # All observed and projected lines except dotted OUTRA
+      geom_line(
+        data = df_plot |> filter(!(TIPO == "ENSINO_MEDIO" & GRUPO == "PROJECAO")),
+        size = 1.5
       ) +
+      
+      # Dotted line for OUTRA projection only
+      geom_line(
+        data = df_plot |> filter(TIPO == "ENSINO_MEDIO" & GRUPO == "PROJECAO"),
+        aes(x = ANO, y = VALOR),
+        linetype = "longdash",
+        linewidth = 1.5,
+        color = "#00BFC4"  # consistent with ggplot default for OUTRA
+      ) +
+      
+      # Points for all
+      geom_point(size = 2, alpha = 0.8) +
+      
+      # Meta 11 horizontal line
+      geom_hline(yintercept = triplo_2013, linetype = "dashed", color = "darkorange", linewidth = 1.1) +
+      annotate(
+        "text", x = 2008, y = triplo_2013,
+        label = paste0("Meta 11 (Triplo 2013): ", format(triplo_2013, big.mark = ".")),
+        color = "darkorange", vjust = -1, fontface = "bold"
+      ) +
+      
+      # Dot on 2013 EPT point
       geom_point(
         data = data.frame(ANO = x_label, VALOR = ept_2013),
         aes(x = ANO, y = VALOR),
         color = "black", size = 3, shape = 21, fill = "white"
       ) +
-      # Arrow from label to 2013 point (black straight arrow)
+      
+      # Arrow from label to point
       geom_segment(
-        aes(x = x_label + 0.6, y = y_label, xend = x_label, yend = ept_2013),
+        data = data.frame(
+          x = x_label + 0.6,
+          y = y_label,
+          xend = x_label,
+          yend = ept_2013
+        ),
+        aes(x = x, y = y, xend = xend, yend = yend),
         inherit.aes = FALSE,
         arrow = arrow(length = unit(0.02, "npc"), type = "closed"),
         linewidth = 0.8,
         color = "black"
       ) +
+      
+      # Rich label
       ggtext::geom_richtext(
         data = data.frame(x = x_label + 1, y = y_label),
         aes(x = x, y = y, label = paste0("<b>EPT 2013:</b><br>", format(ept_2013, big.mark = "."))),
@@ -605,11 +628,26 @@ server <- function(input, output, session) {
         label.r = unit(6, "pt"),
         inherit.aes = FALSE
       ) +
-    theme_minimal(base_size = 14) +
+      
+      # Axis and title formatting
+      scale_x_continuous(breaks = 2007:2035, limits = c(2007, 2035)) +
+      scale_y_continuous(labels = scales::comma) +
+      
+      labs(
+        title = paste("UF:", input$oferta_uf),
+        subtitle = paste(input$oferta_ept_var, "vs", input$oferta_other_var),
+        x = "Ano",
+        y = "Total de Matrículas"
+      ) +
+      
+      coord_cartesian(clip = "off") +
+      
+      theme_minimal(base_size = 14) +
       theme(
         plot.title = element_text(face = "bold"),
         axis.text.x = element_text(angle = 45, hjust = 1)
       )
+    
     
     
     
@@ -623,7 +661,7 @@ server <- function(input, output, session) {
       group_by(ANO) |>
       summarise(
         EPT = sum(.data[[input$oferta_ept_var]], na.rm = TRUE),
-        OUTRA = sum(.data[[input$oferta_other_var]], na.rm = TRUE),
+        ENSINO_MEDIO = sum(.data[[input$oferta_other_var]], na.rm = TRUE),
         .groups = "drop"
       )
     
@@ -632,7 +670,7 @@ server <- function(input, output, session) {
     
     df$PNE_META11 <- if (!is.na(triplo_2013)) format(round(triplo_2013), big.mark = ".", decimal.mark = ",") else NA
     df$EPT <- format(round(df$EPT), big.mark = ".", decimal.mark = ",")
-    df$OUTRA <- format(round(df$OUTRA), big.mark = ".", decimal.mark = ",")
+    df$ENSINO_MEDIO <- format(round(df$ENSINO_MEDIO), big.mark = ".", decimal.mark = ",")
     
     datatable(df, rownames = FALSE, options = list(pageLength = 30))
   })
