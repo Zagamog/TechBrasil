@@ -65,7 +65,7 @@ processar_csv_local <- function(anos, base_dir = here::here("rawdata", "mec_inep
     })
     if (is.null(df)) next
     
-    # --- Define columns to keep ---
+    # --- Define base columns to keep ---
     cols_keep <- c(
       "NU_ANO_CENSO", "NO_UF", "SG_UF", "CO_UF", "NO_MUNICIPIO", "CO_MUNICIPIO",
       "NO_ENTIDADE", "CO_ENTIDADE", "TP_LOCALIZACAO", "TP_LOCALIZACAO_DIFERENCIADA",
@@ -74,14 +74,14 @@ processar_csv_local <- function(anos, base_dir = here::here("rawdata", "mec_inep
       "QT_DOC_PROF", "QT_DOC_PROF_TEC", "IN_PROF_TEC", "QT_MAT_BAS", "QT_MAT_EJA",
       "QT_MAT_ESP", "QT_MAT_FUND", "QT_MAT_INF", "QT_MAT_MED", "QT_MAT_PROF_TEC",
       "QT_MAT_MED_NM", "QT_MAT_PROF_TEC_SUBS", "QT_MAT_EJA_MED_TEC",
-      "QT_MAT_PROF" # needed for fallback logic
+      "QT_MAT_EJA_FUND_FIC", "QT_MAT_EJA_MED_FIC", "QT_MAT_PROF"
     )
     
-    # --- Subset to available columns ---
+    # --- Subset to available columns (defensive)
     df_proc <- df %>%
-      dplyr::select(dplyr::any_of(cols_keep))
+      select(any_of(cols_keep))
     
-    # --- Fallback: create QT_MAT_MED_NM if missing ---
+    # --- Create fallback for QT_MAT_MED_NM if missing
     if (!"QT_MAT_MED_NM" %in% names(df_proc)) {
       if (all(c("QT_MAT_PROF", "QT_MAT_PROF_TEC") %in% names(df_proc))) {
         df_proc$QT_MAT_MED_NM <- df_proc$QT_MAT_PROF - df_proc$QT_MAT_PROF_TEC
@@ -90,18 +90,23 @@ processar_csv_local <- function(anos, base_dir = here::here("rawdata", "mec_inep
       }
     }
     
-    # --- Replace NAs with 0, except for character ID columns ---
+    # --- Replace NA with 0 for numeric columns (excluding IDs)
     df_proc <- df_proc %>%
-      dplyr::mutate(across(
-        .cols = -c(NO_UF, NO_MUNICIPIO, NO_ENTIDADE),
-        .fns  = ~ tidyr::replace_na(., 0)
-      ))
+      mutate(across(-c(NO_UF, NO_MUNICIPIO, NO_ENTIDADE), ~ tidyr::replace_na(., 0)))
     
-    # --- Calculate PROPAG ---
+    # --- Add derived variable: QT_MAT_PROF_TEC_PROPAG
     df_proc <- df_proc %>%
-      dplyr::mutate(QT_MAT_PROF_TEC_PROPAG = QT_MAT_PROF_TEC - QT_MAT_MED_NM)
+      mutate(QT_MAT_PROF_TEC_PROPAG = QT_MAT_PROF_TEC - QT_MAT_MED_NM)
     
-    # --- Save as RDA with object name df_censoXX ---
+    # --- Add new derived variable only for 2023 and 2024
+    if (ano %in% c(2023, 2024)) {
+      if (all(c("QT_MAT_EJA_FUND_FIC", "QT_MAT_EJA_MED_FIC", "QT_MAT_EJA_MED_TEC") %in% names(df_proc))) {
+        df_proc <- df_proc %>%
+          mutate(QT_MAT_EJA_ARTIC_EPT = QT_MAT_EJA_FUND_FIC + QT_MAT_EJA_MED_FIC + QT_MAT_EJA_MED_TEC)
+      }
+    }
+    
+    # --- Save as .rda with appropriate object name
     short_ano <- substr(as.character(ano), 3, 4)
     obj_name <- paste0("df_censo", short_ano)
     assign(obj_name, df_proc)
@@ -110,7 +115,7 @@ processar_csv_local <- function(anos, base_dir = here::here("rawdata", "mec_inep
     dir.create(dirname(local_rda), showWarnings = FALSE, recursive = TRUE)
     save(list = obj_name, file = local_rda)
     
-    # --- Upload to S3 if changed ---
+    # --- Upload to S3 if changed
     s3_key <- paste0("working/mec_inep/censo_escolar_", ano, ".rda")
     tryCatch({
       upload_if_missing_or_changed(local_rda, s3_key, bucket_name)
@@ -126,7 +131,8 @@ processar_csv_local <- function(anos, base_dir = here::here("rawdata", "mec_inep
 
 
 
+
 processar_csv_local(2007)           # Single year
 processar_csv_local(2008:2023)     # All years
-
+processar_csv_local(2024)  
 
