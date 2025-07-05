@@ -1,4 +1,4 @@
-# br_censo_tec.R
+# prepara_censo_escolar_tecnico.R
 # Process Censo Escolar EPT technical course data, validate totals, enrich with geo metadata, and upload results to S3.
 
 library(here)
@@ -128,3 +128,16 @@ save(matriculas_tec_ano_mun_area_curso, file = rda_output)
 
 upload_if_different(csv_output, "working/mec_inep/matriculas_tec_ano_mun_area_curso.csv", bucket_name)
 upload_if_different(rda_output, "working/mec_inep/matriculas_tec_ano_mun_area_curso.rda", bucket_name)
+
+# RGN
+
+matriculas_por_curso_RGN <- matriculas_tec_ano_mun_area_curso %>% filter(SG_UF=="RN") %>%
+  group_by(NM_RGIMED, NM_RGIINTM, ano, no_area_curso_profissional, no_curso_educ_profissional) %>%
+  summarise(matriculas_tec = sum(matriculas_tec, na.rm = TRUE), .groups = "drop")
+
+openxlsx::write.xlsx(matriculas_por_curso_RGN,file="D:/Temp/matriculas_por_curso_RGN.xlsx")
+
+
+matriculas_por_curso_por_esc_RGN <- matriculas_tec_ano_mun_area_curso %>% filter(SG_UF=="RN") 
+openxlsx::write.xlsx(matriculas_por_curso_por_esc_RGN,file="D:/Temp/matriculas_por_curso_por_esc_RGN.xlsx")
+

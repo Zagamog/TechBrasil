@@ -73,6 +73,7 @@ processar_csv_local <- function(anos, base_dir = here::here("rawdata", "mec_inep
       "IN_LABORATORIO_EDUC_PROF", "IN_SALA_OFICINAS_EDUC_PROF", "QT_DOC_BAS", "QT_DOC_MED",
       "QT_DOC_PROF", "QT_DOC_PROF_TEC", "IN_PROF_TEC", "QT_MAT_BAS", "QT_MAT_EJA",
       "QT_MAT_ESP", "QT_MAT_FUND", "QT_MAT_INF", "QT_MAT_MED", "QT_MAT_PROF_TEC",
+      "QT_MAT_MED_CT", "QT_MAT_PROF_TEC_CONC", "QT_MAT_PROF_TEC_SUBS",
       "QT_MAT_MED_NM", "QT_MAT_PROF_TEC_SUBS", "QT_MAT_EJA_MED_TEC",
       "QT_MAT_EJA_FUND_FIC", "QT_MAT_EJA_MED_FIC", "QT_MAT_PROF"
     )
@@ -102,7 +103,8 @@ processar_csv_local <- function(anos, base_dir = here::here("rawdata", "mec_inep
     if (ano %in% c(2023, 2024)) {
       if (all(c("QT_MAT_EJA_FUND_FIC", "QT_MAT_EJA_MED_FIC", "QT_MAT_EJA_MED_TEC") %in% names(df_proc))) {
         df_proc <- df_proc %>%
-          mutate(QT_MAT_EJA_ARTIC_EPT = QT_MAT_EJA_FUND_FIC + QT_MAT_EJA_MED_FIC + QT_MAT_EJA_MED_TEC)
+          mutate(QT_MAT_EJA_ARTIC_EPT = QT_MAT_EJA_FUND_FIC + QT_MAT_EJA_MED_FIC + QT_MAT_EJA_MED_TEC,
+                 QT_MAT_PROF_TEC_MED=QT_MAT_MED_CT+QT_MAT_PROF_TEC_CONC)
       }
     }
     
@@ -132,7 +134,8 @@ processar_csv_local <- function(anos, base_dir = here::here("rawdata", "mec_inep
 
 
 
-processar_csv_local(2007)           # Single year
-processar_csv_local(2008:2023)     # All years
+processar_csv_local(2007:2021)  
+processar_csv_local(2022)  
+processar_csv_local(2023)  
 processar_csv_local(2024)  
 

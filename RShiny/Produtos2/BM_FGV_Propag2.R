@@ -8,20 +8,23 @@ library(DT)
 library(scales)
 library(patchwork)
 library(dplyr)
+library(tidyr)
 
+options(warn=-1) # Too many pesky warnings, terrain, terrain, terrain, pull up, pull up 
 
 # Load Propag scraped data
 propag_ept_financeiro <- readRDS("propag_ept_financeiro.rds")
-nome_ufs <- sort(unique(df_codes_ibge$NM_UF))  # Ensure sorted and unique
 
+# Load Censo Escolar data 2007 to 2024 UF aggregates
 load("df_censo_UF.rda")
 
+# Get State names for display
+nome_ufs <- sort(unique(df_censo_UF$NM_UF))  # Ensure sorted and unique
 
 
 # --- Define variable choices for Oferta EPT ---
 ept_vars <- c("QT_MAT_PROF_TEC_PROPAG", "QT_MAT_PROF_TEC", "QT_MAT_PROF_TEC_SUBS", "QT_MAT_EJA_MED_TEC")
 other_vars <- c("QT_MAT_MED", "QT_MAT_BAS", "QT_MAT_FUND", "QT_MAT_EJA")
-
 
 
 
@@ -80,6 +83,50 @@ ui <- dashboardPage(
       ")), 
       tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
     ),
+    
+    tags$head(
+      tags$style(HTML("
+    /* Force all checkbox labels to black */
+    .form-group.shiny-input-checkbox label,
+    .checkbox label,
+    .checkbox-inline label,
+    .shiny-input-container input[type='checkbox'] + span {
+      color: black !important;
+    }
+
+    /* Existing label styling */
+    label,
+    .selectize-control.single .selectize-input,
+    .irs-single,
+    .irs-min,
+    .irs-max,
+    .irs-grid-text,
+    .shiny-input-container > .control-label {
+      color: black !important;
+    }
+
+    /* Slider tweaks */
+    .irs {
+      background-color: transparent !important;
+    }
+    .irs-bar,
+    .irs-line {
+      background: #ccc !important;
+    }
+    .irs-slider {
+      background-color: #555 !important;
+      border: 1px solid #999 !important;
+    }
+    .irs-grid-text {
+      color: #333 !important;
+      font-weight: bold;
+    }
+  "))
+    ),
+    
+    
+
+    
     tags$head(
       tags$link(rel = "stylesheet", type = "text/css", href = "https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css"),
       tags$script(src = "https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"),
@@ -112,7 +159,7 @@ ui <- dashboardPage(
       )
     ),
     
-    tabsetPanel(id = "tab_selection", selected = "Tema Oferta EPT",
+    tabsetPanel(id = "tab_selection", selected = "Situação - Meta 11 (vigente)",
                 tabPanel("Tema Financiero",
                          fluidPage(
                            h3("Visualização Financeira do PROPAG", style = "color: #1f5673; font-weight: bold;"),
@@ -161,13 +208,13 @@ ui <- dashboardPage(
                          DTOutput("P02_table")
                 ),
                 
-                tabPanel("Tema Oferta EPT",
+                tabPanel("Situação - Meta 11 (vigente)",
                          fluidPage(
                            h3("Evolução da Oferta de EPT por UF", style = "color: #1f5673; font-weight: bold;"),
                            fluidRow(
                              column(4,
                                     selectizeInput("oferta_uf", "Selecionar UF (NM_UF):",
-                                                   choices = sort(unique(df_codes_ibge$NM_UF)),
+                                                   choices = sort(unique(df_censo_UF$NM_UF)),
                                                    selected = "Rio Grande do Norte")
                              ),
                              column(4,
@@ -193,19 +240,29 @@ ui <- dashboardPage(
                            h3("Meta 11a: EPT como % do Ensino Médio", style = "color: #1f5673; font-weight: bold;"),
                            
                            fluidRow(
-                             column(3,
-                                    selectizeInput("meta11a_uf", "Selecionar UF:", choices = sort(unique(df_codes_ibge$NM_UF)), selected = "Rio Grande do Norte")
+                             column(2,
+                                    selectizeInput("meta11a_uf", "Selecionar UF:", choices = sort(unique(df_censo_UF$NM_UF)), selected = "Rio Grande do Norte")
                              ),
-                             column(3,
+                             column(2,
                                     selectizeInput("meta11a_ept_var", "Variável EPT:", choices = ept_vars, selected = "QT_MAT_PROF_TEC_PROPAG")
                              ),
-                             column(3,
+                             column(2,
                                     selectizeInput("meta11a_med_var", "Variável Ensino Médio:", choices = other_vars, selected = "QT_MAT_MED")
                              ),
-                             column(3,
+                             column(2,
                                     selectInput("meta11a_target_year", "Meta 11a Pública atingida até o ano:",
                                                 choices = 2024:2035, selected = 2030)
+                             ),
+                             column(2,
+                                    sliderInput(inputId = "ensino_slope_factor",label = "Crescimento EM projetado:",
+                                      min = 0.5,max = 1.5,step = 0.01,value = 1
+                                    )
+                             ),
+                             column(2,
+                                    checkboxInput("meta11a_show_profmed", "Mostrar Ensino Médio Profissional (Int. e Conc.)", value = FALSE)
                              )
+                             
+                             
                               ),
                            
                            plotOutput("meta11a_plot", height = "500px"),
@@ -216,7 +273,46 @@ ui <- dashboardPage(
                 ),
                 
                 
-                tabPanel("Painel 5", h4("Placeholder Content for Panel 5")),
+                
+                tabPanel("Situação - Meta 11a - Público",
+                         fluidPage(
+                           h3("Meta 11a: EPT como % do Ensino Médio", style = "color: #1f5673; font-weight: bold;"),
+                           
+                           fluidRow(
+                             column(2,
+                                    selectizeInput("meta11a_uf2", "Selecionar UF:", choices = sort(unique(df_censo_UF$NM_UF)), selected = "Rio Grande do Norte")
+                             ),
+                             column(2,
+                                    selectizeInput("meta11a_ept_var2", "Variável EPT:", choices = ept_vars, selected = "QT_MAT_PROF_TEC_PROPAG")
+                             ),
+                             column(2,
+                                    selectizeInput("meta11a_med_va2r", "Variável Ensino Médio:", choices = other_vars, selected = "QT_MAT_MED")
+                             ),
+                             column(2,
+                                    selectInput("meta11a_target_year2", "Meta 11a Pública atingida até o ano:",
+                                                choices = 2024:2035, selected = 2030)
+                             ),
+                             column(2,
+                                    sliderInput(inputId = "ensino_slope_factor2",label = "Crescimento EM projetado:",
+                                                min = 0.5,max = 1.5,step = 0.01,value = 1
+                                    )
+                             ),
+                             column(2,
+                                    checkboxInput("mostrar_expansao_publica",
+                                                  "Mostrar PNE11a – Expansão nas redes públicas",
+                                                  value = FALSE)
+                             )
+                             
+                           ),
+                           
+                           plotOutput("meta11a_plot2", height = "500px"),
+                           br()
+                           
+                         )
+                ),
+                
+                
+                
                 tabPanel("Painel 6", h4("Placeholder Content for Panel 6")),
                 tabPanel("Painel 7", h4("Placeholder Content for Panel 7")),
                 tabPanel("Estatísticas Relevantes", DTOutput("P8_table"))
@@ -489,11 +585,10 @@ server <- function(input, output, session) {
   })
   
   ## PAINEL OFERTA #############################
-  
-  
+  ##########################################################################################################################################
+  ##########################################################################################################################################
   ##############################################
-  # --- Load pre-aggregated data ---
-  load("df_censo_UF.rda")  # loads df_censo_estados1a
+
   
   # --- Reactive filtered dataset for oferta ---
   oferta_data_by_year <- reactive({
@@ -596,7 +691,7 @@ server <- function(input, output, session) {
       summarise(val = sum(VALOR, na.rm = TRUE)) |> 
       pull(val)
     
-    x_label <- 2012.5
+    x_label <- 2013
     y_label <- ept_2013 + 5000  # Adjust vertical space as needed
     
     
@@ -689,10 +784,10 @@ server <- function(input, output, session) {
     
   })
   
-  
-  # --- Table output ---
   output$oferta_ept_table <- DT::renderDT({
-    # Step 1: Filter and aggregate base data
+    req(input$oferta_uf, input$oferta_ept_var, input$oferta_other_var)
+    
+    # Step 1: Observed data
     df_obs <- df_censo_UF |>
       filter(NM_UF == input$oferta_uf, AGREG == "UF_TUDO") |>
       group_by(ANO) |>
@@ -703,49 +798,45 @@ server <- function(input, output, session) {
       ) |>
       mutate(TIPO = "OBSERVADO")
     
-    # Step 2: Generate EPT projection
+    # Step 2: Projection (2024–2035)
+    years_future <- 2024:2035
     slope_ept <- coef(lm(EPT ~ ANO, data = df_obs |> filter(ANO %in% 2020:2024)))["ANO"]
-    start_ept <- df_obs |> filter(ANO == 2024) |> pull(EPT) |> mean(na.rm = TRUE)
-    future_years <- 2024:2035
-    future_ept <- start_ept + slope_ept * (future_years - 2024)
-    
-    # Step 3: Generate ENSINO_MEDIO projection
     slope_med <- coef(lm(ENSINO_MEDIO ~ ANO, data = df_obs |> filter(ANO %in% 2020:2024)))["ANO"]
+    start_ept <- df_obs |> filter(ANO == 2024) |> pull(EPT) |> mean(na.rm = TRUE)
     start_med <- df_obs |> filter(ANO == 2024) |> pull(ENSINO_MEDIO) |> mean(na.rm = TRUE)
-    future_med <- start_med + slope_med * (future_years - 2024)
     
-    # Step 4: Create projection dataframe
-    df_proj <- data.frame(
-      ANO = future_years,
-      EPT = future_ept,
-      ENSINO_MEDIO = future_med,
+    df_proj <- tibble(
+      ANO = years_future,
+      EPT = start_ept + slope_ept * (years_future - 2024),
+      ENSINO_MEDIO = start_med + slope_med * (years_future - 2024),
       TIPO = "PROJECAO"
     )
     
-    # Step 5: Combine observed + projection
+    # Step 3: Combine all
     df_all <- bind_rows(df_obs, df_proj)
     
-    # Step 6: Calculate Meta 11 (Triplo 2013)
+    # Step 4: Add PNE Meta 11 (triplo de 2013)
     base_2013_val <- df_all |> filter(ANO == 2013, TIPO == "OBSERVADO") |> pull(EPT)
     triplo_2013 <- if (!is.na(base_2013_val)) 3 * base_2013_val else NA
+    df_all$PNE_META11 <- if (!is.na(triplo_2013)) round(triplo_2013) else NA
     
-    df_all$PNE_META11 <- if (!is.na(triplo_2013)) format(round(triplo_2013), big.mark = ".", decimal.mark = ",") else NA
-    
-    # Step 7: Format numbers for display
-    df_all$EPT <- format(round(df_all$EPT), big.mark = ".", decimal.mark = ",")
-    df_all$ENSINO_MEDIO <- format(round(df_all$ENSINO_MEDIO), big.mark = ".", decimal.mark = ",")
-    
-    
-    # Step 8: Render DT
-    # Transpose table so ANO becomes columns
+    # Step 5: Transpose safely
     df_transposed <- df_all |>
       select(ANO, TIPO, EPT, ENSINO_MEDIO) |>
       pivot_longer(cols = c(EPT, ENSINO_MEDIO), names_to = "VAR", values_to = "VAL") |>
-      unite("ROW", VAR, TIPO, sep = "_") |>  # e.g. EPT_OBSERVADO
-      pivot_wider(names_from = ANO, values_from = VAL)
+      unite("ROW", VAR, TIPO, sep = "_") |>
+      pivot_wider(names_from = ANO, values_from = VAL) |>
+      mutate(across(
+        where(is.numeric),
+        ~ format(round(.), big.mark = ".", decimal.mark = ",")
+      ))
     
     
+    # Step 6: Format numerics
+    df_transposed <- df_transposed |>
+      mutate(across(where(is.numeric), ~ format(., big.mark = ".", decimal.mark = ",")))
     
+    # Step 7: Return datatable
     datatable(
       df_transposed,
       rownames = FALSE,
@@ -770,26 +861,25 @@ server <- function(input, output, session) {
       ),
       class = "stripe nowrap display"
     )
+  })
+  
     
-    #### PAINEL META 11a
-    ####
     
-    #####
     
+    ## PAINEL META11a ############################# META META METTA WORLD PEAECE
+    ##########################################################################################################################################
+    ##########################################################################################################################################
+    ##############################################
     ######
     meta11a_data <- reactive({
-      req(input$meta11a_uf)
-      
-      # Hardcoded variable names
-      ept_var <- "QT_MAT_PROF_TEC_PROPAG"
-      med_var <- "QT_MAT_MED"
+      req(input$meta11a_uf, input$meta11a_ept_var, input$meta11a_med_var)
       
       df <- df_censo_UF |>
         filter(NM_UF == input$meta11a_uf, AGREG == "UF_TUDO") |>
         group_by(ANO) |>
         summarise(
-          EPT = sum(.data[[ept_var]], na.rm = TRUE),
-          MEDIO = sum(.data[[med_var]], na.rm = TRUE),
+          EPT = sum(.data[[input$meta11a_ept_var]], na.rm = TRUE),
+          MEDIO = sum(.data[[input$meta11a_med_var]], na.rm = TRUE),
           .groups = "drop"
         ) |>
         mutate(PCT_EPT = ifelse(MEDIO > 0, 100 * EPT / MEDIO, NA))
@@ -798,46 +888,100 @@ server <- function(input, output, session) {
     })
     
     
-    output$meta11a_plot <- renderPlot({
+    
+    
+    
+    
+    ###############################################################
+    ###############################################################
+
+    meta11a_expansao_publica_hist <- reactive({
+      req(input$meta11a_uf, input$meta11a_ept_var)
+      
+      df_total <- df_censo_UF |>
+        filter(NM_UF == input$meta11a_uf, AGREG == "UF_TUDO") |>
+        group_by(ANO) |>
+        summarise(EPT_TOTAL = sum(.data[[input$meta11a_ept_var]], na.rm = TRUE), .groups = "drop")
+      
+      df_pub <- df_censo_UF |>
+        filter(NM_UF == input$meta11a_uf, AGREG == "UF_PUB") |>
+        group_by(ANO) |>
+        summarise(EPT_PUB = sum(.data[[input$meta11a_ept_var]], na.rm = TRUE), .groups = "drop")
+      
+      df_joined <- full_join(df_total, df_pub, by = "ANO") |>
+        arrange(ANO) |>
+        mutate(
+          DELTA_TOTAL = pmax(EPT_TOTAL - lag(EPT_TOTAL), 0),
+          DELTA_PUB = pmax(EPT_PUB - lag(EPT_PUB), 0),
+          SHARE_PUB = ifelse(DELTA_TOTAL > 0, DELTA_PUB / DELTA_TOTAL, NA)
+        ) |>
+        filter(!is.na(ANO), ANO >= 2008, ANO <= 2035)  # include up to 2035
+      
+      return(df_joined)
+    })
+    
+    
+    
+    
+  output$meta11a_plot <- renderPlot({
   df <- meta11a_data() 
   
+  # Define anos de base para tendência histórica
+  years_trend <- 2020:2024
   
-  
-  
-
-  # Get last available year (2024) value
+  # Último ano observado
   latest_year <- max(df$ANO, na.rm = TRUE)
-  latest_pct <- df |> filter(ANO == latest_year) |> pull(PCT_EPT)
+  
+  # Ano-alvo definido pelo usuário
   target_year <- as.numeric(input$meta11a_target_year)
-  # Current % in 2024
-  current_pct <- df |> filter(ANO == 2024) |> pull(PCT_EPT)
   
-  # Years remaining to reach target
-  years_left <- as.numeric(input$meta11a_target_year) - 2024
+  # Quantos anos faltam até o ano-alvo
+  years_left <- target_year - 2024
   
-  # Annual growth needed
+  # Valores de 2024
+  current_row <- df |> filter(ANO == 2024)
+  current_pct <- current_row$PCT_EPT
+  current_ept <- current_row$EPT
+  current_med <- current_row$MEDIO
+  
+  latest_pct <- df |> filter(ANO == latest_year) |> pull(PCT_EPT)
+  
+  # Estimar tendência linear para o Ensino Médio
+  lm_med <- lm(MEDIO ~ ANO, data = df |> filter(ANO %in% years_trend))
+  base_slope <- coef(lm_med)["ANO"]
+  
+  # Aplicar ajuste com o fator do slider
+  slope_factor <- input$ensino_slope_factor  # entre 0.5 e 1.5
+  adjusted_slope <- base_slope * slope_factor
+  
+  # Projeção do Ensino Médio no ano-alvo
+  projected_med <- current_med + adjusted_slope * years_left
+  
+  # Quantidade de estudantes necessária para atingir 50% da meta
+  target_students <- 0.5 * projected_med
+  
+  # Crescimento absoluto necessário (em matrículas EPT)
+  growth_abs <- if (!is.na(current_ept) && years_left > 0) {
+    (target_students - current_ept) / years_left
+  } else {
+    NA_real_
+  }
+  
+  # Crescimento percentual anual necessário (em pontos percentuais)
   required_growth <- if (!is.na(current_pct) && years_left > 0) {
     (50 - current_pct) / years_left
   } else {
     NA_real_
   }
   
-  # Get Ensino Médio absolute value in 2024
-  current_med <- df |> filter(ANO == 2024) |> pull(MEDIO)
   
-  # Total students needed to hit 50% in target year
-  target_students <- 0.5 * current_med
   
-  # Current EPT in 2024 (in % of Ensino Médio)
-  current_students <- (current_pct / 100) * current_med
-  
-  # Annual growth needed in absolute numbers
-  growth_abs <- if (!is.na(current_students) && years_left > 0) {
-    (target_students - current_students) / years_left
-  } else {
-    NA_real_
-  }
-  
+  # Texto da projeção do Ensino Médio
+em_text <- paste0(
+  "<b>EM: Projetado</b><br>",
+  format(round(projected_med), big.mark = ".", decimal.mark = ","), " alunos<br>matriculados"
+)
+
   
   
   
@@ -851,6 +995,14 @@ server <- function(input, output, session) {
     "(", formatC(growth_abs, format = "d", big.mark = "."), " alunos/ano)"
   )
   
+  
+  # with checkbox
+  
+  
+  
+  
+  
+
 
   # Base plot: line and points
   gg <- ggplot(df, aes(x = ANO, y = PCT_EPT)) +
@@ -908,13 +1060,26 @@ server <- function(input, output, session) {
         arrow = arrow(length = unit(0.02, "npc"), type = "closed"),
         color = "red",
         linewidth = 0.8
+      )+
+      ggtext::geom_richtext(
+        data = data.frame(x = target_year, y = 60),  # y ajusta altura; mude se quiser mais pra cima
+        aes(x = x, y = y, label = em_text),
+        inherit.aes = FALSE,
+        fill = "white",
+        color = "blue",
+        label.color = "blue",
+        size = 3.5,
+        label.size = 0.5,
+        label.r = unit(5, "pt"),
+        label.padding = unit(c(4, 6, 4, 6), "pt"),
+        vjust = 1
       )
     
     
   }
 
-  gg +
-    scale_x_continuous(breaks = 2007:2035, limits = c(2007, 2035)) +
+  gg <- gg +
+    scale_x_continuous(breaks = 2013:2030, limits = c(2013, 2030)) +
     scale_y_continuous(limits = c(0, 70), labels = scales::percent_format(scale = 1)) +
     labs(
       title = paste("UF:", input$meta11a_uf),
@@ -924,35 +1089,338 @@ server <- function(input, output, session) {
     ) +
     theme_minimal(base_size = 14) +
     theme(plot.title = element_text(face = "bold"))
+  
+  
+  
+  # Add red circles for QT_MAT_PROF_TEC_MED if checkbox is checked
+  if (isTRUE(input$meta11a_show_profmed)) {
+    df_profmed <- df_censo_UF |>
+      filter(NM_UF == input$meta11a_uf,
+             AGREG == "UF_TUDO",
+             ANO %in% c(2023, 2024)) |>
+      group_by(ANO) |>
+      summarise(
+        PROFTEC_MED = sum(QT_MAT_PROF_TEC_MED, na.rm = TRUE),
+        MEDIO = sum(.data[[input$meta11a_med_var]], na.rm = TRUE),
+        .groups = "drop"
+      ) |>
+      mutate(
+        PCT_PROFTEC_MED = ifelse(MEDIO > 0, 100 * PROFTEC_MED / MEDIO, NA)
+      ) |>
+      filter(!is.na(PCT_PROFTEC_MED))
+    
+    if (nrow(df_profmed) > 0) {
+      # Custom SW/SE offsets per year
+      df_profmed <- df_profmed |>
+        mutate(
+          LABEL_X = case_when(
+            ANO == 2023 ~ ANO - 1.5,
+            ANO == 2024 ~ ANO + 1.5
+          ),
+          LABEL_Y = PCT_PROFTEC_MED - 10  # push label below
+        )
+      
+      gg <- gg +
+        # Red dots at actual values
+        geom_point(
+          data = df_profmed,
+          aes(x = ANO, y = PCT_PROFTEC_MED),
+          shape = 21, size = 6, fill = "red", color = "black", stroke = 1.5
+        ) +
+        
+        # Upward arrows from label to dot
+        geom_segment(
+          data = df_profmed,
+          aes(x = LABEL_X, y = LABEL_Y, xend = ANO, yend = PCT_PROFTEC_MED),
+          arrow = arrow(length = unit(0.02, "npc"), type = "closed"),
+          color = "red", linewidth = 0.8
+        ) +
+        
+        # Labels placed SW and SE, just below
+        ggtext::geom_richtext(
+          data = df_profmed,
+          aes(
+            x = LABEL_X,
+            y = LABEL_Y,
+            label = paste0(
+              "<b>Ensino Prof. Técnico</b><br>",
+              "Somente Médio<br>",
+              "Int. e Conc.<br>",
+              round(PCT_PROFTEC_MED, 1), "%"
+            )
+          ),
+          fill = "white",
+          label.color = "red",
+          color = "black",
+          size = 3.5,
+          label.size = 0.5,
+          label.r = unit(5, "pt"),
+          label.padding = unit(c(4, 6, 4, 6), "pt"),
+          vjust = 1,  # anchor top of label to Y pos (so label appears below)
+          hjust = 0.5,
+          inherit.aes = FALSE
+        )
+    }
+  }
+  
+  
+  
+  
+
+return(gg)
+  
+  
 })
 
     
-    
-    output$meta11a_table <- renderDT({
+    #####
+    ##RENDER DATATABLE
+    ###
+    output$meta11a_table <- DT::renderDT({
       df <- meta11a_data()
+      req(nrow(df) > 0)
+      
+      df_fmt <- df |>
+        filter(ANO <= 2024) |>
+        mutate(
+          EPT = format(round(EPT), big.mark = ".", decimal.mark = ","),
+          MEDIO = format(round(MEDIO), big.mark = ".", decimal.mark = ","),
+          `PCT EPT/Médio` = paste0(round(PCT_EPT, 1), "%")
+        ) |>
+        select(ANO, EPT, MEDIO, `PCT EPT/Médio`)
       
       datatable(
-        df |>
-          mutate(
-            EPT = format(round(EPT), big.mark = ".", decimal.mark = ","),
-            MEDIO = format(round(MEDIO), big.mark = ".", decimal.mark = ","),
-            `PCT EPT/Médio` = paste0(round(PCT_EPT, 1), "%")
-          ) |>
-          select(ANO, EPT, MEDIO, `PCT EPT/Médio`),
+        df_fmt,
         rownames = FALSE,
-        options = list(pageLength = 30)
+        extensions = 'Buttons',
+        options = list(
+          pageLength = 30,
+          dom = 'Bfrtip',
+          buttons = list(
+            list(extend = "copy", text = "Copiar"),
+            list(extend = "csv", filename = "Meta11a_Tabela", text = "CSV"),
+            list(extend = "excel", filename = "Meta11a_Tabela", text = "Excel"),
+            list(
+              extend = "pdf",
+              filename = "Meta11a_Tabela",
+              text = "PDF",
+              orientation = "portrait",
+              pageSize = "A4",
+              messageTop = "Tabela com dados históricos da Meta 11a (2007–2024)"
+            )
+          ),
+          scrollX = TRUE
+        ),
+        class = "stripe nowrap display"
       )
+      
+
+      
+    })
+    
+  #########################################################?????????????????????????????????????????
+    #########################################################?????????????????????????????????????????
+    #########################################################?????????????????????????????????????????
+    #########################################################?????????????????????????????????????????
+    #########################################################?????????????????????????????????????????
+    #########################################################?????????????????????????????????????????
+    ## REACTIVES
+    
+    ######
+    meta11a_data2 <- reactive({
+      req(input$meta11a_uf, input$meta11a_ept_var2, input$meta11a_med_var2)
+      
+      df <- df_censo_UF |>
+        filter(NM_UF == input$meta11a_uf, AGREG == "UF_TUDO") |>
+        group_by(ANO) |>
+        summarise(
+          EPT = sum(.data[[input$meta11a_ept_var2]], na.rm = TRUE),
+          MEDIO = sum(.data[[input$meta11a_med_var2]], na.rm = TRUE),
+          .groups = "drop"
+        ) |>
+        mutate(PCT_EPT = ifelse(MEDIO > 0, 100 * EPT / MEDIO, NA))
+      
+      return(df)
+    })
+    
+    
+    # Meta 11a second part
+    meta11a_expansao_publica_hist2 <- reactive({
+      req(input$meta11a_uf, input$meta11a_ept_var2)
+      
+      df_total <- df_censo_UF |>
+        filter(NM_UF == input$meta11a_uf, AGREG == "UF_TUDO") |>
+        group_by(ANO) |>
+        summarise(EPT_TOTAL = sum(.data[[input$meta11a_ept_var2]], na.rm = TRUE), .groups = "drop")
+      
+      df_pub <- df_censo_UF |>
+        filter(NM_UF == input$meta11a_uf, AGREG == "UF_PUB") |>
+        group_by(ANO) |>
+        summarise(EPT_PUB = sum(.data[[input$meta11a_ept_var2]], na.rm = TRUE), .groups = "drop")
+      
+      df_joined <- full_join(df_total, df_pub, by = "ANO") |>
+        arrange(ANO) |>
+        mutate(
+          DELTA_TOTAL = pmax(EPT_TOTAL - lag(EPT_TOTAL), 0),
+          DELTA_PUB = pmax(EPT_PUB - lag(EPT_PUB), 0),
+          SHARE_PUB = ifelse(DELTA_TOTAL > 0, DELTA_PUB / DELTA_TOTAL, NA)
+        ) |>
+        filter(!is.na(ANO), ANO >= 2008, ANO <= 2035)  # include up to 2035
+      
+      return(df_joined)
+    })
+    
+    
+    
+    output$meta11a_plot2 <- renderPlot({
+      df <- meta11a_data() 
+      
+      # Define anos de base para tendência histórica
+      years_trend <- 2020:2024
+      
+      # Último ano observado
+      latest_year <- max(df$ANO, na.rm = TRUE)
+      
+      # Ano-alvo definido pelo usuário
+      target_year <- as.numeric(input$meta11a_target_year)
+      
+      # Quantos anos faltam até o ano-alvo
+      years_left <- target_year - 2024
+      
+      # Valores de 2024
+      current_row <- df |> filter(ANO == 2024)
+      current_pct <- current_row$PCT_EPT
+      current_ept <- current_row$EPT
+      current_med <- current_row$MEDIO
+      
+      latest_pct <- df |> filter(ANO == latest_year) |> pull(PCT_EPT)
+      
+      # Estimar tendência linear para o Ensino Médio
+      lm_med <- lm(MEDIO ~ ANO, data = df |> filter(ANO %in% years_trend))
+      base_slope <- coef(lm_med)["ANO"]
+      
+      # Aplicar ajuste com o fator do slider
+      slope_factor <- input$ensino_slope_factor  # entre 0.5 e 1.5
+      adjusted_slope <- base_slope * slope_factor
+      
+      # Projeção do Ensino Médio no ano-alvo
+      projected_med <- current_med + adjusted_slope * years_left
+      
+      # Quantidade de estudantes necessária para atingir 50% da meta
+      target_students <- 0.5 * projected_med
+      
+      # Crescimento absoluto necessário (em matrículas EPT)
+      growth_abs <- if (!is.na(current_ept) && years_left > 0) {
+        (target_students - current_ept) / years_left
+      } else {
+        NA_real_
+      }
+      
+      # Crescimento percentual anual necessário (em pontos percentuais)
+      required_growth <- if (!is.na(current_pct) && years_left > 0) {
+        (50 - current_pct) / years_left
+      } else {
+        NA_real_
+      }
+      
+      
+      
+      # Texto da projeção do Ensino Médio
+      em_text <- paste0(
+        "<b>EM: Projetado</b><br>",
+        format(round(projected_med), big.mark = ".", decimal.mark = ","), " alunos<br>matriculados"
+      )
+      
+      
+      
+      
+      
+      # Prepare the label
+      growth_text <- paste0(
+        "<b>Para atingir 50%</b><br>",
+        "em ", input$meta11a_target_year, ":<br>",
+        "crescimento de<br>",
+        "<span style='color:#1f5673'><b>", round(required_growth, 1), "%</b></span> ao ano<br>",
+        "(", formatC(growth_abs, format = "d", big.mark = "."), " alunos/ano)"
+      )
+      
+      
+      # with checkbox
+      
+      
+      
+      
+      
+      
+      
+      # Base plot: line and points
+      gg <- ggplot(df, aes(x = ANO, y = PCT_EPT)) +
+        
+        
+        # Meta 11a fixed line
+        geom_hline(yintercept = 45, color = "darkgreen", linetype = "dashed", linewidth = 1.1) +
+        annotate("text", x = 2008, y = 45, label = "Meta 11a público: 45%", color = "darkgreen", vjust = -1, fontface = "bold")
+      
+
+      gg <- gg +
+        scale_x_continuous(breaks = 2013:2026, limits = c(2012, 2026)) +
+        scale_y_continuous(limits = c(0, 110), labels = scales::percent_format(scale = 1)) +
+        labs(
+          title = paste("UF:", input$meta11a_uf),
+          subtitle = "Expansão no EPT na rede Pública como % da expansão no EPT",
+          x = "Ano",
+          y = "% de Matrículas em EPT"
+        ) +
+        theme_minimal(base_size = 14) +
+        theme(plot.title = element_text(face = "bold"))
+      
+      
+      
+      # Dentro do renderPlot principal
+      if (input$mostrar_expansao_publica) {
+        df_pub_share <- meta11a_expansao_publica_hist()
+        
+        gg <- gg +
+          geom_point(
+            data = df_pub_share,
+            aes(x = ANO, y = 100*SHARE_PUB),
+            color = "#FF6600",
+            size = 5,
+            inherit.aes = FALSE
+          )+ 
+          ggtext::geom_richtext(
+            data = df_pub_share |> filter(!is.na(SHARE_PUB)),
+            aes(
+              x = ANO,
+              y = 100 * SHARE_PUB,
+              label = paste0(
+                "<b>Expansão ", ANO - 1, "–", ANO, "</b><br>",
+                "EPT total: ", format(round(DELTA_TOTAL), big.mark = "."), "<br>",
+                "EPT pública: ", format(round(DELTA_PUB), big.mark = "."), "<br>",
+                "Público: ", round(100 * SHARE_PUB, 1), "%"
+              )
+            ),
+            fill = "white",
+            label.color = "#FF6600",
+            color = "black",
+            size = 3,
+            label.size = 0.4,
+            label.r = unit(6, "pt"),
+            label.padding = unit(c(3, 5, 3, 5), "pt"),
+            vjust = -0.5,
+            inherit.aes = FALSE
+          )
+      }
+      
+      
+      return(gg)
+      
+      
     })
     
     
     
     
-    
-    
-    
-  })
-  
-  
 }  
   
 

@@ -36,8 +36,7 @@ s3_path <- paste0("rawdata/mec_inep/", file_name)
 update_data_from_s3(local_path, s3_path, bucket_name)
 
 # --- Step 5: Load and clean into a tibble ---
-df_ed_basica_2024 <- read_csv2(local_path, locale = locale(encoding = "ISO-8859-1")) %>%
-  clean_names()
+df_ed_basica_2024 <- read_csv2(local_path, locale = locale(encoding = "ISO-8859-1")) 
 
 # Optional: preview structure
 glimpse(df_ed_basica_2024)
