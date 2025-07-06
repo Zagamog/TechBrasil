@@ -1,10 +1,9 @@
 # prepara_censo_escolar_tecnico.R
-# Process Censo Escolar EPT technical course data, validate totals, enrich with geo metadata, and upload results to S3.
+# Processa suplemento de cursos técnicos (2023–2024) com base no padrão INEP
 
 library(here)
 library(tidyverse)
-library(janitor)
-library(readxl)
+library(readr)
 library(aws.s3)
 library(dotenv)
 library(digest)
@@ -14,7 +13,6 @@ dotenv::load_dot_env()
 bucket_name <- "techbrazildata"
 
 # --- Step 2: Utilities ---
-
 update_data_from_s3 <- function(local_path, s3_path, bucket) {
   if (!file.exists(local_path)) {
     tryCatch({
@@ -50,94 +48,36 @@ upload_if_different <- function(local_path, s3_path, bucket) {
 
 # --- Step 3: File paths ---
 input_folder <- here("rawdata", "mec_inep")
-df_ibge_path <- here("rawdata", "ibge", "df_codes_ibge.rds")
-totals_path <- here("working", "mec_inep", "matriculas_total_em_ept_uf_20162024.csv")
+output_folder <- here("working", "mec_inep")
+dir.create(output_folder, recursive = TRUE, showWarnings = FALSE)
 
-# --- Step 4: Load IBGE geo data and UF lookup ---
-df_codes_ibge <- read_rds(df_ibge_path)
-
-uf_lookup <- df_codes_ibge %>%
-  distinct(CO_UF, SG_UF)
-
-# --- Step 5: Import EPT suplemento data with fallback ---
-importa_censo_tec <- function(ano) {
-  local_path <- here(input_folder, paste0("suplemento_cursos_tecnicos_", ano, ".csv"))
+# --- Step 4: Process one year of supplement and save ---
+processar_suplemento_ano <- function(ano) {
+  message("📥 Processando suplemento técnico: ", ano)
+  
+  local_path <- file.path(input_folder, paste0("suplemento_cursos_tecnicos_", ano, ".csv"))
   s3_path <- paste0("rawdata/mec_inep/suplemento_cursos_tecnicos_", ano, ".csv")
   update_data_from_s3(local_path, s3_path, bucket_name)
   
-  read_csv2(local_path, locale = locale(encoding = "ISO-8859-1")) %>%
-    clean_names() %>%
-    rename(
-      ano = nu_ano_censo,
-      CO_UF = co_uf,
-      CO_MUN = co_municipio
-    ) %>%
-    filter(tp_dependencia == 2) %>%
-    select(ano, CO_UF, CO_MUN, no_area_curso_profissional, no_curso_educ_profissional, qt_mat_curso_tec)
+  if (!file.exists(local_path)) stop("❌ Arquivo não encontrado: ", local_path)
+  
+  df_proc <- read_csv2(local_path, locale = locale(encoding = "ISO-8859-1")) %>%
+    rename(CO_MUN = CO_MUNICIPIO, ANO = NU_ANO_CENSO) %>%
+    select(CO_MUN, CO_ENTIDADE, NO_ENTIDADE, ANO,TP_DEPENDENCIA,
+           NO_AREA_CURSO_PROFISSIONAL, NO_CURSO_EDUC_PROFISSIONAL,
+           starts_with("QT_")) %>%
+    mutate(across(starts_with("QT_"), ~replace_na(., 0)))
+  
+  obj_name <- paste0("df_censo_supl_tec", substr(ano, 3, 4))
+  assign(obj_name, df_proc, envir = .GlobalEnv)
+  
+  rda_path <- file.path(output_folder, paste0(obj_name, ".rda"))
+  save(list = obj_name, file = rda_path)
+  
+  s3_key <- paste0("working/mec_inep/", obj_name, ".rda")
+  upload_if_different(rda_path, s3_key, bucket_name)
 }
 
-# --- Step 6: Load and combine data for 2023 and 2024 ---
-censo_tec <- map_dfr(c(2023, 2024), importa_censo_tec)
-
-# --- Step 7: Load official totals and map SG_UF to CO_UF ---
-update_data_from_s3(totals_path, "working/mec_inep/matriculas_total_em_ept_uf_20162024.csv", bucket_name)
-
-matriculas_uf <- read_csv(totals_path) %>%
-  rename(SG_UF = sigla_uf) %>%
-  left_join(uf_lookup, by = "SG_UF")
-
-# --- Step 8: Validate totals by CO_UF and year ---
-censo_tec %>%
-  group_by(CO_UF, ano) %>%
-  summarise(matriculas_tec = sum(qt_mat_curso_tec, na.rm = TRUE), .groups = "drop") -> confere
-
-inner_join(
-  select(matriculas_uf, ano, CO_UF, matriculas_total_tecprof),
-  confere,
-  by = c("ano", "CO_UF")
-) -> compara
-
-# Optional: flag mismatches
-mismatches <- compara %>%
-  filter(matriculas_total_tecprof != matriculas_tec)
-
-if (nrow(mismatches) > 0) {
-  message("⚠️ Discrepancies found in total validation:")
-  print(mismatches)
-} else {
-  message("✅ Totals match between processed data and official file.")
-}
-
-# --- Step 9: Aggregate by municipality and course ---
-matriculas_tec_ano_mun_area_curso <- censo_tec %>%
-  group_by(CO_MUN, ano, no_area_curso_profissional, no_curso_educ_profissional) %>%
-  summarise(matriculas_tec = sum(qt_mat_curso_tec, na.rm = TRUE), .groups = "drop")
-
-# --- Step 10: Enrich with geo metadata from df_codes_ibge ---
-matriculas_tec_ano_mun_area_curso <- matriculas_tec_ano_mun_area_curso %>%
-  left_join(df_codes_ibge %>% select(CO_MUN, NM_MUN, NM_UF, NM_RGIMED, NM_RGIINTM, CO_RGIMED, CO_RGIINTM),
-            by = "CO_MUN") %>%
-  relocate(ano, NM_UF, NM_MUN, NM_RGIMED, NM_RGIINTM, .before = CO_MUN)
-
-# --- Step 11: Save and upload outputs ---
-csv_output <- here("working", "mec_inep", "matriculas_tec_ano_mun_area_curso.csv")
-rda_output <- here("working", "mec_inep", "matriculas_tec_ano_mun_area_curso.rda")
-
-write_csv(matriculas_tec_ano_mun_area_curso, csv_output)
-save(matriculas_tec_ano_mun_area_curso, file = rda_output)
-
-upload_if_different(csv_output, "working/mec_inep/matriculas_tec_ano_mun_area_curso.csv", bucket_name)
-upload_if_different(rda_output, "working/mec_inep/matriculas_tec_ano_mun_area_curso.rda", bucket_name)
-
-# RGN
-
-matriculas_por_curso_RGN <- matriculas_tec_ano_mun_area_curso %>% filter(SG_UF=="RN") %>%
-  group_by(NM_RGIMED, NM_RGIINTM, ano, no_area_curso_profissional, no_curso_educ_profissional) %>%
-  summarise(matriculas_tec = sum(matriculas_tec, na.rm = TRUE), .groups = "drop")
-
-openxlsx::write.xlsx(matriculas_por_curso_RGN,file="D:/Temp/matriculas_por_curso_RGN.xlsx")
-
-
-matriculas_por_curso_por_esc_RGN <- matriculas_tec_ano_mun_area_curso %>% filter(SG_UF=="RN") 
-openxlsx::write.xlsx(matriculas_por_curso_por_esc_RGN,file="D:/Temp/matriculas_por_curso_por_esc_RGN.xlsx")
-
+# --- Step 5: Processar 2023 e 2024 separadamente ---
+processar_suplemento_ano(2023)
+processar_suplemento_ano(2024)

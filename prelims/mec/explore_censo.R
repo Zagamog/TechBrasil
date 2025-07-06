@@ -109,5 +109,129 @@ junk2 <- junk %>% filter (CO_UF==29) %>% select(
 glimpse(junk2)
 
 
+junk <- read.xlsx("D:/Country/Brazil/TechBrazil/rawdata/mec_inep/Garabed_MTjuly25.xlsx", sheet="E_Medio_Prop_Prof")
+library(tidyverse)
+
+# Primeiro, filtra apenas os casos relevantes e soma por combinação chave
+parcial_regular_check <- E_Medio_DepAdm %>%
+  filter(Forma.de.Oferta %in% c("Médio_Parcial", "Médio_Regular", "Médio_Total")) %>%
+  group_by(Ano, UF, `Dependência.Adm.`, Forma.de.Oferta) %>%
+  summarise(total = sum(Matrículas, na.rm = TRUE), .groups = "drop") %>%
+  pivot_wider(
+    names_from = Forma.de.Oferta,
+    values_from = total,
+    values_fill = 0
+  ) %>%
+  mutate(
+    Soma_Parcial_Regular = Médio_Parcial + Médio_Regular,
+    Diferenca = Médio_Total - Soma_Parcial_Regular
+  )
+
+# Exibir inconsistências
+parcial_regular_check %>%
+  filter(abs(Diferenca) > 0)
+
+parcial_integral_check <- E_Medio_DepAdm %>%
+  filter(Forma.de.Oferta %in% c("Médio_Parcial", "Médio_Integral", "Médio_Total")) %>%
+  group_by(Ano, UF, `Dependência.Adm.`, Forma.de.Oferta) %>%
+  summarise(total = sum(Matrículas, na.rm = TRUE), .groups = "drop") %>%
+  pivot_wider(
+    names_from = Forma.de.Oferta,
+    values_from = total,
+    values_fill = 0
+  ) %>%
+  mutate(
+    Soma_Parcial_Integral = Médio_Parcial + Médio_Integral,
+    Diferenca = Médio_Total - Soma_Parcial_Integral
+  )
+
+# Ver inconsistências
+parcial_integral_check %>%
+  filter(abs(Diferenca) == 0)
+
+eja_check <- E_Medio_DepAdm %>%
+  filter(Forma.de.Oferta %in% c("Médio_EJA", "Técnico Integrado EJA", "Médio_EJA_Integrado_FIC")) %>%
+  group_by(Ano, UF, `Dependência.Adm.`, Forma.de.Oferta) %>%
+  summarise(total = sum(Matrículas, na.rm = TRUE), .groups = "drop") %>%
+  pivot_wider(
+    names_from = Forma.de.Oferta,
+    values_from = total,
+    values_fill = 0
+  ) %>%
+  mutate(
+    Soma_EJA_TEC = `Técnico Integrado EJA` + `Médio_EJA_Integrado_FIC`,
+    Diferenca = `Médio_EJA` - Soma_EJA_TEC
+  )
+
+# Verificar se são iguais
+eja_check %>% filter(abs(Diferenca) != 0)
+
+prof_check <- E_Medio_DepAdm %>%
+  filter(Forma.de.Oferta %in% c(
+    "Médio_Profissional",
+    "Técnico Integrado",
+    "Técnico Integrado EJA",
+    "Normal/Magistério",
+    "Médio_EJA_Integrado_FIC"
+  )) %>%
+  group_by(Ano, UF, `Dependência.Adm.`, Forma.de.Oferta) %>%
+  summarise(total = sum(Matrículas, na.rm = TRUE), .groups = "drop") %>%
+  pivot_wider(
+    names_from = Forma.de.Oferta,
+    values_from = total,
+    values_fill = 0
+  ) %>%
+  mutate(
+    Soma_Subtipos = `Técnico Integrado` + `Técnico Integrado EJA` +
+      `Normal/Magistério` + `Médio_EJA_Integrado_FIC`,
+    Diferenca = `Médio_Profissional` - Soma_Subtipos
+  )
+
+# Verificar inconsistências
+prof_check %>%
+  filter(abs(Diferenca) > 0)
+
+
+
+total_vs_componentes <- E_Medio_DepAdm %>%
+  filter(Forma.de.Oferta %in% c("Médio_Total", "Médio_Regular", "Médio_Profissional", "Médio_EJA")) %>%
+  group_by(Ano, UF, `Dependência.Adm.`, Forma.de.Oferta) %>%
+  summarise(total = sum(Matrículas, na.rm = TRUE), .groups = "drop") %>%
+  pivot_wider(
+    names_from = Forma.de.Oferta,
+    values_from = total,
+    values_fill = 0
+  ) %>%
+  mutate(
+    Soma_Componentes = `Médio_Regular` + `Médio_Profissional` + `Médio_EJA`,
+    Diferenca = `Médio_Total` - Soma_Componentes
+  )
+
+# Mostrar inconsistências
+total_vs_componentes %>%
+  filter(abs(Diferenca) != 0)
+
+
+E_Medio_DepAdm %>%
+  filter(Forma.de.Oferta %in% c("Médio_Regular", "Médio_Profissional")) %>%
+  group_by(Ano, UF, `Dependência.Adm.`, Forma.de.Oferta) %>%
+  summarise(total = sum(Matrículas, na.rm = TRUE), .groups = "drop") %>%
+  pivot_wider(
+    names_from = Forma.de.Oferta,
+    values_from = total,
+    values_fill = 0
+  ) %>%
+  mutate(Prof_maior_que_Regular = `Médio_Profissional` > `Médio_Regular`) %>%
+  filter(Prof_maior_que_Regular == TRUE)
+
+
+
+
+
+
+
+
+
+
 
 

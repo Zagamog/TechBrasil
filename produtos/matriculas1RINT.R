@@ -1,8 +1,38 @@
-# matriculas1UF.R
+# matriculas1RINT.R
 
 library(dplyr)
 library(purrr)
 library(tidyr)
+library(aws.s3)
+
+
+dotenv::load_dot_env()
+bucket_name <- "techbrazildata"
+
+upload_if_missing_or_changed <- function(local_path, s3_key, bucket) {
+  if (!file.exists(local_path)) stop("❌ Local file not found: ", local_path)
+  temp_s3 <- tempfile(fileext = ".rda")
+  s3_exists <- tryCatch({
+    save_object(object = s3_key, bucket = bucket, file = temp_s3)
+    TRUE
+  }, error = function(e) FALSE)
+  
+  if (!s3_exists) {
+    message("☁️ Not found on S3 — uploading: ", s3_key)
+    put_object(file = local_path, object = s3_key, bucket = bucket)
+    return(TRUE)
+  }
+  
+  local_hash <- digest(local_path, algo = "md5")
+  s3_hash <- digest(temp_s3, algo = "md5")
+  if (local_hash != s3_hash) {
+    message("🔁 File changed — uploading: ", s3_key)
+    put_object(file = local_path, object = s3_key, bucket = bucket)
+  } else {
+    message("✅ S3 version is up to date: ", s3_key)
+  }
+}
+
 
 load("working/ibge/df_codes_ibge.rda")
 
@@ -198,5 +228,12 @@ df_censo_RGINTM <- bind_rows(df_tudos_aggRGINTM, df_red_aggRGINTM, df_pub_aggRGI
 
 save(df_censo_RGINTM, file = "working/mec_inep/df_censo_RGINTM.rda")
 
+# Upload para S3 se necessário
+s3_key_final <- "working/mec_inep/df_censo_RGINTM.rda"
+tryCatch({
+  upload_if_missing_or_changed("working/mec_inep/df_censo_RGINTM.rda", s3_key_final, bucket_name)
+}, error = function(e) {
+  warning("❌ Upload to S3 failed: ", e$message)
+})
 
 

@@ -199,4 +199,12 @@ df_censo_RIME <- bind_rows(df_tudos_aggRIME, df_red_aggRIME, df_pub_aggRIME)
 save(df_censo_RIME, file = "working/mec_inep/df_censo_RIME.rda")
 
 
+# Upload para S3 se necessário
+s3_key_final <- "working/mec_inep/df_censo_RIME.rda"
+tryCatch({
+  upload_if_missing_or_changed("working/mec_inep/df_censo_RIME.rda", s3_key_final, bucket_name)
+}, error = function(e) {
+  warning("❌ Upload to S3 failed: ", e$message)
+})
+
 
