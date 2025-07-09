@@ -115,22 +115,25 @@ E_Medio_Garabed1 <- E_Medio_mainR %>%
   left_join(df_, by = "CO_UF") %>%
   relocate(NM_UF, .before = SG_UF)
 
-
+save(E_Medio_Garabed1, file = here("working", "mec_inep", "E_Medio_Garabed1.rda"))
 
 # --- Step 7: Ler a planilha "E_Medio_Prop_ProfDepAdm" ---
 
-if (file.exists(local_path)) {
-  df <- openxlsx::read.xlsx(local_path, sheet = "E_Medio_Prop_Prof_DepAdm")
-  message("✅ Planilha 'aaa' carregada com sucesso.")
-} else {
-  stop("❌ Arquivo não encontrado localmente nem no S3: ", local_path)
-}
-# Import from xlsx file
 
-E_Medio_DepAdm <- openxlsx::read.xlsx(local_path, sheet = "E_Medio_Prop_Prof_DepAdm") %>% arrange(Ano,UF)
-E_Medio_DepAdm %>% select(Forma.de.Oferta) %>% unique()
-E_Medio_DepAdm %>% select(`Dependência.Adm.`) %>% unique()
-# Could not figure out usefulness of the aggregates here
+# This is from the Censo Escolar Microdados so we will not use it as we already have comprehensive treatment elsewhere
+
+# if (file.exists(local_path)) {
+#   df <- openxlsx::read.xlsx(local_path, sheet = "E_Medio_Prop_Prof_DepAdm")
+#   message("✅ Planilha 'aaa' carregada com sucesso.")
+# } else {
+#   stop("❌ Arquivo não encontrado localmente nem no S3: ", local_path)
+# }
+# # Import from xlsx file
+# 
+# E_Medio_DepAdm <- openxlsx::read.xlsx(local_path, sheet = "E_Medio_Prop_Prof_DepAdm") %>% arrange(Ano,UF)
+# E_Medio_DepAdm %>% select(Forma.de.Oferta) %>% unique()
+# E_Medio_DepAdm %>% select(`Dependência.Adm.`) %>% unique()
+# # Could not figure out usefulness of the aggregates here
 
 # --- Step 8: Ler a planilha "E_Medio_Prop_ProfDepAdm" ---
 
@@ -185,7 +188,7 @@ Tecnico_FormaR <- Tecnico_Forma %>%
 
 
 # Agregações padronizadas
-Tecnico_FormaR <- Tecnico_FormaR %>%
+Tecnico_FormaR_Garabed1 <- Tecnico_FormaR %>%
   group_by(ANO, SG_UF, TP_DEPENDENCIA) %>%
   summarise(
     QT_MAT_PROF = sum(Matrículas, na.rm = TRUE),
@@ -202,12 +205,12 @@ Tecnico_FormaR <- Tecnico_FormaR %>%
     .groups = "drop"
   )
 
-# Visualizar resultado
-glimpse(Tecnico_FormaR)
+save(Tecnico_FormaR_Garabed1, file = here("working", "mec_inep", "Tecnico_FormaR_Garabed1.rda"))
+
 
 ## By curso
 
-Tecnico_Forma_Cursos <- Tecnico_Forma %>%
+Tecnico_Forma_Cursos_Garabed1 <- Tecnico_Forma %>%
   rename(
     ANO = Ano,
     SG_UF = UF,
@@ -223,14 +226,22 @@ Tecnico_Forma_Cursos <- Tecnico_Forma %>%
 
 # QT_MAT_CURSO_TEC is the total of CT + CONC + SUBS + EJA
 # validation
-total_cursos_check <- Tecnico_Forma_Cursos %>%
+total_cursos_check <- Tecnico_Forma_Cursos_Garabed1 %>%
   group_by(ANO, SG_UF, TP_DEPENDENCIA) %>%
   summarise(SOMA_CURSOS = sum(QT_MAT_CURSO_TEC, na.rm = TRUE), .groups = "drop")
 
-comparacao <- Tecnico_FormaR %>%
+comparacao <- Tecnico_FormaR_Garabed1 %>%
   left_join(total_cursos_check, by = c("ANO", "SG_UF", "TP_DEPENDENCIA")) %>%
   mutate(DIF = QT_MAT_CURSO_TEC - SOMA_CURSOS)
 
 comparacao %>% filter(abs(DIF) > 0)
 
+save(Tecnico_Forma_Cursos_Garabed1, file = here("working", "mec_inep", "Tecnico_Forma_Cursos_Garabed1.rda"))
 
+path_area <- here("working", "mec_inep", "E_Medio_Garabed1.rda")
+path_curso1 <- here("working", "mec_inep", "Tecnico_FormaR_Garabed1.rda")
+path_curso2 <- here("working", "mec_inep", "Tecnico_Forma_Cursos_Garabed1.rda")
+
+upload_if_missing_or_changed(path_area, "working/mec_inep/E_Medio_Garabed1.rda", bucket_name)
+upload_if_missing_or_changed(path_curso1, "working/mec_inep/Tecnico_FormaR_Garabed1.rda", bucket_name)
+upload_if_missing_or_changed(path_curso2, "working/mec_inep/Tecnico_Forma_Cursos_Garabed1.rda", bucket_name)

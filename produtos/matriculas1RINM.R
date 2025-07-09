@@ -18,7 +18,8 @@ qt_vars_base <- c("QT_MAT_PROF_TEC", "QT_MAT_PROF", "QT_MAT_MED", "QT_MAT_BAS", 
 
 qt_vars_new <- c("QT_MAT_PROF_TEC_SUBS", "QT_MAT_EJA_MED_TEC", 
                  "QT_MAT_EJA_FUND_FIC", "QT_MAT_EJA_MED_FIC",
-                 "QT_MAT_PROF_TEC_MED","QT_MAT_MED_CT")
+                 "QT_MAT_PROF_TEC_MED","QT_MAT_MED_CT",
+                 "QT_MAT_EJA_MED","QT_MAT_MED_PROP")
 
 qt_vars_extra <- c("QT_MAT_PROF_TEC_PROPAG", "QT_MAT_EJA_ARTIC_EPT", "QT_MAT_MED_NM")
 

@@ -9,6 +9,7 @@ library(scales)
 library(patchwork)
 library(dplyr)
 library(tidyr)
+library(purrr)
 
 options(warn=-1) # Too many pesky warnings, terrain, terrain, terrain, pull up, pull up 
 
@@ -17,6 +18,8 @@ propag_ept_financeiro <- readRDS("propag_ept_financeiro.rds")
 
 # Load Censo Escolar data 2007 to 2024 UF aggregates
 load("df_censo_UF.rda")
+
+load("meta11a_opcoes.rda")  
 
 # Get State names for display
 nome_ufs <- sort(unique(df_censo_UF$NM_UF))  # Ensure sorted and unique
@@ -313,7 +316,34 @@ ui <- dashboardPage(
                 
                 
                 
-                tabPanel("Painel 6", h4("Placeholder Content for Panel 6")),
+                tabPanel("Novo Tab Meta 11a - parte 1",
+                         fluidPage(
+                           h3("Meta 11a – Comparação das Definições", style = "color: #1f5673; font-weight: bold;"),
+                           
+                           fluidRow(
+                             column(3,
+                                    selectizeInput(
+                                      inputId = "meta11a_nova_uf",
+                                      label = "Selecionar UF:",
+                                      choices = sort(unique(meta11a_opcoes$NM_UF)),
+                                      selected = "Rio de Janeiro"
+                                    )
+                             ),
+                             column(6,
+                                    checkboxGroupInput(
+                                      inputId = "meta11a_nova_definicoes",
+                                      label = "Escolher definições para comparar:",
+                                      choices = c("Meta11a_opcao1", "Meta11a_opcao2", "Meta11a_opcao3"),
+                                      selected = c("Meta11a_opcao1", "Meta11a_opcao2", "Meta11a_opcao3"),
+                                      inline = TRUE
+                                    )
+                             )
+                           ),
+                           
+                           plotOutput("meta11a_nova_plot", height = "600px")
+                         )
+                ),
+                
                 tabPanel("Painel 7", h4("Placeholder Content for Panel 7")),
                 tabPanel("Estatísticas Relevantes", DTOutput("P8_table"))
     )
@@ -1418,9 +1448,190 @@ return(gg)
       
     })
     
+############^^&^(^(^(*^(*^(*^(^(*^(*))))))))
+    ############^^&^(^(^(*^(*^(*^(^(*^(*))))))))
+    ############^^&^(^(^(*^(*^(*^(^(*^(*))))))))
+    ############^^&^(^(^(*^(*^(*^(^(*^(*))))))))
     
+    output$meta11a_nova_plot <- renderPlot({
+      req(input$meta11a_nova_uf, input$meta11a_nova_definicoes)
+      
+      df <- meta11a_opcoes %>%
+        filter(NM_UF == input$meta11a_nova_uf) %>%
+        select(ANO, all_of(input$meta11a_nova_definicoes)) %>%
+        pivot_longer(
+          cols = -ANO,
+          names_to = "Definicao",
+          values_to = "Meta11a"
+        )
+      
+      # Criar tooltip text com dados brutos
+      df_tooltip <- meta11a_opcoes %>%
+        filter(NM_UF == input$meta11a_nova_uf) %>%
+        select(ANO, SG_UF, NM_UF, QT_MAT_MED, QT_MAT_PROF_TEC_PROPAG, QT_MAT_CURSO_TEC_CT, QT_MAT_CURSO_TEC_CONC) %>%
+        mutate(across(where(is.numeric), ~format(round(.), big.mark = ".", decimal.mark = ","))) %>%
+        unite("tooltip_text",
+              QT_MAT_PROF_TEC_PROPAG, QT_MAT_CURSO_TEC_CT, QT_MAT_CURSO_TEC_CONC, QT_MAT_MED,
+              sep = " | ",
+              na.rm = TRUE
+        ) %>%
+        mutate(
+          tooltip_text = paste0("Matrículas: ", tooltip_text),
+          ANO = as.numeric(ANO)  # <-- Corrige o tipo
+        )
+      
+      
+      df <- df %>%
+        left_join(df_tooltip %>% select(ANO, tooltip_text), by = "ANO")
+      
+      # Color labels
+      
+      # Definir cores para as opções
+      definicao_colors <- c(
+        "Meta11a_opcao1" = "blue",
+        "Meta11a_opcao2" = "red",
+        "Meta11a_opcao3" = "#594712"
+      )
+      
+      
+      df <- df %>%
+        mutate(
+          color_label = definicao_colors[Definicao]
+        )
+      
+      
+      # PROJEÇÕES PARA CADA DEFINIÇÃO DE META 11a
+      
+      # Agrupar por Definicao e ajustar linha linear
+      # Agrupar por Definicao e aplicar projeção com ajuste via slider
+      proj_lines <- df %>%
+        filter(ANO %in% 2020:2024, !is.na(Meta11a)) %>%
+        group_by(Definicao) %>%
+        nest() %>%
+        mutate(
+          model = map(data, ~ lm(Meta11a ~ ANO, data = .x)),
+          slope = map_dbl(model, ~ coef(.x)["ANO"]),
+          slope_adj = slope * input$ensino_slope_factor,
+          intercept = map_dbl(model, ~ coef(.x)["(Intercept)"]),
+          start_2024 = map_dbl(data, ~ .x$Meta11a[.x$ANO == 2024]),
     
+          proj = map2(slope_adj, start_2024, ~ {
+            years_proj <- 2024:as.numeric(input$meta11a_target_year)
+            tibble(
+              ANO = years_proj,
+              Meta11a = .y + .x * (years_proj - 2024)
+            )
+          })
+          
+          
+        ) %>%
+        select(Definicao, proj) %>%
+        unnest(proj)
+      
+      # Adiciona as linhas tracejadas de projeção
+      
+      
+      
+      # Gráfico
+  gg <- ggplot(df, aes(x = ANO, y = Meta11a, color = Definicao)) +
+        geom_line(size = 1.2) +
+        geom_point(size = 2.5) +
+        geom_hline(yintercept = 0.5, color = "darkgreen", linetype = "dashed", linewidth = 1.1) +
+        annotate(
+          "text", x = 2025, y = 0.5,
+          label = "Meta 11a: EPT forma 50% da matricula EM",size=6,
+          color = "darkorange", vjust = -1, fontface = "bold"
+        ) +
+        ggtext::geom_richtext(
+          aes(label = paste0("<b>", scales::percent(Meta11a, accuracy = 0.1), "</b>"),
+              color= Definicao),
+          label.color = df$color_label, 
+          fill = "white",
+          size = 4,
+          label.size = 0.25,
+          label.r = unit(5, "pt"),
+          label.padding = unit(c(3, 5, 3, 5), "pt"),
+          vjust = -0.8
+        )+
+      scale_color_manual(values = definicao_colors) +
+        scale_y_continuous(labels = scales::percent_format(scale = 1), limits = c(0, 0.6)) +
+        scale_x_continuous(breaks = 2007:2035, limits=c(2007,2035)) +
+        labs(
+          title = paste("Meta 11a – Comparação para:", input$meta11a_nova_uf),
+          x = "Ano",
+          y = "Atingimento PNE Meta 11a: Porcentagem Matricula de EPT sobre EM",
+          color = "Definição"
+        ) +
+        theme_minimal(base_size = 14) +
+        theme(legend.position = "none",
+              axis.text = element_text(size = 14),
+              axis.title = element_text(size = 14, colour = "blue", face= "bold"),
+              plot.title = element_text(size = 16, face = "bold", hjust = 0.5, color = "blue")  
+                  ) +
+        
+        ggtext::geom_textbox(
+          data = data.frame(x = 2012.5, y = 0.5),  # posição mais ao centro e abaixo do topo
+          aes(x = x, y = y, label = paste(
+            "<b>META 11a (Parte 1): </b> DEFINIÇÕES do Numerador de Matrículas:",
+            " ",
+            "Opção 1: Técnico Médio (Integrado, Concomitante, Subsequente e EJA) (PROPAG)",
+            " ",
+            "Opção 2: Técnico Médio (Integrado e Concomitante)",
+            " ",
+            "Opção 3: Técnico Médio (Somente Integrado)",
+            " ",
+            "Definição Denominador (comum para as 3 opções): Matrículas no Ensino Médio <br> (Variavel: QT_MAT_MED do Censo Escolar do INEP)",
+            sep = "<br>"
+          )),
+          width = unit(0.4, "npc"),        # ajuste fino (50% da largura do gráfico)
+          fill = "#fdf6e3",                # bege claro
+          box.color = "gray40",            # borda discreta
+          halign = 0,                      # texto à esquerda
+          color = "black",
+          size = 5,
+          fontface = "plain",
+          lineheight = 1.1,
+          box.padding = unit(c(5, 6, 5, 6), "pt"),
+          r = unit(6, "pt")                # cantos arredondados
+        )
+      
+  # PROJEÇÕES PARA CADA DEFINIÇÃO DE META 11a
+  
+  # Agrupar por Definicao e ajustar linha linear
+  proj_lines <- df %>%
+    filter(ANO >= 2020 & ANO <= 2024) %>%
+    group_by(Definicao) %>%
+    filter(!is.na(Meta11a)) %>%
+    nest() %>%
+    mutate(model = map(data, ~ lm(Meta11a ~ ANO, data = .x)),
+           last_value = map_dbl(data, ~ .x$Meta11a[.x$ANO == 2024])) %>%
+    mutate(proj = map2(model, last_value, ~ {
+      years <- 2024:input$meta11a_target_year
+      base_pred <- predict(.x, newdata = data.frame(ANO = years))
+      shift <- .y - predict(.x, newdata = data.frame(ANO = 2024))  # shift amount
+      tibble(
+        ANO = years,
+        Meta11a = base_pred + shift
+      )
+    })) %>%
+    select(Definicao, proj) %>%
+    unnest(proj)
+  
+  # Adiciona as linhas tracejadas de projeção
+  gg <- gg +
+    geom_line(
+      data = proj_lines,
+      aes(x = ANO, y = Meta11a, color = Definicao),
+      linetype = "dashed",
+      linewidth = 1
+    )
+  
+  return(gg)
     
+    })
+    
+      
+      
 }  
   
 
