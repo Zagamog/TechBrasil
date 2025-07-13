@@ -132,9 +132,6 @@ processar_csv_local <- function(anos, base_dir = here::here("rawdata", "mec_inep
   list(success = success_years, failed = failed_years)
 }
 
-
-
-
 processar_csv_local(2007:2021)  
 processar_csv_local(2022)  
 processar_csv_local(2023)  
