@@ -64,7 +64,7 @@ processar_suplemento_ano <- function(ano) {
   df_proc <- read_csv2(local_path, locale = locale(encoding = "ISO-8859-1")) %>%
     rename(CO_MUN = CO_MUNICIPIO, ANO = NU_ANO_CENSO) %>%
     select(CO_MUN, CO_ENTIDADE, NO_ENTIDADE, ANO,TP_DEPENDENCIA,
-           NO_AREA_CURSO_PROFISSIONAL, NO_CURSO_EDUC_PROFISSIONAL,
+           NO_AREA_CURSO_PROFISSIONAL, ID_AREA_CURSO_PROFISSIONAL, NO_CURSO_EDUC_PROFISSIONAL, CO_CURSO_EDUC_PROFISSIONAL,
            starts_with("QT_")) %>%
     mutate(across(starts_with("QT_"), ~replace_na(., 0)))
   
