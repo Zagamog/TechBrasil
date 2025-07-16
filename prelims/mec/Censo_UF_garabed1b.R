@@ -159,6 +159,34 @@ meta11a_opcoes <- meta11a_opcao1 %>%
   left_join(meta11a_opcao3, by = c("ANO", "SG_UF", "NM_UF"), suffix = c("", "_DROP2")) %>%
   select(-ends_with("_DROP"), -ends_with("_DROP2"))
 
+
+
+# Create Brazil total
+meta11a_brasil <- meta11a_opcoes %>%
+  group_by(ANO) %>%
+  summarise(
+    QT_MAT_MED = sum(coalesce(QT_MAT_MED, 0)),
+    QT_MAT_PROF_TEC_PROPAG = sum(coalesce(QT_MAT_PROF_TEC_PROPAG, 0)),
+    QT_MAT_CURSO_TEC_CT = sum(coalesce(QT_MAT_CURSO_TEC_CT, 0)),
+    QT_MAT_CURSO_TEC_CONC = sum(coalesce(QT_MAT_CURSO_TEC_CONC, 0)),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    QT_MAT_TEC_NUM2 = QT_MAT_CURSO_TEC_CT + QT_MAT_CURSO_TEC_CONC,
+    QT_MAT_TEC_NUM3 = QT_MAT_CURSO_TEC_CT,
+    Meta11a_opcao1 = QT_MAT_PROF_TEC_PROPAG / QT_MAT_MED,
+    Meta11a_opcao2 = QT_MAT_TEC_NUM2 / QT_MAT_MED,
+    Meta11a_opcao3 = QT_MAT_TEC_NUM3 / QT_MAT_MED,
+    NM_UF = "Brasil",
+    SG_UF = "BR"
+  ) %>%
+  relocate(NM_UF, SG_UF)
+
+
+
+# Append to original dataset
+meta11a_opcoes <- bind_rows(meta11a_opcoes, meta11a_brasil)
+
 save(meta11a_opcoes,file="D:/Country/Brazil/TechBrazil/working/mec_inep/meta11a_opcoes.rda")
 
 
@@ -172,19 +200,3 @@ put_object(
 )
 
 
-# I need to download the data from S3
-
-# Download the data from S3
-
-download_meta11a_opcoes <- function(local_path, s3_key, bucket) {
-  if (!file.exists(local_path)) {
-    tryCatch({
-      message("☁️ Downloading missing file from S3: ", s3_key)
-      save_object(object = s3_key, bucket = bucket, file = local_path)
-    }, error = function(e) {
-      stop("❌ Failed to download from S3: ", s3_key, " — ", e$message)
-    })
-  } else {
-    message("✅ Local version found: ", basename(local_path))
-  }
-}
