@@ -105,9 +105,6 @@ distribution = {
 df_distribution = pd.DataFrame(distribution)
 
 
-
-
-
 # Extract the 1st digit of the CBO code as 'Grande Grupo'
 df_censo_cbo_matched["CBO_code_str"] = df_censo_cbo_matched["CBO_code"].astype(str).str.zfill(6)
 df_censo_cbo_matched["Grande_Grupo"] = df_censo_cbo_matched["CBO_code_str"].str[0]
