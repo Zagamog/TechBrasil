@@ -4,6 +4,7 @@
 
 from pinecone import Pinecone
 from sentence_transformers import SentenceTransformer
+from dotenv import load_dotenv
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from torch.nn.functional import softmax
 import torch
@@ -13,21 +14,22 @@ import unicodedata
 import re
 from collections import Counter
 import pprint
+import random
 
 # --- Load Pinecone ---
+
+# --- 1. Setup Pinecone ---
+load_dotenv("D:/AdvancedR/knowbankedu/openai/.env")
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
 index = pc.Index("cnct-qbq")
 
 # --- Load models ---
-embed_model = SentenceTransformer("intfloat/e5-large-v2", device="cuda")
-tokenizer = AutoTokenizer.from_pretrained("cross-encoder/ms-marco-MiniLM-L12-v2")
-reranker = AutoModelForSequenceClassification.from_pretrained("cross-encoder/ms-marco-MiniLM-L12-v2").cuda()
+embed_model = SentenceTransformer("intfloat/multilingual-e5-large", device="cuda")
+
+
 
 # --- Load df ---
 df = pd.read_excel("D:/Country/Brazil/TechBrazil/working/qbq/df_censo_cbo_matched.xlsx")
-
-
-
 
 
 # --- Pick an example egresso ---
@@ -37,18 +39,11 @@ def normalize_namespace(text):
     text_hyphenated = re.sub(r"[^a-z0-9]+", "-", text_ascii)
     return re.sub(r"-+", "-", text_hyphenated).strip("-")
 
-def find_first_available_row(df, priorities=[3, 4, 5, 6, 7, 8, 9]):
-    for grp in priorities:
-        subset = df[df["cbo_1dig"] == grp]
-        if not subset.empty:
-            return subset.iloc[0]
-    return None
-
 # 🔍 Describe index once to get valid namespaces
 valid_namespaces = set(index.describe_index_stats().namespaces.keys())
 
 # 📦 Pick a valid row
-row = find_first_available_row(df)
+row = df.iloc[19]  # 0-based index, so 19 = 20th row
 if row is None:
     raise ValueError("❌ No matching row found for cbo_1dig priorities")
 
@@ -67,32 +62,34 @@ if egresso_id not in response.vectors:
     raise ValueError(f"❌ Vector ID '{egresso_id}' not found in namespace '{egresso_namespace}'")
 
 # --- Embed query ---
+###########################################
 query_vec = embed_model.encode(egresso_text).tolist()
 
-# --- Query ocupacao namespaces starting with técnicos (cbo_1dig = 3) ---
-# Normalize namespace values for ocupacao:: (cbo_gragru)
-# --- Normalize and validate ocupacao namespaces ---
-target_ns_list_raw = df[df.cbo_1dig == 3]["cbo_gragru"].dropna().unique()
 
-target_ns_list = []
-for val in target_ns_list_raw:
-    val_ascii = unicodedata.normalize("NFKD", val).encode("ascii", "ignore").decode().lower()
-    val_norm = re.sub(r"[^a-z0-9]+", "-", val_ascii).strip("-")
-    ns = f"ocupacao-{val_norm}"
-    if ns in valid_namespaces:
-        target_ns_list.append(ns)
-    else:
-        print(f"⚠️ Skipping namespace '{ns}' — not present in index")
+# Define target to query
+###############################################
+# Normalize namespace values for ocupacao:: (cbo_gragru)
+# These are the namespaces we will query from ocupações
+
+# Just grab existing occupation-related namespaces directly from Pinecone
+target_ns_list = [
+    ns for ns in valid_namespaces
+    if ns.startswith("ocupacao-")
+]
 
 if not target_ns_list:
-    raise ValueError("❌ No valid 'ocupacao' namespaces found in index for cbo_1dig == 3")
+    raise ValueError("❌ No valid 'ocupacao' namespaces found in index")
 
 
+## Now execute the query with payload to pinecone
+######################################
+#  Prepare an empty list to collect matches
 results_all = []
 
+# Loop through each ocupacao-* namespace
 for ns in target_ns_list:
     try:
-        res = index.query(vector=query_vec, namespace=ns, top_k=10, include_metadata=True)
+        res = index.query(vector=query_vec, namespace=ns, top_k=50, include_metadata=True)
         for match in res.matches:
             results_all.append({
                 "cbo_6dig": match.id,
@@ -106,61 +103,30 @@ if not results_all:
     print("⚠️ No results returned from vector query")
 
 
-# --- Rerank with CrossEncoder ---
-pairs = [(egresso_text, r["ocup_text"]) for r in results_all]
+###########################################################
+# --- Convert final list to DataFrame and sort by cosine score ---
+df_results = pd.DataFrame(results_all)
+df_results = df_results.sort_values(by="score_cosine", ascending=False).reset_index(drop=True)
 
-if not pairs:
-    raise ValueError("❌ No candidate pairs to rerank.")
-
-encodings = tokenizer(pairs, padding=True, truncation=True, return_tensors="pt").to("cuda")
-with torch.no_grad():
-    logits = reranker(**encodings).logits.squeeze().tolist()
-
-# Ensure logits is a list
-if isinstance(logits, float):
-    logits = [logits]
-
-# Attach raw reranked scores to results_all
-for i, score in enumerate(logits):
-    results_all[i]["score_reranked"] = score
-
-# --- Normalize reranked scores over all results ---
-min_score = min(logits)
-max_score = max(logits)
-for r in results_all:
-    r["score_reranked_norm"] = (r["score_reranked"] - min_score) / (max_score - min_score + 1e-8)
-
-# --- Deduplicate by cbo_6dig: keep highest scoring entry per code ---
-seen = {}
-for r in results_all:
-    code = r["cbo_6dig"]
-    if code not in seen or r["score_reranked"] > seen[code]["score_reranked"]:
-        seen[code] = r
-
-# --- Convert to DataFrame and sort ---
-df_results = pd.DataFrame(seen.values())
-df_results = df_results.sort_values(by="score_reranked_norm", ascending=False).reset_index(drop=True)
-
-# --- Add egresso metadata ---
+# --- Add egresso (course) metadata ---
 df_results["IDX_EIXCUR"] = egresso_id
 df_results["Denominacao_Curso_CNCT"] = row["Denominacao_Curso_CNCT"]
 
-# --- Merge occupation info from df ---
+# --- Ensure matching types for merge ---
 df_results["cbo_6dig"] = df_results["cbo_6dig"].astype(str)
 df["cbo_6dig"] = df["cbo_6dig"].astype(str)
 
-df_results = df_results.merge(
-    df[["cbo_6dig", "Ocupação", "Síntese", "PerfilOcupacional"]],
-    how="left",
-    on="cbo_6dig"
-)
+# --- Merge detailed occupation metadata from df (deduplicated) ---
+df_dedup = df.drop_duplicates(subset="cbo_6dig")[["cbo_6dig", "Ocupação", "Síntese", "PerfilOcupacional"]]
+df_results = df_results.merge(df_dedup, how="left", on="cbo_6dig")
 
-# --- Final column order ---
+# --- Final display columns ---
 df_results = df_results[[
     "IDX_EIXCUR", "Denominacao_Curso_CNCT", "cbo_6dig", "Ocupação",
-    "score_cosine", "score_reranked", "score_reranked_norm"
+    "score_cosine"
 ]]
 
-# --- Display or export ---
+# --- Display the result ---
 pd.set_option("display.max_colwidth", 100)
 print(df_results)
+

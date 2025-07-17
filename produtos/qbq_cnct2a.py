@@ -27,18 +27,20 @@ load_dotenv("D:/AdvancedR/knowbankedu/openai/.env")
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
 spec = ServerlessSpec(cloud="aws", region="us-east-1")
 
-# Create a test index
+# create index
 index_name = "cnct-qbq"
-if index_name not in pc.list_indexes().names():
-    pc.create_index(name=index_name, dimension=1024, metric="cosine", spec=spec)
-    time.sleep(3)
+pc.create_index(name=index_name, dimension=1024, metric="cosine", spec=spec)
+time.sleep(3)
 index = pc.Index(index_name)
+
+
 
 # --- 2. Load Excel ---
 df = pd.read_excel("D:/Country/Brazil/TechBrazil/working/qbq/df_censo_cbo_matched.xlsx")
 
 # --- 3. Load Embedding Model ---
-model = SentenceTransformer("intfloat/e5-large-v2", device="cuda")
+model = SentenceTransformer("intfloat/multilingual-e5-large", device="cuda")
+
 
 
 # --- Batch upsert to Pinecone ---
