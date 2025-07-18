@@ -1,0 +1,205 @@
+---
+title: "Relatório de Cobertura CNCT–CBO"
+subtitle: "Listagem de CBOs que não aparecem na seleção feita pela IA"
+author: "Equipe BM – FGV/DGPE"
+date: "`r format(Sys.Date(), '%d/%m/%Y')`"
+output:
+  pdf_document:
+    latex_engine: pdflatex
+    number_sections: true
+    toc: false
+    keep_tex: true
+geometry: margin=1in
+header-includes:
+  - \usepackage[utf8]{inputenc}
+  - \usepackage[bookmarks=false]{hyperref}
+  - \usepackage{xcolor}
+  - \usepackage{pifont}   # needed for \ding symbol in radio buttons
+  - \usepackage{longtable}
+---
+
+
+```{r setup, include=FALSE}
+# Load required libraries
+library(reticulate)
+library(dplyr)
+library(purrr)
+library(tibble)
+library(knitr)
+library(writexl)
+library(xtable)
+```
+
+```{r echo=FALSE}
+# Load the Python pickle file exported from df_summary
+py <- import_builtins()
+pd <- import("pandas")
+df_summary <- pd$read_pickle("D:/Country/Brazil/TechBrazil/working/qbq/df_cnct_cbo_atual.pkl")
+
+# Convert to R tibble
+df_summary <- as_tibble(df_summary)
+```
+
+```{r echo=FALSE}
+# Criar coluna com CBOs que foram corretamente detectados
+df_summary <- df_summary %>%
+  mutate(
+    matched_cbos = map2(cbo_list, matched_cbos, ~ intersect(.x, .y)),
+    num_matched = map_int(matched_cbos, length)
+  )
+
+# Filtrar apenas cursos com pelo menos um CBO corretamente identificado
+df_matched <- df_summary %>%
+  filter(num_matched > 0) %>%
+  select(IDX_EIXCUR, Denominacao_Curso_CNCT, matched_cbos) %>%
+  arrange(IDX_EIXCUR)
+
+```
+
+
+```{r echo=FALSE, results='asis'}
+cat("\\textbf{CBOs correspondidos e seus perfis (presentes no CNCT, e presentes na predição da IA)}\n\n")
+
+```
+
+```{r echo=FALSE}
+# 
+# library(xtable)
+# # Prepare table
+# df_matched_table <- df_summary %>%
+#   filter(lengths(matched_cbos) > 0) %>%
+#   mutate(
+#     matched_cbos_str = sapply(matched_cbos, function(x) paste(x, collapse = ", "))
+#   ) %>%
+#   select(IDX_EIXCUR, Denominacao_Curso_CNCT, matched_cbos_str, FraIN_Top10) %>%
+#   rename(
+#     `Código` = IDX_EIXCUR,
+#     `Curso CNCT` = Denominacao_Curso_CNCT,
+#     `CBOs correspondidos` = matched_cbos_str,
+#     `Cobertura CNCT por IA` = FraIN_Top10
+#   )
+# 
+# # Correct align length: ncol + 1 = 5
+# align <- c("|", "p{1.5cm}", "p{5cm}", "p{4cm}", "l","r|")
+# 
+# # Print with xtable
+# print(
+#   xtable(df_matched_table, caption = "Cursos com CBOs Correspondidos no IA", align = align),
+#   include.rownames = FALSE,
+#   tabular.environment = "longtable",
+#   floating = FALSE,
+#   comment = FALSE,
+#   caption.placement = "top",
+#   sanitize.text.function = identity
+# )
+```
+
+
+
+```{r echo=FALSE, results='asis'}
+cat("\\section*{Tabela de Correspondências Positivas}\n\n")
+cat("\\textbf{CBOs correspondidos e seus perfis (presentes no CNCT, e presentes na predição da IA)}\n\n")
+
+cat("\\begin{longtable}{p{2cm}p{6cm}p{5cm}p{2cm}}\n")
+cat("\\caption{Cursos com CBOs Correspondidos no IA} \\\\ \n")
+cat("\\hline\n")
+cat("\\textbf{Código} & \\textbf{Curso CNCT} & \\textbf{CBOs correspondidos} & \\textbf{Cobertura CNCT por IA} \\\\ \n")
+cat("\\hline\n")
+cat("\\endfirsthead\n")
+cat("\\hline\n")
+cat("\\textbf{Código} & \\textbf{Curso CNCT} & \\textbf{CBOs correspondidos} & \\textbf{Cobertura CNCT por IA} \\\\ \n")
+cat("\\hline\n")
+cat("\\endhead\n")
+cat("\\hline\n")
+cat("\\endfoot\n")
+cat("\\hline\n")
+cat("\\endlastfoot\n")
+
+# Emit rows
+df_matched_table <- df_summary %>%
+  filter(lengths(matched_cbos) > 0) %>%
+  mutate(
+    matched_cbos_str = sapply(matched_cbos, function(x) paste(x, collapse = ", "))
+  ) %>%
+  select(IDX_EIXCUR, Denominacao_Curso_CNCT, matched_cbos_str, FraIN_Top10)
+
+for (i in seq_len(nrow(df_matched_table))) {
+  row <- df_matched_table[i, ]
+  cat(sprintf("%s & %s & %s & %.2f \\\\ \n",
+              row$IDX_EIXCUR,
+              row$Denominacao_Curso_CNCT,
+              row$matched_cbos_str,
+              row$FraIN_Top10))
+}
+
+cat("\\end{longtable}\n")
+
+
+```
+
+
+
+
+```{r echo=FALSE, results='asis'}
+
+# 1. Carregar os dados completos com perfis
+df_full <- pd$read_pickle("D:/Country/Brazil/TechBrazil/working/qbq/df_censo_cbo_matched.pkl") %>%
+  as_tibble() %>%
+  select(IDX_EIXCUR, cbo_6dig, Perfil_CNCT, `Ocupação`, PerfilOcupacional) %>%
+  mutate(
+    IDX_EIXCUR = as.character(IDX_EIXCUR),
+    cbo_6dig = as.character(cbo_6dig)
+  )
+
+# 2. Preparar base com correspondências positivas
+filt <- df_summary %>%
+  filter(lengths(matched_cbos) > 0) %>%
+  arrange(IDX_EIXCUR) %>%
+  mutate(
+    sec_title = paste(IDX_EIXCUR, Denominacao_Curso_CNCT, sep = " -- "),
+    IDX_EIXCUR = as.character(IDX_EIXCUR),
+    matched_cbo_6dig = map(matched_cbos, as.character)
+  )
+
+df_matched_detail <- filt %>%
+  tidyr::unnest(matched_cbo_6dig) %>%
+  rename(cbo_6dig = matched_cbo_6dig) %>%
+  left_join(df_full, by = c("IDX_EIXCUR", "cbo_6dig"))
+
+# 3. Emitir LaTeX por curso
+for (idx in unique(df_matched_detail$IDX_EIXCUR)) {
+  curso_rows <- df_matched_detail %>% filter(IDX_EIXCUR == idx)
+  curso_header <- curso_rows$sec_title[1]
+  perfil_curso <- curso_rows$Perfil_CNCT[1]
+
+  cat("\\newpage\n")
+  cat("\\section{", curso_header, "}\n\n")
+
+  cat("\\textbf{Perfil do Curso (CNCT)}\n\n")
+  cat(perfil_curso, "\n\n")
+
+  cat("\\textbf{CBOs correspondidos e seus perfis (presentes no CNCT, e presentes na predição da IA)}\n\n")
+
+  for (j in seq_len(nrow(curso_rows))) {
+    cbo <- curso_rows$cbo_6dig[j]
+    ocup <- curso_rows$Ocupação[j]
+    perfil <- curso_rows$PerfilOcupacional[j]
+    cbo_clean <- gsub("[^0-9]", "", cbo)
+
+    cat("\\textbf{CBO:", cbo, " (", ocup, ")}\n\n")
+    cat(perfil, "\n\n")
+
+    cat("\\begin{Form}\n")
+    cat("\\textbf{Esta correspondência está adequada?} \\\\ \n")
+    cat("\\ChoiceMenu[radio,radiosymbol=\\ding{52},bordercolor=0 0.5 0,name=cbovalid_", cbo_clean, "]{}{CBO deve ficar=sim, \\hspace{6em} CBO não fica aqui=nao}\n")
+    cat("\\end{Form}\n\n")
+  }
+}
+```
+
+```
+\footnotetext{Fonte: CNCT e QBQ, `r format(Sys.Date(), "%d/%m/%Y")`}
+
+
+
+

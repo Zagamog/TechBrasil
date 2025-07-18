@@ -1,0 +1,138 @@
+---
+title: "Relatório de Cobertura CNCT–CBO"
+subtitle: "Listagem de CBOs que não aparecem na seleção feita pela IA"
+author: "Equipe BM – FGV/DGPE"
+date: "`r format(Sys.Date(), '%d/%m/%Y')`"
+output:
+  pdf_document:
+    latex_engine: pdflatex
+    number_sections: true
+    toc: false
+    keep_tex: true
+geometry: margin=1in
+header-includes:
+  - \usepackage[utf8]{inputenc}
+  - \usepackage[bookmarks=false]{hyperref}
+  - \usepackage{xcolor}
+  - \usepackage{pifont}   # needed for \ding symbol in radio buttons
+---
+
+```{r setup, include=FALSE}
+# Load required libraries
+library(reticulate)
+library(dplyr)
+library(purrr)
+library(tibble)
+library(knitr)
+library(writexl)
+
+```
+
+```{r echo=FALSE}
+# Load the Python pickle file exported from df_summary
+py <- import_builtins()
+pd <- import("pandas")
+df_summary <- pd$read_pickle("D:/Country/Brazil/TechBrazil/working/qbq/df_cnct_cbo_atual.pkl")
+
+# Convert to R tibble
+df_summary <- as_tibble(df_summary)
+```
+
+```{r echo=FALSE}
+# Create column with unmatched CBOs
+df_summary <- df_summary %>%
+  mutate(
+    unmatched_cbos = map2(cbo_list, matched_cbos, ~ setdiff(.x, .y)),
+    num_unmatched = map_int(unmatched_cbos, length)
+  )
+
+# Filter only those with at least one unmatched CBO
+df_unmatched <- df_summary %>%
+  filter(num_unmatched > 0) %>%
+  select(IDX_EIXCUR, Denominacao_Curso_CNCT, unmatched_cbos) %>%
+  arrange(IDX_EIXCUR)
+
+```
+
+
+```{r echo=FALSE, results='asis'}
+cat("\\textbf{CBOs não correspondidos e seus perfis (presentes no CNCT, ausentes na predição da IA)}\n\n")
+
+```
+
+
+
+
+```{r echo=FALSE}
+# Display table of unmatched CBOs
+kable(df_unmatched, caption = "Cursos com CBOs Não Correspondidos")
+
+```
+
+
+
+```{r echo=FALSE, results='asis'}
+
+# Load full data to get Perfil_CNCT and PerfilOcupacional
+df_full <- pd$read_pickle("D:/Country/Brazil/TechBrazil/working/qbq/df_censo_cbo_matched.pkl") %>%
+  as_tibble() %>%
+  select(IDX_EIXCUR, cbo_6dig, Perfil_CNCT, `Ocupação`, PerfilOcupacional) %>%
+  mutate(
+    IDX_EIXCUR = as.character(IDX_EIXCUR),
+    cbo_6dig = as.character(cbo_6dig)
+  )
+
+# Join to the filtered unmatched summary
+# 2. Prepare course summary table with unmatched CBOs
+filt <- df_summary %>%
+  filter(num_unmatched > 0) %>%
+  arrange(IDX_EIXCUR) %>%
+  mutate(
+    sec_title = paste(IDX_EIXCUR, Denominacao_Curso_CNCT, sep = " -- "),
+    IDX_EIXCUR = as.character(IDX_EIXCUR),
+    unmatched_cbo_6dig = map(unmatched_cbos, as.character)
+  )
+
+df_unmatched <- filt %>%
+  tidyr::unnest(unmatched_cbo_6dig) %>%
+  rename(cbo_6dig = unmatched_cbo_6dig) %>%
+  left_join(df_full, by = c("IDX_EIXCUR", "cbo_6dig"))
+
+# Emit LaTeX per course
+for (idx in unique(df_unmatched$IDX_EIXCUR)) {
+  curso_rows <- df_unmatched %>% filter(IDX_EIXCUR == idx)
+  curso_header <- curso_rows$sec_title[1]
+  perfil_curso <- curso_rows$Perfil_CNCT[1]
+
+  cat("\\newpage\n")
+  cat("\\section{", curso_header, "}\n\n")
+
+  cat("\\textbf{Perfil do Curso (CNCT)}\n\n")
+  cat(perfil_curso, "\n\n")
+
+  cat("\\textbf{CBOs não correspondidos e seus perfis:}\n\n")
+
+ for (j in seq_len(nrow(curso_rows))) {
+  cbo <- curso_rows$cbo_6dig[j]
+  ocup <- curso_rows$Ocupação[j]
+  perfil <- curso_rows$PerfilOcupacional[j]
+
+  # Clean CBO code for field use (remove spaces or bad characters)
+  cbo_clean <- gsub("[^0-9]", "", cbo)
+
+  cat("\\textbf{CBO:", cbo, " (", ocup, ")}\n\n")
+  cat(perfil, "\n\n")
+
+  # Begin LaTeX Form block
+  cat("\\begin{Form}\n")
+  cat("\\textbf{Esta correspondência está adequada?} \\\\ \n")
+  cat("\\ChoiceMenu[radio,radiosymbol=\\ding{52},name=cbovalid_", cbo_clean, "]{}{CBO deve ficar=sim, \\hspace{6em} CBO não fica aqui=nao}\n")
+  cat("\\end{Form}\n\n")
+}
+}
+```
+\footnotetext{Fonte: CNCT e QBQ, `r format(Sys.Date(), "%d/%m/%Y")`}
+
+
+
+

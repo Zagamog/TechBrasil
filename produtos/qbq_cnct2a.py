@@ -35,8 +35,9 @@ index = pc.Index(index_name)
 
 
 
-# --- 2. Load Excel ---
-df = pd.read_excel("D:/Country/Brazil/TechBrazil/working/qbq/df_censo_cbo_matched.xlsx")
+# --- 2. Unpickle save python pandas df
+df = pd.read_pickle("D:/Country/Brazil/TechBrazil/working/qbq/df_censo_cbo_matched.pkl")
+
 
 # --- 3. Load Embedding Model ---
 model = SentenceTransformer("intfloat/multilingual-e5-large", device="cuda")

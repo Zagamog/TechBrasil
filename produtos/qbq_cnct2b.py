@@ -29,7 +29,7 @@ embed_model = SentenceTransformer("intfloat/multilingual-e5-large", device="cuda
 
 
 # --- Load df ---
-df = pd.read_excel("D:/Country/Brazil/TechBrazil/working/qbq/df_censo_cbo_matched.xlsx")
+df = pd.read_pickle("D:/Country/Brazil/TechBrazil/working/qbq/df_censo_cbo_matched.pkl")
 
 
 # --- Pick an example egresso ---

@@ -26,7 +26,7 @@ def normalize_namespace(text):
     return re.sub(r"[^a-z0-9]+", "-", text_ascii).strip("-")
 
 # --- 2. Load data and prep ---
-df = pd.read_excel("D:/Country/Brazil/TechBrazil/working/qbq/df_censo_cbo_matched.xlsx")
+df = pd.read_pickle("D:/Country/Brazil/TechBrazil/working/qbq/df_censo_cbo_matched.pkl")
 df["cbo_6dig"] = df["cbo_6dig"].astype(str)
 
 # --- 3. Load Pinecone index + model beforehand ---

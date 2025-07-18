@@ -1,0 +1,38 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[bookmarks=false]{hyperref}
+\usepackage{xcolor}
+
+\begin{document}
+	
+	\section*{Avaliação de Correspondência CNCT–CBO}
+	
+	Por favor, indique se você concorda com a correspondência abaixo:
+	
+	\vspace{1em}
+	
+	\textbf{CBO: 322235 (Auxiliar de enfermagem do trabalho)}
+	
+	\vspace{0.5em}
+	
+	Participa da organização e funcionamento do serviço de segurança e saúde do trabalhador...
+	
+	\vspace{1em}
+	
+	\begin{Form}
+		
+		% --- Radio button group using ChoiceMenu ---
+		\textbf{Esta correspondência está adequada?} \\
+		
+		
+		\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+		
+		\vspace{1em}
+		
+		% --- Comment box ---
+		\textbf{Comentários adicionais:} \\[0.5em]
+		\TextField[multiline=true, backgroundcolor=0.9 0.9 1, bordercolor=red, width=\linewidth, height=4cm]{}
+		
+	\end{Form}
+	
+\end{document}
