@@ -93,6 +93,19 @@ plt.ylabel("Frequência")
 plt.tight_layout()
 plt.show()
 
+# --- Plot Distribution by Nivel Ocupacional ---
+df_censo_cbo_matched["NO"] = df_censo_cbo_matched["cbo_6dig"].str[0]
+freq = df_censo_cbo_matched["NO"].value_counts().sort_index().reset_index()
+freq.columns = ["NivelOcupacional", "Frequencia"]
+
+plt.figure(figsize=(10, 6))
+sns.barplot(data=freq, x="NivelOcupacional", y="Frequencia", palette="viridis")
+plt.title("Distribuição de CBOs por NivelOcupacional")
+plt.xlabel("NivelOcupacional")
+plt.ylabel("Frequência")
+plt.tight_layout()
+plt.show()
+
 
 
 

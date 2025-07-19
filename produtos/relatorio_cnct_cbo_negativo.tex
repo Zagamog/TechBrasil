@@ -1,0 +1,3456 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{5}
+\usepackage[utf8]{inputenc}
+\usepackage[bookmarks=false]{hyperref}
+\usepackage{xcolor}
+\usepackage{pifont}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Relatório de Cobertura CNCT--CBO},
+  pdfauthor={Equipe BM -- FGV/DGPE},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Relatório de Cobertura CNCT--CBO}
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{% add subtitle to \maketitle
+  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+}
+\makeatother
+\subtitle{Listagem de CBOs que não aparecem na seleção feita pela IA}
+\author{Equipe BM -- FGV/DGPE}
+\date{18/07/2025}
+
+\begin{document}
+\maketitle
+
+\textbf{CBOs não correspondidos e seus perfis (presentes no CNCT, ausentes na predição da IA)}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1236}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4382}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4382}}@{}}
+\caption{Cursos com CBOs Não Correspondidos}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+IDX\_EIXCUR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Denominacao\_Curso\_CNCT
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+unmatched\_cbos
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+IDX\_EIXCUR
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Denominacao\_Curso\_CNCT
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+unmatched\_cbos
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+01007 & Técnico em Enfermagem & 322235 \\
+01033 & Técnico em Vigilância em Saúde & 352205 \\
+02001 & Técnico em Automação Industrial & 313215 \\
+02005 & Técnico em Eletrotécnica & 318705 \\
+02006 & Técnico em Fabricação Mecânica & 391125 \\
+02009 & Técnico em Instrumentação Industrial & 313405, 313415 \\
+04002 & Técnico em Comércio & 354205, 354705 \\
+04008 & Técnico em Logística & 342110, 391115 \\
+04009 & Técnico em Marketing & 354130 \\
+05001 & Técnico em Computação Gráfica & 317120 \\
+05003 & Técnico em Informática & 317115, 317120 \\
+05009 & Técnico em Telecomunicações & 391205 \\
+06005 & Técnico em Edificações & 318005, 318010, 318015, 318120 \\
+06011 & Técnico em Portos & 354305 \\
+06017 & Técnico em Transporte Metroferroviário & 342120, 342315 \\
+06018 & Técnico em Transporte Rodoviário & 342210 \\
+09001 & Técnico em Artes Circenses & 376305, 376310, 376315, 376320 \\
+09011 & Técnico em Design de Interiores & 318005, 318010 \\
+09014 & Técnico em Design de Móveis & 771120 \\
+09019 & Técnico em Figurino Cênico & 318810 \\
+09023 & Técnico em Multimídia & 317110 \\
+09030 & Técnico em Produção de Áudio e Vídeo & 374305, 517330 \\
+09031 & Técnico em Produção de Moda & 375110 \\
+09033 & Técnico em Rádio e Televisão & 374110, 374115, 374120, 374135,
+374140 \\
+10001 & Técnico em Açúcar e Álcool & 311115, 325305, 325310 \\
+10006 & Técnico em Celulose e Papel & 311115, 311710, 311715 \\
+10008 & Técnico em Construção Naval & 318205, 318210 \\
+10020 & Técnico em Têxtil & 311705, 311715, 311725, 721305 \\
+11016 & Técnico em Recursos Pesqueiros & 321310, 341220 \\
+12001 & Técnico em Defesa Civil & 351605 \\
+\end{longtable}
+
+\newpage
+\section{ 01007 -- Técnico em Enfermagem }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Enfermagem será habilitado para:
+
+Realizar, sob a supervisão do Enfermeiro, cuidados integrais de
+enfermagem a indivíduos, família e grupos sociais vulneráveis ou não.
+Atuar na promoção, prevenção, recuperação e reabilitação dos processos
+saúde-doença em todo o ciclo vital. Participar do planejamento e
+execução das ações de saúde junto à equipe multidisciplinar,
+considerando as normas de biossegurança, envolvendo curativos,
+administração de medicamentos e vacinas, nebulizações, banho de leito,
+cuidados pós-morte, mensuração antropométrica e verificação de sinais
+vitais. Preparar o paciente para os procedimentos de saúde. Participar
+de comissões de certificação de serviços de saúde, tais como núcleo de
+segurança do paciente, serviço de controle de infecção hospitalar,
+gestão da qualidade dos serviços prestados à população, gestão de
+riscos, comissões de ética de enfermagem, transplantes, óbitos e outros.
+Colaborar com o Enfermeiro em ações de comissões de certificação de
+serviços de saúde, tais como núcleo de segurança do paciente, serviço de
+controle de infecção hospitalar, gestão da qualidade dos serviços
+prestados à população, gestão de riscos, comissões de ética de
+enfermagem, transplantes, óbitos e outros.
+
+Para a atuação como Técnico em Enfermagem, são fundamentais:
+
+Conhecimentos das políticas públicas de saúde e compreensão de sua
+atuação profissional frente às diretrizes, princípios e estrutura
+organizacional do Sistema Único de Saúde (SUS). Conhecimentos e saberes
+relacionados aos princípios das técnicas aplicadas na área, sempre
+pautados numa postura humana e ética. Resolução de situações-problema,
+comunicação, trabalho em equipe e interdisciplinar, tecnologias da
+informação e da comunicação, gestão de conflitos e ética profissional.
+Organização e responsabilidade. Iniciativa social. Determinação e
+criatividade, buscando promover a humanização da assistência.
+Atualização e aperfeiçoamento profissional por meio da educação
+continuada.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 322235  ( Auxiliar de enfermagem do trabalho )}
+
+Participa da organização e funcionamento do serviço de segurança e saúde
+do trabalhador. Atua em situações de urgência e emergência, integrando a
+equipe multidisciplinar de saúde e do serviço especializado em
+engenharia e medicina do trabalho (SESMT). Atende, sob supervisão,
+trabalhadores portadores de doenças ou lesões de pouca gravidade.
+Auxilia na observação sistemática do estado de saúde dos trabalhadores,
+da ocorrência de doenças profissionais, lesões traumáticas e doenças
+epidemiológicas. Preenche relatório dos dados observados. Auxilia na
+realização de exame pré-admissional, periódicos e demissionais. Realiza
+ações de prevenção de doenças ocupacionais e promoção da saúde e
+segurança no trabalho. Participa de programas de prevenção de acidentes
+e de reabilitação profissional. Participa de campanhas de educação
+sanitária e de vacinação. Pode atuar em programas de qualidade e de
+certificação de serviços de saúde do trabalhador.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 322235 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 01033 -- Técnico em Vigilância em Saúde }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Vigilância em Saúde será habilitado para:
+
+Atuar, sob a supervisão de profissionais de nível superior, de forma a
+aplicar a normatização de produtos, processos, ambientes e serviços de
+interesses a saúde. Controlar o fluxo de pessoas, animais, plantas e
+produtos em portos, aeroportos e fronteiras. Desenvolver ações de
+controle e monitoramento de doenças, endemias e de vetores. Desenvolver
+ações de inspeção e fiscalização sanitárias. Elaborar e implementar,
+junto com a população do território, ações educativas no âmbito das
+vigilâncias: ambiental, sanitária, epidemiológica e saúde do trabalhador
+para promoção da saúde. Investigar, monitorar e avaliar riscos e os
+determinantes dos agravos e danos à saúde da população, relacionados ao
+trabalho, assim como ao meio ambiente. Planejar e articular ações
+intersetoriais para promoção da saúde prevenção, controle e
+monitoramento de vetores e doenças endêmicas. Planejar, executar e
+avaliar o processo de vigilância sanitária, epidemiológica, ambiental,
+saúde do trabalhador e vigilância da situação de saúde. Realizar análise
+territorial das condições de vida e de saúde da população, como também
+identificar e intervir em situações de risco e de vulnerabilidade de
+grupos populacionais e ambientes. Desenvolver ações de mobilização
+social junto à comunidade para promoção e proteção da saúde. Realizar
+ações de prevenção e controle de doenças e agravos à saúde em interação
+com o Agente Comunitário de Saúde e a equipe de Atenção Básica.
+
+Para a atuação como Técnico em Vigilância em Saúde, são fundamentais:
+
+Conhecimento das políticas públicas de saúde: organização, princípios e
+diretrizes do Sistema Único de Saúde (SUS). Conhecimentos e saberes
+relacionados a processos de sustentabilidade, territorialização,
+organização do SUS e vigilâncias. Resolução de situações-problemas,
+trabalho em equipe, tecnologias da informação e da comunicação, gestão
+de conflitos e ética profissional. Iniciativa e capacidade de
+planejamento Organização, responsabilidade, iniciativa social,
+entusiasmo, empatia e respeito. Atualização e aperfeiçoamento
+profissional por meio da educação continuada.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 352205  ( Agente de defesa ambiental )}
+
+Protege a fauna e a flora, impedindo as práticas que provoquem a
+extinção de espécies ou submetam os animais à crueldade. Fiscaliza
+atividades e obras, solicitando documentação ao fiscalizado e coletando
+informações técnicas relacionadas à preservação do meio ambiente.
+Vistoria atividades e obras, verificando o cumprimento das exigências
+legais e técnicas e avaliando o impacto ambiental. Analisa tecnicamente
+projetos, examinando o processo de licenciamento, enviando material para
+análise nos órgãos competentes e elaborando parecer, laudo ou relatório
+técnico. Investiga denúncias de danos ao meio ambiente, levantando
+informações junto à comunidade local da ocorrência e coletando material
+para análise. Se constatada a veracidade da denúncia, enquadra
+legalmente o caso. Reprime atividades ilegais, interditando
+estabelecimentos e atividades, embargando obras, apreendendo animais em
+condições ilegais e providenciando destinação de produtos irregulares.
+Adverte, notifica, intima ou multa infrator, podendo encaminhá-lo às
+autoridades competentes. Toma providências para minimizar impactos de
+acidentes ambientais, de destruições e de outros danos causados em
+recursos naturais e na biodiversidade. Previne e combate incêndios.
+Presta suporte técnico à polícia florestal. Ministra palestras e promove
+educação ambiental em comunidades, escolas e espaços públicos, para
+sensibilizar crianças, jovens e adultos para a importância da defesa do
+meio ambiente. Pode gerenciar atividades, coordenando e supervisionando
+equipes e administrando recursos humanos, financeiros e materiais.
+Providencia manutenção de equipamentos e instalações. Emite
+notificações, autorizações, intimações, licenças e ofícios. Registra
+denúncias, solicita mandado de busca e apreensão e formaliza propostas
+de embargo, interdição e multa. Consulta imagens e relatórios de
+geoinformação para realizar o seu trabalho.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 352205 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 02001 -- Técnico em Automação Industrial }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Automação Industrial será habilitado para:
+
+Desenvolver e integrar soluções para sistemas de automação visando à
+medição e ao controle de variáveis em processos industriais,
+considerando as normas, os padrões e os requisitos técnicos de
+qualidade, saúde e segurança e de meio ambiente. Empregar programas de
+computação e redes industriais no controle de processos industriais.
+Planejar, controlar e executar a instalação e a manutenção de
+equipamentos automatizados e/ou sistemas robotizados para controle de
+processos industriais. Realizar medições, testes e calibrações em
+equipamentos eletroeletrônicos empregados em controle de processos
+industriais. Instalar, configurar e operar tecnologias de manufatura
+aditiva, sistemas ciberfísicos e processos de produção com internet das
+coisas. Reconhecer tecnologias inovadoras presentes no segmento visando
+a atender às transformações digitais na sociedade. Realizar
+especificação, projeto, instalação, medição, teste, diagnóstico e
+calibração de equipamentos e sistemas automatizados. Executar
+procedimentos de controle de qualidade, operação e gestão de sistemas
+automatizados e controle de processos.
+
+Para atuação como Técnico em Automação Industrial, são fundamentais:
+
+Conhecimentos e saberes relacionados aos processos de planejamento e
+implementação de processos automatizados de modo a assegurar a saúde e a
+segurança dos trabalhadores e dos usuários. Conhecimentos e saberes
+relacionados à sustentabilidade do processo produtivo, às técnicas e aos
+processos de produção, às normas técnicas, à liderança de equipes, à
+solução de problemas técnicos e trabalhistas e à gestão de conflitos.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 313215  ( Técnico eletrônico )}
+
+Conserta e faz manutenção corretiva em aparelhos e equipamentos
+eletrônicos, interpretando esquemas elétricos e substituindo componentes
+defeituosos. Pode utilizar equipamentos de diagnóstico eletrônico.
+Instala equipamentos, aparelhos e dispositivos eletrônicos, observando
+as condições do ambiente, realizando ajustes e testes. Faz manutenções
+preventivas e preditivas em equipamentos eletrônicos, de acordo com
+planos de manutenção, podendo fazer uso da internet para suporte.
+Realiza medições, testes e calibrações de equipamentos. Desenvolve,
+monta e testa dispositivos de circuitos eletrônicos, especificando
+componentes, calculando custos, incluindo a possibilidade de uso de
+microcontroladores, microprocessadores e outros dispositivos eletrônicos
+digitais programáveis. Sugere alterações no processo de produção,
+implementando dispositivos de automação e integração de dispositivos e
+sistemas eletrônicos por meio de redes digitais de comunicação de dados,
+locais e a distância. Participa de reuniões técnicas com pessoal interno
+e externo. Redige procedimentos de trabalho e elabora gráficos de
+resultados. Pode realizar treinamento, orientação e avaliação de
+desempenho de operadores.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 313215 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 02005 -- Técnico em Eletrotécnica }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Eletrotécnica será habilitado para:
+
+Planejar, controlar e executar a instalação e a manutenção de sistemas e
+instalações elétricas industriais, prediais e residenciais, considerando
+as normas, os padrões e os requisitos técnicos de qualidade, saúde e
+segurança e de meio ambiente. Elaborar e desenvolver projetos de
+instalações elétricas industriais, prediais e residenciais, sistemas de
+acionamentos elétricos e de automação industrial e de infraestrutura
+para sistemas de telecomunicações em edificações. Aplicar medidas para o
+uso eficiente da energia elétrica e de fontes energéticas alternativas.
+Elaborar e desenvolver programação e parametrização de sistemas de
+acionamentos eletrônicos industriais. Planejar e executar instalação e
+manutenção de sistemas de aterramento e de descargas atmosféricas em
+edificações residenciais, comerciais e industriais. Reconhecer
+tecnologias inovadoras presentes no segmento visando a atender às
+transformações digitais na sociedade.
+
+Para atuação como Técnico em Eletrotécnica, são fundamentais:
+
+Conhecimentos e saberes relacionados aos processos de planejamento e
+implementação de sistemas elétricos de modo a assegurar a saúde e a
+segurança dos trabalhadores e dos usuários. Conhecimentos e saberes
+relacionados à sustentabilidade do processo produtivo, às técnicas e aos
+processos de produção, às normas técnicas, à liderança de equipes, à
+solução de problemas técnicos e trabalhistas e à gestão de conflitos.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 318705  ( Desenhista projetista de eletricidade )}
+
+Participa da elaboração de anteprojetos elétricos, efetuando estudos,
+elaborando desenhos para apreciação do cliente e definindo os pontos
+críticos do projeto. Define os recursos humanos, estima sua quantidade e
+participa da distribuição e da atribuição de responsabilidades. Realiza
+as estimativas de materiais. Participa da elaboração do cronograma de
+desenvolvimento e estabelece o prazo de entrega. Acompanha o
+desenvolvimento do projeto. Analisa especificações técnicas fornecidas
+pelo cliente e coleta dados -- utilizando técnicas de pesquisa e fontes
+diversificadas -- para elaboração do projeto. Examina normas técnicas
+relacionadas ao projeto. Desenvolve projetos elétricos de produtos e
+instalações elétricas, utilizando ferramentas computacionais integradas
+na elaboração dos desenhos e demais documentos técnicos do projeto.
+Realiza cálculos técnicos de projetos elétricos; desenha diagramas
+elétricos detalhados; e simula o projeto elétrico, por meio de programas
+aplicativos específicos para eletricidade do tipo CAD-Desenho Assistido
+por Computador (Computer Aided Design). Pode utilizar programas
+aplicativos do tipo CAM--Manufatura Auxiliada por Computador (Computer
+Aided Manufacturing), para geração de programas e informações de
+prototipagem ou de fabricação -- de placas de circuito impresso, por
+exemplo --, quando requeridas no projeto. Utiliza normas de qualidade e
+de segurança do produto, nas especificações e nos cálculos do projeto.
+Faz especificação de componentes, módulos e outros materiais elétricos
+aplicáveis ao projeto. Incorpora componentes eletrônicos ao projeto - a
+fim de agregar valor e novas funções ou reduzir custos - e introduz
+inovações relacionadas à eficiência energética. Otimiza os custos
+envolvidos em todas as partes do projeto. Adapta o projeto em função das
+necessidades do cliente. Confere o projeto e faz correções ou
+modificações, quando necessário. Elabora lista de materiais, folha de
+dados (datasheet), manuais de instalação e de manutenção, catálogos e
+outros documentos técnicos do projeto. Participa de reuniões para tomada
+de decisão e coordena equipes de trabalho na elaboração do projeto. Zela
+pelo cumprimento do cronograma do projeto. Desenvolve fornecedores para
+os projetos elétricos de produtos e instalações elétricas. Pesquisa
+fornecedores em potencial, avaliando-os por meio de visitas técnicas.
+Elabora desenhos para produtos especiais -- tais como componentes,
+peças, módulos, equipamentos ou acessórios para projetos elétricos --
+e/ou introduz melhorias em produtos especiais, junto aos fornecedores.
+Acompanha etapas de desenvolvimento de projetos e ensaios de amostras.
+Avalia a relação custo-benefício dos produtos fornecidos. Participa da
+implantação do projeto elétrico de produtos e instalações elétricas,
+auxiliando no desenvolvimento do protótipo; colaborando na definição de
+métodos de produção; e acompanhando fabricação e montagem. Introduz
+modificações no projeto, em função de erros detectados e necessidades de
+implementação de melhorias. Participa de reuniões de avaliação do
+projeto. Acompanha ensaios finais de produtos e instalações elétricas
+projetadas, estabelecendo tipos de equipamentos e parâmetros para
+testes; analisando resultados de testes; e elaborando relatórios de
+ensaios. Modifica o projeto, em função dos resultados de testes.
+Controla documentação relacionada ao projeto, estruturando e mantendo
+arquivos -- físico e eletrônico --; atualizando cópias do projeto; e
+registrando etapas e revisões de projeto. Nos processos de
+desenvolvimento de projetos elétricos de produtos e instalações
+elétricas, aplica conceitos e ferramentas da qualidade. Conserva a
+limpeza, controla a luminosidade e verifica as condições ergonômicas do
+ambiente de trabalho. Coleta e descarta resíduos, de acordo com
+diretrizes de preservação ambiental. Conserva equipamentos em plenas
+condições de funcionamento. Segue preceitos de segurança no trabalho,
+utilizando equipamentos de proteção individual.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 318705 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 02006 -- Técnico em Fabricação Mecânica }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Fabricação Mecânica será habilitado para:
+
+Desenvolver projetos, planejar, supervisionar e controlar atividades de
+fundição, em usinagem convencional e computadorizada, em caldeiraria, em
+soldagem e processos de conformação mecânica. Interpretar desenho
+técnico. Selecionar, desenvolver e especi?car ferramental para os
+processos produtivos. Executar ensaios mecânicos. Especi?car materiais e
+insumos aplicados aos processos de fabricação mecânica. Controlar
+estoques de produtos acabados.
+
+Para atuação como Técnico em Fabricação Mecânica, são fundamentais:
+
+Conhecimentos e saberes relacionados aos processos de planejamento e
+operação das atribuições da área de modo a assegurar a saúde e a
+segurança dos trabalhadores e dos futuros usuários e operadores de
+empresas em processos de transformação em fabricação mecânica.
+Conhecimentos e saberes relacionados à sustentabilidade do processo
+produtivo, às normas e relatórios técnicos, à legislação da área, às
+novas tecnologias relacionadas à indústria 4.0, à liderança de equipes,
+à solução de problemas técnicos e à gestão de conflitos.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 391125  ( Técnico de planejamento de produção )}
+
+Planeja a produção, a partir da análise da demanda e da capacidade de
+produção. Realiza a programação da produção, analisando ordens de
+produção, determinando prioridades, definindo cronograma e estabelecendo
+a sequência de produção. Estabelece parâmetros para controle dos
+processos de produção. Controla o desenvolvimento dos planos de
+produção, com base em parâmetros de controle e monitoramento do fluxo
+produtivo. Identifica desvios e define ações corretivas. Propõe
+melhorias no processo de produção. Define estoque de segurança de
+suprimentos necessários para atender às demandas de produção.
+Providencia entrega e distribuição de suprimentos para agilizar o fluxo
+de materiais e cumprir os cronogramas de produção. Pode revisar os
+cronogramas de produção por falta de trabalhadores, atraso de entrega de
+material ou outros problemas. Trata as informações do ciclo
+planejamento-produção, elaborando gráficos e relatórios de controle.
+Disponibiliza e atualiza informações. Interage com profissionais
+envolvidos nas diversas etapas de produção, com clientes e com
+fornecedores, para coordenar as atividades de produção, para resolver
+reclamações ou para eliminar atrasos. Auxilia na definição das
+instruções de trabalho.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 391125 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 02009 -- Técnico em Instrumentação Industrial }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Instrumentação Industrial será habilitado para:
+
+Implantar, configurar e manter sistemas de instrumentação e controle de
+processos industriais. Elaborar, desenvolver e executar projetos de
+instalações de instrumentos de medição de variáveis industriais, de
+acordo com normas técnicas, ambientais, de saúde e segurança no trabalho
+e de qualidade. Realizar programação, parametrização, medições e testes
+de equipamentos por meio de instrumentação industrial. Reconhecer
+tecnologias inovadoras presentes no segmento visando a atender às
+transformações digitais na sociedade.
+
+Para atuação como Técnico em Instrumentação Industrial, são
+fundamentais:
+
+Conhecimentos e saberes relacionados aos processos de planejamento e
+implementação de controle de processos industriais por meio de
+instrumentação de modo a assegurar a saúde e a segurança dos
+trabalhadores. Conhecimentos e saberes relacionados à sustentabilidade
+do processo produtivo, às técnicas e processos de produção, às normas
+técnicas, à liderança de equipes, à solução de problemas técnicos e
+trabalhistas e à gestão de conflitos
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 313405  ( Técnico em calibração )}
+
+Prepara o serviço de calibração, identificando especificações técnicas,
+monitorando as condições ambientais para a calibração, inspecionando
+visualmente os itens a serem calibrados e determinando o procedimento de
+calibração. Realiza aferição e calibração de padrões, equipamentos,
+sistemas e instrumentos de medição e controle. Calcula e interpreta os
+resultados das medições realizadas no processo, comparando com padrões,
+para realizar os ajustes necessários nos equipamentos, sistemas e
+instrumentos. Realiza medições de grandezas, lendo e interpretando
+desenhos técnicos, selecionando métodos e princípios de medição. Executa
+ensaios físicos, elétricos, mecânicos e eletrônicos, dentre outros,
+correspondentes às grandezas a serem medidas. Opera padrões,
+equipamentos, sistemas e instrumentos de medição e controle. Emite
+laudos e certificados da calibração de equipamentos e instrumentos de
+medição e controle. Arquiva documentação técnica e gerencial. Participa
+da gestão dos procedimentos do sistema de confiabilidade metrológica de
+laboratórios de calibração credenciados, elaborando sistema de
+codificação, estabelecendo frequência, controlando prazos e validando
+resultados da calibração. Participa de auditorias internas e externas.
+Participa da gestão da documentação técnica de laboratórios
+credenciados, elaborando, atualizando e analisando criticamente
+procedimentos e instruções de trabalho, cadastrando instrumentos de
+medição e controle, elaborando fichas e formulários de registros.
+Contribui no desenvolvimento de projetos de sistemas de medição e
+controle, identificando as variáveis envolvidas no processo e avaliando
+o desempenho de instrumentos e sistemas em desenvolvimento, realizando a
+calibração de protótipos e novos produtos. Realiza manutenção de
+instrumentos de medição e controle, em bancada, para fins de calibração,
+identificando disfunções e suas causas, relacionando custos e benefícios
+da manutenção, reparando ou substituindo componentes danificados.
+Realiza a calibração dos instrumentos após os trabalhos de manutenção.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 313405 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 313415  ( Encarregado de manutenção de instrumentos de controle, medição e similares )}
+
+Planeja, com os integrantes da equipe de trabalho, a execução de
+manutenção preventiva, preditiva e corretiva de instrumentos elétricos,
+eletrônicos e mecânicos de medição, controle e funções análogas,
+utilizados em processos industriais. Supervisiona as atividades de
+manutenção, estabelecendo procedimentos para identificar disfunções em
+instrumentos, por meio de sistemas manuais, semiautomáticos e
+automáticos. Contribui no aperfeiçoamento de sistemas de medição e
+controle, analisando indicadores das atividades de manutenção de
+instrumentos -- tais como TMEF-Tempo Médio Entre Falhas (MTBF--Mean Time
+Between Failures), TMPR-Tempo Médio Para Reparo (MTTR-Mean Time To
+Repair), dentre outros -, para calcular a taxa de disponibilidade dos
+equipamentos e do processo; retroalimentar o sistema; avaliar seu
+desempenho; e propor soluções aperfeiçoadas de medição e controle, com
+base em dados e informações. Garante a calibração dos instrumentos,
+monitorando a validade de calibração e selecionando os prestadores de
+serviços. Pode supervisionar as atividades de calibração em laboratórios
+credenciados. Participa da gestão dos procedimentos do sistema de
+confiabilidade metrológica, colaborando na elaboração de sistema de
+codificação, estabelecendo frequência, controlando prazos e validando os
+resultados da calibração. Participa de auditorias internas e externas.
+Analisa tecnicamente a aquisição de produtos e serviços para manutenção,
+estabelecendo os objetivos da análise, indicando fornecedores potenciais
+e definindo características técnicas de produtos e serviços. Emite
+pareceres técnicos. Participa da gestão de contratos de serviços
+terceirizados de manutenção. Organiza a documentação técnica e
+gerencial, elaborando, atualizando e analisando criticamente
+procedimentos e instruções de trabalho, cadastrando instrumentos e
+elaborando fichas e formulários de registros. Coordena e supervisiona a
+equipe de trabalho, orientando os trabalhos, avaliando os desempenhos
+individuais e coletivos e identificando as necessidades de treinamento.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 313415 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 04002 -- Técnico em Comércio }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Comércio será habilitado para:
+
+Aplicar métodos de comercialização de bens e serviços em loja física ou
+virtual. Efetuar controle quantitativo e qualitativo de produtos, preços
+e tributos. Coordenar e controlar a armazenagem em estabelecimento
+comercial. Elaborar planilha de custos. Identificar demanda e comunicar
+previsões a fornecedores. Ofertar serviços correlatos aos produtos
+comercializados. Operacionalizar planos de marketing e de comunicação.
+Executar atividades voltadas à logística, a recursos humanos e à
+comercialização.
+
+Para atuação como Técnico em Comércio, são fundamentais:
+
+Conhecimentos e saberes relacionados ao funcionamento da área comercial
+e de prestação de serviços, de modo a atuar em conformidade com as
+legislações e diretrizes de conduta, como também com as normas de saúde
+e segurança do trabalho. Atuação de forma proativa em atividades de
+comercialização de produtos e serviços, com visão empreendedora,
+comunicação clara e cordial, comprometimento com necessidades e desejos
+de clientes e respeito a demais stakeholders.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 354205  ( Comprador )}
+
+Ao receber requisições de compras, verifica as especificações dos
+materiais ou dos serviços. Pode agrupar os itens requeridos por lotes
+(famílias ou ramos). Verifica quantidade de materiais solicitados,
+informando-se sobre a disponibilidade em estoques. Consulta a existência
+de verba disponível para a aquisição de materiais ou serviços. Realiza a
+compra por processo de cotação ou por processo licitatório, levando em
+conta - para optar por um deles - o valor estimado da aquisição e a
+natureza da empresa ou instituição (pública ou privada). Executa
+processo de cotação, determinando - aos fornecedores interessados - a
+data para apresentação de propostas. Monta e analisa planilha de
+cotações. Pode negociar, com fornecedores, preços, prazos de entrega e
+condições de pagamentos. Realiza ou providencia a realização de processo
+licitatório, estabelecendo em edital qual será a modalidade e os
+requisitos para que os interessados possam inscrever-se. Ao final,
+solicita, à área jurídica, a elaboração e a celebração de contrato com o
+fornecedor. Concretiza a compra de materiais ou serviços, após
+autorização. Acompanha o fluxo de entrega, conferindo se ocorre dentro
+das condições estabelecidas. Pode identificar defeitos ou problemas,
+rejeitando e devolvendo materiais. Pode negociar substituição ou
+reparação dos prejuízos decorrentes da devolução dos materiais.
+Desenvolve fornecedores de materiais e serviços, entrevistando,
+pesquisando referências, requisitando amostras ou catálogos de materiais
+ou serviços e agendando visita técnica ao fornecedor. Pode participar da
+homologação de fornecedores. Cadastra e atualiza constantemente dados e
+informações de fornecedores. Prepara relatórios de visitas a
+fornecedores, de não conformidade de materiais e de variação de preços.
+Redige comunicado aos setores sobre compras efetuadas e elabora
+correspondências. Organiza e arquiva documentos dos processos de
+compras. Pode utilizar sistemas, aplicativos e plataformas, além do
+sistema informatizado de controle de compras. Entre outros, pode
+utilizar o Sistema Integrado de Gestão Empresarial (Enterprise Resource
+Planning -- ERP) - para obter informações de estoque e de existência de
+verba disponível -, a plataforma de Gestão de Relacionamento com o
+Cliente (Customer Relationship Management - CRM) - para inserir e
+consultar dados e informações cadastrais de fornecedores - e o
+Marketplace virtual - para verificar preços e prazo de entrega de
+diferentes fornecedores -.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 354205 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 354705  ( Representante comercial autônomo )}
+
+Realiza planejamento das atividades de representação comercial autônoma
+- de empresas nacionais ou estrangeiras -, fazendo pesquisa de mercado,
+analisando potencial de clientes e elaborando plano estratégico.
+Estabelece metas de venda de produtos e serviços. Realiza divulgação de
+produtos e serviços, definindo estratégias de marketing e requisitando
+material de divulgação. Envia mala direta ao conjunto de clientes e
+divulga produtos por meio de multimídia. Informa aos clientes sobre
+alterações nos produtos e serviços, ressaltando as melhorias. Prepara
+cadastro de novos clientes e estabelece contato com eles por telefone,
+celular, e-mail e outros meios de comunicação. Realiza vendas aos novos
+clientes. Planeja itinerário de visitas, agendando horários. Explica os
+objetivos da visita, demonstra benefícios e qualidades de produtos e
+serviços e fornece amostras. Auxilia na escolha, prestando informações
+técnicas dos produtos. Apresenta tabelas de preços, explica formas de
+pagamento e efetiva vendas. Recebe clientes para vendas, identificando
+suas necessidades e apresentando proposta ao cliente. Calcula custo do
+produto e serviço. Estabelece prazos de entrega dos produtos. Finaliza
+as vendas, emitindo pedidos de produtos e serviços. Esclarece dúvidas
+dos clientes referentes aos pedidos e aos contratos de prestação de
+serviços. Monitora o cumprimento do prazo de entrega dos produtos.
+Acompanha clientes pós-venda, verificando suas opiniões. Filtra
+informações para melhoria de serviços, dando retorno às sugestões dos
+clientes e enviando-lhes brindes. Renova e altera contratos de prestação
+de serviços. Interage com as diversas áreas da empresa representada.
+Requisita mostruário de produtos e solicita troca de produtos
+defeituosos. Obtém informações de pré-venda com telemarketing. Comunica
+transações comerciais realizadas e os resultados de vendas. Sugere
+políticas de vendas, propondo ações para melhoria dos resultados. Visita
+área industrial da empresa, participando de reuniões sobre promoção de
+produtos e serviços. Mantém-se atualizado, participando de cursos sobre
+novas estratégias de marketing. Participa de eventos, tais como feiras e
+palestras relacionadas à área. Expõe produtos em locais definidos pela
+empresa representada.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 354705 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 04008 -- Técnico em Logística }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Logística será habilitado para:
+
+Auxiliar no planejamento, operacionalização e controle da cadeia
+produtiva e seu fluxo logístico. Executar procedimentos relacionados a
+suprimentos, produção, recebimento, armazenagem e distribuição de
+produtos, fazendo uso das tecnologias de informação e comunicação.
+Identificar agentes da cadeia de suprimentos. Elaborar relatórios
+operacionais para tomada de decisões.
+
+Para atuação como Técnico em Logística, são fundamentais:
+
+Conhecimentos e saberes relacionados à área operacional, de produção e
+de prestação de serviços das organizações, de modo a atuar em
+conformidade com as legislações e diretrizes de conduta, como também com
+as normas de saúde e segurança do trabalho. Atuação de forma proativa na
+resolução de situações-problema do mundo do trabalho, desenvolvendo
+competências socioemocionais e atributos comportamentais relacionados à
+sustentabilidade e ao trabalho colaborativo.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 342110  ( Operador de transporte multimodal )}
+
+Programa, controla e coordena operações de transportes em geral - em
+diferentes modais de transporte -, acompanhando as operações de
+embarque, transbordo e desembarque de carga junto ao regime de trânsito
+aduaneiro. Supervisiona as condições de segurança e de manutenção dos
+meios de transportes e equipamentos utilizados. Controla a eficiência
+operacional do armazenamento e do transporte da carga. Remaneja
+equipamentos e veículos, quando necessário. Controla recursos
+financeiros e insumos, elaborando planilhas de custos e receitas dos
+serviços prestados. Pesquisa mercado, analisando a viabilidade de novos
+serviços, coletando dados de clientes e fornecedores potenciais e
+identificando rotas de transporte e respectiva estrutura de serviço.
+Define parcerias e fornecedores de serviços com critérios técnicos,
+contratando serviços de transporte e negociando preços e prazos de
+pagamento. Elabora ou auxilia na elaboração de documentação - como
+contratos, registros legais de transporte de cargas do comércio
+doméstico ou do exterior - necessária ao desembaraço de cargas. Registra
+dados em sistemas e alimenta sistemas informacionais internos. Atende
+clientes, classificando-os por demanda, identificando suas necessidades,
+elaborando propostas de preços e serviços, disponibilizando informações
+da carga e verificando a sua satisfação. Treina e orienta funcionários e
+estagiários, avaliando os seus desempenhos e analisando as necessidades
+de treinamento da equipe.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 342110 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 391115  ( Controlador de entrada e saída )}
+
+Controla suprimentos - matéria-prima e insumos - nos processos de
+produção, registrando entrada e saída, definindo estoque de segurança
+para cada item e emitindo solicitações. Pode propor suprimentos
+alternativos. Define formas de transporte, manuseio, armazenamento e
+distribuição de suprimentos. Realiza a inspeção de matéria-prima e
+insumos. Mantém registros relacionados ao movimento de entrada e saída
+de suprimentos. Atualiza, disponibiliza e trata as informações,
+elaborando gráficos e relatórios de controles. Colabora no planejamento
+e no controle da produção, propondo aperfeiçoamentos nos processos,
+indicando melhorias em máquinas e equipamentos e definindo leiaute do
+processo produtivo. Pode auxiliar na definição de instruções de
+trabalho. Mantém comunicação com clientes e fornecedores.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 391115 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 04009 -- Técnico em Marketing }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Marketing será habilitado para:
+
+Projetar e implementar planos de marketing. Realizar análises de vendas,
+preços e produtos. Desenvolver projetos de comunicação, ?delização de
+clientes e relação com fornecedores ou outras entidades. Desenvolver,
+implementar e gerenciar estratégias de marketing digital.
+Operacionalizar apresentação dos serviços e produtos no ponto de venda.
+Elaborar estudos de mercado.
+
+Para atuação como Técnico em Marketing, são fundamentais:
+
+Conhecimentos e saberes relacionados à área comercial e de negócios das
+organizações, de modo a atuar em conformidade com as legislações e
+diretrizes de conduta, como também com as normas de saúde e segurança do
+trabalho, demonstrando visão empreendedora. Competências socioemocionais
+e atributos comportamentais relacionados à comunicação clara e cordial,
+respeito à diversidade, trabalho colaborativo e protagonismo na análise
+e resolução de problemas voltados ao mundo do trabalho.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 354130  ( Promotor de vendas especializado )}
+
+Promove o processo de venda de produtos especializados - inclusive por
+comércio eletrônico (ou e-commerce) -, visando ao aumento de vendas e à
+fixação de marca. Propõe política de vendas para produtos
+especializados, definindo estratégia de marketing e fazendo previsão de
+vendas. Subsidia a revisão de plano de vendas, sugerindo melhorias no
+processo promocional e comercial e realizando sondagens de potencial de
+mercado. Pesquisa compradores e revendedores potenciais, mapeando-os por
+georreferenciamento. Pode elaborar roteiro de visitas, utilizando banco
+de dados de compradores e revendedores. Organiza documentação e elabora
+manuais técnicos - em meio impresso e digital - para a promoção de
+vendas junto a revendedores e grandes compradores, conforme
+procedimentos de marketing e vendas. Divulga e demonstra produtos
+especializados, de acordo com estratégias de marketing e especificidades
+de cada linha desses produtos. Presta assistência a revendedores e a
+grandes compradores, instruindo-os sobre o manuseio ou a aplicação dos
+produtos. Soluciona problemas para usos especiais, por meio de consulta
+ao setor especializado de projeto ou de fabricação. Recebe, registra e
+encaminha solicitações de customização de produtos para grandes
+compradores. Prepara documentação subsidiária para treinamento de
+vendedores dos pontos de venda, em meio impresso e digital. Pode treinar
+novos funcionários. Elabora relatórios e estatísticas. Comunica a sua
+chefia os resultados de vendas. Consulta publicações técnicas, participa
+de palestras e de feiras relacionadas à área. Participa de lançamento de
+novos produtos.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 354130 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 05001 -- Técnico em Computação Gráfica }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Computação Gráfica Digital será habilitado para:
+
+Elaborar e implementar projetos de programação visual e lay-out para
+mídia digital e/ou impressa. Realizar a modelagem e edição de imagens,
+áudios e vídeos. Estruturar aplicações web e multimídia. Aplicar
+técnicas de desenho e pintura digital. Realizar a programação de objetos
+gráficos 2D e 3D. Realizar tratamento de imagens estáticas e em
+movimento que compõem estruturas de navegação em mídias digitais.
+Executar desenho técnico para elaboração de projetos, plantas e maquetes
+digitais.
+
+Para atuação como Técnico em Computação Gráfica, são fundamentais:
+
+Conhecimentos e saberes relacionados aos processos de planejamento e
+execução de projetos e roteiros de modo a garantir a entrega de produtos
+digitais de acordo com suas finalidades. Conhecimentos e saberes
+relacionados às normas técnicas, à liderança de equipes, à solução de
+problemas técnicos e à assertividade na comunicação do material
+produzido.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 317120  ( Desenvolvedor de multimídia )}
+
+Desenvolve sistemas e aplicações de multimídia, elaborando a interface
+gráfica e aplicando critérios ergonômicos de navegação. Monta a
+estrutura do banco de dados e codifica os programas e aplicativos,
+aplicando sistemas de rotinas de segurança. Compila os programas. Testa
+aplicativos e programas, elaborando casos de testes. Gera aplicativos
+para instalação e gerenciamento dos sistemas. Documenta sistemas e
+aplicações e avalia o desempenho dos produtos desenvolvidos. Implanta
+sistemas e aplicações de multimídia, instalando os programas, adaptando
+o conteúdo para mídias interativas e configurando os equipamentos em que
+a aplicação será executada. Homologa sistemas e aplicações
+desenvolvidos, avaliando e validando os resultados da implantação.
+Elabora material para capacitação de usuários. Avalia os objetivos e as
+metas de projetos de sistemas e aplicações, tendo em vista os resultados
+obtidos na fase de implantação. Publica o código final no servidor de
+sistemas e aplicações. Realiza a manutenção de sistemas e aplicações de
+multimídia, atualizando informações gráficas, textuais e audiovisuais.
+Implementa alterações em sistemas e aplicações e em suas estruturas de
+armazenamento de dados, adequando-os aos sistemas e ambientes
+operacionais. Monitora a performance de sistemas e aplicações,
+utilizando ferramentas de software, para obter subsídios à atividade de
+manutenção. Atualiza a documentação de sistemas e aplicações, em função
+das intervenções de manutenção. Fornece suporte técnico para o cliente
+interno. Colabora na seleção dos recursos de desenvolvimento,
+especificando máquinas, ferramentas, acessórios e suprimentos. Participa
+da seleção das linguagens de programação e metodologias. Seleciona
+ferramentas de desenvolvimento. Participa da definição da nomenclatura
+padrão. Colabora no planejamento das etapas e ações de trabalho,
+participando das definições de atividades, tarefas e cronograma.
+Participa de reuniões com a equipe de trabalho ou com o cliente.
+Participa das definições de padronizações. Projeta sistemas e aplicações
+de multimídia, identificando a demanda do cliente, coletando dados e
+desenvolvendo o leiaute de telas e relatórios. Elabora o pré-projeto e
+os projetos conceitual, lógico, estrutural, físico e gráfico dos
+sistemas e aplicações, definindo os requisitos de projeto. Participa das
+definições dos critérios ergonômicos de navegação e da interface de
+comunicação e interatividade. Dimensiona a vida útil dos sistemas e
+aplicações.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 317120 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 05003 -- Técnico em Informática }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Informática será habilitado para:
+
+Desenvolver sistemas computacionais utilizando ambiente de
+desenvolvimento. Realizar modelagem, desenvolvimento, testes,
+implementação e manutenção de sistemas computacionais. Modelar,
+construir e realizar manutenção de banco de dados. Executar montagem,
+instalação e configuração de equipamentos de informática. Instalar e
+configurar sistemas operacionais e aplicativos em equipamentos
+computacionais. Realizar manutenção preventiva e corretiva de
+equipamentos de informática. Instalar e configurar dispositivos de
+acesso à rede e realizar testes de conectividade. Realizar atendimento
+help-desk. Operar, instalar, configurar e realizar manutenção em redes
+de computadores. Aplicar técnicas de instalação e configuração da rede
+física e lógica. Instalar, configurar e administrar sistemas
+operacionais em redes de computadores. Executar as rotinas de
+monitoramento do ambiente operacional. Identificar e registrar os
+desvios e adotar os procedimentos de correção. Executar procedimentos de
+segurança, pré-definidos, para ambiente de rede.
+
+Para atuação como Técnico em Informática, são fundamentais:
+
+Conhecimentos e saberes relacionados aos processos de planejamento e
+execução de projetos computacionais de forma a garantir a entrega de
+produtos digitais, análise de softwares, testagem de protótipos, de
+acordo com suas finalidades. Conhecimentos e saberes relacionados às
+normas técnicas, à liderança de equipes, à solução de problemas técnicos
+e à assertividade na comunicação de laudos e análises. Habilidades
+relacionadas à construção de soluções em BI e integrações sistêmicas.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 317115  ( Programador de máquinas - ferramenta com comando numérico )}
+
+Projeta sistemas e aplicações para máquinas-ferramenta CNC,
+identificando a demanda do cliente, coletando dados e desenvolvendo o
+leiaute de telas e relatórios. Elabora o pré-projeto e os projetos
+conceitual, lógico, estrutural, físico e gráfico dos sistemas e
+aplicações. Elabora croquis e desenhos para geração de programas de CNC.
+Projeta dispositivos, ferramentas e posicionamento de peças em máquinas.
+Participa das definições dos critérios ergonômicos de navegação e da
+interface de comunicação e interatividade. Dimensiona a vida útil dos
+sistemas e aplicações e modela sua estrutura de banco de dados.
+Desenvolve sistemas e aplicações para máquinas-ferramenta CNC,
+elaborando a interface gráfica, montando a estrutura do banco de dados,
+codificando os programas e aplicativos e aplicando sistemas de rotinas
+de segurança. Compila os programas. Testa aplicativos e programas,
+elaborando casos de testes. Gera aplicativos para instalação e
+gerenciamento dos sistemas. Documenta os sistemas e aplicações e avalia
+o desempenho dos produtos desenvolvidos. Implanta sistemas e aplicações
+para máquinas-ferramenta CNC, instalando os programas, homologando os
+sistemas e aplicações desenvolvidos, avaliando e validando os resultados
+da implantação. Elabora material para capacitação de usuários. Realiza a
+manutenção de sistemas e aplicações para máquinas-ferramenta CNC,
+atualizando informações gráficas, textuais e audiovisuais e convertendo
+seus códigos fontes para outras linguagens ou plataformas. Implementa
+alterações nos sistemas e aplicações. Monitora a performance dos
+sistemas e aplicações, utilizando ferramentas de software, para obter
+subsídios à atividade de manutenção. Atualiza a documentação dos
+sistemas e aplicações, em função das intervenções de manutenção. Fornece
+suporte técnico para o cliente interno. Colabora na seleção dos recursos
+de desenvolvimento, especificando máquinas, ferramentas, acessórios e
+suprimentos. Participa da seleção das linguagens de programação e
+metodologias. Seleciona ferramentas de desenvolvimento. Colabora no
+planejamento das etapas e ações de trabalho, participando das definições
+de atividades, tarefas e cronograma. Participa de reuniões com a equipe
+de trabalho ou com o cliente. Participa das definições de padronizações.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 317115 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 317120  ( Desenvolvedor de multimídia )}
+
+Desenvolve sistemas e aplicações de multimídia, elaborando a interface
+gráfica e aplicando critérios ergonômicos de navegação. Monta a
+estrutura do banco de dados e codifica os programas e aplicativos,
+aplicando sistemas de rotinas de segurança. Compila os programas. Testa
+aplicativos e programas, elaborando casos de testes. Gera aplicativos
+para instalação e gerenciamento dos sistemas. Documenta sistemas e
+aplicações e avalia o desempenho dos produtos desenvolvidos. Implanta
+sistemas e aplicações de multimídia, instalando os programas, adaptando
+o conteúdo para mídias interativas e configurando os equipamentos em que
+a aplicação será executada. Homologa sistemas e aplicações
+desenvolvidos, avaliando e validando os resultados da implantação.
+Elabora material para capacitação de usuários. Avalia os objetivos e as
+metas de projetos de sistemas e aplicações, tendo em vista os resultados
+obtidos na fase de implantação. Publica o código final no servidor de
+sistemas e aplicações. Realiza a manutenção de sistemas e aplicações de
+multimídia, atualizando informações gráficas, textuais e audiovisuais.
+Implementa alterações em sistemas e aplicações e em suas estruturas de
+armazenamento de dados, adequando-os aos sistemas e ambientes
+operacionais. Monitora a performance de sistemas e aplicações,
+utilizando ferramentas de software, para obter subsídios à atividade de
+manutenção. Atualiza a documentação de sistemas e aplicações, em função
+das intervenções de manutenção. Fornece suporte técnico para o cliente
+interno. Colabora na seleção dos recursos de desenvolvimento,
+especificando máquinas, ferramentas, acessórios e suprimentos. Participa
+da seleção das linguagens de programação e metodologias. Seleciona
+ferramentas de desenvolvimento. Participa da definição da nomenclatura
+padrão. Colabora no planejamento das etapas e ações de trabalho,
+participando das definições de atividades, tarefas e cronograma.
+Participa de reuniões com a equipe de trabalho ou com o cliente.
+Participa das definições de padronizações. Projeta sistemas e aplicações
+de multimídia, identificando a demanda do cliente, coletando dados e
+desenvolvendo o leiaute de telas e relatórios. Elabora o pré-projeto e
+os projetos conceitual, lógico, estrutural, físico e gráfico dos
+sistemas e aplicações, definindo os requisitos de projeto. Participa das
+definições dos critérios ergonômicos de navegação e da interface de
+comunicação e interatividade. Dimensiona a vida útil dos sistemas e
+aplicações.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 317120 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 05009 -- Técnico em Telecomunicações }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Telecomunicações será habilitado para:
+
+Participar na elaboração de projetos de telecomunicações. Instalar,
+testar e realizar manutenções preventivas e corretivas em sistemas de
+telecomunicações. Configurar equipamentos nas áreas de telefonia,
+transmissão e redes de comunicação. Supervisionar tecnicamente processos
+e serviços de telecomunicações. Elaborar documentação técnica. Prestar
+assistência técnica aos clientes. Realizar programação de softwares
+específicos para equipamentos de telecomunicações. Participar na
+elaboração da documentação técnica
+
+Para atuação como Técnico em Telecomunicações, são fundamentais:
+
+Conhecimentos e saberes relacionados aos processos técnicos de
+telecomunicação cabeada ou de transmissão/tráfego de dados móveis, bem
+como às boas práticas de comunicação e de liderança de equipes.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 391205  ( Inspetor de qualidade )}
+
+Planeja e desenvolve a inspeção de insumos e produtos - peças, conjuntos
+e material em processo de produção -, definindo amostras e aplicando
+procedimentos e métodos de inspeção de acordo com sistemas, normas e
+instruções específicas. Define e opera equipamentos laboratoriais,
+instrumentos e ferramentas para realização de ensaios. Pode fazer coleta
+e envio de amostras para análises. Aplica ferramentas da qualidade e
+metodologia estatística para avaliação da conformidade, de acordo com o
+objeto da inspeção. Verifica conformidade de processos, controlando as
+condições do ambiente em que se desenvolve o processo e observando
+condições de uso de equipamentos, instrumentos e ferramentas. Analisa
+relatórios de controle de processos para constatar o cumprimento de
+normas e procedimentos e informar setores responsáveis sobre processos,
+produtos e serviços não-conformes. Na inspeção de recebimento, na
+inspeção realizada durante o processo de produção e na inspeção de
+produtos acabados, examina documentos, verifica local de recebimento e
+inspeção, avalia condições de descarregamento e verifica higiene e
+limpeza do local de armazenamento de insumos e produtos. Pode executar
+ações corretivas em função de reclamações do mercado. Libera produtos e
+serviços inspecionados, verificando especificações e padrões e
+conferindo condições de transporte e higiene.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 391205 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 06005 -- Técnico em Edificações }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Edificações será habilitado para:
+
+Desenvolver projetos de arquitetura, estrutura, instalações elétricas e
+hidrossanitárias de até 80 m2 usando meios físicos ou digitais. Elaborar
+orçamentos de obras e serviços. Planejar a execução dos serviços de
+construção e manutenção predial. Executar obras e serviços de construção
+e manutenção predial. Executar ensaios de materiais de construção, solos
+e controle tecnológico. Conduzir planos de qualidade da construção.
+Coordenar a execução de serviços de manutenção de equipamentos e
+instalações em edificações.
+
+Para atuação como Técnico em Edificações, são fundamentais:
+
+Conhecimentos e saberes relacionados aos processos de planejamento e
+construção de edificações de modo a assegurar a saúde e a segurança dos
+trabalhadores e dos futuros ocupantes do imóvel. Conhecimentos e saberes
+relacionados à sustentabilidade do processo produtivo, às técnicas e
+processos de produção na construção civil, às normas técnicas.
+Habilidades e competências relacionadas à liderança de equipes, à
+solução de problemas técnicos e trabalhistas e à gestão de conflitos.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 318005  ( Desenhista técnico )}
+
+Analisa solicitação de desenho técnico, interpretando documentos de
+apoio, tais como plantas, projetos, catálogos, croquis e normas. Propõe
+ao solicitante alternativas para execução do desenho, chegando a um
+acordo sobre os detalhes técnicos finais. Estima tempo para realização
+do desenho e define prioridades, conforme cronograma. Programa ações
+para realização do desenho técnico, observando características técnicas,
+fazendo esboços, estabelecendo formatos e definindo escalas e sistemas
+de representação. Elabora desenhos técnicos, representando formas
+geométricas em duas e três dimensões. Utiliza computador, programa --
+tal como CAD-Desenho Assistido por Computador (Computer Aided Design) -,
+impressoras, plotters e outros periféricos, além de fazer uso de
+instrumentos para execução do traçado diretamente em substratos de
+papel. Constrói o desenho, traçando linhas auxiliares, cotando e
+definindo a lista de materiais e componentes. Envia o desenho para
+revisão, recebendo a aprovação do solicitante. Realiza cópias de
+segurança e disponibiliza o desenho técnico final e/ou suas revisões
+para as áreas afins, que providenciarão a entrega ao solicitante.
+Conserva o local de trabalho limpo e organizado. Controla graus de
+luminosidade do ambiente e verifica as condições ergonômicas para uso de
+monitor de vídeo, mouse, mesa digitalizadora, prancheta e teclado.
+Mantém equipamentos e instrumentos de trabalho em plenas condições de
+uso e funcionamento. Requisita serviço de manutenção de computador,
+impressoras, plotters e outros periféricos, quando necessário. Organiza
+e arquiva documentos físicos e eletrônicos, tais como comprovantes de
+aprovação e cópias de segurança dos desenhos técnicos. Destina
+adequadamente os resíduos gerados, fazendo reciclagem e realizando
+descarte de acordo com as normas ambientais.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 318005 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 318010  ( Desenhista copista )}
+
+Analisa solicitação de cópia de desenho técnico, observando as
+características técnicas do desenho original e interpretando documentos
+de apoio, tais como originais de plantas, projetos, catálogos, croquis e
+normas. Propõe ao solicitante alternativas para execução da cópia,
+chegando a acordo em relação aos detalhes técnicos finais. Estima tempo
+para realização do trabalho. Elabora cópias de desenhos técnicos,
+reproduzindo representações de formas geométricas em duas e três
+dimensões. Utiliza computador, programa -- tal como CAD-Desenho
+Assistido por Computador (Computer Aided Design) -, mesas
+digitalizadoras, impressoras, plotters e outros periféricos, além de
+fazer uso de instrumentos para execução do traçado diretamente em
+substratos de papel. Constrói a cópia do desenho, traçando linhas
+auxiliares e cotando. Envia a cópia para revisão, recebendo a aprovação
+do solicitante. Realiza cópias de segurança e disponibiliza o desenho
+final copiado e/ou suas revisões para as áreas afins, que providenciarão
+a entrega ao solicitante. Conserva o local de trabalho limpo e
+organizado. Controla graus de luminosidade do ambiente e verifica as
+condições ergonômicas para uso de monitor de vídeo, mouse, mesa
+digitalizadora, prancheta e teclado. Mantém equipamentos e instrumentos
+de trabalho em plenas condições de uso e funcionamento. Requisita
+serviço de manutenção de computador, impressoras, plotters e outros
+periféricos, quando necessário. Organiza e arquiva documentos físicos e
+eletrônicos, tais como comprovantes de aprovação e uma via de cada
+desenho copiado. Destina adequadamente os resíduos gerados, fazendo
+reciclagem e realizando descarte de acordo com as normas ambientais.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 318010 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 318015  ( Desenhista detalhista )}
+
+Analisa solicitação de detalhamento de desenho técnico, interpretando
+original e documentos de apoio, tais como plantas, projetos, catálogos,
+croquis e normas. Propõe ao solicitante alternativas para execução do
+detalhamento, chegando a um acordo sobre pormenores técnicos finais.
+Estima tempo para realização do detalhamento e estabelece prioridades,
+conforme cronograma. Programa ações para realização do desenho
+detalhado, observando características técnicas, fazendo esboços,
+estabelecendo formatos e definindo escalas e sistemas de representação.
+Elabora desenhos técnicos detalhados, representando formas geométricas
+em duas e três dimensões. Utiliza computador, programa -- tal como
+CAD-Desenho Assistido por Computador (Computer Aided Design) -,
+impressoras, plotters e outros periféricos, além de fazer uso de
+instrumentos para execução do traçado diretamente em substratos de
+papel. Constrói o detalhamento do desenho, traçando linhas auxiliares,
+cotando e realçando aspectos e características de formas geométricas
+complexas e outros elementos a detalhar. Elabora a lista de materiais e
+componentes do desenho detalhado. Envia o desenho técnico detalhado para
+revisão, recebendo a aprovação do solicitante. Realiza cópias de
+segurança e disponibiliza o desenho detalhado final e/ou suas revisões
+para as áreas afins, que providenciarão a entrega ao solicitante.
+Conserva o local de trabalho limpo e organizado. Controla graus de
+luminosidade do ambiente e verifica as condições ergonômicas para uso de
+monitor de vídeo, mouse, mesa digitalizadora, prancheta e teclado.
+Mantém equipamentos e instrumentos de trabalho em plenas condições de
+uso e funcionamento. Requisita serviço de manutenção de computador,
+impressoras, plotters e outros periféricos, quando necessário. Organiza
+e arquiva documentos físicos e eletrônicos, tais como comprovantes de
+aprovação e cópias de segurança dos desenhos técnicos detalhados.
+Destina adequadamente os resíduos gerados, fazendo reciclagem e
+realizando descarte de acordo com as normas ambientais.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 318015 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 318120  ( Desenhista técnico (instalações hidrossanitárias) )}
+
+Planeja o trabalho relacionado ao desenho técnico de instalações
+hidrossanitárias, propondo alternativas para elaboração do desenho e
+determinando a metodologia para sua execução. Seleciona instrumentos e
+outros meios necessários à elaboração do desenho. Pode prever uso de
+sistemas BIM - Modelagem da Informação da Construção (Building
+Information Modeling). Calcula e define o custo do desenho. Estipula
+prazo de execução. Prepara o local de trabalho, de acordo com
+recomendações normativas de ergonomia, de segurança do trabalho e de
+saúde ocupacional. Coleta dados para elaboração do desenho técnico de
+instalações hidrossanitárias, interpretando projetos existentes,
+consultando informações em arquivos e fazendo levantamento de campo.
+Busca informações complementares e organiza os dados coletados. Processa
+dados para desenho técnico de instalações hidrossanitárias, analisando
+croquis obtidos por meio dos levantamentos de campo; interpretando
+memória de cálculo e outras informações do conjunto de dados coletados.
+Transfere dados da estação local de campo -- para o escritório ou
+ambiente onde será executado o desenho --, utilizando ferramentas de
+tecnologia da informação requeridas. Calcula dados da caderneta de
+campo. Realiza pesquisas complementares -- inclusive via internet --,
+para obter novos dados relacionados ao desenho ou ampliar a compreensão
+sobre o conjunto de dados à disposição. Elabora desenhos técnicos de
+instalações hidrossanitárias -- tais como desenhos de redes de esgoto,
+águas pluviais, abastecimento de água e de sistemas de captação,
+purificação e distribuição de água --, aplicando normas técnicas e
+realizando visitas técnicas para rever dados. Utiliza softwares
+específicos para desenho, especialmente CAD-Desenho Assistido por
+Computador (Computer Aided Design). Utiliza estações de trabalho
+computadorizadas, impressoras, plotters e outros periféricos. Pode fazer
+uso de instrumentos para execução do traçado diretamente em substratos
+de papel, quando requerido. Define formatos e escalas e detalha
+desenhos. Diagrama pranchas ou folhas de desenho técnico. Legenda
+plantas e elabora a lista de material relacionada ao conteúdo do
+desenho. Revisa desenhos técnicos de instalações hidrossanitárias,
+conferindo cotas, dimensionamentos, informações descritivas e outros
+conteúdos. Atualiza desenhos, em função de mudanças de legislação.
+Realiza a complementação ou a modificação de desenhos, quando
+necessário. Em situações em que os desenhos passam por supervisão,
+realiza as compatibilizações necessárias dos desenhos, de acordo com os
+apontamentos da supervisão. Fecha a ordem de serviço do desenho de
+instalações hidrossanitárias, relatando mudanças de procedimento
+adotadas ao longo dos trabalhos; liberando o desenho para arquivo
+eletrônico ou mapoteca; e enviando originais e/ou cópias do desenho para
+clientes. Retorna documentos utilizados para arquivo. Organiza arquivos
+técnicos -- físicos e eletrônicos -- relacionados aos serviços com
+desenhos técnicos de instalações hidrossanitárias, determinando o tipo
+de arquivo a ser utilizado e indexando documentos pertinentes à área.
+Reúne documentos e organiza catálogos de fornecedores. Compacta e
+armazena arquivos digitais. Conserva o local de trabalho limpo e
+organizado. Controla luminosidade do ambiente e verifica as condições
+ergonômicas para uso de monitor de vídeo, mouse, mesa digitalizadora,
+prancheta e teclado. Mantém equipamentos e instrumentos de trabalho em
+plenas condições de uso e funcionamento. Requisita serviço de manutenção
+de computador, impressoras, plotters e outros periféricos, quando
+necessário. Destina adequadamente os resíduos gerados, fazendo
+reciclagem e realizando descarte de acordo com as normas ambientais.
+Zela pela segurança, atuando na prevenção de acidentes e utilizando
+equipamentos de proteção individual, sempre que necessário,
+especialmente durante os levantamentos de dados em campo.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 318120 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 06011 -- Técnico em Portos }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Portos será habilitado para:
+
+Desenvolver atividades de gerenciamento, monitoramento, supervisão,
+programação e controle em operações portuárias diversas. Controlar,
+programar e coordenar operações de transportes em geral, inclusive o
+transporte de cargas perigosas. Prestar suporte técnico em atividades de
+armazenagem de cargas, inclusive armazenagem de cargas perigosas.
+Supervisionar operações de embarque, transbordo e desembarque de cargas
+entre os diversos modos de transporte. Prestar suporte técnico para o
+agenciamento de embarcações. Encaminhar procedimentos de importação e
+exportação. Verificar as condições de segurança dos meios de
+transportes, equipamentos utilizados e das cargas. Programar e
+supervisionar a manutenção de equipamentos eletromecânicos de operação
+portuária. Verificar e inspecionar a eficiência operacional de
+equipamentos e veículos. Interpretar, elaborar e preparar a documentação
+necessária ao desembaraço aduaneiro de cargas. Atender clientes internos
+e externos. Elaborar a cotação de preços de serviços de transporte,
+inclusive transporte multimodal. Identificar e programar rotas de
+transporte de cargas. Utilizar tecnologias aplicadas ao processo de
+gestão da informação sobre condições do transporte e da carga.
+
+Para atuação como Técnico em Portos, são fundamentais:
+
+Conhecimentos e saberes relacionados aos processos de desembaraço
+aduaneiro de cargas, transporte terrestre de contêineres, operações
+logísticas, transporte e armazenagem de mercadorias perigosas,
+sistemáticas de importação e exportação, operações de
+embarque/desembarque de navios e logística de armazéns. Comprometimento
+com as questões ambientais, sociais e de desenvolvimento tecnológico e
+para a solução de problemas e busca por inovações tecnológicas.
+Conhecimentos relacionados à liderança de equipes, à solução de
+problemas técnicos e trabalhistas e à gestão de conflitos.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 354305  ( Analista de exportação e importação )}
+
+Analisa mercado internacional de produtos e serviços, para identificar
+oportunidades de negócio e fornecer subsídios para definição de
+políticas de importação ou exportação. Examina aspectos cambiais e
+creditícios. Analisa aspectos legais e normativos. Verifica as
+tendências de consumo nos países, para adequar produtos e embalagens aos
+diferentes mercados. Analisa logística de movimentação. Elabora o plano
+de exportação, estabelecendo tipos e quantidades de mercadorias e
+avaliando concorrentes. Participa da definição de preços de produtos e
+serviços. Avalia a capacidade produtiva da mercadoria a exportar, para
+projetar curvas de vendas e definir logística. Operacionaliza a
+exportação, negociando condições de venda de produtos e serviços.
+Elabora proposta comercial, incluindo especificações técnicas do produto
+e tipos de embalagens e acondicionamento. Comunica ao produtor a
+aceitação da proposta, acertando a compatibilização do cronograma de
+produção com o contrato de venda. Contrata despachante, elabora
+documentação para exportação e providencia pagamento de encargos.
+Acompanha o andamento da produção de bens e serviços, para liberação da
+mercadoria comprometida em tempo hábil de embarque. Contrata serviços de
+terceiros para realização de transporte da mercadoria. Providencia meios
+do recebimento do valor acordado, por intermédio de transações em moeda
+estrangeira. Conclui o processo junto aos órgãos competentes,
+acompanhando a finalização no Sistema Integrado de Comércio Exterior --
+SISCOMEX. Guarda a documentação pelo prazo legal. Processa a importação
+de mercadorias, estudando a viabilidade do processo e emitindo planilha
+de custos. Verifica a conformidade da documentação e da nomenclatura das
+mercadorias, em relação à legislação vigente. Faz o pedido das
+mercadorias. No recebimento, instrui o desembaraço aduaneiro e verifica
+a documentação. Pode negociar com fornecedores a troca de mercadorias
+com defeito ou em desacordo com o pedido. Providencia meios de pagamento
+por intermédio de transações em moeda estrangeira. Aciona a seguradora,
+quando necessário. Realiza atividades de promoção de comércio exterior,
+organizando missões empresariais, prestando assistência técnica e
+operacional aos clientes em feiras e eventos e providenciando propaganda
+de produtos e serviços. Atende consultas de clientes, orienta
+exportadores e importadores e presta informações sobre o andamento de
+processos de importação ou exportação. Desenvolve fornecedores. Pode
+ministrar palestras técnicas da área.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 354305 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 06017 -- Técnico em Transporte Metroferroviário }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Transporte Metroferroviário será habilitado para:
+
+Operar, coordenar e fiscalizar o transporte metroferroviário. Coordenar
+a circulação de veículos metroferroviários. Trabalhar no planejamento,
+na execução e no controle de atividades ligadas às operações de pátios e
+terminais, veículos, sinalização e equipamentos do transporte
+metroferroviário. Coordenar a circulação de veículos metroferroviários.
+Administrar e controlar as atividades de pátios e terminais. Controlar e
+programar os horários de circulação de trens. Operar equipamentos e
+sistemas de sinalização, telecomunicações e bordo utilizados nos
+sistemas metroferroviários. Manobrar equipamentos e veículos
+metroferroviários. Preencher relatórios, planilhas, documentos de
+despacho, diário operacional e boletins de ocorrência.
+
+Para atuação como Técnico em Transporte Metroferroviário, são
+fundamentais:
+
+Conhecimentos e saberes relacionados ao controle e operação de veículos
+em pátios e vias ferroviárias, de modo a assegurar a saúde e a segurança
+dos trabalhadores e dos usuários do transporte metroferroviário. Além de
+ter o comprometimento com as questões sociais e de desenvolvimento
+tecnológico, proatividade, formação para a solução de problemas e a
+busca de inovações tecnológicas. Habilidades e saberes relacionados à
+liderança de equipes, à solução de problemas técnicos e trabalhistas e à
+gestão de conflitos.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 342120  ( Afretador )}
+
+Atende clientes, identificando suas necessidades. Informa-se sobre
+produto a ser transportado, elaborando proposta de preços e serviços.
+Define parcerias e fornecedores de serviços de armazenagem e transporte.
+Contrata serviços de arrendamento de navio em diferentes modalidades,
+entre as quais a casco nu (ou demise charter party ), afretamento por
+tempo (time charter-party) e contrato por viagem (ou voyage party).
+Contrata serviços de arrendamento de equipamentos, negociando preços e
+prazos de pagamento. Elabora ou auxilia a elaboração de documentos e
+contratos de afretamento. Registra dados de carga e transporte no
+sistema de comércio exterior (Siscarga) e em sistemas internos. Confere,
+organiza e arquiva documentos. Disponibiliza informações da carga para o
+cliente, verificando a sua satisfação. Pesquisa mercado, coletando dados
+de clientes potenciais. Identifica rotas de transporte, preços e
+serviços de seus parceiros e de seus concorrentes. Consulta sistemas de
+informação especializados, órgãos governamentais e entidades.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 342120 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 342315  ( Supervisor de carga e descarga )}
+
+Supervisiona operações logísticas de carga e descarga, envolvendo o
+embarque, o percurso e o desembarque. Verifica o tipo e a quantidade de
+carga, emitindo documento fiscal. Examina as condições do transporte,
+determinando as providências para adaptá-lo a cada tipo de embalagem de
+carga e para adequá-lo às operações em terminais e armazéns. Confere a
+retirada da carga. Colabora no planejamento, na programação e no
+controle de atividades de transporte relacionadas a operações logísticas
+de carga e descarga, identificando fatores condicionantes como limites
+de horários para o transporte urbano de carga - principalmente nas
+grandes cidades -, condições estabelecidas para movimentação de
+materiais e determinação de formas de distribuição. Consulta sistemas de
+informações, para verificar ocorrências no transporte de cargas.
+Controla despesas, conferindo notas fiscais e prestações de contas.
+Atende clientes, prestando informações.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 342315 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 06018 -- Técnico em Transporte Rodoviário }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Transporte Rodoviário será habilitado para:
+
+Organizar e controlar as operações e executar a logística de tráfego
+rodoviário. Planejar, operacionalizar e executar a logística do
+transporte de passageiros. Administrar e controlar a frota de veículos
+no transporte rodoviário de cargas e passageiros. Executar a operação,
+comercialização e manutenção de equipamentos. Planejar a armazenagem e o
+processo de expedição das empresas e centros de distribuições. Planejar
+e executar a distribuição de pessoal e cargas. Coordenar ações de
+intermodalidade de transportes. Identificar as características da malha
+viária e os diversos tipos de veículos transportadores. Aplicar a
+legislação de trânsito de veículos e de transporte de passageiros.
+Preparar e gerenciar a documentação necessária para operações de
+transportes.
+
+Para atuação como Técnico em Transporte Rodoviário, são fundamentais:
+
+Conhecimentos e saberes relacionados ao controle de operações e
+logística de transportes rodoviários, de passageiros e de cargas, de
+modo a assegurar a saúde e a segurança dos trabalhadores e usuários.
+Compromisso e ética com as questões ambientais, sociais e de
+desenvolvimento tecnológico. Habilidades para a solução de problemas.
+Conhecimentos e habilidades relacionados à busca de inovações
+tecnológicas, à liderança de equipes, à solução de problemas técnicos e
+trabalhistas e à gestão de conflitos.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 342210  ( Despachante aduaneiro )}
+
+Executa atividades relacionadas ao despacho aduaneiro de mercadorias -
+inclusive bagagem de viajante - na importação, na exportação e na
+internação, realizadas por qualquer via de transporte. Elabora e/ou
+supervisiona a elaboração de documentos relativos ao despacho aduaneiro.
+Providencia credenciamento de cliente junto à Receita Federal. Analisa
+cartas de crédito. Elabora fatura proforma e fatura comercial. Prepara
+lista de embarque. Executa e/ou supervisiona a classificação de
+mercadorias, analisando a documentação técnica das mercadorias;
+verificando suas funções de uso e aplicação; e observando seu material
+constitutivo. Analisa necessidade de anuência de órgãos pertinentes e,
+quando necessário, consulta a Receita Federal sobre dúvidas de
+classificação. Analisa enquadramento legal das alíquotas de impostos de
+importação e exportação. Enquadra mercadorias na Tarifa Externa Comum
+(TEC), na Nomenclatura da Associação Latino-americana de Integração
+(Naladi) e na Tabela de Incidência do Imposto sobre Produtos
+Industrializados (TIPI). Preenche Certificado de Origem; Conhecimento de
+Transporte internacional; Documento de Arrecadação de Receitas Federais
+(DARF); guia de Imposto sobre Operações relativas à Circulação de
+Mercadorias e sobre Prestações de Serviços de Transporte Interestadual e
+Intermunicipal e de Comunicação (ICMS); além de outros formulários
+necessários às operações de comércio exterior. Realiza e/ou supervisiona
+a atividade de entrada de dados no Sistema Integrado de Comércio
+Exterior (Siscomex) e sistemas auxiliares. Coleta dados de operações e
+registra licenças e declarações de importação e de despacho de
+exportação. Efetua registros no módulo Registro de Operações Financeiras
+do Sistema Registro Declaratório Eletrônico (RDE-ROF) e de atos
+concessórios de regime aduaneiro especial (``Drawback''). Faz Declaração
+de Trânsito Aduaneiro (DTA). Efetua acompanhamento da tramitação de
+documentos relacionados ao despacho aduaneiro. Solicita deferimento de
+licenças de importação e de declarações retificadoras. Subscreve
+documentos, inclusive termos de responsabilidade. Faz recebimento de
+intimações, de notificações, de autos de infração, de despachos, de
+decisões e de outros atos e termos processuais relacionados com o
+procedimento de despacho aduaneiro. Realiza ou supervisiona o
+recebimento de mercadorias e bagagens. Paga impostos e taxas. Pode
+apresentar desistência de vistoria aduaneira. Executa acompanhamento de
+vistoria da mercadoria na conferência aduaneira, observando a
+conferência física e a retirada de amostra de mercadoria para
+assistência técnica e perícia. Avalia exigências da receita federal e
+demais órgãos pertinentes, presta esclarecimentos e apresenta
+documentação. Retira comprovantes de importação e exportação junto à
+receita federal. Presta assessoria a importadores e exportadores,
+identificando suas necessidades; informando sobre legislação pertinente;
+propondo alternativas de logística de transportes; e avaliando
+benefícios fiscais. Calcula custos de operação. Pleiteia benefícios
+fiscais. Monitora processos administrativos e informa a cliente sobre
+tramitação de processos. Realiza contratação de serviços de terceiros,
+supervisionando a cotação de preços de armazenagem e preços de fretes
+nacionais e internacionais; orçando seguros; e negociando preços e
+prazos. Confere cobrança de terceiros por serviços prestados e
+providencia o pagamento. Supervisiona equipe de trabalho, distribuindo
+tarefas, avaliando desempenho e desenvolvendo treinamentos. Monitora a
+limpeza e a organização do ambiente de trabalho. Controla a aplicação de
+procedimentos da empresa para cumprimento de normas ambientais,
+inspecionando o reaproveitamento de sobras de material e o descarte de
+resíduos.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 342210 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 09001 -- Técnico em Artes Circenses }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Artes Circenses será habilitado para:
+
+Criar, desenvolver e executar apresentações circenses em espaços de
+circo, teatro, estúdio de televisão, públicos e culturais. Utilizar
+técnicas artísticas e corporais de acrobacia aérea e de solo,
+equilibrismo, malabarismo, antipodismo, ilusionismo, comicidade, canto,
+dança e pantomima. Organizar e supervisionar a estrutura, a montagem e o
+funcionamento do circo e dos equipamentos. Administrar, produzir e
+divulgar espetáculos.
+
+Para atuação como Técnico em Artes Circenses, são fundamentais:
+
+Conhecimentos interdisciplinares relacionados aos processos de criação,
+envolvendo pesquisa, idealização, planejamento, execução técnica,
+fruição e recepção estética. Competências comunicativas e empreendedoras
+voltadas à proposição de projetos, ao coletivo, à gestão, à solução de
+problemas e à resiliência, entre outras competências socioemocionais.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 376305  ( Apresentador de eventos )}
+
+Prepara-se para realizar apresentação de evento, pesquisando informações
+a transmitir na ocasião. Levanta informações impressas, radiofônicas,
+televisivas e disponíveis na Internet. Contata fontes de informação -
+tais como líderes comunitários, formadores de opinião e políticos --
+para inteirar-se dos temas relacionados ao evento. Pesquisa o perfil
+social, econômico e político do público-alvo. Atenta para
+especificidades culturais e políticas regionais. Com base nas
+informações coletadas, prepara comentários para fazer durante o evento e
+capacita-se a entrevistar convidados. Verifica as condições técnicas
+exigidas para a apresentação. Pode gravar locuções e materiais
+audiovisuais a serem utilizados no evento como complementares ao
+processo de comunicação. Prepara-se física e mentalmente para realizar a
+apresentação de evento, selecionando vestimenta e adereços -- entre os
+considerados adequados pela organização -; ajustando postura; realizando
+exercícios de concentração; e aquecendo a voz. Pode interagir com os
+membros da equipe de produção e organização, opinando na formatação do
+evento, quando solicitado. Apresenta o evento, dando o tom da solenidade
+e interpretando o texto. Pode receber instruções dos organizadores do
+evento, durante sua apresentação. Conduz o evento, atento ao roteiro
+predefinido. Alerta para colocação e retirada dos equipamentos.
+Administra os tempos do evento. Presta informações ao público,
+apresentando o conteúdo do evento. Anima o evento, mantendo a atenção e
+criando expectativas no público. Controla o tempo das performances de
+artistas e indica o momento de apresentação dos materiais audiovisuais
+previamente gravados. Entrevista convidados, aprofundando as informações
+por eles trazidas e coordenando a apresentação de dúvidas pelo público e
+de respostas pelos entrevistados. Transmite credibilidade para o
+público, noticiando fatos e imprevistos de forma segura. Faz adequação
+de sua postura física e entonação de voz à informação a ser transmitida.
+Verifica o conteúdo e a forma do texto, para atender às expectativas do
+público. Observa sinais de entrada de inserções comerciais. Transmite
+informações sobre o patrocinador, divulgando o produto promocional.
+Informa o público sobre acontecimentos intervenientes ao evento, tais
+como alertas sobre criança perdida, trânsito, entre outros. Percebe as
+reações relacionadas ao nível de satisfação do público durante o evento
+e conversa com alguns participantes após o final, para conhecer suas
+opiniões. Pode elaborar relatório para as equipes de produção e
+organização, com dados sobre ocorrências durante o evento e com
+sugestões para os próximos. Organiza e arquiva - em meio físico e
+eletrônico -- os dados coletados, para reutilização em eventos com temas
+similares.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 376305 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 376310  ( Apresentador de festas populares )}
+
+Prepara-se para realizar apresentação de festa popular, pesquisando
+informações a transmitir na ocasião. Levanta informações impressas,
+radiofônicas, televisivas e disponíveis na Internet sobre artistas
+participantes. Contata fontes de informação - tais como líderes
+comunitários e formadores de opinião -- para inteirar-se de temas
+relacionados à festa. Pesquisa o perfil socioeconômico e a faixa etária
+do público-alvo. Atenta para especificidades -- tais como região de
+origem, ano de início, tradições culinárias, danças, músicas,
+brincadeiras realizadas, entre outras - relacionadas à festa. Com base
+nas informações coletadas, prepara comentários para fazer durante a
+festa e capacita-se a entrevistar convidados. Verifica as condições
+técnicas exigidas para a apresentação. Pode gravar locuções e materiais
+audiovisuais a serem utilizados na festa como complementares ao processo
+de comunicação. Prepara-se física e mentalmente para realizar a
+apresentação da festa, selecionando vestimenta e adereços -- entre os
+considerados adequados pela organização -; ajustando postura; realizando
+exercícios de concentração; e aquecendo a voz. Pode interagir com os
+membros da equipe de produção e organização, opinando na formatação da
+festa, quando solicitado. Apresenta a festa, mantendo a espontaneidade e
+controlando a gesticulação. Pode receber instruções dos organizadores da
+festa, durante sua apresentação. Conduz a festa, atento ao roteiro
+predefinido. Alerta para colocação e retirada de equipamentos e de
+instrumentos musicais. Administra o tempo para realização de cada item
+do roteiro. Interage com o público, estabelecendo relações de empatia e
+estimulando o convívio cordial entre os participantes. Anima a festa,
+mantendo a atenção e criando expectativas no público. Controla o tempo
+da performance de cada artista e indica o momento de apresentação dos
+materiais audiovisuais previamente gravados. Entrevista convidados,
+aprofundando as informações por eles trazidas e sendo porta-voz de
+dúvidas e indagações do público. Transmite informações e comunicados
+relevantes ao desenvolvimento da festividade. Faz adequação de sua
+postura física e entonação de voz à informação a ser transmitida.
+Verifica os conteúdos de textos e a forma de transmiti-los, para não
+dispersar a atenção do público. Informa ao público sobre ocorrências
+durante a festa, tais como alertas sobre criança perdida, estacionamento
+irregular de veículos, entre outras. Faz contato - por meio do olhar -
+com o público, para perceber suas reações durante a festa e levantar o
+seu nível de satisfação. Conversa com alguns participantes após o final
+da festa, para conhecer suas opiniões. Pode elaborar relatório para as
+equipes de produção e organização, com dados sobre ocorrências durante a
+festa e com sugestões para as próximas. Organiza e arquiva - em meio
+físico e eletrônico -- os dados coletados sobre a festa, que possam ser
+reutilizados em novas edições, nos anos seguintes.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 376310 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 376315  ( Apresentador de programas de rádio )}
+
+Prepara-se para realizar apresentação de programa de rádio, levantando o
+conteúdo básico de seu programa com a equipe de produção e pesquisando
+informações a transmitir. Pesquisa características do seu padrão de
+ouvinte ou público-alvo, tais como perfil socioeconômico, faixa etária,
+uso de celular e Internet, principais tipos de divertimento ou
+entretenimento; principais problemas enfrentados no dia a dia, entre
+outras. A partir do conteúdo central de seu programa, levanta -- em
+jornais impressos e suas versões na web; em programas jornalísticos em
+rádios ou televisão; em dados disponíveis na Internet; e em outros meios
+de comunicação - informações sobre diferentes temas, para manter-se
+atualizado e poder explicar o assunto com clareza para seu público.
+Examina os temas de maior interesse para seu público-alvo e os mais
+discutidos em redes sociais. Contata fontes - tais como líderes
+comunitários, formadores de opinião e políticos --, para reunir novas
+informações. Com base nas informações coletadas, prepara comentários e
+argumentos para seus programas e capacita-se a entrevistar convidados.
+Verifica as condições técnicas exigidas para a apresentação. Pode
+realizar programas de rádio ao vivo ou gravá-los, considerando todas as
+etapas de produção e as expectativas do público-alvo. Pode transmitir
+evento ao vivo no programa de rádio, atuando remotamente. Pode interagir
+com os membros da equipe de produção da rádio, opinando sobre pauta,
+gênero e formato de programa, quando solicitado. Prepara-se para
+realizar a apresentação do programa de rádio, aquecendo sua voz e
+controlando sua respiração. Busca adequar sua linguagem ao público-alvo,
+para tornar clara sua fala. Apresenta o programa, interpretando textos.
+Pode receber instruções da equipe de produção, durante sua apresentação.
+Conduz o programa, atento ao roteiro predefinido. Administra o tempo
+para apresentar cada item do roteiro. Informa o público, apresentando o
+conteúdo do programa. Anima o programa, mantendo a atenção e criando
+expectativas no público. Conversa com artistas e apresenta as músicas
+preferidas de seu público-alvo. Interage com repórter, para detalhar
+ocorrências do momento, ficando atento ao tempo da reportagem. Recebe
+especialistas em temas abordados, para comentar notícias. Recebe
+convidados, para realizar entrevistas e aprofundar as informações por
+eles trazidas. Interage com os ouvintes, levantando problemas
+enfrentados e reivindicando respostas e soluções de autoridades.
+Transmite credibilidade para o público, noticiando fatos e imprevistos
+de forma segura. Faz adequação da entonação de sua voz à informação a
+ser transmitida. Observa sinais de entrada de inserções comerciais.
+Transmite informações sobre o patrocinador e divulga produto
+promocional. Recebe relatórios de audiência. Pode acompanhar reunião de
+``grupo de foco'', que compartilha suas opiniões, ideias e reações em
+relação ao programa. Pode conversar com amostra de ouvintes, para
+conhecer suas opiniões e levantar pontos considerados positivos e
+negativos. Com essas informações, pode ser chamado, pela equipe de
+produção, para participar da discussão de alterações no formato do
+programa e ajustes nos conteúdos abordados, para aumentar a audiência.
+Organiza e arquiva - em meio físico e eletrônico -- as informações
+coletadas em suas pesquisas, para consultas.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 376315 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 376320  ( Apresentador de programas de televisão )}
+
+Prepara-se para realizar apresentação de programa de televisão,
+consultando o conteúdo básico de seu programa com equipe de produção e
+levantando informações. Pesquisa características do seu público - tais
+como perfil socioeconômico, gênero e faixa etária -, para antever
+expectativas e interesses. Mantém-se atualizado sobre diferentes temas
+-- cultura, esporte, economia, política, entre outros -- do país e do
+mundo, lendo livros, estudando artigos e matérias publicadas e
+verificando informações divulgadas em jornais impressos e suas versões
+na web; em programas jornalísticos de rádio e televisão; na Internet; e
+em outros meios de comunicação. Examina os temas de maior interesse para
+seu público e os mais discutidos em redes sociais. Contata fontes - tais
+como líderes comunitários, formadores de opinião e políticos --, para
+levantar informações locais ou regionais. Com base nas informações
+coletadas, prepara comentários e argumentos para seus programas e
+capacita-se a entrevistar convidados. Verifica as condições técnicas
+exigidas para a apresentação. Pode interagir com diretor do programa e
+com equipe de produção, opinando sobre pauta e formatação do programa,
+quando solicitado. Mantém bom relacionamento com a equipe do programa,
+trocando ideias. Prepara-se para realizar a apresentação do programa de
+televisão, selecionando vestimenta e adereços -- entre os considerados
+adequados pela direção -; ajustando postura; realizando exercícios de
+concentração; aquecendo a voz; e controlando respiração. Busca adequar
+sua linguagem ao seu público, para tornar clara sua fala. Usa
+concentração e disciplina para eliminar vícios de linguagem. Apresenta
+programa em uma área específica -- como culinária, esporte, música,
+religião, entre outras -- ou com pauta diversificada; com ou sem
+plateia; ao vivo ou gravado e editado. Atua em estúdio ou remotamente,
+principalmente em transmissão de eventos ao vivo. Conduz o programa,
+administrando o tempo para apresentar cada item previsto em roteiro.
+Pode receber instruções do diretor ou da equipe de produção, durante sua
+apresentação. Anima o programa, mantendo a atenção e criando
+expectativas no público; demonstrando espontaneidade e descontração; e
+desenvolvendo formas de comunicação para conquistar a empatia das
+pessoas. Lida com imprevistos, durante a apresentação, de forma
+criativa. Busca ter estilo pessoal de condução do programa,
+diferenciando-se dos demais apresentadores. Informa o público,
+apresentando o conteúdo do programa. Interage com os telespectadores,
+levantando problemas enfrentados e reivindicando respostas e soluções de
+autoridades. Conversa com artistas e apresenta as músicas preferidas de
+seu público. Dialoga com especialistas em temas abordados, para comentar
+notícias. Recebe convidados, para realizar entrevistas e aprofundar as
+informações por eles trazidas. No caso de telejornais, segue o
+``espelho'' do jornal (tabela com o tempo de cada matéria e a ordem de
+apresentação). Interpreta textos que aparecem no ``teleprompter'', que
+fica na câmera para a qual se dirige. Apresenta matérias gravadas e
+editadas. Interage com repórter em tempo real, para detalhar ocorrências
+do momento. Fica atento às orientações do diretor de TV. Transmite
+credibilidade, noticiando fatos e imprevistos de forma segura. Faz
+adequação da entonação de sua voz à informação a ser transmitida.
+Observa sinais de entrada de inserções comerciais. Pode transmitir
+informações sobre o patrocinador e divulgar produtos. Recebe relatórios
+de audiência. Analisa pontos fortes e fracos de seu programa, levantados
+por diferentes estratégias, como reunião de ``grupo de foco'' e coleta
+de dados junto ao público. Com essas informações, pode ser chamado, pelo
+diretor de TV e pela equipe de produção, para participar da discussão de
+alterações no formato do programa e ajustes nos conteúdos abordados,
+para aumentar a audiência.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 376320 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 09011 -- Técnico em Design de Interiores }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Design de Interiores será habilitado para:
+
+Criar, desenvolver e viabilizar a execução de projetos de interiores
+residenciais, comerciais, de vitrines e exposições. Orientar e
+desenvolver projetos com base em ergonomia e desenho universal,
+conforto, saúde e bem-estar. Desenvolver esboços, perspectivas e
+desenhos técnicos. Planejar e organizar o espaço, com base nos estudos
+ergonômicos, estéticos e funcionais. Identificar elementos básicos para
+a concepção projetual dos espaços internos habitados. Representar os
+elementos de projeto no espaço bi e tridimensional. Aplicar métodos de
+representação gráfica. Prestar assistência técnica no estudo e
+desenvolvimento de projetos e pesquisas tecnológicas, voltadas às
+atividades da área. Orientar e coordenar a execução dos serviços de
+manutenção de equipamentos e instalações de ambientes e mobiliários
+fixos. Reformar ambientes sem alteração estrutural.
+
+Para atuação como Técnico em Design de Interiores, são fundamentais:
+
+Conhecimentos interdisciplinares relacionados aos processos de criação,
+envolvendo pesquisa, idealização, planejamento, execução técnica,
+fruição e recepção estética. Competências comunicativas e empreendedoras
+voltadas à proposição de projetos, ao coletivo, à gestão, à solução de
+problemas e à resiliência, entre outras competências socioemocionais.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 318005  ( Desenhista técnico )}
+
+Analisa solicitação de desenho técnico, interpretando documentos de
+apoio, tais como plantas, projetos, catálogos, croquis e normas. Propõe
+ao solicitante alternativas para execução do desenho, chegando a um
+acordo sobre os detalhes técnicos finais. Estima tempo para realização
+do desenho e define prioridades, conforme cronograma. Programa ações
+para realização do desenho técnico, observando características técnicas,
+fazendo esboços, estabelecendo formatos e definindo escalas e sistemas
+de representação. Elabora desenhos técnicos, representando formas
+geométricas em duas e três dimensões. Utiliza computador, programa --
+tal como CAD-Desenho Assistido por Computador (Computer Aided Design) -,
+impressoras, plotters e outros periféricos, além de fazer uso de
+instrumentos para execução do traçado diretamente em substratos de
+papel. Constrói o desenho, traçando linhas auxiliares, cotando e
+definindo a lista de materiais e componentes. Envia o desenho para
+revisão, recebendo a aprovação do solicitante. Realiza cópias de
+segurança e disponibiliza o desenho técnico final e/ou suas revisões
+para as áreas afins, que providenciarão a entrega ao solicitante.
+Conserva o local de trabalho limpo e organizado. Controla graus de
+luminosidade do ambiente e verifica as condições ergonômicas para uso de
+monitor de vídeo, mouse, mesa digitalizadora, prancheta e teclado.
+Mantém equipamentos e instrumentos de trabalho em plenas condições de
+uso e funcionamento. Requisita serviço de manutenção de computador,
+impressoras, plotters e outros periféricos, quando necessário. Organiza
+e arquiva documentos físicos e eletrônicos, tais como comprovantes de
+aprovação e cópias de segurança dos desenhos técnicos. Destina
+adequadamente os resíduos gerados, fazendo reciclagem e realizando
+descarte de acordo com as normas ambientais.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 318005 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 318010  ( Desenhista copista )}
+
+Analisa solicitação de cópia de desenho técnico, observando as
+características técnicas do desenho original e interpretando documentos
+de apoio, tais como originais de plantas, projetos, catálogos, croquis e
+normas. Propõe ao solicitante alternativas para execução da cópia,
+chegando a acordo em relação aos detalhes técnicos finais. Estima tempo
+para realização do trabalho. Elabora cópias de desenhos técnicos,
+reproduzindo representações de formas geométricas em duas e três
+dimensões. Utiliza computador, programa -- tal como CAD-Desenho
+Assistido por Computador (Computer Aided Design) -, mesas
+digitalizadoras, impressoras, plotters e outros periféricos, além de
+fazer uso de instrumentos para execução do traçado diretamente em
+substratos de papel. Constrói a cópia do desenho, traçando linhas
+auxiliares e cotando. Envia a cópia para revisão, recebendo a aprovação
+do solicitante. Realiza cópias de segurança e disponibiliza o desenho
+final copiado e/ou suas revisões para as áreas afins, que providenciarão
+a entrega ao solicitante. Conserva o local de trabalho limpo e
+organizado. Controla graus de luminosidade do ambiente e verifica as
+condições ergonômicas para uso de monitor de vídeo, mouse, mesa
+digitalizadora, prancheta e teclado. Mantém equipamentos e instrumentos
+de trabalho em plenas condições de uso e funcionamento. Requisita
+serviço de manutenção de computador, impressoras, plotters e outros
+periféricos, quando necessário. Organiza e arquiva documentos físicos e
+eletrônicos, tais como comprovantes de aprovação e uma via de cada
+desenho copiado. Destina adequadamente os resíduos gerados, fazendo
+reciclagem e realizando descarte de acordo com as normas ambientais.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 318010 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 09014 -- Técnico em Design de Móveis }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Design de Móveis será habilitado para:
+
+Desenvolver esboços, perspectivas e desenhos normatizados de móveis.
+Realizar estudos volumétricos e maquetes convencionais e eletrônicas.
+Aplicar aspectos ergonômicos ao projeto. Pesquisar e definir materiais,
+ferragens e acessórios. Elaborar documentação técnica normatizada.
+Acompanhar a execução de protótipos ou peças-piloto. Aplicar os
+conceitos de sustentabilidade ao desenvolvimento de móveis.
+
+Para atuação como Técnico em Design de Móveis, são fundamentais:
+
+Conhecimentos interdisciplinares relacionados aos processos de criação,
+envolvendo pesquisa, idealização, planejamento, execução técnica,
+fruição e recepção estética. Competências comunicativas e empreendedoras
+voltadas à proposição de projetos, ao coletivo, à gestão, à solução de
+problemas e à resiliência, entre outras competências socioemocionais.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 771120  ( Tanoeiro )}
+
+Planeja o trabalho, interpretando projetos, desenhos e especificações
+para a confecção e a restauração de pipas e outros vasilhames de madeira
+e derivados. Seleciona matéria-prima, insumos e componentes, ferramentas
+manuais, ferramentas elétricas portáteis, instrumentos de medição e
+controle, máquinas e equipamentos. Define roteiro para as atividades de
+confecção e restauração. Pode elaborar orçamento. Elabora esboço e
+realiza dimensionamento do produto sob medida, conforme solicitação do
+cliente e local de instalação. Confecciona gabaritos ou moldes para
+execução das peças. Especifica madeiras, acessórios, ferragens e
+acabamentos. Prepara máquinas e ferramentas. Confere parâmetros
+operacionais e do produto, tais como tipo da madeira e seu nível de
+umidade, posicionamento e geometria de corte, flexibilidade da madeira
+para executar a curvatura das aduelas, tipo de chapa para fazer a cinta
+do barril, entre outros. Confecciona pipas e outros vasilhames de
+madeira e derivados, regulando as máquinas para obter o produto conforme
+o projeto. Executa traçado em madeira, derivados e outros materiais,
+observando o sentido dos veios, serrando, moldando e aplainando aduelas,
+tampos e demais elementos, de acordo com as dimensões, curvaturas e
+formas gerais requeridas. Monta pipas e outros vasilhames de madeira e
+derivados, ajustando aduelas e tampos; utilizando elementos de união e
+fixação das aduelas - tais como arcos ou argolas de metal provisórios e
+definitivos -; aplicando massa para montagem, sob pressão; e submetendo
+o conjunto a chamas, banhos de vapor ou outras formas de calor, para
+dotar a madeira de mais flexibilidade. Realiza operações de acabamento,
+apondo apliques, lâminas e anéis metálicos; colocando ferragens para
+reajuste; regulando o funcionamento das partes móveis; e aplicando
+produtos para correções, de acordo com o projeto. Realiza revestimento
+interno no produto, para preservar as propriedades das substâncias
+envasadas em contato com a madeira. Pode realizar teste de viscosidade
+nos produtos utilizados para acabamento da superfície. Verifica os
+produtos confeccionados, para garantir a qualidade de pipas e outros
+vasilhames de madeira e derivados. Avalia matéria-prima, condições de
+impermeabilidade, resistência, ausência de vazamentos, formas e
+dimensões, encaixes, união e fixação das partes, acabamento das
+superfícies internas e externas do recipiente e aplicação de acessórios.
+Compara as características do produto final com os requisitos do cliente
+ou do projeto, providenciando ajustes, quando necessários. Restaura
+pipas e outros vasilhames de madeira e derivados, avaliando produtos
+para determinar a viabilidade de restauração; confeccionando peças para
+reposição; substituindo peças como aduelas, arcos metálicos e tampos
+danificados; reapertando elementos de fixação; e preparando o produto
+para acabamento. Prepara a expedição de pipas e outros vasilhames de
+madeira e derivados confeccionados sob medida ou restaurados,
+acondicionando-os para o transporte seguro e apondo instruções e
+procedimentos de conservação do produto. Organiza o ambiente de trabalho
+e os locais para carga, descarga e armazenamento de materiais. Realiza
+limpeza e conservação dos recursos materiais. Mantém as máquinas, os
+equipamentos e as ferramentas em plenas condições de uso e
+funcionamento. Mantém os materiais, instrumentos e acessórios de
+trabalho organizados e acondicionados. Controla desperdícios de
+material. Separa, identifica e classifica resíduos -- sólidos e líquidos
+-, para descarte, reúso e reciclagem. Utiliza equipamentos de proteção
+individual e coletiva.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 771120 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 09019 -- Técnico em Figurino Cênico }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Figurino Cênico será habilitado para:
+
+Aplicar técnicas de pesquisa, concepção, desenho e execução de
+figurinos. Aplicar técnicas de costura e modelagem de roupas. Produzir
+figurinos (trajes e acessórios) de acordo com a época e o tema a ser
+representado. Criar figurinos para personagens das artes cênicas,
+audiovisual, dança e festas populares. Acompanhar as tendências
+contemporâneas ligadas à criação de figurinos e as inovações
+tecnológicas.
+
+Para atuação como Técnico em Figurino Cênico, são fundamentais:
+
+Conhecimentos interdisciplinares relacionados aos processos de criação,
+envolvendo pesquisa, idealização, planejamento, execução técnica,
+fruição e recepção estética. Competências comunicativas e empreendedoras
+voltadas à proposição de projetos, ao coletivo, à gestão, à solução de
+problemas e à resiliência, entre outras competências socioemocionais.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 318810  ( Modelista de roupas )}
+
+Planeja a confecção de moldes e o desenvolvimento de protótipos de
+roupas, examinando a coleção do estilista; verificando tendências de
+mercado; consultando boletins técnicos; avaliando estilos de design,
+concepções e produtos de concorrentes; e coletando informações
+tecnológicas em feiras e em desfiles de vestuário. Confecciona moldes de
+roupas, interpretando modelos e desenhos; elaborando desenhos
+planificados de roupas; traçando, cortando e codificando moldes. Utiliza
+prancheta e softwares, tais como CAD-Desenho Assistido por Computador
+(Computer Aided Design) e CAM--Manufatura Auxiliada por Computador
+(Computer Aided Manufacturing). Marca referências em moldes e elabora
+tabelas de medidas de roupas, para orientar a produção do vestuário.
+Desenvolve protótipo de roupa, interpretando normas técnicas para
+produção, elaborando ficha técnica, especificando aviamentos e
+acessórios, ajustando moldes e gabaritos e determinando a posição de
+ornamentos, detalhes e acessórios. Confecciona e testa peça-piloto
+(protótipo). Requisita testes laboratoriais do protótipo. Realiza
+ampliações e reduções das dimensões do produto por escala. Avalia
+materiais para aquisição com vistas à produção de vestuário, verificando
+a resistência dos materiais e analisando sua composição e acabamento.
+Avalia a costurabilidade de tecidos e couros. Avalia a relação entre
+custo e benefício de materiais. Interpreta resultados de testes
+laboratoriais de materiais e elabora relatório.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 318810 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 09023 -- Técnico em Multimídia }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Multimídia será habilitado para:
+
+Desenvolver comunicação visual em meios eletrônicos, interfaces
+interativas, publicações digitais, animações 2D e 3D, jogos eletrônicos,
+web sites, web TV, TV digital e conteúdo audiovisual. Organizar e
+preparar arquivos digitais para aplicações web e multimídia, animações e
+games. Aplicar técnicas de tratamento de imagens estáticas e em
+movimento que compõem estruturas de navegação em mídias digitais.
+Executar atualização de páginas web e portais.
+
+Para atuação como Técnico em Multimídia, são fundamentais:
+
+Conhecimentos interdisciplinares relacionados aos processos de criação,
+envolvendo pesquisa, idealização, planejamento, execução técnica,
+fruição e recepção estética. Competências comunicativas e empreendedoras
+voltadas à proposição de projetos, ao coletivo, à gestão, à solução de
+problemas e à resiliência, entre outras competências socioemocionais.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 317110  ( Desenvolvedor de sistemas de tecnologia da informação (técnico) )}
+
+Desenvolve sistemas e aplicações de tecnologia da informação, elaborando
+a interface gráfica e aplicando critérios ergonômicos de navegação.
+Monta a estrutura do banco de dados e codifica os programas e
+aplicativos, aplicando sistemas de rotinas de segurança. Compila os
+programas. Testa aplicativos e programas, elaborando casos de testes.
+Gera aplicativos para instalação e gerenciamento dos sistemas. Documenta
+os sistemas e aplicações e avalia o desempenho dos produtos
+desenvolvidos. Implanta sistemas e aplicações de tecnologia da
+informação, instalando os programas e configurando os equipamentos em
+que a aplicação será executada. Homologa os sistemas e aplicações
+desenvolvidos, avaliando e validando os resultados da implantação.
+Elabora material para capacitação de usuários. Avalia os objetivos e as
+metas de projetos de sistemas e aplicações, tendo em vista os resultados
+obtidos na fase de implantação. Publica o código final no servidor de
+sistemas e aplicações. Realiza a manutenção de sistemas e aplicações de
+tecnologia da informação, atualizando informações gráficas, textuais e
+audiovisuais e convertendo seus códigos fontes para outras linguagens ou
+plataformas. Implementa alterações nos sistemas e aplicações e em suas
+estruturas de armazenamento de dados, adequando-os aos sistemas e
+ambientes operacionais. Monitora a performance dos sistemas e
+aplicações, utilizando ferramentas de software, para obter subsídios à
+atividade de manutenção. Atualiza a documentação dos sistemas e
+aplicações, em função das intervenções de manutenção. Fornece suporte
+técnico para o cliente interno. Colabora na seleção dos recursos de
+desenvolvimento, especificando máquinas, ferramentas, acessórios e
+suprimentos. Participa da seleção das linguagens de programação e
+metodologias. Seleciona ferramentas de desenvolvimento. Participa da
+definição da nomenclatura padrão. Colabora no planejamento das etapas e
+ações de trabalho, participando das definições de atividades, tarefas e
+cronograma. Participa de reuniões com a equipe de trabalho ou com o
+cliente. Participa das definições de padronizações. Projeta sistemas e
+aplicações de tecnologia da informação, identificando a demanda do
+cliente, coletando dados e desenvolvendo o leiaute de telas e
+relatórios. Elabora o pré-projeto e os projetos conceitual, lógico,
+estrutural, físico e gráfico dos sistemas e aplicações, definindo os
+requisitos de projeto. Participa das definições dos critérios
+ergonômicos de navegação e da interface de comunicação e interatividade.
+Dimensiona a vida útil dos sistemas e aplicações, modela sua estrutura
+de banco de dados e dimensiona a capacidade de armazenamento de dados
+dos sistemas.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 317110 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 09030 -- Técnico em Produção de Áudio e Vídeo }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Produção de Áudio e Vídeo será habilitado para:
+
+Captar imagens e sons. Realizar ambientação e operação de equipamentos
+por intermédio de recursos e linguagens. Investigar a utilização de
+tecnologias de tratamento acústico, de imagem, luminosidade e animação.
+Preparar material audiovisual. Elaborar fichas técnicas, mapas de
+programação, distribuição, veiculação de produtos e serviços de
+comunicação.
+
+Para atuação como Técnico em Produção de Áudio e Vídeo, são
+fundamentais:
+
+Conhecimentos interdisciplinares relacionados aos processos de criação,
+envolvendo pesquisa, idealização, planejamento, execução técnica,
+fruição e recepção estética. Competências comunicacionais e
+empreendedoras voltadas à proposição de projetos, ao coletivo, à gestão,
+à solução de problemas e à resiliência, entre outras competências
+socioemocionais.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 374305  ( Operador de projetor cinematográfico )}
+
+Planeja a operação de projetor cinematográfico, conferindo a programação
+de cinema ou de outro local de exibição de filmes. Testa o funcionamento
+do projetor. Realiza manutenção de primeiro nível, fazendo limpeza e, se
+for o caso, lubrificação de equipamentos da cabine de projeção. Em
+sistema analógico, verifica tipo de som e película e faz a montagem do
+filme. Confere o nome e as partes do filme. Marca as partes do filme.
+Monta o filme e os complementos. Revisa o filme e preenche o boletim de
+revisão. Faz a seção teste, conferindo o tempo do filme e dos
+complementos. Prepara a projeção de filme, em sistema analógico,
+adaptando a lente e a máscara ao filme e o sistema de som. Instala o
+filme no projetor. Inicia a projeção do filme, acionando os comandos do
+equipamento. Configura e ajusta o projetor e a tela, para obter o
+tamanho, a iluminação e o foco adequados das imagens. Regula o som, para
+ter o volume e o tom adequados. Monitora a projeção e o volume de som.
+Pode operar vários equipamentos e monitorar a projeção de uma película
+em várias salas simultaneamente. Encerra a projeção do filme. Desmonta o
+filme, separando suas partes e complementos. Rebobina o filme e cola
+suas extremidades. Realiza o acondicionamento do filme em lata. Em
+sistema digital, prepara a cabine de projeção, verificando itens do
+ambiente -- como ventilação -- para instalação do projetor. Identifica
+os conteúdos a serem projetados e cria a lista de reprodução
+(``playlist'') da sala. Pode fazer a recepção do filme, transmitido via
+internet e satélite ou recebido em disco rígido, para ser armazenado em
+um servidor do cinema. Insere o arquivo digital HD-Alta Definição (High
+Definition) - com imagem e som do filme - em servidor de vídeo,
+localizado no projetor ou em aparelho conectado ao projetor por cabos de
+HDMI-Interface Multimídia de Alta Definição (High-Definition Multimedia
+Interface). Controla início e configuração do filme em tela de
+computador ou outro dispositivo plugado ao projetor digital. Monitora a
+projeção, tomando providências - como a troca de lâmpada do projetor
+durante a operação -, para evitar eventuais falhas. Acompanha as
+inovações na área, verificando o surgimento de novos equipamentos e
+novas tecnologias digitais de projeção. Monitora a sala de cinema ou
+outro ambiente de exibição de filmes, controlando a iluminação e o som.
+Verifica o funcionamento do sistema de ar-condicionado. Detecta
+problemas, corrigindo pequenas falhas ou providenciando serviço de
+manutenção. Pode operar projetor de vídeo e sistema composto por dois ou
+mais monitores que formam uma grande tela de exibição de vídeo
+(``videowall''). Pode modificar o sistema de som para o vídeo. Conserva
+a cabine de projeção limpa e organizada.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 374305 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 517330  ( Vigilante )}
+
+Presta serviços de vigilância patrimonial - com a finalidade de garantir
+a incolumidade física das pessoas e a integridade do patrimônio - a
+instituições financeiras; a estabelecimentos comerciais, industriais e
+de prestação de serviços; a residências; a entidades sem fins
+lucrativos; e a órgãos e empresas públicas. Presta serviço de transporte
+de numerário, bens ou valores, mediante a utilização de veículos, comuns
+ou especiais. Realiza escolta armada de transporte de qualquer tipo de
+carga ou de valor. Avalia condições da área de destino para desviar de
+obstáculos e de obstruções no trajeto, percorrendo o que foi
+preestabelecido. Controla objetos, cargas e veículos, verificando a
+documentação da carga, acompanhando sua entrega no local de trabalho e
+apreendendo objetos ilícitos ou irregulares. Identifica objetos achados
+e perdidos para devolução. Presta serviço de segurança pessoal, com a
+finalidade de garantir a incolumidade física de pessoas. Pode prevenir e
+combater princípios de incêndio e prestar primeiros socorros. Faz uso de
+equipamentos com tecnologias de segurança e monitoramento virtual. Pode
+comunicar-se com a equipe por meio de gestos, sinais e códigos.
+Comunica-se com a base durante a escolta. Relata ocorrências e interage
+com órgãos oficiais.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 517330 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 09031 -- Técnico em Produção de Moda }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Produção de Moda será habilitado para:
+
+Coordenar a montagem de ambientes para divulgação da moda. Estabelecer
+relação direta entre produto e consumidor por intermédio de catálogos,
+desfiles, vídeos, fotografias e meios de comunicação em geral. Pesquisar
+tendências de moda, de mercado e de lançamentos para construção de
+estilos e composição visual. Elaborar a composição de looks para
+apresentação pública de estilo, produção publicitária, vitrines,
+exposições, desfiles.
+
+Para atuação como Técnico em Produção de Moda, são fundamentais:
+
+Conhecimentos interdisciplinares relacionados aos processos de criação,
+envolvendo pesquisa, idealização, planejamento, execução técnica,
+fruição e recepção estética. Competências comunicacionais e
+empreendedoras voltadas à proposição de projetos, ao coletivo, à gestão,
+à solução de problemas e à resiliência, entre outras competências
+socioemocionais.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 375110  ( Designer de vitrines )}
+
+Realiza estudo preliminar, levantando as expectativas do cliente, os
+limites orçamentários e o prazo para execução do projeto. Analisa o
+perfil do público consumidor e as características do produto a ser
+exposto. Realiza levantamento fotográfico e calcula as medidas do espaço
+disponível, para identificar os elementos básicos para a concepção do
+projeto da vitrine. Analisa a possibilidade de aproveitamento das
+instalações pré-existentes. Concebe o projeto da vitrine, com base no
+limite de custo e no prazo definidos. Desenha o croqui da vitrine,
+utilizando técnicas de desenho de observação e perspectiva. Apresenta a
+versão preliminar do projeto de vitrine ao cliente, podendo realizar
+ajustes por ele solicitados. Elabora o projeto executivo, selecionando
+elementos decorativos, cenográficos, mobiliários, suportes e
+expositores. Escolhe a escala cromática. Aloca pontos elétricos e pontos
+de iluminação. Representa graficamente as soluções para a vitrine,
+utilizando desenho manual ou recursos tecnológicos, como CAD-Projeto
+Assistido por Computador (Computer Aided Design). Faz o orçamento para
+execução do projeto, a ser submetido à aprovação do cliente. Após
+aprovação, consulta carteira de fornecedores, para aquisição de produtos
+e serviços. Realiza a montagem da vitrine, de acordo com os princípios e
+as técnicas de composição e exposição de produtos. Utiliza recursos de
+iluminação, considerando os efeitos de destaque da decoração, dos
+materiais promocionais e dos produtos expostos na vitrine. Avalia os
+resultados do projeto, analisando atratividade da vitrine junto ao
+público, variação de vendas do produto exposto e satisfação do cliente.
+Realiza pesquisas nos mercados nacional e internacional e participa de
+exposições, mostras e feiras, para conhecer inovações em vitrinismo.
+Zela pela segurança, prevenindo acidentes e utilizando equipamentos de
+proteção individual.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 375110 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 09033 -- Técnico em Rádio e Televisão }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Rádio e Televisão será habilitado para:
+
+Executar a produção e veiculação de programas radiofônicos e
+televisivos. Realizar seleção musical, montagem de filmes, videotapes,
+trilhas, vinhetas, jingles, spots, roteiros, locução e aplicação de
+efeitos especiais. Operar equipamentos analógicos e digitais de estúdio
+de gravação.
+
+Para atuação como Técnico em Rádio e Televisão, são fundamentais:
+
+Conhecimentos interdisciplinares relacionados aos processos de criação,
+envolvendo pesquisa, idealização, planejamento, execução técnica,
+fruição e recepção estética. Competências comunicativas e empreendedoras
+voltadas à proposição de projetos, ao coletivo, à gestão, à solução de
+problemas e à resiliência, entre outras competências socioemocionais.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 374110  ( Técnico em instalação de equipamentos de áudio )}
+
+Planeja a instalação de equipamentos de áudio, analisando projeto;
+verificando as dimensões físicas do local do evento; examinando as
+condições de infraestrutura para acesso e instalação de equipamentos; e
+identificando os parâmetros acústicos do local. Estabelece as
+necessidades técnicas, a partir das informações levantadas sobre o
+evento de sonorização e gravação. Define ângulos de cobertura, níveis de
+pressão sonora e resposta de frequência. Faz a especificação dos
+equipamentos, tais como microfones, transdutores, cabos e conectores.
+Elabora documento -- rider técnico -, relacionando as características
+técnicas dos equipamentos de sonorização. Gera desenhos e diagramas de
+instalação, incluindo atualizações referentes às alterações realizadas.
+Orça o serviço de instalação de equipamentos para evento. Acondiciona
+equipamentos, para transportá-los ao local do evento. Supervisiona o
+transporte, o descarregamento e a limpeza dos equipamentos e acessórios.
+Monta e testa os equipamentos de áudio e acessórios - tais como mesas
+e/ou console de som analógico ou digital, caixas de som, monitores de
+áudio, amplificadores, entre outros -, substituindo os que apresentam
+defeitos. Executa o projeto de instalação de equipamentos, conferindo
+sistema de energia elétrica e aterramento. Conecta sistema de caixas
+acústicas, instala transdutores e conecta sinais de áudio. Confere o
+funcionamento de sistema e a uniformidade de distribuição de áudio.
+Checa os níveis de interferência em sistema. Configura e alinha sistema
+de sonorização. Avalia as características - timbre, formato e tipo - de
+fonte sonora. Seleciona e posiciona transdutores eletroacústicos. No
+sistema de gravação, ajusta as estruturas de ganho de sistema e prepara
+o sistema de monitoramento para gravação. Pode instalar, testar e
+configurar equipamentos e softwares de captação e gravação de conteúdo
+audiofônico para diversas mídias, considerando especificidades ligadas
+aos canais de transmissão e distribuição -- radiodifusão, cabo, satélite
+e rede mundial de computadores -- e respeitando o projeto previamente
+estabelecido. Desconecta sistema de caixas acústicas, desinstala
+transdutores e desconecta sinais de áudio, no final do evento. Prepara
+os equipamentos para retirada do local do evento e para transporte.
+Documenta as rotinas de trabalho, registrando ocorrências da produção,
+relatando medidas de contingenciamento e comunicando ajustes aos
+diferentes setores envolvidos nos processos de trabalho. Informa aos
+profissionais, envolvidos em sonorização e gravação de áudio, sobre os
+processos realizados de instalação, teste e configuração de
+equipamentos. Auxilia na elaboração de pareceres e relatórios técnicos
+de qualidade e segurança. Realiza manutenção de primeiro nível em
+equipamentos e acessórios, executando pequenos reparos. Providencia
+serviço de manutenção de equipamentos, para solucionar problemas mais
+complexos. Trabalha com segurança, realizando o dimensionamento adequado
+da alimentação elétrica; providenciando a fixação segura dos
+equipamentos em paredes, tetos, treliças, pórticos e outros suportes;
+examinando a localização e o posicionamento de equipamentos, de modo a
+não obstruir saídas e passagens de emergência; verificando a
+disponibilidade de dispositivos de extinção de incêndio adequados aos
+equipamentos utilizados no sistema de áudio; e prevenindo acidentes, de
+modo geral.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 374110 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 374115  ( Técnico em masterização de áudio )}
+
+Planeja o serviço de masterização, programando as etapas a serem
+realizadas e estabelecendo cronograma. Seleciona equipamentos analógicos
+ou digitais. Faz o orçamento do serviço. Recebe arquivos de áudio após o
+trabalho de mixagem, na forma de um arquivo único -- ``mix down'' -- ou
+em ``stems'' separados. Analisa registros sonoros mixados, avaliando a
+qualidade do produto. Realiza a restauração do áudio, marcando pontos
+específicos e consertando pequenos erros, como chiados. Executa o
+aprimoramento estéreo, acertando o equilíbrio espacial do áudio. Faz a
+equalização, equilibrando e balanceando todos os elementos de áudio,
+para soar bem em qualquer sistema de som. Melhora os elementos que
+precisam se destacar e causar maior impacto em determinado momento do
+produto sonoro. Efetua a compressão do áudio, uniformizando todas as
+faixas. Passa a faixa de áudio por um tipo específico de compressor --
+limitador (``limiter'') -, criando um pico teto e adequando o áudio com
+base nesse elemento, para intensificar a música ou outro produto sonoro.
+Na masterização de um álbum, organiza a sequência e o espaçamento (pausa
+ou silêncio entre as faixas). Finaliza o processo de masterização,
+armazenando a matriz de todas as cópias a serem feitas do produto
+sonoro, para divulgação ao público em diversos formatos -- tais como
+vinil, CD, fita e serviços de streaming (Spotify, iTunes, SoundCloud,
+entre outros) - com a qualidade necessária para o ouvinte. Documenta as
+rotinas de trabalho, organizando informações, registrando ocorrências da
+produção, relatando medidas de contingenciamento e comunicando ajustes
+aos diferentes setores envolvidos nos processos de trabalho. Auxilia na
+elaboração de pareceres e relatórios técnicos de qualidade e segurança.
+Realiza manutenção de primeiro nível em equipamentos e acessórios,
+executando pequenos reparos. Providencia serviço de manutenção de
+equipamentos, para solucionar problemas mais complexos. Trabalha com
+segurança, prevenindo acidentes.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 374115 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 374120  ( Projetista de som )}
+
+Prepara-se para elaborar projeto para sonorização e gravação do áudio de
+produção audiovisual e/ou artística - tal como teatral, cinematográfica,
+televisiva, entre outras -, colhendo informações. Interage com
+profissionais envolvidos nas áreas técnica e artística da produção -
+como diretor, diretor de arte, roteirista e editor -, para conhecer
+roteiro, cenários, personagens e outros detalhes. Com relação ao local
+da apresentação e/ou filmagem da produção, verifica as dimensões
+físicas; examina as condições de infraestrutura para acesso e instalação
+de equipamentos; e identifica os parâmetros acústicos. Elabora projeto
+de sonorização e de gravação de áudio, planejando a infraestrutura
+física e tecnológica; dimensionando e selecionando equipamentos de áudio
+e softwares; configurando sistemas de sonorização; e escolhendo os
+locais para captação e gravação do som. Elabora orçamento para
+implementação do projeto. Realiza a implementação do projeto, após a
+aprovação da proposta. Confere a uniformidade de distribuição de áudio.
+Avalia as características - timbre, formato e tipo - de fonte sonora e
+seleciona os transdutores eletroacústicos. Posiciona os microfones e
+analisa os sinais de áudio. Mistura sinais de fontes de áudio. Distribui
+sinais de áudio para outros sistemas. Executa o processo de gravação,
+selecionando o meio de registro (mídia). Alinha os sistemas de gravação.
+Arquiva o meio de registro, em ambiente que atenda às especificações
+técnicas predefinidas. Realiza o tratamento dos registros sonoros,
+selecionando-os e equalizando-os. Controla a dinâmica de registros
+sonoros. Marca pontos específicos de faixas, rolos e arquivos digitais.
+Ordena faixas e rolos em sequência predeterminada. Finaliza o produto
+sonoro, para diversas mídias e/ou plataformas. Avalia a qualidade do
+produto sonoro. Verifica a satisfação, dos responsáveis pela produção
+audiovisual e/ou artística, com os resultados. Documenta o serviço
+realizado, organizando informações, registrando ocorrências e relatando
+interação com os setores envolvidos nos processos. Elabora relatório
+sobre a implementação do projeto e sobre os resultados obtidos. Realiza
+a manutenção de primeiro nível em equipamentos e acessórios. Providencia
+serviço de manutenção de equipamentos, para solucionar problemas mais
+complexos. Monitora a aplicação de técnicas de segurança durante a
+implementação do projeto, examinando as medidas adotadas para prevenção
+de acidentes.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 374120 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 374135  ( Projetista de sistemas de áudio )}
+
+Elabora projeto de sistemas de sonorização e de gravação, levantando
+informações para definir necessidades técnicas. Verifica dimensões
+físicas e identifica parâmetros acústicos do local. Examina as condições
+de infraestrutura para acesso e instalação de equipamentos. Define
+ângulos de cobertura, níveis de pressão sonora e resposta de frequência.
+Faz a especificação de equipamentos, microfones, transdutores, cabos e
+conectores. Define a demanda de energia elétrica dos sistemas. Elabora
+documento -- rider técnico -, relacionando as características técnicas
+dos equipamentos de sonorização. Gera desenhos e diagramas de
+instalação, incluindo atualizações referentes às alterações realizadas.
+Orça o serviço de elaboração e implementação do projeto. Acompanha a
+implementação do projeto, conferindo a uniformidade de distribuição de
+áudio após a instalação dos equipamentos e acessórios. Configura e
+alinha os sistemas de sonorização. Avalia as características - timbre,
+formato e tipo - de fonte sonora e posiciona os transdutores
+eletroacústicos. Analisa os sinais de áudio e, se adequados, os
+distribui para outros sistemas. Ajusta as estruturas de ganho de sistema
+e define padrões de sincronismo, no sistema de gravação. Monitora
+sistemas, equipamentos e softwares de sonorização, captação e gravação
+de sinais sonoros para diversas mídias e/ou plataformas. Avalia o
+desempenho dos sistemas, realizando ajustes, quando necessário.
+Documenta o serviço realizado, organizando informações, registrando
+ocorrências e relatando interação com os setores envolvidos nos
+processos. Elabora relatório sobre a implementação do projeto e sobre os
+resultados obtidos. Realiza manutenção de primeiro nível em equipamentos
+e acessórios, executando pequenos reparos. Providencia serviço de
+manutenção de equipamentos, para solucionar problemas mais complexos.
+Trabalha com segurança, prevenindo acidentes.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 374135 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 374140  ( Microfonista )}
+
+Prepara os equipamentos de captação de sinais sonoros -- tais como
+microfones ``boom'', direcionais, de vara, sem fio, de lapela, entre
+outros -, acondicionando-os para transporte ao local do evento ou da
+produção audiovisual e artística. Levanta informações, junto ao
+responsável técnico do evento ou da produção -- teatral, televisiva,
+musical ou outra --, sobre roteiro preestabelecido, personagens e
+apresentadores. Configura, monta, posiciona e testa os equipamentos de
+captação de sinais sonoros. Coloca e posiciona microfones sem fio e de
+lapela em apresentadores e atores, considerando figurinos e acessórios
+que serão utilizados, e verificando o funcionamento dos sistemas de
+comunicação sem fio. Monitora o estado geral das baterias nos
+equipamentos de captação de sinais sonoros, inventariando informações
+relativas a cargas e vida útil das baterias, caixas sem fio,
+equipamentos de retorno sonoro, entre outros. Participa de ensaios e
+programas-piloto em diferentes gêneros e formatos de eventos e produções
+audiovisuais e artísticas, verificando deslocamentos e movimentos de
+câmera, ações de cena e ordem de falas, assim como a posição ideal de
+microfones, de acordo com a iluminação ou a luz distribuída. Acompanha a
+gravação ou a apresentação de evento ou da produção audiovisual e
+artística, garantindo o cumprimento das diretrizes e orientações
+estipuladas em roteiro e/ou apontamentos do responsável técnico. Envia
+sinal de áudio para a câmera, se necessário, sincronizando o
+``timecode'' e entregando sinal de áudio para os diferentes postos, tais
+como diretor, continuísta e assistente de vídeo. Monitora e verifica
+todo o sistema de comunicação sem fio utilizado. Confere e controla a
+qualidade técnica do som dos equipamentos de captação de sinais sonoros,
+analógicos e/ou digitais. Identifica eventuais defeitos ou problemas
+técnicos, fazendo o reparo ou solicitando - para casos mais complexos -
+o serviço de profissionais de manutenção. Documenta o serviço realizado,
+organizando informações, registrando ocorrências e relatando interação
+com os setores envolvidos nos processos. Auxilia na elaboração de
+pareceres e relatórios técnicos. Trabalha com segurança, prevenindo
+acidentes.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 374140 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 10001 -- Técnico em Açúcar e Álcool }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Açúcar e Álcool será habilitado para:
+
+Controlar e supervisionar operações de processos tecnológicos da
+produção de açúcar e álcool e subprodutos. Realizar análises
+físico-químicas e microbiológicas de matérias-primas e produtos dos
+processos de industrialização da cana-de-açúcar para o controle de
+qualidade. Desenvolver produtos e processos em açúcar e álcool.
+Colaborar com equipe multidisciplinar nas fases de colheita, transporte,
+moagem, industrialização e distribuição dos produtos e subprodutos.
+Operar etapas e movimentação de materiais e insumos relacionados à área.
+
+Para atuação como Técnico em Açúcar e Álcool, são fundamentais:
+
+Conhecimentos e saberes relacionados aos processos de planejamento e
+operação das atribuições da área, de modo a assegurar a saúde e a
+segurança dos trabalhadores e dos futuros usuários e operadores de
+empresas em processos de transformação em açúcar e álcool. Conhecimentos
+e saberes relacionados à sustentabilidade do processo produtivo, às
+normas e relatórios técnicos, à legislação da área, às novas tecnologias
+relacionadas à indústria 4.0, à liderança de equipes, à solução de
+problemas técnicos e à gestão de conflitos.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 311115  ( Técnico em curtimento )}
+
+Opera e controla máquinas e equipamentos empregados nas operações e
+processos de curtimento de pele, recurtimento, matização, pré-acabamento
+e acabamento de couro, conforme manuais técnicos e procedimentos de
+produção. Monitora o funcionamento de máquinas, equipamentos e
+instrumentos de medição e controle. Mantém máquinas e equipamentos em
+condições de uso, realizando regulagens, quando necessárias. Realiza
+análises químicas e físicas, utilizando métodos analíticos e
+instrumentais, seguindo procedimentos e normas técnicas e de qualidade e
+observando critérios de confiabilidade metrológica. Coleta e prepara
+amostras. Prepara reagentes. Registra os resultados, assumindo
+responsabilidade técnica por eles. Supervisiona processos de produção,
+definindo e coordenando equipes de trabalho, elaborando o cronograma de
+produção, definindo o fluxo do processo, monitorando os parâmetros do
+processo e emitindo relatórios de produção. Participa do desenvolvimento
+de produtos e processos, testando insumos e matérias primas, elaborando
+formulações para produção, testando novos produtos, definindo o processo
+de fabricação de produtos, fazendo a adequação dos produtos às
+necessidades dos clientes e validando o produto desenvolvido. Participa
+da implantação de programas de qualidade, analisando indicadores,
+aplicando ferramentas da qualidade e implementando ações preventivas e
+corretivas. Participa de auditorias. Colabora na implantação ou
+reestruturação das instalações industriais, definindo leiautes e
+fluxogramas de produção, acompanhando a montagem e instalação de
+equipamentos e testando máquinas e equipamentos. Presta assistência
+técnica, identificando necessidades dos clientes, diagnosticando
+problemas técnicos e propondo soluções e melhorias de produtos e
+processos. Elabora documentação técnica, emitindo laudos e redigindo
+procedimentos e relatórios. Conserva o local de trabalho limpo e
+organizado. Realiza tratamento de resíduos sólidos e efluentes gerados
+no curtimento e no beneficiamento, para aproveitamento econômico -- tal
+como aplicação na produção de biogás e de fertilizante agrícola -- e
+diminuição do impacto ambiental.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 311115 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 325305  ( Técnico em biotecnologia )}
+
+Prepara ambiente de trabalho, mapeando áreas de coleta e experimento;
+selecionando equipamentos e utensílios; e montando utensílios de
+laboratórios. Confere protocolos e procedimentos. Providencia materiais
+aplicados à biotecnologia, coletando materiais para pesquisa;
+selecionando e colocando identificação nos materiais biológico e
+químico; descontaminando e esterilizando materiais. Faz armazenamento e
+descarte dos materiais aplicados à biotecnologia de acordo com normas
+técnicas e de biossegurança. Pode prestar apoio técnico à criação de
+animais, para sua utilização em experimentos de pesquisa científica.
+Cuida dos animais e monitora sua reprodução, sob a supervisão de
+profissional de nível superior. Mensura taxa de natalidade e mortalidade
+dos animais. Pode abater os animais em condições que envolvam, de acordo
+com as espécies, o mínimo possível de sofrimento físico ou mental.
+Controla as condições do laboratório para realização de experimento.
+Confere condições ambientais, examinando luz, temperatura, umidade e
+radiação. Dispõe os equipamentos, verificando seu funcionamento, fazendo
+sua calibragem e realizando sua adequação ao experimento. Opera
+equipamentos de laboratórios. Pode executar manutenção (de até segundo
+nível) de equipamentos. Prepara meios de cultura e soluções, calculando
+e pesando reagentes; misturando substâncias para produção de inóculos;
+diluindo e concentrando soluções. Desenvolve culturas ``in vivo'' e ``in
+vitro'' e marcadores moleculares, para estudos da fisiologia e da
+bioquímica de células e para detecção da presença de doenças e
+acompanhamento de sua evolução. Cultiva tecidos animal e vegetal para
+multiplicação celular. Cultiva e inocula microrganismos. Macera tecidos
+animais e vegetais. Realiza extração, replicação, sequenciamento e
+quantificação de DNA-Ácido desoxirribonucleico (Deoxyribonucleic acid).
+Analisa substâncias e compostos biológicos, medindo volume,
+concentração, potencial hidrogeniônico e condutividade de soluções; e
+determinando umidade de substâncias e compostos biológicos. Realiza
+análises químicas e microbiológicas, atuando na produção de
+imunobiológicos (medicamentos, soros e vacinas) e nos processos
+biotecnológicos de indústrias - química, de alimentos, de medicamentos,
+de cosméticos e de produtos veterinários -, sob supervisão de
+profissional de nível superior. Controla a qualidade de matérias-primas
+e produtos utilizados. Mantém-se atualizado em relação às pesquisas e
+inovações na área de biotecnologia. Acompanha a introdução da
+automatização e do uso de robótica nos processos e o desenvolvimento de
+novos materiais e produtos. Monitora a limpeza do local de trabalho.
+Orienta a aplicação de técnicas de higienização. Aplica procedimentos
+para cumprimento de normas ambientais, promovendo o tratamento
+estabelecido e o destino adequado de materiais biológicos e de outros
+resíduos descartados. Atua seguindo as normas de segurança e de
+biossegurança, submetendo-se a exames periódicos; vacinando-se contra
+agentes patogênicos; e usando equipamentos de proteção individual.
+Participa em ações para prevenção de acidentes, colaborando na
+eliminação de situações de risco. Atua no combate a pequenos focos de
+fogo, manuseando extintores de incêndio. Aplica cuidados de primeiros
+socorros.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 325305 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 325310  ( Técnico em imunobiológicos )}
+
+Prepara ambiente de trabalho, mapeando áreas de coleta e experimento;
+selecionando equipamentos e utensílios; e montando utensílios de
+laboratórios. Confere protocolos e procedimentos. Providencia materiais
+aplicados à biotecnologia, coletando materiais para pesquisa;
+selecionando e colocando identificação nos materiais biológico e
+químico; descontaminando e esterilizando materiais. Faz armazenamento e
+descarte dos materiais aplicados à biotecnologia de acordo com normas
+técnicas e de biossegurança. Pode prestar apoio técnico à criação de
+animais, para sua utilização em experimentos de pesquisa científica.
+Cuida dos animais e monitora sua reprodução, sob a supervisão de
+profissional de nível superior. Mensura taxas de natalidade e
+mortalidade dos animais. Pode abater os animais em condições que
+envolvam, de acordo com as espécies, o mínimo possível de sofrimento
+físico ou mental. Controla as condições do laboratório para realização
+de experimento. Confere condições ambientais, examinando luz,
+temperatura, umidade e radiação. Dispõe os equipamentos, verificando seu
+funcionamento, fazendo sua calibragem e realizando sua adequação ao
+experimento. Opera equipamentos de laboratórios. Pode executar
+manutenção (de até segundo nível) em equipamentos. Prepara meios de
+cultura e soluções, calculando e pesando reagentes; misturando
+substâncias para produção de inóculos; diluindo e concentrando soluções.
+Desenvolve culturas ``in vivo'' e ``in vitro'' e marcadores moleculares,
+para estudos da fisiologia e da bioquímica de células e para detecção da
+presença de doenças e acompanhamento de sua evolução. Cultiva tecidos
+animal e vegetal para multiplicação celular. Cultiva e inocula
+microrganismos. Macera tecidos animais e vegetais. Faz extração,
+replicação, sequenciamento e quantificação de DNA-Ácido
+desoxirribonucleico (Deoxyribonucleic acid). Realiza manipulação de
+RNA-Ácido ribonucleico (Ribonucleic acid). Analisa substâncias e
+compostos biológicos, medindo volume, concentração, potencial
+hidrogeniônico e condutividade de soluções; e determinando umidade de
+substâncias e compostos biológicos. Realiza análises químicas e
+microbiológicas, atuando na produção de imunobiológicos (medicamentos,
+soros, vacinas e kits de diagnóstico) e no estudo de doenças infecciosas
+causadas por microrganismos - tais como bactérias e vírus -, sob
+supervisão de profissional de nível superior. Auxilia em pesquisas de
+melhoramento genético. Pode colaborar em atividades de perícia criminal
+e investigação genética. Controla a qualidade de matérias-primas e
+produtos utilizados. Mantém-se atualizado em relação às pesquisas e
+inovações na área de imunobiologia. Colabora em estudos para implantação
+de inovações, tais como os ``órgãos-em-chip'', capazes de servir como
+``simuladores'' de diferentes órgãos do corpo humano, permitindo que
+pesquisadores monitorem a jornada de um corpo externo - como bactéria e
+droga farmacêutica - com maior segurança e controle, em substituição ao
+uso de animais em experimentos. Monitora a limpeza do local de trabalho.
+Orienta a aplicação de técnicas de higienização. Aplica procedimentos
+para cumprimento de normas ambientais, promovendo o tratamento
+estabelecido e o destino adequado de materiais biológicos e de outros
+resíduos descartados. Atua seguindo as normas de segurança e de
+biossegurança, submetendo-se a exames periódicos; vacinando-se contra
+agentes patogênicos; e usando equipamentos de proteção individual.
+Participa em ações para prevenção de acidentes, colaborando na
+eliminação de situações de risco. Atua no combate a pequenos focos de
+fogo, manuseando extintores de incêndio. Aplica cuidados de primeiros
+socorros.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 325310 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 10006 -- Técnico em Celulose e Papel }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Celulose e Papel será habilitado para:
+
+Controlar processos de obtenção da celulose e de fabricação de papel.
+Realizar ensaios e análises químicas, físicas e físico-químicas de
+matérias-primas e produtos seguindo normas e procedimentos técnicos.
+Planejar, executar e supervisionar os processos de secagem e corte na
+produção de papel.
+
+Para atuação como Técnico em Celulose e Papel, são fundamentais:
+
+Conhecimentos e saberes relacionados aos processos de planejamento e
+operação das atribuições da área, de modo a assegurar a saúde e a
+segurança dos trabalhadores e dos futuros usuários e operadores de
+empresas em processos de obtenção da celulose e de fabricação de papel.
+Conhecimentos e saberes relacionados à sustentabilidade do processo
+produtivo, às normas e relatórios técnicos, à legislação da área, às
+novas tecnologias relacionadas à indústria 4.0, à liderança de equipes,
+à solução de problemas técnicos e à gestão de conflitos.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 311115  ( Técnico em curtimento )}
+
+Opera e controla máquinas e equipamentos empregados nas operações e
+processos de curtimento de pele, recurtimento, matização, pré-acabamento
+e acabamento de couro, conforme manuais técnicos e procedimentos de
+produção. Monitora o funcionamento de máquinas, equipamentos e
+instrumentos de medição e controle. Mantém máquinas e equipamentos em
+condições de uso, realizando regulagens, quando necessárias. Realiza
+análises químicas e físicas, utilizando métodos analíticos e
+instrumentais, seguindo procedimentos e normas técnicas e de qualidade e
+observando critérios de confiabilidade metrológica. Coleta e prepara
+amostras. Prepara reagentes. Registra os resultados, assumindo
+responsabilidade técnica por eles. Supervisiona processos de produção,
+definindo e coordenando equipes de trabalho, elaborando o cronograma de
+produção, definindo o fluxo do processo, monitorando os parâmetros do
+processo e emitindo relatórios de produção. Participa do desenvolvimento
+de produtos e processos, testando insumos e matérias primas, elaborando
+formulações para produção, testando novos produtos, definindo o processo
+de fabricação de produtos, fazendo a adequação dos produtos às
+necessidades dos clientes e validando o produto desenvolvido. Participa
+da implantação de programas de qualidade, analisando indicadores,
+aplicando ferramentas da qualidade e implementando ações preventivas e
+corretivas. Participa de auditorias. Colabora na implantação ou
+reestruturação das instalações industriais, definindo leiautes e
+fluxogramas de produção, acompanhando a montagem e instalação de
+equipamentos e testando máquinas e equipamentos. Presta assistência
+técnica, identificando necessidades dos clientes, diagnosticando
+problemas técnicos e propondo soluções e melhorias de produtos e
+processos. Elabora documentação técnica, emitindo laudos e redigindo
+procedimentos e relatórios. Conserva o local de trabalho limpo e
+organizado. Realiza tratamento de resíduos sólidos e efluentes gerados
+no curtimento e no beneficiamento, para aproveitamento econômico -- tal
+como aplicação na produção de biogás e de fertilizante agrícola -- e
+diminuição do impacto ambiental.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 311115 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 311710  ( Colorista têxtil )}
+
+Recebe, inspeciona e testa corantes, pigmentos, ligantes, resinas e
+demais materiais utilizados na estamparia e no tingimento de materiais
+têxteis, para garantir a conformidade com as especificações. Desenvolve
+cores em laboratórios, selecionando, pesando e misturando pigmentos,
+corantes e materiais auxiliares para preparar tinturas têxteis, de
+acordo com especificações. Calcula e prepara receitas de cores para
+produção, a partir de formulações de cores preestabelecidas. Coleta
+amostras de materiais ou produtos intermediários e acabados para
+realizar testes laboratoriais das receitas. Testa a qualidade de
+tinturas aplicadas em materiais têxteis, comparando a cor com os padrões
+estabelecidos - seja visualmente ou usando equipamentos como
+colorímetros ou espectrofotômetros -, ajustando e padronizando cores.
+Desenvolve cartela de cores para produtos têxteis e de vestuários,
+pesquisando tendências, selecionando e harmonizando cores. Identifica
+cores com códigos, em conformidade com padrões internacionais. Pode
+interagir com o designer têxtil, para decidir as cores a serem usadas
+para cada padrão de tecido e a combinação de cores em uma coleção para
+os segmentos de mercado masculino, feminino e infantil. Analisa as
+tendências da indústria da moda. Controla a qualidade de processo de
+tingimento e estamparia, examinando as características físicas e
+químicas das tinturas e corantes. Pode operar e manter máquinas e
+equipamentos utilizados no processo de tingimento e estamparia de
+materiais têxteis. Registra os dados operacionais ou de produção em
+formulários especificados. Conserva local de trabalho limpo e
+organizado. Armazena corantes, pigmentos, ligantes, resinas e demais
+materiais. Destina adequadamente os resíduos gerados, reciclando
+materiais e realizando descarte de acordo com as normas ambientais. Zela
+pela segurança, prevenindo acidentes, eliminando condições inseguras e
+utilizando equipamentos de proteção individual.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 311710 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 311715  ( Preparador de tintas )}
+
+Recebe, inspeciona e testa corantes, pigmentos e demais materiais
+utilizados na preparação das tintas, para garantir a conformidade com as
+especificações. Seleciona, pesa e mistura pigmentos, corantes e
+materiais auxiliares para preparar tintas, de acordo com fórmula
+preestabelecida. Faz a mistura manual ou mecanicamente. Coleta amostras
+de materiais ou produtos intermediários e acabados para testes
+laboratoriais. Testa a qualidade de tintas aplicadas em materiais ou
+produtos, comparando a cor com os padrões estabelecidos - seja
+visualmente ou usando equipamentos como colorímetros ou
+espectrofotômetros -, ajustando e padronizando cores. Controla a
+qualidade de processo de preparação de tintas. Examina as
+características físicas e químicas das tintas, tais como viscosidade,
+pH, densidade, aderência e espessura de camada de tintas aplicadas.
+Opera e mantém máquinas utilizadas no processo de preparação de tintas.
+Pode usar software específico para modelamento dos projetos de aplicação
+das tintas. Pode preparar biotintas, tintas autorregenerativas, bem como
+utilizar nanopigmentos, nanofibras e nanoativos. Presta assistência ao
+cliente interno e externo. Registra os dados operacionais ou de produção
+em formulários especificados. Conserva local de trabalho limpo e
+organizado. Armazena corantes, pigmentos e demais materiais utilizados
+na preparação das tintas. Destina adequadamente os resíduos gerados,
+reciclando materiais e realizando descarte de acordo com as normas
+ambientais. Zela pela segurança, prevenindo acidentes, eliminando
+condições inseguras e utilizando equipamentos de proteção individual e
+coletiva.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 311715 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 10008 -- Técnico em Construção Naval }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Construção Naval será habilitado para:
+
+Realizar ensaios e testes e montar componentes na fabricação e
+manutenção naval. Desenvolver projetos de construção naval. Controlar e
+inspecionar os processos de construção em plantas navais. Apoiar a
+coordenação de construção de embarcações e estruturas hidroviárias.
+Realizar manutenção e operação de sistemas de navegação. Selecionar
+materiais a serem empregados na construção naval. Analisar custos
+operacionais na área. Testar a velocidade e a segurança de barcos e
+navios. Montar e organizar estaleiros. Operar sistemas de logística para
+controle do frete, do armazenamento e da distribuição de cargas. Emitir
+laudos técnicos e fazer vistorias nas companhias de navegação dentro de
+suas atribuições técnicas.
+
+Para atuação como Técnico em Construção Naval, são fundamentais:
+
+Conhecimentos e saberes relacionados aos processos de planejamento e
+operação das atribuições da área, de modo a assegurar a saúde e a
+segurança dos trabalhadores e dos futuros usuários e operadores de
+empresas em processos de transformação em construção naval.
+Conhecimentos e saberes relacionados à sustentabilidade do processo
+produtivo, às normas e relatórios técnicos, à legislação da área, às
+novas tecnologias relacionadas à indústria 4.0, à liderança de equipes,
+à solução de problemas técnicos e à gestão de conflitos.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 318205  ( Desenhista técnico mecânico )}
+
+Planeja o trabalho, levando em consideração o cronograma geral da área
+ou do projeto -- ao qual se vinculam as atividades de elaboração do
+desenho técnico mecânico --, estabelecendo prioridades e estimando o
+tempo de execução do desenho. Define os meios computacionais e/ou
+manuais a serem empregados nos trabalhos e elabora o cronograma
+específico de execução do desenho. Coleta os dados necessários à
+elaboração do desenho técnico mecânico, estudando as características do
+projeto; identificando interfaces com áreas envolvidas no projeto; e
+levantando informações básicas e informações complementares junto às
+áreas de interface, a fim de atender aos requisitos de projeto em todas
+as etapas de elaboração do desenho. Consulta tabelas, gráficos, normas
+técnicas e outras fontes. Identifica o material -- das peças ou dos
+conjuntos que integram os artefatos mecânicos a serem desenhados -- e
+identifica a aplicabilidade do projeto. Identifica inovações
+tecnológicas na área da mecânica e seus reflexos nos elementos de
+composição do desenho. Elabora croquis, com o auxílio de instrumentos de
+medição e materiais de desenho, para fazer estudo prévio do desenho
+definitivo. Elabora desenhos técnicos detalhados de componentes,
+ferramentas, dispositivos, máquinas, equipamentos, motores, veículos e
+outros artefatos mecânicos, utilizando programas computacionais de apoio
+e/ou instrumentos manuais e materiais de desenho. Utiliza programas do
+tipo CAD-Desenho Assistido por Computador (Computer Aided Design) e os
+recursos -- de hardware e de software -- associados a essas ferramentas.
+Pode executar o desenho técnico mecânico a partir de informações da
+representação de artefatos mecânicos em três dimensões (3D), utilizando
+ferramentas computacionais integradas de representação em 3D e de
+simulações. Na execução do desenho, aplica normas para desenho técnico e
+realiza os cálculos necessários à execução do desenho, tais como cálculo
+das dimensões, das superfícies, do volume, do peso e do centro de
+gravidade de cada peça. Pode utilizar recursos de software para auxílio
+ao cálculo. Efetua cálculos para estabelecer relações entre as
+diferentes partes do artefato mecânico desenhado, dimensionando os
+elementos parciais em escalas adequadas. Executa a representação de
+todos os elementos do desenho com precisão técnica, clareza e nitidez.
+Detalha desenho de conjunto e desenho de montagem. Elabora lista de
+peças de conjunto. Confere o desenho e submete o esboço elaborado à
+apreciação do autor do projeto, consultando-o sobre possíveis correções
+ou alterações, para efetuar os ajustes necessários. Elabora o desenho
+definitivo, registrando comentários, instruções gerais e informações
+sobre materiais, processos e técnicas de fabricação e montagem. Faz
+cópias do desenho, por meio de plotters, impressoras eletrônicas ou
+máquinas copiadoras de diferentes tecnologias. Acompanha fabricação e
+montagem dos artefatos mecânicos desenhados, assistindo o executante na
+fabricação e conferindo as peças, os conjuntos e a montagem em relação
+ao desenho. Pode detectar erros, propor modos de corrigi-los e sugerir
+melhorias. Elabora relatórios de acompanhamento dos trabalhos. Pode
+alterar desenhos, em função de mudanças de projeto, adequação às normas
+ou outras demandas. Pode elaborar desenhos para manuais de referência e
+publicações técnicas, a fim de descrever a operação e a manutenção de
+artefatos mecânicos. Identifica os desenhos para arquivo. Organiza os
+arquivos dos desenhos, em meios eletrônicos e em substratos de papel ou
+similares. Controla a distribuição de cópias dos desenhos. Conserva o
+local de trabalho limpo e organizado. Controla luminosidade do ambiente
+e verifica as condições ergonômicas. Destina adequadamente os resíduos
+gerados. Mantém equipamentos e instrumentos de trabalho em plenas
+condições de uso e funcionamento. Zela pela segurança, atuando na
+prevenção de acidentes e utilizando equipamentos de proteção individual.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 318205 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 318210  ( Desenhista técnico aeronáutico )}
+
+Planeja o trabalho, levando em consideração o cronograma geral da área
+ou do projeto -- ao qual se vinculam as atividades de elaboração do
+desenho técnico aeronáutico --, estabelecendo as prioridades e estimando
+o tempo de execução do desenho. Define os meios computacionais e/ou
+manuais a serem empregados nos trabalhos e elabora o cronograma
+específico de execução do desenho. Coleta os dados necessários à
+elaboração do desenho técnico aeronáutico, estudando as características
+do projeto; identificando interfaces com áreas envolvidas no projeto; e
+levantando informações básicas e informações complementares junto às
+áreas de interface, a fim de atender aos requisitos de projeto em todas
+as etapas de elaboração do desenho. Consulta tabelas, gráficos, normas
+técnicas e outras fontes. Identifica o material -- das peças ou dos
+conjuntos que integram os artefatos mecânicos de aeronaves a serem
+desenhados -- e identifica a aplicabilidade do projeto. Identifica
+inovações tecnológicas na área aeronáutica e seus reflexos nos elementos
+de composição do desenho. Elabora croquis, com o auxílio de instrumentos
+de medição e materiais de desenho, para fazer estudo prévio do desenho
+definitivo. Elabora desenhos técnicos detalhados de estruturas,
+componentes, equipamentos, sistemas e outros artefatos mecânicos de
+células de aeronaves, utilizando programas computacionais de apoio e/ou
+instrumentos manuais e materiais de desenho. Utiliza programas do tipo
+CAD-Desenho Assistido por Computador (Computer Aided Design) e os
+recursos -- de hardware e de software -- associados a essas ferramentas.
+Pode executar o desenho a partir de informações da representação de
+artefatos mecânicos de aeronaves em três dimensões (3D), utilizando
+ferramentas computacionais integradas de representação em 3D e de
+simulações. Na execução do desenho, aplica normas para desenho técnico e
+realiza os cálculos necessários à execução do desenho, tais como cálculo
+das dimensões, das superfícies, do volume, do peso e do centro de
+gravidade de cada peça. Pode utilizar recursos de software para auxílio
+ao cálculo. Efetua cálculos para estabelecer relações entre as
+diferentes partes do artefato mecânico de aeronave desenhado,
+dimensionando os elementos parciais em escalas adequadas. Executa a
+representação de todos os elementos do desenho com precisão técnica,
+clareza e nitidez. Detalha desenho de conjunto e desenho de montagem.
+Elabora lista de peças de conjunto. Confere o desenho e submete o esboço
+elaborado à apreciação do autor do projeto, consultando-o sobre
+possíveis correções ou alterações, para efetuar os ajustes necessários.
+Elabora o desenho definitivo, registrando comentários, instruções gerais
+e informações sobre materiais, processos e técnicas de fabricação e
+montagem. Faz cópias do desenho, por meio de plotters, impressoras
+eletrônicas ou máquinas copiadoras de diferentes tecnologias. Acompanha
+fabricação e montagem dos artefatos mecânicos de aeronaves desenhados,
+assistindo o executante na fabricação e conferindo as peças, os
+conjuntos e a montagem em relação ao desenho. Pode detectar erros,
+propor modos de corrigi-los e sugerir melhorias. Elabora relatórios de
+acompanhamento dos trabalhos. Pode alterar desenhos, em função de
+mudanças de projeto, adequação às normas ou outras demandas. Pode
+elaborar desenhos para manuais de referência e publicações técnicas, a
+fim de descrever a operação e a manutenção de artefatos mecânicos de
+aeronaves. Identifica os desenhos para arquivo. Organiza os arquivos dos
+desenhos em substratos de papel ou similares e em meios eletrônicos.
+Controla a distribuição de cópias dos desenhos. Conserva o local de
+trabalho limpo e organizado. Controla luminosidade do ambiente e
+verifica as condições ergonômicas. Destina adequadamente os resíduos
+gerados. Mantém equipamentos e instrumentos de trabalho em plenas
+condições de uso e funcionamento. Zela pela segurança, atuando na
+prevenção de acidentes e utilizando equipamentos de proteção individual.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 318210 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 10020 -- Técnico em Têxtil }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Têxtil será habilitado para:
+
+Supervisionar os processos produtivos na cadeia têxtil, da ?ação ao
+bene?ciamento. Planejar e controlar as operações nos processos nas áreas
+de ?ação, tecelagem e bene?ciamento têxtil. Desenvolver padronagens de
+malharia ou tecido plano. Desenvolver produtos e processos de
+tinturaria, estamparia e acabamento ?nal. Realizar testes de controle de
+qualidade, químicos, físicos e colorimétricos. Analisar laudos técnicos.
+Controlar estoques de produtos acabados.
+
+Para atuação como Técnico em Têxtil, são fundamentais:
+
+Conhecimentos e saberes relacionados aos processos de planejamento e
+operação das atribuições da área, de modo a assegurar a saúde e a
+segurança dos trabalhadores e dos futuros usuários e operadores de
+empresas em processos de transformação têxtil. Conhecimentos e saberes
+relacionados à sustentabilidade do processo produtivo, às normas e
+relatórios técnicos, à legislação da área, às novas tecnologias
+relacionadas à indústria 4.0, à liderança de equipes, à solução de
+problemas técnicos e à gestão de conflitos.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 311705  ( Colorista de papel )}
+
+Recebe, inspeciona e testa corantes, pigmentos e demais materiais
+utilizados na coloração de papéis, para garantir a conformidade com as
+especificações. Desenvolve cores em laboratórios, selecionando, pesando
+e misturando pigmentos, corantes e materiais auxiliares, para preparar
+tinturas de acordo com especificações. Coleta amostras de materiais ou
+produtos intermediários e acabados para testes laboratoriais. Testa a
+qualidade de tinturas aplicadas em papel, comparando a cor com os
+padrões estabelecidos - seja visualmente ou usando equipamentos como
+colorímetros ou espectrofotômetros -, ajustando e padronizando cores.
+Desenvolve cores e elabora cartelas de amostras de cores de acordo com
+tendências e em conformidade com padrões internacionais. Controla a
+qualidade do processo de tingimento e impressão, verificando a
+viscosidade e o pH de tintas pastosas e examinando a densidade e a
+espessura de camada de tinta nas impressões. Pode operar e manter
+máquinas utilizadas no processo de coloração de papel. Registra os dados
+operacionais ou de produção em formulários especificados. Conserva local
+de trabalho limpo e organizado. Armazena corantes, pigmentos e demais
+materiais. Destina adequadamente os resíduos gerados, reciclando papel e
+realizando descarte de acordo com as normas ambientais. Zela pela
+segurança, prevenindo acidentes, eliminando condições inseguras e
+utilizando equipamentos de proteção individual.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 311705 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 311715  ( Preparador de tintas )}
+
+Recebe, inspeciona e testa corantes, pigmentos e demais materiais
+utilizados na preparação das tintas, para garantir a conformidade com as
+especificações. Seleciona, pesa e mistura pigmentos, corantes e
+materiais auxiliares para preparar tintas, de acordo com fórmula
+preestabelecida. Faz a mistura manual ou mecanicamente. Coleta amostras
+de materiais ou produtos intermediários e acabados para testes
+laboratoriais. Testa a qualidade de tintas aplicadas em materiais ou
+produtos, comparando a cor com os padrões estabelecidos - seja
+visualmente ou usando equipamentos como colorímetros ou
+espectrofotômetros -, ajustando e padronizando cores. Controla a
+qualidade de processo de preparação de tintas. Examina as
+características físicas e químicas das tintas, tais como viscosidade,
+pH, densidade, aderência e espessura de camada de tintas aplicadas.
+Opera e mantém máquinas utilizadas no processo de preparação de tintas.
+Pode usar software específico para modelamento dos projetos de aplicação
+das tintas. Pode preparar biotintas, tintas autorregenerativas, bem como
+utilizar nanopigmentos, nanofibras e nanoativos. Presta assistência ao
+cliente interno e externo. Registra os dados operacionais ou de produção
+em formulários especificados. Conserva local de trabalho limpo e
+organizado. Armazena corantes, pigmentos e demais materiais utilizados
+na preparação das tintas. Destina adequadamente os resíduos gerados,
+reciclando materiais e realizando descarte de acordo com as normas
+ambientais. Zela pela segurança, prevenindo acidentes, eliminando
+condições inseguras e utilizando equipamentos de proteção individual e
+coletiva.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 311715 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 311725  ( Tingidor de couros e peles )}
+
+Recebe, inspeciona e testa corantes, pigmentos e demais materiais
+utilizados no tingimento de couros e peles, para garantir a conformidade
+com as especificações. Seleciona, pesa e mistura pigmentos, corantes e
+materiais auxiliares para preparar tinturas e banhos de acordo com
+especificações. Calcula receitas para produção a partir de formulações
+de cores preestabelecidas. Coleta amostras de materiais ou produtos
+intermediários e acabados para testes laboratoriais. Testa a qualidade
+de tinturas aplicadas em couros e peles, comparando a cor com os padrões
+estabelecidos - seja visualmente ou usando equipamentos como
+colorímetros ou espectrofotômetros -, ajustando e padronizando cores.
+Controla a qualidade do processo de tingimento, verificando as
+características físicas e químicas das tinturas e banhos. Opera e mantém
+máquinas e equipamentos utilizados no processo de tingimento de couros e
+peles. Registra os dados operacionais ou de produção em formulários
+especificados. Conserva local de trabalho limpo e organizado. Armazena
+corantes, pigmentos e demais materiais utilizados no tingimento de
+couros e peles. Trata resíduos e efluentes gerados no processo de
+tingimento, de acordo com as normas ambientais. Zela pela segurança,
+prevenindo acidentes, eliminando condições inseguras e utilizando
+equipamentos de proteção individual e coletiva.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 311725 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 721305  ( Afiador de cardas )}
+
+Planeja o trabalho de afiação, consultando normas, instruções e
+parâmetros. Estuda desenhos e especificações das cardas para determinar
+os procedimentos de afiação, bem como planejar configurações da máquina
+e sequências operacionais. Seleciona e monta rebolos ou lixas nas
+máquinas, de acordo com as especificações, usando ferramentas manuais e
+aplicando conhecimentos sobre abrasivos. Seleciona e extrai as pontas
+desgastadas da guarnição da carda a serem afiadas, utilizando
+ferramentas adequadas, ou prepara para a afiação diretamente na
+guarnição, fazendo uso de máquinas especiais. Escolhe angulação, de
+acordo com o material a ser afiado. Afia por processo manual ou
+semiautomático, interpretando instruções de trabalho. Prepara a
+ferramenta de afiação, executando o dressamento do rebolo, instalando-o
+na máquina de afiar e fazendo os ajustes necessários. Instala lixas na
+máquina de afiar. Verifica refrigeração e lubrificação do material a ser
+afiado e regula a máquina para afiar. Gira as válvulas para direcionar o
+fluxo de líquido de refrigeração durante o processo de afiação. Aciona a
+máquina, manejando os controles de partida e de movimentação manual ou
+semiautomática, para colocar o rebolo ou a lixa em contato com a peça,
+procedendo à afiação de cada ponta. Controla o processo, avaliando e
+compensando desgastes da ferramenta de afiação e a substituindo, se
+necessário, quando desgastada. Pode trabalhar com ferramentas manuais.
+Afia por processo automático, preparando, configurando e programando
+máquinas de afiação de cardas convencionais e de alto desempenho. Coloca
+as peças -- pontas ou guarnições completas das cardas -- a serem afiadas
+na máquina. Aciona comandos para dar início às operações de afiação.
+Monitora o processo. Verifica o acabamento final da afiação. Troca
+instrumentos de afiação desgastados quando atingem condições mínimas de
+corte. Retira a peça afiada, detendo a máquina e utilizando ferramentas
+apropriadas. Reinstala a ponta afiada na guarnição da carda. Pode
+retificar guarnição de cardas. Controla a qualidade, verificando as
+dimensões das peças ou lotes no início do processo e definindo a
+quantidade - totalidade ou amostras das peças - a inspecionar.
+Identifica os pontos a inspecionar e realiza a inspeção do produto,
+visualmente ou fazendo uso de equipamentos. Examina e mede as peças para
+garantir que as superfícies e as dimensões atendam às especificações ao
+final do processo. Identifica material a ser refugado ou retrabalhado.
+Executa manutenção básica - como limpeza e lubrificação de peças - das
+máquinas e ferramentas de afiação. Remove e substitui peças gastas ou
+quebradas, usando ferramentas manuais. Trabalha com segurança, seguindo
+normas de segurança e de medicina do trabalho. Ajusta as condições
+ergonômicas. Utiliza equipamentos de proteção individual. Participa do
+levantamento de riscos ambientais e de ações preventivas contra
+incêndios e acidentes. Presta primeiros socorros. Conserva o ambiente de
+trabalho limpo e organizado. Destina adequadamente os resíduos gerados,
+reciclando materiais e realizando descarte de acordo com as normas
+ambientais.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 721305 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 11016 -- Técnico em Recursos Pesqueiros }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Recursos Pesqueiros será habilitado para:
+
+Realizar operações do setor pesqueiro com base no manejo e na qualidade
+da cadeia produtiva do pescado. Analisar e avaliar os aspectos técnicos,
+sociais e econômicos da cadeia produtiva do setor pesqueiro. Prestar
+assistência técnica e assessoria ao estudo e ao desenvolvimento de
+projetos e pesquisas tecnológicas, ou aos trabalhos de vistoria,
+perícia, arbitramento e consultoria. Elaborar orçamentos, laudos,
+pareceres, relatórios e projetos, inclusive de incorporação de novas
+tecnologias. Analisar a viabilidade técnica e econômica de propostas de
+projetos aquícolas e pesqueiros. Prestar assistência técnica às áreas de
+crédito rural, agroindustrial e impacto ambiental. Reconhecer os
+aspectos fisiológicos, biológicos e ecológicos das espécies cultivadas e
+exploradas pela pesca. Planejar e organizar ações de extensão pesqueira.
+Planejar, organizar, dirigir e controlar as operações de pesca e de
+despesca. Confeccionar, montar e operar apetrechos e equipamentos de
+pesca e de aquicultura e dar manutenção adequada. Realizar procedimentos
+para reprodução das principais espécies de interesse pesqueiro.
+Monitorar e realizar o beneficiamento e o processamento de pescado em
+embarcações pesqueiras e frigoríficos de pescado. Aplicar boas práticas
+de manipulação e fabricação, supervisionar as etapas de conservação,
+processamento, beneficiamento e comercialização do pescado. Elaborar,
+aplicar e monitorar programas profiláticos, higiênicos e sanitários na
+cadeia produtiva do pescado. Implantar e gerenciar sistemas de controle
+de qualidade na produção do pescado. Emitir laudos e documentos de
+classificação e exercer a fiscalização de produtos pesqueiros. Treinar e
+conduzir equipes nas suas modalidades de atuação profissional. Prevenir
+situações de risco à segurança no trabalho. Aplicar as legislações
+pertinentes ao processo produtivo e ao meio ambiente. Identificar e
+aplicar técnicas mercadológicas para distribuição e comercialização do
+pescado. Executar a gestão econômica e financeira da produção pesqueira.
+Administrar e gerenciar empreendimentos do setor pesqueiro. Conduzir
+embarcações de pesca. Operar equipamentos como radares, bússolas,
+barômetros e de Sistema de Navegação Global por Satélite (GNSS).
+
+Para a atuação como Técnico em Recursos Pesqueiros, são fundamentais:
+
+Conhecimentos e saberes relacionados a processos de gestão de negócios
+voltados à aquicultura e pesca, à legislação pesqueira brasileira, à
+legislação ambiental, ao planejamento de produção, à gestão de projetos,
+à gestão de processos, ao empreendedorismo, ao mercado e comercialização
+do pescado, à extensão aquícola e pesqueira, à aquicultura em águas da
+União, a políticas públicas para o desenvolvimento da aquicultura e da
+pesca, ao associativismo e ao cooperativismo. Domínio do uso de
+tecnologias da informação.\\
+Habilidade de comunicação, resolução de situações-problema, trabalho em
+equipe e gestão de conflitos.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 321310  ( Técnico em carcinicultura )}
+
+Elabora projeto de implantação e de operação de sistema de criação de
+camarões marinhos ou de camarões de água doce em cativeiro. Faz análise
+da viabilidade técnica e econômica do projeto. Apresenta as etapas de
+implantação. Relaciona máquinas, equipamentos, ferramentas, instrumentos
+e materiais necessários. Detalha tamanho de equipe de trabalho e suas
+atribuições. Elabora orçamento. Presta orientações técnicas na
+implantação do projeto de carcinicultura, conforme características da
+área, do clima e da localização geográfica. Seleciona sistema extensivo,
+semi-intensivo ou intensivo de criação. Recomenda espécie de camarões
+para criação. Orienta a construção e a adaptação de instalações - no mar
+ou na terra - para a criação de camarões. Executa levantamento
+topográfico. Indica necessidade de drenagem, colocação de telas e outras
+providências. Orienta a montagem de sistemas de aeração. Pode recomendar
+a instalação de viveiros automatizados. Orienta monitoramento constante
+de parâmetros da água. Demonstra a forma de coletar amostras e de medir
+temperatura, pH, oxigênio, transparência, entre outros parâmetros.
+Indica o modo de instalar filtros de purificação e de dimensionar a
+vazão da água. Monitora, antes do povoamento do viveiro com as
+pós-lavas, a aplicação de calcário e de fertilizantes químicos e
+orgânicos, que contribuirão na produção da alimentação natural, formada
+por microorganismos, tais como algas, fito e zooplânctons, entre outros.
+Além da alimentação natural, orienta o fornecimento de ração balanceada.
+Seleciona e recomenda suplementos alimentares. Indica procedimentos
+técnicos para aquisição de pós-larvas, para sua transferência ao local
+de criação e para sua aclimatação. Pode organizar a reprodução de
+camarões, monitorando a seleção, a mensuração e o acasalamento de
+reprodutores. Pode orientar a aplicação de técnicas artificiais de
+reprodução. Informa sobre técnicas de melhoramento genético. Recomenda o
+emprego de tela de proteção durante o abastecimento de água no local da
+criação, para impedir a entrada de espécies competidoras e predadoras.
+Implanta controle da sanidade dos camarões, com observação de espécimes
+e coleta de amostra dirigida - dos que apresentem aspectos menos
+saudáveis - de diferentes pontos do viveiro. Orienta a pesagem dos
+camarões e imediato envio para a avaliação de tecidos e órgãos, a fim de
+identificar enfermidades virais e bacterianas, entre outras doenças e
+irregularidades. Recomenda, ainda, o controle de índices zootécnicos -
+como taxa de crescimento, peso corporal, entre outros -- indicativos da
+saúde dos camarões em cativeiro. Orienta a despesca, a desinfecção e o
+abate dos camarões. Organiza o beneficiamento dos camarões abatidos,
+monitorando os processos, tais como limpeza, processamento em filés,
+classificação, congelamento e embalagem. Monta a logística de
+armazenagem e transporte da produção. Implanta e gerencia sistemas de
+controle de qualidade de processos e produtos. Observa a organização do
+local de trabalho. Monitora a aplicação de programas profiláticos,
+higiênicos e sanitários. Orienta a conservação de ferramentas e
+instrumentos em plenas condições de funcionamento. Prepara plano de
+manutenção de máquinas e equipamentos. Elabora relatório técnico sobre
+resultados do projeto de carcinicultura. Pode ministrar palestras. Pode
+administrar empreendimentos e realizar pesquisa e extensão, na área de
+carcinicultura. Pode supervisionar trabalho de equipe, avaliando
+desempenho e desenvolvendo treinamentos. Mantém-se atualizado em relação
+às inovações em carcinicultura. Estuda aplicação de novas tecnologias,
+como o sistema de criação em bioflocos bacterianos para criação de
+camarões marinhos em locais afastados da costa. Contribui para redução
+dos impactos ambientais do processo de criação, monitorando a aplicação
+das normas ambientais. Zela pela segurança, prevenindo situações de
+risco. Utiliza e monitora o uso de equipamentos de proteção individual.
+Presta primeiros socorros.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 321310 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\textbf{CBO: 341220  ( Patrão de pesca de alto-mar )}
+
+Realiza operações de navegação em mar aberto com embarcação de pesca,
+traçando a rota de navegação; relatando posição da embarcação e hora
+estimada de chegada; e monitorando condições de navegabilidade. Guarnece
+o passadiço e o timão. Aciona equipamentos auxiliares e luzes
+regulamentares da embarcação. Opera equipamentos de embarcação de pesca
+na navegação em mar aberto, tais como equipamentos de comunicação, de
+combate a incêndio, de salvatagem e de orientação para posicionamento
+geográfico. Opera piloto automático, instrumento ecossondador e sonar.
+Atraca e desatraca embarcação de pesca na navegação em mar aberto,
+acionando a seção de máquinas; trocando informações com a estação de
+apoio; e analisando as condições intervenientes (maré, vento, tráfego de
+embarcações, visibilidade e profundidade). Solicita serviços de apoio
+portuário. Realiza as manobras necessárias para atracar ou desatracar a
+embarcação. Reboca embarcações. Monitora carga e descarga da embarcação
+de pesca na navegação em mar aberto, emitindo notificação de prontidão
+da embarcação; verificando condições dos porões de carga; classificando
+cargas; e elaborando o plano de carregamento. Verifica documentação das
+cargas. Designa pessoal para carregamento e descarregamento. Monitora o
+calado, a disposição das cargas e as condições de conservação de
+pescados. Verifica condições e fixação das cargas. Informa unidade
+receptora sobre características das cargas. Supervisiona serviços de
+manutenção de embarcação de pesca na navegação em mar aberto,
+solicitando serviços de reparo e fiscalizando reparos realizados a
+bordo. Fiscaliza condições de conservação da embarcação e condições de
+equipamentos de convés. Fiscaliza equipamentos de combate a incêndio e
+de salvatagem. Fiscaliza dotação de material para contenção de
+poluentes. Fiscaliza compartimentos habitáveis. Administra recursos
+materiais e financeiros nas operações com embarcação de pesca na
+navegação em mar aberto, requisitando materiais, comprando insumos,
+requisitando provisões de alimentos e requisitando combustível,
+lubrificantes e água. Administra custeio de bordo. Inventaria materiais.
+Efetua pagamento para a tripulação. Supervisiona tripulação de
+embarcação de pesca na navegação em mar aberto, divulgando normas e
+regulamentos, determinando horário de trabalho, distribuindo tarefas
+para guarnição e monitorando atividades. Treina novatos. Aplica
+advertências e demais punições. Comanda embarcação de pesca na navegação
+em mar aberto, de acordo com normas da autoridade marítima da Diretoria
+de Portos e Costas da Marinha do Brasil, que define capacidades das
+embarcações e limites em que pode atuar. Registra dados da embarcação de
+pesca na navegação em mar aberto, preenchendo rol de tripulação (rol de
+equipagem); emitindo documentação de entrada, saída e permanência no
+porto; e atualizando cartas e publicações náuticas. Organiza
+documentação de embarcação e carga. Escritura diário de navegação.
+Preenche livro de carga e documentação de despacho de lixo. Escritura
+diário de comunicação e redige atas de reuniões. Preenche mapa de bordo
+para o Instituto Brasileiro do Meio Ambiente e dos Recursos Naturais
+Renováveis (Ibama). Orienta tripulação sobre temas de segurança do
+trabalho, tais como utilização de Equipamentos de Proteção individual
+(EPI); situações de emergência; e condições e atos inseguros. Simula
+situações adversas para treinamento da tripulação. Divulga informações
+sobre saúde e orienta sobre questões ambientais.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 341220 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+
+\newpage
+\section{ 12001 -- Técnico em Defesa Civil }
+
+\textbf{Perfil do Curso (CNCT)}
+
+O Técnico em Defesa Civil será habilitado para:
+
+Gerenciar riscos e desastres. Realizar o monitoramento preventivo de
+desastres. Monitorar mudanças climáticas, alertas de emergências e
+sistemas de informações geográficas. Coordenar, de forma estratégica,
+secretarias, entidades e órgãos de poder público, privado e ONG.
+Planejar reuniões de núcleos comunitários de proteção e defesa civil.
+Orientar e mobilizar as comunidades a adotar comportamentos adequados de
+prevenção, preparação, resposta e recuperação em situação de eventos
+adversos/desastres e promover a autoproteção. Promover e coordenar ações
+de recuperação de eventos adversos/desastres. Promover políticas
+públicas para redução dos riscos de eventos adversos/desastres.
+Estimular o desenvolvimento de cidades resilientes e os processos
+sustentáveis de urbanização. Produzir alertas antecipados e possibilitar
+mecanismos de comunicação com base no monitoramento sobre a
+possibilidade de ocorrência de eventos adversos e/ou desastres naturais.
+Oferecer capacitação de recursos humanos para as ações de proteção e
+defesa civil. Elaborar planos de contingência de proteção e defesa
+civil. Elaborar pareceres, relatórios, planos, projetos. Realizar
+pesquisas, estudos, análises, interpretação, planejamento, implantação,
+coordenação e controle dos trabalhos em proteção e Defesa Civil.
+
+Para atuação como Técnico em Defesa Civil, são fundamentais:
+
+Proficiência e conhecimento estratégico, tático e operacional.
+Conhecimentos e saberes relacionados aos processos de projetos,
+planejamento e gestão, tanto no setor público quanto no privado, em
+situações de eventos adversos e possíveis desastres de origem natural ou
+tecnológica. Conhecimento técnico para interpretar, monitorar e
+gerenciar condições geológicas, meteorológicas, climatológicas,
+epidemiológicas e outras condições fortuitas ligadas a condições de meio
+ambiente, natureza e ambiente antropizados. Capacidade de assegurar a
+saúde e a segurança dos cidadãos e a sustentabilidade do desenvolvimento
+urbano. Conhecimentos e saberes relacionados às normas técnicas, à
+liderança de equipes, à solução de problemas técnicos e trabalhistas e à
+gestão de conflitos.
+
+\textbf{CBOs não correspondidos e seus perfis:}
+
+\textbf{CBO: 351605  ( Técnico em segurança do trabalho )}
+
+Elabora, implanta e implementa política de saúde e segurança do
+trabalho, definindo metas, prioridades e responsabilidades. Divulga a
+política entre os trabalhadores. Acompanha e avalia os resultados,
+podendo promover alterações para aperfeiçoamento e atualização. Analisa
+e avalia o ambiente de trabalho, as instalações e os processos laborais,
+identificando fatores de risco de acidentes do trabalho, de doenças
+profissionais e de presença de agentes ambientais agressivos ao
+trabalhador. Participa da seleção de tecnologias e processos de
+trabalho, avaliando implantação e impactos por meio de análise coletiva
+do trabalho (ACT) e análise ergonômica do trabalho (AET). Emite parecer
+sobre equipamentos, máquinas e processos. Coleta, organiza e analisa
+comunicações de acidentes de trabalho (CAT). Investiga e analisa
+acidentes para determinar causas e recomendar medidas de prevenção e
+controle. Levanta e utiliza dados estatísticos de doenças e acidentes de
+trabalho para ajustes das ações prevencionistas. Adota medidas de
+controle de riscos ocupacionais por meio de ações e programas de saúde e
+segurança do trabalho. Realiza procedimentos de orientação sobre medidas
+de eliminação e neutralização de riscos. Seleciona, controla, orienta e
+fiscaliza o uso de EPC (Equipamento de Proteção Coletiva) e EPI
+(Equipamento de Proteção Individual). Participa do desenvolvimento de
+ações educativas e capacitações, elaborando cronograma, preparando
+recursos didáticos e formando multiplicadores. Produz relatórios
+referentes à segurança e à saúde do trabalhador. Elabora manual do
+sistema de gestão de saúde e segurança no trabalho. Controla atualização
+de documentos, normas e legislação. Atua em equipes multidisciplinares
+de saúde e segurança ocupacionais.
+
+\begin{Form}
+\textbf{Esta correspondência está adequada?} \\ 
+\ChoiceMenu[radio,radiosymbol=\ding{52},name=cbovalid_ 351605 ]{}{CBO deve ficar=sim, \hspace{6em} CBO não fica aqui=nao}
+\end{Form}
+\footnotetext{Fonte: CNCT e QBQ, 18/07/2025}
+
+\end{document}
