@@ -130,14 +130,68 @@ qbq_ocup_cmento1 <- qbq_ocup %>%
   filter(!is.na(desArea) & !is.null(desArea) & desArea!="NULL") %>%
   distinct() %>%
   group_by(CodCBO, `Ocupação`, `Síntese`, PerfilOcupacional, NivelOcupacao) %>%
+  mutate(CodCBO = as.character(CodCBO)) %>%
   summarise(
     desArea = list(unique(na.omit(desArea))),
     desCampo = list(unique(na.omit(desCampo))),
     desConhecimento = list(unique(na.omit(desConhecimento))),
     .groups = "drop"
-  )
+  ) %>% arrange(CodCBO)
 #1899 occupations
 
+# Bring in some vars from cbo now
+# Caminho base dos arquivos
+base <- "D:/Country/Brazil/TechBrazil/rawdata/cbo/"
+
+# --- Carregar arquivos CSV ---
+
+# Grande Grupo (1 dígito)
+df_gg <- read_delim(paste0(base, "CBO2002 - Grande Grupo.csv"), delim = ";", locale = locale(encoding = "LATIN1")) %>%
+  clean_names() %>%
+  rename(cbo_1dig = codigo, cbo_gragru = titulo) %>%
+  mutate(cbo_1dig = str_pad(as.character(cbo_1dig), 1, pad = "0"))
+
+# Subgrupo Principal (2 dígitos)
+df_sgp <- read_delim(paste0(base, "CBO2002 - SubGrupo Principal.csv"), delim = ";", locale = locale(encoding = "LATIN1")) %>%
+  clean_names() %>%
+  rename(cbo_2dig = codigo, cbo_prigru = titulo) %>%
+  mutate(cbo_2dig = str_pad(as.character(cbo_2dig), 2, pad = "0"))
+
+# Subgrupo (3 dígitos)
+df_sg <- read_delim(paste0(base, "CBO2002 - SubGrupo.csv"), delim = ";", locale = locale(encoding = "LATIN1")) %>%
+  clean_names() %>%
+  rename(cbo_3dig = codigo, cbo_subgru = titulo) %>%
+  mutate(cbo_3dig = str_pad(as.character(cbo_3dig), 3, pad = "0"))
+
+# Família Ocupacional (4 dígitos)
+df_fam <- read_delim(paste0(base, "CBO2002 - Familia.csv"), delim = ";", locale = locale(encoding = "LATIN1")) %>%
+  clean_names() %>%
+  rename(cbo_4dig = codigo, cbo_familia = titulo) %>%
+  mutate(cbo_4dig = str_pad(as.character(cbo_4dig), 4, pad = "0"))
+
+# Ocupações (6 dígitos finais)
+df_ocup <- read_delim(paste0(base, "CBO2002 - Ocupacao.csv"), delim = ";", locale = locale(encoding = "LATIN1")) %>%
+  clean_names() %>%
+  rename(cbo_6dig = codigo, cbo_nome = titulo) %>%
+  mutate(
+    cbo_1dig = str_sub(cbo_6dig, 1, 1),
+    cbo_2dig = str_sub(cbo_6dig, 1, 2),
+    cbo_3dig = str_sub(cbo_6dig, 1, 3),
+    cbo_4dig = str_sub(cbo_6dig, 1, 4)
+  )
+
+# --- Unir tudo em um só dataframe ---
+df_cbo_hier <- df_ocup %>%
+  left_join(df_fam, by = "cbo_4dig") %>%
+  left_join(df_sg, by = "cbo_3dig") %>%
+  left_join(df_sgp, by = "cbo_2dig") %>%
+  left_join(df_gg, by = "cbo_1dig") %>%
+  relocate(cbo_6dig, cbo_nome, cbo_4dig, cbo_familia, cbo_3dig, cbo_subgru,
+           cbo_2dig, cbo_prigru, cbo_1dig, cbo_gragru)
+
+
+qbq_ocup_cmento1 <- left_join(qbq_ocup_cmento1,df_cbo_hier, by=c("CodCBO" = "cbo_6dig")) %>%
+  select(-desArea,-desCampo,-desConhecimento) 
 
 # save
 save(qbq_ocup_cmento1, file = "D:/Country/Brazil/TechBrazil/working/qbq/qbq_ocup_cmento1.rda")
@@ -159,20 +213,29 @@ put_object(file = "D:/Country/Brazil/TechBrazil/working/qbq/qbq_ocup_cmento1.pkl
            bucket = bucket_name)
 
 
-# The cnct file in pickle too
-df_py <- r_to_py(df_censo_supl_tec_4qbq)
-# Save as pickle (requires reticulate config + pandas setup)
-py_save_object(df_censo_supl_tec_4qbq, "D:/Country/Brazil/TechBrazil/working/qbq/df_censo_supl_tec_4qbq.pkl")
-
-# Save to .pkl file
-put_object(file = "D:/Country/Brazil/TechBrazil/working/qbq/df_censo_supl_tec_4qbq.pkl",
-           object = "working/qbq/df_censo_supl_tec_4qbq.pkl",
-           bucket = bucket_name)
-
-
+# # The cnct file in pickle too
+# df_py <- r_to_py(df_censo_supl_tec_4qbq)
+# # Save as pickle (requires reticulate config + pandas setup)
+# py_save_object(df_censo_supl_tec_4qbq, "D:/Country/Brazil/TechBrazil/working/qbq/df_censo_supl_tec_4qbq.pkl")
+# 
+# # Save to .pkl file
+# put_object(file = "D:/Country/Brazil/TechBrazil/working/qbq/df_censo_supl_tec_4qbq.pkl",
+#            object = "working/qbq/df_censo_supl_tec_4qbq.pkl",
+#            bucket = bucket_name)
 
 
 
+qbq_ocup_cmento1 %>% select(cbo_familia) %>% unique() %>% arrange() %>% print(n=484)
 
 
+junk <- qbq_ocup_cmento1 %>% filter(cbo_familia=="Técnicos em artes gráficas") %>% select(PerfilOcupacional)
 
+junk$PerfilOcupacional
+
+junk <- qbq_ocup_cmento1 %>% filter(cbo_familia=="Técnicos em transportes rodoviários") %>% select(PerfilOcupacional)
+
+junk$PerfilOcupacional
+
+ 
+
+  

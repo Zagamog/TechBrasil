@@ -9,17 +9,18 @@ library(zoo) #to compute moving averages
 library(scales)
 library(dlookr)
 
-input_folder <- here("rawdata") 
+input_folder1 <- here("rawdata/ibge") 
+input_folder2 <- here("rawdata/mintraemp")
 
 ####STATE-LEVEL ANALYSIS#######
 #Importar regioes gegráficas IBGE
-regioes_ibge <- read_xlsx(here(input_folder, "regioes_geograficas_composicao_por_municipios_2017_20180911.xlsx")) %>%
+regioes_ibge <- read_xlsx(here(input_folder1, "regioes_geograficas_composicao_por_municipios_2017_20180911.xlsx")) %>%
 rename(id_municipio = CD_GEOCODI) %>%
   select(id_municipio, cod_rgint, nome_rgint) %>%
   mutate(id_municipio = as.numeric(id_municipio))
 
 #Importa CAGED
-caged <- read_csv(here(input_folder, "caged_cbo_mun_2023_2024.csv")) %>%
+caged <- read_csv(here(input_folder2, "caged_cbo_mun_2023_2024.csv")) %>%
   left_join(regioes_ibge, by = "id_municipio") %>%
   relocate(cod_rgint, nome_rgint, .before = id_municipio) %>%
   mutate(micro_regiao = str_sub(id_municipio, 1, 5),
@@ -37,7 +38,7 @@ caged <- read_csv(here(input_folder, "caged_cbo_mun_2023_2024.csv")) %>%
 gc()
 
 #Importa RAIS
-rais <- read_csv(here(input_folder, "rais_cbo_mun_2022_2023.csv")) %>%
+rais <- read_csv(here(input_folder2, "rais_cbo_mun_2022_2023.csv")) %>%
   left_join(regioes_ibge, by = "id_municipio") %>%
   relocate(cod_rgint, nome_rgint, .before = id_municipio) %>%
   mutate(ano = ano + 1, # ajusta variável de ano porque vamos usar o estoque em dezembro do ano anterior como denominador para a taxa de rotatividade no ano seguinte
@@ -46,13 +47,12 @@ rais <- read_csv(here(input_folder, "rais_cbo_mun_2022_2023.csv")) %>%
          cbo1 = str_sub(cbo_2002, 1, 1),
          cbo2 = str_sub(cbo_2002, 1, 2),
          cbo3 = str_sub(cbo_2002, 1, 3)) %>%
-  filter(cbo1 == 3) %>%
-  group_by(ano, sigla_uf, nome_rgint, cbo2) %>%
+  group_by(ano, sigla_uf, nome_rgint, cbo_2002) %>%
   summarise(
-    total_vinculo_ativo_3112 = sum(total_vinculo_ativo_3112_ponderado, na.rm = TRUE), # Usa variável ajustada pelas horas semanais de trabalho do contrato
+    total_vinculo_ativo_3112 = round(sum(total_vinculo_ativo_3112_ponderado, na.rm = TRUE)), # Usa variável ajustada pelas horas semanais de trabalho do contrato
   ) %>%
   ungroup %>%
-  relocate(cbo2, .before = total_vinculo_ativo_3112)
+  relocate(cbo_2002, .before = total_vinculo_ativo_3112)
 
 
 #Agrega CAGED no nível de CBO3 com colunas para separadas para admitidos e desligados

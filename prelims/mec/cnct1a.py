@@ -46,7 +46,7 @@ else:
 # --- Step 3: Load CSV and inspect ---
 df_full = pd.read_csv(local_path, delimiter=";", encoding="ISO-8859-1")
 
-# --- Step 4: Create course_id using hierarchical codes ---
+# --- Step 4: Create course_id IDX_EIXARECUR using hierarchical codes ---
 df_full = df_full.copy()
 eixo_map = {eixo: f"{i+1:02d}" for i, eixo in enumerate(df_full['Eixo Tecnológico'].unique())}
 df_full['eixo_code'] = df_full['Eixo Tecnológico'].map(eixo_map)
@@ -69,7 +69,7 @@ curso_codes = (
     .cumcount() + 1
 )
 df_full['curso_code'] = curso_codes.apply(lambda x: f"{x:02d}")
-df_full['course_id'] = df_full['eixo_code'] + df_full['area_code'] + df_full['curso_code']
+df_full['IDX_EIXARECUR'] = df_full['eixo_code'] + df_full['area_code'] + df_full['curso_code']
 
 # --- Step 5: Reorder and finalize output ---
 original_columns = [
@@ -80,7 +80,7 @@ original_columns = [
     'Infraestrutura Mínima', 'Legislação Profissional'
 ]
 
-df_ordered = df_full[['course_id'] + original_columns]
+df_ordered = df_full[['IDX_EIXARECUR'] + original_columns]
 df_ordered['eixo_code'] = df_full['eixo_code']
 df_ordered['area_code'] = df_full['area_code']
 df_ordered['curso_code'] = df_full['curso_code']
@@ -92,3 +92,10 @@ pyreadr.write_rds(output_base + ".rds", df_ordered)
 df_ordered.to_csv(output_base + ".csv", index=False)
 
 print("✅ Saved as .pkl, .rds, and .csv")
+
+# Unpickle:
+    
+df_cnct2025a = pd.read_pickle("D:/Country/Brazil/TechBrazil/working/mec_outros/df_cnct2025a.pkl")
+
+                              
+                              
