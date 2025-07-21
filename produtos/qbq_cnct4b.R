@@ -1,4 +1,4 @@
-# qbq_cnct4a.R
+# qbq_cnct4b.R
 
 library(aws.s3)
 library(dotenv)
