@@ -45,6 +45,31 @@ df_ibge_path <- here("working", "ibge", "df_codes_ibge.rda")
 update_data_from_s3(df_ibge_path, "working/ibge/df_codes_ibge.rda", bucket_name)
 load(df_ibge_path)  # loads df_codes_ibge
 
+
+
+# --- Step 5a: Add CO_MUN6 to df_codes_ibge and re-save ---
+df_codes_ibge <- df_codes_ibge %>%
+  mutate(CO_MUN6 = as.numeric(substr(CO_MUN, 1, 6)))
+
+df_codes_ibge <- df_codes_ibge %>% relocate(CO_MUN6, .after = CO_MUN)
+
+
+# Save updated df_codes_ibge locally
+save(df_codes_ibge, file = df_ibge_path)
+
+# Upload to S3 if changed or missing
+upload_if_not_exists(df_ibge_path, "working/ibge/df_codes_ibge.rda", bucket_name)
+
+message("✅ CO_MUN6 added to df_codes_ibge and saved locally and to S3.")
+
+
+
+
+
+
+
+
+
 # --- Step 6: Import function with fallback ---
 importa_censo_tec <- function(ano) {
   local_path <- here(input_folder, paste0("suplemento_cursos_tecnicos_", ano, ".csv"))
@@ -112,3 +137,7 @@ upload_if_not_exists(csv_output, "working/mec_inep/matriculas_tec_ano_mun_area_c
 upload_if_not_exists(rda_output, "working/mec_inep/matriculas_tec_ano_mun_area_curso.rda", bucket_name)
 
 message("✅ Script completed and outputs saved/uploaded.")
+
+
+
+
