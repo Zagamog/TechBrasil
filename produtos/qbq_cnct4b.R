@@ -73,18 +73,32 @@ tfidf_cnct_nostop <- df_cnct2025b %>%
 
 
 # Step 2: For each course, take top 100 TF-IDF words and build named vector
-tfidf_vectors_cnct <- tfidf_cnct_nostop %>%
-  group_by(IDX_EIXARECUR) %>%
-  slice_max(tf_idf, n = 100, with_ties = FALSE) %>%
-  summarise(tfidf_vector = list(setNames(tf_idf, word))) %>%
-  ungroup()
+# tfidf_vectors_cnct <- tfidf_cnct_nostop %>%
+#   group_by(IDX_EIXARECUR) %>%
+#   slice_max(tf_idf, n = 100, with_ties = FALSE) %>%
+#   summarise(tfidf_vector = list(setNames(tf_idf, word))) %>%
+#   ungroup()
 
 # Check the length of each vector
 # map_int(tfidf_vectors_cnct$tfidf_vector, length)
 
+tfidf_vectors_cnct <- df_cnct2025b %>%
+  unnest_tokens(word, curso_blob, token = "words") %>%
+  filter(str_detect(word, "[a-zA-Z]")) %>%
+  filter(!word %in% pt_stopwords) %>%
+  count(IDX_EIXARECUR, word, sort = TRUE) %>%
+  bind_tf_idf(word, IDX_EIXARECUR, n) %>%
+  group_by(IDX_EIXARECUR) %>%
+  slice_max(tf_idf, n = 100, with_ties = FALSE) %>%
+  summarise(tfidf_vector = list(set_names(as.list(tf_idf), word))) %>%
+  ungroup()
+
+
 
 # Now save the tfidf_vector in pickle
-py_save_object(tfidf_vectors_cnct, "D:/Country/Brazil/TechBrazil/working/qbq/tfidf_vectors_cnct.pkl")
+# 2. Save for Python
+reticulate::py_save_object(tfidf_vectors_cnct, "D:/Country/Brazil/TechBrazil/working/qbq/tfidf_vectors_cnct.pkl")
+
 
 
 ## Now qbq side
@@ -104,16 +118,6 @@ qbq_ocup_cmento1 <- qbq_ocup_cmento1 %>%
 # Save as Python-compatible pickle
 py_save_object(qbq_ocup_cmento1, "D:/Country/Brazil/TechBrazil/working/qbq/qbq_ocup_cmento1_blob.pkl")
 
-# Tokenize and clean QBQ
-tfidf_qbq <- qbq_ocup_cmento1 %>%
-  unnest_tokens(word, ocup_blob, token = "words") %>%         # Split text into words
-  filter(str_detect(word, "[a-zA-Z]")) %>%                    # Keep only words
-  count(CodCBO, word, sort = TRUE) %>%                        # Count word frequency per occupation
-  bind_tf_idf(word, CodCBO, n) %>%                            # Compute TF-IDF
-  arrange(desc(tf_idf))
-
-# Get Portuguese stopwords
-pt_stopwords <- stopwords("pt")
 
 # Remove stopwords from tokenized table
 tfidf_qbq_nostop <- qbq_ocup_cmento1 %>%
@@ -124,15 +128,19 @@ tfidf_qbq_nostop <- qbq_ocup_cmento1 %>%
   bind_tf_idf(word, CodCBO, n) %>%
   arrange(desc(tf_idf))
 
-# Test
-#tfidf_qbq_nostop %>% filter(CodCBO == "731305") %>% top_n(10, tf_idf)
 
-# Step 2: Named vector for cosine comparison
-tfidf_vectors_qbq <- tfidf_qbq_nostop %>%
+# Tokenize and clean QBQ
+tfidf_vectors_qbq <- qbq_ocup_cmento1 %>%
+  unnest_tokens(word, ocup_blob, token = "words") %>%
+  filter(str_detect(word, "[a-zA-Z]")) %>%
+  filter(!word %in% pt_stopwords) %>%
+  count(CodCBO, word, sort = TRUE) %>%
+  bind_tf_idf(word, CodCBO, n) %>%
   group_by(CodCBO) %>%
   slice_max(tf_idf, n = 100, with_ties = FALSE) %>%
-  summarise(tfidf_vector = list(setNames(tf_idf, word))) %>%
+  summarise(tfidf_vector = list(set_names(as.list(tf_idf), word))) %>%
   ungroup()
+
 
 # Save as pickle for use in Python
 py_save_object(tfidf_vectors_qbq, "D:/Country/Brazil/TechBrazil/working/qbq/tfidf_vectors_qbq.pkl")
