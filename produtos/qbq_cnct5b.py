@@ -89,7 +89,6 @@ for curso_id, curso_vec in tqdm(dict_cnct.items(), desc="🔍 Matching CNCT → 
 
 # --- 6. Save output ---
 df_results = pd.DataFrame(results)
-df_results.to_csv("D:/Country/Brazil/TechBrazil/working/qbq/cnct_qbq_matches.csv", index=False)
 df_results.to_pickle("D:/Country/Brazil/TechBrazil/working/qbq/cnct_qbq_matches.pkl")
 
 print("✅ Hybrid matching completed and results saved.")
