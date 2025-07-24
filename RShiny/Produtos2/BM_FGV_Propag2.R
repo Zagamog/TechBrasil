@@ -246,27 +246,95 @@ ui <- dashboardPage(
                 ),
            
            ### UI - TAB 1b : FINANCE 1b  ##################################################        
-           ### TAB 1B (NEW)
-           tabPanel("Finance 1b",                       # -> .nav-tabs > li:nth-child(2)
+           ### TAB 1B (UPDATED)
+           tabPanel("Finance 1b",
                     fluidPage(
-                     
-                      
                       h3("Conteúdo em desenvolvimento: Finance 1b", style = "color: #1f5673; font-weight: bold;"),
-                      prettyCheckboxGroup(
-                        inputId = "choice_A",
-                        label = "Amortização Inicial",
-                        choices = c("Sem abatimento" = "A1", "10% abatimento" = "A2", "20% abatimento" = "A3"),
-                        selected = NULL,
-                        icon = icon("check"),
-                        status = "info",         # Color: "primary", "success", "danger", etc.
-                        outline = TRUE,         # TRUE for border-style only
-                        animation = "pulse", # Optional: "pulse", "jelly", "tada"
-                        inline = TRUE 
+                      
+                      div(class = "checkbox-dark-panel",
+                          fluidRow(
+                            # Column 1: Instructions with matched font style
+                            column(
+                              width = 2,
+                              div(
+                                style = "margin-top: 2px; font-size: 14px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #f5f5f5;",
+                                tags$strong("Instruções:"),
+                                div("Por favor, marque as opções relevantes para o seu Estado."),
+                                div("À medida que você clicar em uma escolha, o painel à direita mostrará apenas opções válidas que podem ser escolhidas."),
+                                div("Você pode começar por qualquer uma das quatro linhas abaixo.")
+                              )
+                            ),
+                            
+                            # Column 2: PrettyCheckbox groups
+                            column(
+                              width = 10,
+                              tags$label("Amortização Inicial", style = "font-weight: bold; margin-bottom: 6px; display: block;"),
+                              
+                              div(style = "margin-bottom: 16px;",
+                                  prettyCheckboxGroup(
+                                    inputId = "choice_test",
+                                    label = NULL,
+                                    choices = c("Sem abatimento" = "A", "10% abatimento" = "B", "20% abatimento" = "C"),
+                                    selected = c("A", "B"),
+                                    icon = icon("check"),
+                                    fill = TRUE,
+                                    status = "info",
+                                    bigger = TRUE,
+                                    inline = TRUE
+                                  )
+                              ),
+                              
+                              div(style = "margin-bottom: 16px;",
+                                  prettyCheckboxGroup(
+                                    inputId = "fef",
+                                    label = tags$strong("Contribuição para FEF:"),
+                                    choices = c("1%" = "F1", "1.5%" = "F2", "2%" = "F3"),
+                                    selected = character(0),
+                                    icon = icon("check"),
+                                    fill = TRUE,
+                                    status = "primary",
+                                    bigger = TRUE,
+                                    inline = TRUE
+                                  )
+                              ),
+                              
+                              div(style = "margin-bottom: 16px;",
+                                  prettyCheckboxGroup(
+                                    inputId = "invest",
+                                    label = tags$strong("Investimento Direto:"),
+                                    choices = c("0%" = "I1", "0.5%" = "I2", "2%" = "I3", "1%" = "I4"),
+                                    selected = character(0),
+                                    icon = icon("check"),
+                                    fill = TRUE,
+                                    status = "success",
+                                    bigger = TRUE,
+                                    inline = TRUE
+                                  )
+                              ),
+                              
+                              div(style = "margin-bottom: 0px;",
+                                  prettyCheckboxGroup(
+                                    inputId = "juros",
+                                    label = tags$strong("Taxa de Juros:"),
+                                    choices = c("0%" = "J1", "1%" = "J2", "2%" = "J3", "4% (Não Adere)" = "J4"),
+                                    selected = character(0),
+                                    icon = icon("check"),
+                                    fill = TRUE,
+                                    status = "danger",
+                                    bigger = TRUE,
+                                    inline = TRUE
+                                  )
+                              )
+                            )
+                          )
                       ),
+                      
                       p("Esta aba servirá para visualizações complementares financeiras."),
                       br()
                     )
            ),
+           
+           
            ### UI - TAB 2 : DEMANDA  ##################################################      
                 tabPanel("Tema Demanda EPT",
                          fluidRow(

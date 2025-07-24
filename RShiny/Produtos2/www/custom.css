@@ -181,33 +181,19 @@ body {
 }
 */
 
-
-/* ======= THICKER CHECKBOX BORDER FOR prettyCheckboxGroup ======= */
-.pretty input[type='checkbox'] + label:before {
-  border: 2px solid #90CAF9 !important; /* slightly thicker and lighter blue */
-  background-color: transparent !important;
-  box-shadow: none !important;
+.checkbox-dark-panel {
+  background-color: #1f5673;             /* Exact top bar color */
+  color: #f5f5f5;
+  padding: 12px 20px;
+  margin: 0 -15px 24px -15px;            /* Negative side margins to escape container padding */
+  width: auto;                           /* Let it span full width within container */
+  border-radius: 0;
+  box-shadow: none;
+  border-top: 3px solid #2b3e50;
 }
 
-/* ======= SELECTED STATE CHECKBOX ======= */
-.pretty input[type='checkbox']:checked + label:before {
-  background-color: #1f5673 !important; /* blue fill */
-  border-color: #1f5673 !important;
-  box-shadow: 0 0 5px rgba(31, 86, 115, 0.5);
-}
-
-/* ======= LABEL TEXT COLOR AND SPACING ======= */
-.pretty input[type='checkbox'] + label {
-  color: #ffffff !important; /* match dark background */
-  font-weight: 500;
-  padding-right: 15px;
-}
-
-/* ======= MAKE CHECKBOXES CONSISTENTLY SPACED INLINE ======= */
-.pretty.p-default.p-fill input[type='checkbox'] + label:before,
-.pretty.p-default.p-fill input[type='checkbox'] + label:after {
-  margin-top: -2px !important; /* align better with text */
-  width: 20px;
-  height: 20px;
+/* Force text to remain light inside */
+.checkbox-dark-panel * {
+  color: #f5f5f5 !important;
 }
 
