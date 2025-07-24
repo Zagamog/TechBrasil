@@ -182,3 +182,32 @@ body {
 */
 
 
+/* ======= THICKER CHECKBOX BORDER FOR prettyCheckboxGroup ======= */
+.pretty input[type='checkbox'] + label:before {
+  border: 2px solid #90CAF9 !important; /* slightly thicker and lighter blue */
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* ======= SELECTED STATE CHECKBOX ======= */
+.pretty input[type='checkbox']:checked + label:before {
+  background-color: #1f5673 !important; /* blue fill */
+  border-color: #1f5673 !important;
+  box-shadow: 0 0 5px rgba(31, 86, 115, 0.5);
+}
+
+/* ======= LABEL TEXT COLOR AND SPACING ======= */
+.pretty input[type='checkbox'] + label {
+  color: #ffffff !important; /* match dark background */
+  font-weight: 500;
+  padding-right: 15px;
+}
+
+/* ======= MAKE CHECKBOXES CONSISTENTLY SPACED INLINE ======= */
+.pretty.p-default.p-fill input[type='checkbox'] + label:before,
+.pretty.p-default.p-fill input[type='checkbox'] + label:after {
+  margin-top: -2px !important; /* align better with text */
+  width: 20px;
+  height: 20px;
+}
+

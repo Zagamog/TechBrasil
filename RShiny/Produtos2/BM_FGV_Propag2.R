@@ -11,6 +11,7 @@ library(dplyr)
 library(tidyr)
 library(purrr)
 library(RColorBrewer)
+library(shinyWidgets)
 
 options(warn=-1) # Too many pesky warnings, terrain, terrain, terrain, pull up, pull up 
 
@@ -31,6 +32,10 @@ load("meta11a_opcoes.rda")
 # Get State names for display
 nome_ufs <- sort(unique(df_censo_UF$NM_UF))  # Ensure sorted and unique
 
+
+# Load the FGV scenarios made by Vidal
+
+load("dfcen_val.rda")
 
 # --- Define variable choices for Oferta EPT ---
 ept_vars <- c("QT_MAT_PROF_TEC_PROPAG", "QT_MAT_TEC_NUM2", "QT_MAT_TEC_NUM3" )
@@ -239,6 +244,29 @@ ui <- dashboardPage(
                            )
                          )
                 ),
+           
+           ### UI - TAB 1b : FINANCE 1b  ##################################################        
+           ### TAB 1B (NEW)
+           tabPanel("Finance 1b",                       # -> .nav-tabs > li:nth-child(2)
+                    fluidPage(
+                     
+                      
+                      h3("Conteúdo em desenvolvimento: Finance 1b", style = "color: #1f5673; font-weight: bold;"),
+                      prettyCheckboxGroup(
+                        inputId = "choice_A",
+                        label = "Amortização Inicial",
+                        choices = c("Sem abatimento" = "A1", "10% abatimento" = "A2", "20% abatimento" = "A3"),
+                        selected = NULL,
+                        icon = icon("check"),
+                        status = "info",         # Color: "primary", "success", "danger", etc.
+                        outline = TRUE,         # TRUE for border-style only
+                        animation = "pulse", # Optional: "pulse", "jelly", "tada"
+                        inline = TRUE 
+                      ),
+                      p("Esta aba servirá para visualizações complementares financeiras."),
+                      br()
+                    )
+           ),
            ### UI - TAB 2 : DEMANDA  ##################################################      
                 tabPanel("Tema Demanda EPT",
                          fluidRow(

@@ -1,7 +1,10 @@
 # Avila_Vidal01.R 
 
 library(openxlsx)
+library(stringr)  
 library(stringi)
+library(dplyr)
+
 
 
 # Define path and sheet names
@@ -59,3 +62,52 @@ for (df_name in dfs_to_update) {
   }
 }
 
+
+normalize_uf_names <- function(df) {
+  df %>%
+    mutate(
+      NM_UF = stri_trans_totitle(NM_UF, locale = "pt"),
+      NM_UF = str_replace_all(NM_UF, c(
+        "Mato Grosso Do Sul" = "Mato Grosso do Sul",
+        "Rio Grande Do Norte" = "Rio Grande do Norte",
+        "Rio Grande Do Sul" = "Rio Grande do Sul",
+        "Rio De Janeiro" = "Rio de Janeiro"
+      ))
+    )
+}
+
+
+for (df_name in dfs_to_update) {
+  df <- get(df_name)
+  if ("NM_UF" %in% names(df)) {
+    df <- normalize_uf_names(df)
+    assign(df_name, df, envir = .GlobalEnv)
+  } else {
+    warning(sprintf("Skipped %s: 'NM_UF' column not found.", df_name))
+  }
+}
+
+
+
+names(df_2a)
+
+
+# [1] "NM_UF"       "DIVIDA"      "Distr_FEF"   "Valor_Abat"  "Saldo2025"   "Saldo2026"  
+# [7] "Saldo2027"   "Saldo2028"   "Saldo2029"   "Saldo2030"   "Saldo2031"   "Saldo2032"  
+# [13] "Saldo2033"   "Saldo2034"   "Saldo2035"   "Saldo2036"   "Saldo2037"   "Saldo2038"  
+# [19] "Saldo2039"   "Saldo2040"   "Saldo2041"   "Saldo2042"   "Saldo2043"   "Saldo2044"  
+# [25] "Saldo2045"   "Saldo2046"   "Saldo2047"   "Saldo2048"   "Saldo2049"   "Saldo2050"  
+# [31] "Saldo2051"   "Saldo2052"   "Saldo2053"   "Saldo2054"   "ApoFEF2025"  "ApoFEF2026" 
+# [37] "ApoFEF2027"  "ApoFEF2028"  "ApoFEF2029"  "ApoFEF2030"  "ApoFEF2031"  "ApoFEF2032" 
+# [43] "ApoFEF2033"  "ApoFEF2034"  "ApoFEF2035"  "ApoFEF2036"  "ApoFEF2037"  "ApoFEF2038" 
+# [49] "ApoFEF2039"  "ApoFEF2040"  "ApoFEF2041"  "ApoFEF2042"  "ApoFEF2043"  "ApoFEF2044" 
+# [55] "ApoFEF2045"  "ApoFEF2046"  "ApoFEF2047"  "ApoFEF2048"  "ApoFEF2049"  "ApoFEF2050" 
+# [61] "ApoFEF2051"  "ApoFEF2052"  "ApoFEF2053"  "ApoFEF2054"  "InvDir22025" "InvDir22026"
+# [67] "InvDir22027" "InvDir22028" "InvDir22029" "InvDir22030" "InvDir22031" "InvDir22032"
+# [73] "InvDir22033" "InvDir22034" "InvDir22035" "InvDir22036" "InvDir22037" "InvDir22038"
+# [79] "InvDir22039" "InvDir22040" "InvDir22041" "InvDir22042" "InvDir22043" "InvDir22044"
+# [85] "InvDir22045" "InvDir22046" "InvDir22047" "InvDir22048" "InvDir22049" "InvDir22050"
+# [91] "InvDir22051" "InvDir22052" "InvDir22053" "InvDir22054"
+
+dfcen_val <- read.csv("D:/Country/Brazil/TechBrazil/rawdata/fgv/cenarios_validos.csv", stringsAsFactors = FALSE)
+save(dfcen_val, file = "D:/Country/Brazil/TechBrazil/working/fgv/dfcen_val.rda")
