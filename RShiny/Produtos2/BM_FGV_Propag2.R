@@ -11,6 +11,7 @@ library(dplyr)
 library(tidyr)
 library(purrr)
 library(RColorBrewer)
+library(shinyjs)
 library(shinyWidgets)
 
 options(warn=-1) # Too many pesky warnings, terrain, terrain, terrain, pull up, pull up 
@@ -951,6 +952,10 @@ server <- function(input, output, session) {
   
   
   ## ---- helpers -----------------------------------------------------------
+  # helper for null/empty
+  `%||%` <- function(x, y) if (is.null(x) || length(x) == 0) y else x
+  
+  ## -------- reactive pickers ------------------------------------------------
   picked <- reactive({
     list(A = input$choice_A,
          G = input$choice_G,
@@ -958,10 +963,10 @@ server <- function(input, output, session) {
          J = input$choice_J)
   })
   
-  # returns the matching valid row or NULL
+  # find matching valid row or NULL
   sel_row <- reactive({
     s <- picked()
-    if (any(lengths(s) == 0)) return(NULL)          # still incomplete
+    if (any(lengths(s) == 0)) return(NULL)
     hit <- dfcen_val[dfcen_val$valid &
                        dfcen_val$A == s$A &
                        dfcen_val$G == s$G &
@@ -970,37 +975,84 @@ server <- function(input, output, session) {
     if (nrow(hit)) hit[1, ] else NULL
   })
   
+  ## -------- state needed to rollback & block UI -----------------------------
+  rv <- reactiveValues(
+    last_ok    = list(A=character(0), G=character(0), I=character(0), J=character(0)),
+    last_dim   = NULL,
+    lock_dim   = NULL        # which dim we need to rollback
+  )
   modal_shown <- reactiveVal(FALSE)
   
-  ## ---- modal logic -------------------------------------------------------
+  observeEvent(input$choice_A, { rv$last_dim <- "A" }, ignoreInit = TRUE)
+  observeEvent(input$choice_G, { rv$last_dim <- "G" }, ignoreInit = TRUE)
+  observeEvent(input$choice_I, { rv$last_dim <- "I" }, ignoreInit = TRUE)
+  observeEvent(input$choice_J, { rv$last_dim <- "J" }, ignoreInit = TRUE)
+  
+  ## -------- main logic ------------------------------------------------------
   observeEvent(picked(), {
+    sel <- picked()
+    
+    # Rule: if J4 chosen, clear others immediately
+    if (identical(sel$J, "J4") && any(lengths(sel[c("A","G","I")]) > 0)) {
+      sel$A <- sel$G <- sel$I <- character(0)
+      updatePrettyCheckboxGroup(session, "choice_A", selected = character(0))
+      updatePrettyCheckboxGroup(session, "choice_G", selected = character(0))
+      updatePrettyCheckboxGroup(session, "choice_I", selected = character(0))
+    }
+    
     r <- sel_row()
     
-    # incomplete: silently close if it was open
-    if (is.null(r) && any(lengths(picked()) == 0)) {
-      if (modal_shown()) { removeModal(); modal_shown(FALSE) }
+    # Still incomplete? Just close modal (if any), store nothing
+    if (is.null(r) && any(lengths(sel) == 0)) {
+      if (modal_shown()) { removeModal(); modal_shown(FALSE); shinyjs::enable(selector = ".pcg") }
       return()
     }
     
-    # invalid combo
-    if (is.null(r) && !modal_shown()) {
-      showModal(modalDialog(
-        title = HTML("💥 Combinação inválida"),
-        HTML("Essa escolha não é permitida pelo <b>PROPAG</b>.<br>
-            Ajuste os percentuais para atender uma combinação válida."),
-        easyClose = TRUE,
-        footer = modalButton("OK")
-      ))
-      modal_shown(TRUE)
+    # VALID -> store as last_ok, ensure UI is enabled / modal closed
+    if (!is.null(r)) {
+      rv$last_ok <- sel
+      if (modal_shown()) { removeModal(); modal_shown(FALSE); shinyjs::enable(selector = ".pcg") }
       return()
     }
     
-    # valid combo: ensure modal is closed
-    if (!is.null(r) && modal_shown()) {
-      removeModal()
-      modal_shown(FALSE)
-    }
+    # INVALID ---------------------------------------------------------------
+    # If we already opened, do nothing (wait user)
+    if (modal_shown()) return()
+    
+    # culprit group
+    bad_dim <- rv$last_dim %||% names(sel)[which.max(vapply(sel, length, 0))]
+    rv$lock_dim <- bad_dim
+    
+    # Disable all groups (give each group container a class "pcg" in UI or disable individually)
+    shinyjs::disable(selector = ".pcg")
+    
+    showModal(modalDialog(
+      title = HTML("💥 Combinação inválida"),
+      HTML("Essa escolha não é permitida pelo <b>PROPAG</b>.<br>
+         Ajuste os percentuais para atender uma combinação válida."),
+      easyClose = FALSE,
+      footer = actionButton("invalid_ok", "OK", class = "btn-primary")
+    ))
+    modal_shown(TRUE)
   }, ignoreInit = TRUE)
+  
+  ## -------- user clicks OK on modal ----------------------------------------
+  observeEvent(input$invalid_ok, {
+    removeModal()
+    modal_shown(FALSE)
+    
+    # rollback culprit group to last valid
+    dim <- rv$lock_dim %||% "A"
+    id  <- paste0("choice_", dim)
+    updatePrettyCheckboxGroup(
+      session, inputId = id,
+      selected = rv$last_ok[[dim]] %||% character(0)
+    )
+    
+    # re-enable UI
+    shinyjs::enable(selector = ".pcg")
+  })
+  
   
   ## (optional) summary
 
