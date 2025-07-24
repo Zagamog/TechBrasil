@@ -4,7 +4,7 @@ library(openxlsx)
 library(stringr)  
 library(stringi)
 library(dplyr)
-
+library(tibble)
 
 
 # Define path and sheet names
@@ -109,5 +109,96 @@ names(df_2a)
 # [85] "InvDir22045" "InvDir22046" "InvDir22047" "InvDir22048" "InvDir22049" "InvDir22050"
 # [91] "InvDir22051" "InvDir22052" "InvDir22053" "InvDir22054"
 
-dfcen_val <- read.csv("D:/Country/Brazil/TechBrazil/rawdata/fgv/cenarios_validos.csv", stringsAsFactors = FALSE)
+
+# Avila_Vidal codes
+
+## 0. Mapas código ↔ rótulo  (use os mesmos no UI!)
+A.map <- c("A1"="Sem abatimento", "A2"="10% abatimento", "A3"="20% abatimento")
+G.map <- c("G1"="1%", "G2"="1.5%", "G3"="2%")
+I.map <- c("I1"="0%", "I2"="0.5%", "I3"="1%", "I4"="1.5%", "I5"="2%")  # <-- agora 5 opções
+J.map <- c("J1"="0%", "J2"="1%", "J3"="2%", "J4"="4% (Não Adere)")
+
+# 1. Todos os códigos “normais” (J4 fora)
+df_all <- expand.grid(
+  A = names(A.map),
+  G = names(G.map),
+  I = names(I.map),
+  J = names(J.map)[1:3],   # J1..J3
+  stringsAsFactors = FALSE
+)
+
+# 2. Linha especial “Não Adere” (J4 sozinho)
+nd_row <- data.frame(A="ND1", G="ND1", I="ND1", J="J4", stringsAsFactors = FALSE)
+
+# 3. Conjunto completo bruto
+dfcen_val <- rbind(df_all, nd_row)
+
+# 4. Marque as combinações realmente válidas (8 + 1)
+
+valid_tbl <- tribble(
+  ~A,  ~G,  ~I,  ~J,
+  # Juros 2%
+  "A2","G2","I2","J3",   # 10% amort | 0,5% ID | 1,5% FEF
+  "A1","G1","I3","J3",   # 0% amort  | 1%   ID | 1%   FEF
+  
+  # Juros 1%
+  "A2","G2","I2","J2",   # 10% amort | 0,5% ID | 1,5% FEF
+  "A3","G1","I1","J2",   # 20% amort | 0%   ID | 1%   FEF
+  "A1","G3","I3","J2",   # 0% amort  | 1%   ID | 2%   FEF
+  
+  # Juros 0%
+  "A2","G2","I4","J1",   # 10% amort | 1,5% ID | 1,5% FEF
+  "A3","G1","I3","J1",   # 20% amort | 1%   ID | 1%   FEF
+  "A1","G3","I5","J1",   # 0% amort  | 2%   ID | 2%   FEF
+  
+  # Não Adere
+  "ND1","ND1","ND1","J4"
+)
+
+# 5. Flag 'valid'
+dfcen_val$valid <- with(dfcen_val,
+                        paste(A,G,I,J) %in% paste(valid_tbl$A, valid_tbl$G, valid_tbl$I, valid_tbl$J)
+)
+
+# 6. (Opcional) verificação
+table(dfcen_val$valid)
+# TRUE  -> 9
+# FALSE -> 127  (seus 136 totais = 135 + 1)
+
+
+
+# (optional) assure types / order
+dfcen_val <- dfcen_val[order(dfcen_val$A, dfcen_val$G, dfcen_val$I, dfcen_val$J), ]
+save(dfcen_val, file = "dfcen_val.rda")
+
+
+
 save(dfcen_val, file = "D:/Country/Brazil/TechBrazil/working/fgv/dfcen_val.rda")
+write.csv(dfcen_val, file = "D:/Country/Brazil/TechBrazil/working/fgv/dfcen_val.csv", row.names = FALSE)
+openxlsx:: write.xlsx(dfcen_val, file = "D:/Country/Brazil/TechBrazil/working/fgv/avila_vidal_ocpoes.xlsx", rowNames = FALSE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

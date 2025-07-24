@@ -32,10 +32,9 @@ load("meta11a_opcoes.rda")
 # Get State names for display
 nome_ufs <- sort(unique(df_censo_UF$NM_UF))  # Ensure sorted and unique
 
+# Load options
+load("dfcen_val.rda")  # make sure A,G,I,J exist
 
-# Load the FGV scenarios made by Vidal
-
-load("dfcen_val.rda")
 
 # --- Define variable choices for Oferta EPT ---
 ept_vars <- c("QT_MAT_PROF_TEC_PROPAG", "QT_MAT_TEC_NUM2", "QT_MAT_TEC_NUM3" )
@@ -247,91 +246,172 @@ ui <- dashboardPage(
            
            ### UI - TAB 1b : FINANCE 1b  ##################################################        
            ### TAB 1B (UPDATED)
-           tabPanel("Finance 1b",
-                    fluidPage(
-                      h3("Conteúdo em desenvolvimento: Finance 1b", style = "color: #1f5673; font-weight: bold;"),
-                      
-                      div(class = "checkbox-dark-panel",
-                          fluidRow(
-                            # Column 1: Instructions with matched font style
-                            column(
-                              width = 2,
-                              div(
-                                style = "margin-top: 2px; font-size: 14px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #f5f5f5;",
-                                tags$strong("Instruções:"),
-                                div("Por favor, marque as opções relevantes para o seu Estado."),
-                                div("À medida que você clicar em uma escolha, o painel à direita mostrará apenas opções válidas que podem ser escolhidas."),
-                                div("Você pode começar por qualquer uma das quatro linhas abaixo.")
-                              )
-                            ),
-                            
-                            # Column 2: PrettyCheckbox groups
-                            column(
-                              width = 10,
-                              tags$label("Amortização Inicial", style = "font-weight: bold; margin-bottom: 6px; display: block;"),
-                              
-                              div(style = "margin-bottom: 16px;",
-                                  prettyCheckboxGroup(
-                                    inputId = "choice_test",
-                                    label = NULL,
-                                    choices = c("Sem abatimento" = "A", "10% abatimento" = "B", "20% abatimento" = "C"),
-                                    selected = c("A", "B"),
-                                    icon = icon("check"),
-                                    fill = TRUE,
-                                    status = "info",
-                                    bigger = TRUE,
-                                    inline = TRUE
-                                  )
-                              ),
-                              
-                              div(style = "margin-bottom: 16px;",
-                                  prettyCheckboxGroup(
-                                    inputId = "fef",
-                                    label = tags$strong("Contribuição para FEF:"),
-                                    choices = c("1%" = "F1", "1.5%" = "F2", "2%" = "F3"),
-                                    selected = character(0),
-                                    icon = icon("check"),
-                                    fill = TRUE,
-                                    status = "primary",
-                                    bigger = TRUE,
-                                    inline = TRUE
-                                  )
-                              ),
-                              
-                              div(style = "margin-bottom: 16px;",
-                                  prettyCheckboxGroup(
-                                    inputId = "invest",
-                                    label = tags$strong("Investimento Direto:"),
-                                    choices = c("0%" = "I1", "0.5%" = "I2", "2%" = "I3", "1%" = "I4"),
-                                    selected = character(0),
-                                    icon = icon("check"),
-                                    fill = TRUE,
-                                    status = "success",
-                                    bigger = TRUE,
-                                    inline = TRUE
-                                  )
-                              ),
-                              
-                              div(style = "margin-bottom: 0px;",
-                                  prettyCheckboxGroup(
-                                    inputId = "juros",
-                                    label = tags$strong("Taxa de Juros:"),
-                                    choices = c("0%" = "J1", "1%" = "J2", "2%" = "J3", "4% (Não Adere)" = "J4"),
-                                    selected = character(0),
-                                    icon = icon("check"),
-                                    fill = TRUE,
-                                    status = "danger",
-                                    bigger = TRUE,
-                                    inline = TRUE
-                                  )
-                              )
-                            )
-                          )
-                      ),
-                      
-                      p("Esta aba servirá para visualizações complementares financeiras."),
-                      br()
-                    )
+           ### TAB 1B (UPDATED)
+           tabPanel(
+             "Finance 1b",
+             fluidPage(
+               h3("Conteúdo em desenvolvimento: Finance 1b",
+                  style = "color: #1f5673; font-weight: bold;"),
+               
+               # JS: enforce single selection per group
+               tags$head(
+                 tags$script(HTML("
+        $(document).on('shiny:connected', function () {
+          ['A','G','I','J'].forEach(function(dim){
+            $(document).on('click', '#choice_' + dim + ' input[type=checkbox]', function () {
+              var $grp = $('#choice_' + dim);
+              $grp.find('input[type=checkbox]').not(this).prop('checked', false);
+              $(this).trigger('change');
+            });
+          });
+        });
+      "))
+               ),
+               
+               
+               tags$head(
+                 tags$script(HTML("
+    // lock/unlock A,G,I when 'Não Adere' is chosen
+    Shiny.addCustomMessageHandler('toggleAGI', function(lock){
+      ['A','G','I'].forEach(function(dim){
+        var $grp = $('#choice_' + dim);
+        $grp.find('input[type=checkbox]').prop('disabled', lock);
+        // optional visual dimming
+        $grp.css('opacity', lock ? 0.35 : 1);
+      });
+    });
+  "))
+               ),
+               
+               
+               div(class = "checkbox-dark-panel",
+                   # ---- ROW 1: UF + 4 groups + summary (all in one row) ----
+                   fluidRow(
+                     # UF selector
+                     column(
+                       width = 2,
+                       tags$label("Selecione a UF:",
+                                  style = "font-weight: bold; color: #f5f5f5;"),
+                       selectizeInput("uf_select", label = NULL, choices = nome_ufs)
+                     ),
+                     
+                     # Four groups
+                     column(
+                       width = 8,
+                       fluidRow(
+                         column(
+                           width = 3,
+                           tags$label("(i) Amortização Inicial",
+                                      style = "font-weight: bold; display: block;"),
+                           prettyCheckboxGroup(
+                             inputId  = "choice_A",
+                             label    = NULL,
+                             choices  = c("Sem abatimento" = "A1",
+                                          "10% abatimento" = "A2",
+                                          "20% abatimento" = "A3"),
+                             selected = character(0),
+                             icon     = icon("check"),
+                             fill     = TRUE,
+                             status   = "info",
+                             bigger   = TRUE,
+                             inline   = TRUE
+                           )
+                         ),
+                         column(
+                           width = 2,
+                           tags$label("(ii) Contribuição para FEF:",
+                                      style = "font-weight: bold; display: block;"),
+                           prettyCheckboxGroup(
+                             inputId  = "choice_G",
+                             label    = NULL,
+                             choices  = c("1%" = "G1",
+                                          "1.5%" = "G2",
+                                          "2%" = "G3"),
+                             selected = character(0),
+                             icon     = icon("check"),
+                             fill     = TRUE,
+                             status   = "primary",
+                             bigger   = TRUE,
+                             inline   = TRUE
+                           )
+                         ),
+                         column(
+                           width = 3,
+                           tags$label("(iii) Investimento Direto:",
+                                      style = "font-weight: bold; display: block;"),
+                           # UI  (group III – Investimento Direto)
+                           prettyCheckboxGroup(
+                             inputId  = "choice_I",
+                             label    = NULL,
+                             choices  = c("0%"   = "I1",
+                                          "0,5%" = "I2",
+                                          "1%"   = "I3",
+                                          "1,5%" = "I4",
+                                          "2%"   = "I5"),
+                             selected = character(0),
+                             icon     = icon("check"),
+                             fill     = TRUE,
+                             status   = "success",
+                             bigger   = TRUE,
+                             inline   = TRUE
+                           )
+                             ),
+                         column(
+                           width = 3,
+                           tags$label("(iv) Taxa de Juros:",
+                                      style = "font-weight: bold; display: block;"),
+                           prettyCheckboxGroup(
+                             inputId  = "choice_J",
+                             label    = NULL,
+                             choices  = c("0%" = "J1",
+                                          "1%" = "J2",
+                                          "2%" = "J3",
+                                          "4% (Não Adere)" = "J4"),
+                             selected = character(0),
+                             icon     = icon("check"),
+                             fill     = TRUE,
+                             status   = "danger",
+                             bigger   = TRUE,
+                             inline   = TRUE
+                           )
+                         )
+                       )
+                     ),
+                     
+                     # Summary column (same row)
+                     column(
+                       width = 2,
+                       div(
+                         style = "color: #f5f5f5; font-style: italic;",
+                         uiOutput("choice_summary"),
+                         br(),
+                         "⏳ Suas escolhas aparecerão aqui."
+                       )
+                     )
+                   ),  # end fluidRow 1
+                   
+                   # ---- ROW 2: Instructions ----
+                   fluidRow(
+                     column(
+                       width = 12,
+                       div(
+                         style = "margin-top: 20px; color: #f5f5f5; text-align: justify;",
+                         tags$strong("Instruções: "),
+                         paste(
+                           "Por favor, marque as opções relevantes para o seu Estado.",
+                           "À medida que você clicar em uma escolha, o painel à direita mostrará",
+                           "apenas opções válidas que podem ser escolhidas.",
+                           "Você pode começar por qualquer uma das quatro escolhas –",
+                           "(i) Abatimento; (ii) FEF; (iii) Investimento Direto; (iv) Taxa de juro."
+                         )
+                       )
+                     )
+                   )
+               ),
+               
+               p("Esta aba servirá para visualizações complementares financeiras."),
+               br()
+             )
            ),
            
            
@@ -466,6 +546,7 @@ ui <- dashboardPage(
 ########################################################################
 
 server <- function(input, output, session) {
+
 
 ### REACTIVES OF USE ACROSS TABS
 ##################  
@@ -752,6 +833,199 @@ server <- function(input, output, session) {
   })
 
   
+  
+  
+  ######### TAB1b TAB1b TAB1b TAB1b  TAB1b TAB1b TAB1b TAB1b  TAB1b TAB1b TAB1b TAB1b  TAB1b TAB1b TAB1b TAB1b  TAB1b TAB1b TAB1b TAB1b  TAB1b TAB1b TAB1b TAB1b  
+  ##############################################################################################################################
+  ### OUTPUT  PLOT TAB 1b  FINANCIALS TAB 1b  FINANCIALS  TAB 1b  FINANCIALS  TAB 1b  FINANCIALS TAB 1b  FINANCIALS  TAB 1b  FINANCIALS  TAB 1b  FINANCIALS 
+  ##############################################################################################################################
+  # 3) helper to pull valid codes for a single dimension, given the OTHER three
+
+  ## ---------- TAB 1b logic ----------
+  
+  
+  
+  # 2) Label → value maps (must match UI)
+  # mappings used to rebuild widgets
+  ## 1. Choices exactly like the UI (add I5 if you now have 1.5%)
+  # exact maps as in the UI
+  all_choices <- list(
+    A = c("Sem abatimento"  = "A1",
+          "10% abatimento" = "A2",
+          "20% abatimento" = "A3"),
+    G = c("1%"   = "G1",
+          "1.5%" = "G2",
+          "2%"   = "G3"),
+    I = c("0%"   = "I1",
+          "0.5%" = "I2",
+          "1%"   = "I3",
+          "1.5%" = "I4",
+          "2%"   = "I5"),
+    J = c("0%" = "J1",
+          "1%" = "J2",
+          "2%" = "J3",
+          "4% (Não Adere)" = "J4")
+  )
+  
+  pretty_opts <- list(
+    A = list(fill=TRUE,bigger=TRUE,status="info",    icon=icon("check")),
+    G = list(fill=TRUE,bigger=TRUE,status="primary", icon=icon("check")),
+    I = list(fill=TRUE,bigger=TRUE,status="success", icon=icon("check")),
+    J = list(fill=TRUE,bigger=TRUE,status="danger",  icon=icon("check"))
+  )
+  
+  # if you still don't have the 'valid' column, this just returns all matches
+  valid_codes <- function(dim, sel){
+    df <- dfcen_val
+    for (nm in names(sel)) {
+      if (length(sel[[nm]]) > 0) {
+        df <- df[df[[nm]] %in% sel[[nm]], , drop = FALSE]
+      }
+    }
+    sort(unique(df[[dim]]))
+  }
+  
+  ## ------------ dynamic update ---------------------
+  observeEvent(
+    list(input$choice_A, input$choice_G, input$choice_I, input$choice_J),
+    {
+      sel <- list(A = input$choice_A,
+                  G = input$choice_G,
+                  I = input$choice_I,
+                  J = input$choice_J)
+      
+      # ----- 1) J4 chosen first → lock A/G/I and keep only J4 -----
+      if (identical(sel$J, "J4")) {
+        sel$A <- sel$G <- sel$I <- character(0)
+        session$sendCustomMessage("toggleAGI", TRUE)
+        
+        updatePrettyCheckboxGroup(session, "choice_J",
+                                  choices       = all_choices$J["4% (Não Adere)"],
+                                  selected      = "J4", inline = TRUE,
+                                  prettyOptions = pretty_opts$J
+        )
+        # clear the others
+        for(id in c("choice_A","choice_G","choice_I")){
+          updatePrettyCheckboxGroup(session, id,
+                                    choices       = all_choices[[substr(id,8,8)]],
+                                    selected      = character(0), inline = TRUE,
+                                    prettyOptions = pretty_opts[[substr(id,8,8)]]
+          )
+        }
+        return(invisible(NULL))
+      } else {
+        session$sendCustomMessage("toggleAGI", FALSE)
+      }
+      
+      # ----- 2) If ANY of A/G/I is selected, DROP J4 immediately -----
+      somePicked <- any(lengths(sel[c("A","G","I")]) > 0)
+      if (somePicked) {
+        j_keep <- all_choices$J[names(all_choices$J) != "4% (Não Adere)"]
+      } else {
+        j_keep <- all_choices$J
+      }
+      updatePrettyCheckboxGroup(session, "choice_J",
+                                choices       = j_keep,
+                                selected      = intersect(sel$J, j_keep),
+                                inline        = TRUE,
+                                prettyOptions = pretty_opts$J
+      )
+      
+      # ----- 3) Normal filtering for A/G/I (J already updated) -----
+      for (dim in c("A","G","I")) {
+        others <- sel[names(sel) != dim]
+        ok   <- if (all(lengths(others) > 0)) valid_codes(dim, others) else all_choices[[dim]]
+        keep <- all_choices[[dim]][ all_choices[[dim]] %in% ok ]
+        
+        updatePrettyCheckboxGroup(session,
+                                  inputId       = paste0("choice_", dim),
+                                  choices       = keep,
+                                  selected      = intersect(sel[[dim]], keep),
+                                  inline        = TRUE,
+                                  prettyOptions = pretty_opts[[dim]]
+        )
+      }
+    },
+    ignoreInit = TRUE
+  )
+  
+  
+  ## ---- helpers -----------------------------------------------------------
+  picked <- reactive({
+    list(A = input$choice_A,
+         G = input$choice_G,
+         I = input$choice_I,
+         J = input$choice_J)
+  })
+  
+  # returns the matching valid row or NULL
+  sel_row <- reactive({
+    s <- picked()
+    if (any(lengths(s) == 0)) return(NULL)          # still incomplete
+    hit <- dfcen_val[dfcen_val$valid &
+                       dfcen_val$A == s$A &
+                       dfcen_val$G == s$G &
+                       dfcen_val$I == s$I &
+                       dfcen_val$J == s$J, ]
+    if (nrow(hit)) hit[1, ] else NULL
+  })
+  
+  modal_shown <- reactiveVal(FALSE)
+  
+  ## ---- modal logic -------------------------------------------------------
+  observeEvent(picked(), {
+    r <- sel_row()
+    
+    # incomplete: silently close if it was open
+    if (is.null(r) && any(lengths(picked()) == 0)) {
+      if (modal_shown()) { removeModal(); modal_shown(FALSE) }
+      return()
+    }
+    
+    # invalid combo
+    if (is.null(r) && !modal_shown()) {
+      showModal(modalDialog(
+        title = HTML("💥 Combinação inválida"),
+        HTML("Essa escolha não é permitida pelo <b>PROPAG</b>.<br>
+            Ajuste os percentuais para atender uma combinação válida."),
+        easyClose = TRUE,
+        footer = modalButton("OK")
+      ))
+      modal_shown(TRUE)
+      return()
+    }
+    
+    # valid combo: ensure modal is closed
+    if (!is.null(r) && modal_shown()) {
+      removeModal()
+      modal_shown(FALSE)
+    }
+  }, ignoreInit = TRUE)
+  
+  ## (optional) summary
+
+  
+  # (Optional) simple summary text
+  output$choice_summary <- renderUI({
+    a <- input$choice_A; g <- input$choice_G; i <- input$choice_I; j <- input$choice_J
+    if (any(lengths(list(a,g,i,j)) == 0)) {
+      return(span("Selecione as quatro opções para ver o cenário.", style = "color:#ccc;"))
+    }
+    # check if combo is valid
+    ok <- any(dfcen_val$A %in% a & dfcen_val$G %in% g &
+                dfcen_val$I %in% i & dfcen_val$J %in% j)
+    if (!ok) {
+      span("⚠️ Combinação inválida.", style="color:#ffeb3b; font-weight:bold;")
+    } else {
+      HTML(paste0(
+        "<b>Cenário escolhido:</b> ",
+        a, ", ", g, ", ", i, ", ", j
+      ))
+    }
+  })
+  
+  
+ 
   
   #################
   # PLACE HOLDER FOR TAB 2 
