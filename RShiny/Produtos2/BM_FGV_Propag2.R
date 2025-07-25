@@ -125,6 +125,10 @@ ui <- dashboardPage(
 # Need some css style elements here, because custom.css gets overriden by Bootstrap defaults
 ###############################################################################################################
 
+useShinyjs(),
+# jQuery‑UI (for draggable)
+tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js")),
+
     tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")),
     tags$head(
       tags$style(HTML("
@@ -950,6 +954,66 @@ server <- function(input, output, session) {
     ignoreInit = TRUE
   )
   
+  # VALID TABLE FOR MODAL
+  ## ---- lookups used to print human labels ----
+  labA <- c(A1 = "Sem abatimento",
+            A2 = "10% abatimento",
+            A3 = "20% abatimento",
+            ND1 = "NA")
+  
+  labG <- c(G1 = "1%", G2 = "1,5%", G3 = "2%", ND1 = "NA")
+  labI <- c(I1 = "0%", I2 = "0,5%", I3 = "1%", I4 = "1,5%", I5 = "2%", ND1 = "NA")
+  labJ <- c(J1 = "0%", J2 = "1%", J3 = "2%", J4 = "4% (Não Adere)")
+  
+  # OPTIONAL: give each valid row a friendly name (first column)
+  op_names <- c("II‑A","II‑B","II‑C","III‑A","III‑B","III‑C","IV‑A","IV‑B","ND")
+  
+  ## valid_set MUST contain columns A,G,I,J in codes.
+  valid_set <- subset(dfcen_val, valid, select = c(A,G,I,J))
+  ################TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+  valid_tbl <- valid_set |>
+    dplyr::mutate(
+      Opção          = op_names,
+      Amortização    = labA[A],
+      `Contribuição p/ FEF` = labG[G],
+      `Invest. Direto`       = labI[I],
+      Juros          = labJ[J]
+    ) |>
+    dplyr::select(Opção, Amortização, `Contribuição p/ FEF`, `Invest. Direto`, Juros)
+  
+  ## ---- tiny CSS just for the table (uses your dark panel bg) ----
+  valid_css <- "
+<style>
+#tbl-valid thead th{
+  background:#1f5673; color:#fff; text-align:center; padding:6px 10px; border:1px solid #4e6f84;
+}
+#tbl-valid tbody td{
+  color:#f5f5f5; padding:6px 10px; border:1px solid #4e6f84;
+}
+#tbl-valid tbody tr:nth-child(even){ background:rgba(255,255,255,.05); }
+#tbl-valid tbody tr:nth-child(odd){  background:rgba(255,255,255,.02); }
+</style>
+"
+
+## ---- build the html table without extra pkgs ----
+make_table_html <- function(df){
+  hdr <- paste0("<tr>", paste0(sprintf("<th>%s</th>", names(df)), collapse=""), "</tr>")
+  rows <- apply(df, 1, function(r){
+    paste0("<tr>", paste0(sprintf("<td>%s</td>", r), collapse=""), "</tr>")
+  })
+  paste0(
+    '<table id="tbl-valid" style="width:100%; border-collapse:collapse;">',
+    "<thead>", hdr, "</thead>",
+    "<tbody>", paste0(rows, collapse=""), "</tbody></table>"
+  )
+}
+
+valid_html <- paste0(valid_css, make_table_html(valid_tbl))
+
+  
+  
+  
+  
   
   ## ---- helpers -----------------------------------------------------------
   # helper for null/empty
@@ -1028,11 +1092,27 @@ server <- function(input, output, session) {
     
     showModal(modalDialog(
       title = HTML("💥 Combinação inválida"),
-      HTML("Essa escolha não é permitida pelo <b>PROPAG</b>.<br>
+      tagList(
+        HTML("Essa escolha não é permitida pelo <b>PROPAG</b>.<br>
          Ajuste os percentuais para atender uma combinação válida."),
+        HTML(valid_html)  # <- table goes here
+      ),
       easyClose = FALSE,
-      footer = actionButton("invalid_ok", "OK", class = "btn-primary")
+      footer = actionButton("invalid_ok", "OK", class = "btn-primary"),
+      size = "l"
     ))
+    
+    # make it draggable by the header
+    session$onFlushed(function(){
+      runjs("
+    var dlg = $('#shiny-modal .modal-dialog');
+    if(!dlg.hasClass('ui-draggable')){
+      dlg.draggable({ handle: '.modal-header' });
+      dlg.css('cursor','move');
+    }
+  ")
+    }, once = TRUE)
+
     modal_shown(TRUE)
   }, ignoreInit = TRUE)
   
