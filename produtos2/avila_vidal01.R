@@ -133,6 +133,9 @@ nd_row <- data.frame(A="ND1", G="ND1", I="ND1", J="J4", stringsAsFactors = FALSE
 # 3. Conjunto completo bruto
 dfcen_val <- rbind(df_all, nd_row)
 
+
+
+
 # 4. Marque as combinações realmente válidas (8 + 1)
 
 valid_tbl <- tribble(
@@ -158,18 +161,43 @@ valid_tbl <- tribble(
 # 5. Flag 'valid'
 dfcen_val$valid <- with(dfcen_val,
                         paste(A,G,I,J) %in% paste(valid_tbl$A, valid_tbl$G, valid_tbl$I, valid_tbl$J)
+) 
+
+
+
+dfcen_val <-dfcen_val %>% arrange(desc(valid))
+dfcen_val
+
+
+dfcen_val[7, ]   <- NA
+dfcen_val[95, ]  <- NA
+dfcen_val[8, ]   <- NA
+dfcen_val[106, ] <- NA
+
+
+# Perform the swaps
+# Assign correct values from original spreadsheet logic
+dfcen_val[7, ] <- data.frame(
+  A = "A2", G = "G1", I = "I1", J = "J3", valid = TRUE, stringsAsFactors = FALSE
 )
 
-# 6. (Opcional) verificação
-table(dfcen_val$valid)
-# TRUE  -> 9
-# FALSE -> 127  (seus 136 totais = 135 + 1)
+dfcen_val[8, ] <- data.frame(
+  A = "A1", G = "G2", I = "I2", J = "J3", valid = TRUE, stringsAsFactors = FALSE
+)
+
+dfcen_val[95, ] <- data.frame(
+  A = "A2", G = "G2", I = "I2", J = "J3", valid = FALSE, stringsAsFactors = FALSE
+)
+
+dfcen_val[106, ] <- data.frame(
+  A = "A1", G = "G1", I = "I3", J = "J3", valid = FALSE, stringsAsFactors = FALSE
+)
 
 
+opcao <- c("II-A", "II-B", "II-C","III-A","III-B","III-C", "IV-A", "IV-B","ND",rep("NA", 127))
+dfcen_val$opcao <- opcao
+dfcen_val
 
-# (optional) assure types / order
-dfcen_val <- dfcen_val[order(dfcen_val$A, dfcen_val$G, dfcen_val$I, dfcen_val$J), ]
-save(dfcen_val, file = "dfcen_val.rda")
 
 
 
@@ -182,8 +210,7 @@ openxlsx:: write.xlsx(dfcen_val, file = "D:/Country/Brazil/TechBrazil/working/fg
 
 
 
-
-
+dfcen_val <-dfcen_val %>% arrange(desc(valid))
 
 
 

@@ -387,10 +387,8 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
                      column(
                        width = 2,
                        div(
-                         style = "color: #f5f5f5; font-style: italic;",
-                         uiOutput("choice_summary"),
-                         br(),
-                         "⏳ Suas escolhas aparecerão aqui."
+                         style = "color: #f5f5f5; font-style: italic; font-size: 16px; text-align: center;",
+                         uiOutput("choice_summary")
                        )
                      )
                    ),  # end fluidRow 1
@@ -842,7 +840,7 @@ server <- function(input, output, session) {
   
   ######### TAB1b TAB1b TAB1b TAB1b  TAB1b TAB1b TAB1b TAB1b  TAB1b TAB1b TAB1b TAB1b  TAB1b TAB1b TAB1b TAB1b  TAB1b TAB1b TAB1b TAB1b  TAB1b TAB1b TAB1b TAB1b  
   ##############################################################################################################################
-  ### OUTPUT  PLOT TAB 1b  FINANCIALS TAB 1b  FINANCIALS  TAB 1b  FINANCIALS  TAB 1b  FINANCIALS TAB 1b  FINANCIALS  TAB 1b  FINANCIALS  TAB 1b  FINANCIALS 
+  ###  TAB 1b  FINANCIALS TAB 1b  FINANCIALS  TAB 1b  FINANCIALS  TAB 1b  FINANCIALS TAB 1b  FINANCIALS  TAB 1b  FINANCIALS  TAB 1b  FINANCIALS 
   ##############################################################################################################################
   # 3) helper to pull valid codes for a single dimension, given the OTHER three
 
@@ -966,7 +964,7 @@ server <- function(input, output, session) {
   labJ <- c(J1 = "0%", J2 = "1%", J3 = "2%", J4 = "4% (Não Adere)")
   
   # OPTIONAL: give each valid row a friendly name (first column)
-  op_names <- c("II‑A","II‑B","II‑C","III‑A","III‑B","III‑C","IV‑A","IV‑B","ND")
+  op_names <- c("II-A","II-B","II-C","III-A","III-B","III-C","IV-A","IV-B","ND")
   
   ## valid_set MUST contain columns A,G,I,J in codes.
   valid_set <- subset(dfcen_val, valid, select = c(A,G,I,J))
@@ -1138,24 +1136,46 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
 
   
   # (Optional) simple summary text
-  output$choice_summary <- renderUI({
-    a <- input$choice_A; g <- input$choice_G; i <- input$choice_I; j <- input$choice_J
-    if (any(lengths(list(a,g,i,j)) == 0)) {
-      return(span("Selecione as quatro opções para ver o cenário.", style = "color:#ccc;"))
-    }
-    # check if combo is valid
-    ok <- any(dfcen_val$A %in% a & dfcen_val$G %in% g &
-                dfcen_val$I %in% i & dfcen_val$J %in% j)
-    if (!ok) {
-      span("⚠️ Combinação inválida.", style="color:#ffeb3b; font-weight:bold;")
-    } else {
-      HTML(paste0(
-        "<b>Cenário escolhido:</b> ",
-        a, ", ", g, ", ", i, ", ", j
-      ))
-    }
-  })
+  ## ---- CSS once in UI (or put in your custom.css) ---------------------------
+  tags$head(tags$style(HTML("
+.scenario-box{
+  border:1px solid #cc0000;          /* red frame (change if you want)       */
+  padding:14px 18px;
+  width:260px;
+  margin-left:auto;                  /* keep it at the right column          */
+  color:#fff;                        /* works on your dark panel             */
+  background:rgba(255,255,255,.05);  /* light transparent fill               }
+.scenario-box h4{
+  margin:0 0 8px 0;
+  font-weight:700;
+  text-align:center;
+}
+.scenario-box .lbl {font-weight:600;}
+")))
   
+  
+  ## helper to pull pretty name for a row in dfcen_val (assumes column 'valid')
+  row_to_name <- function(r){
+    # r is a 1-row data.frame
+    key <- paste(r$A,r$G,r$I,r$J, sep = "_")
+    key_vec <- paste(valid_set$A,valid_set$G,valid_set$I,valid_set$J, sep="_")
+    op_names[ match(key, key_vec) ]
+  }
+  
+  ## ---- choice summary card --------------------------------------------------
+  output$choice_summary <- renderUI({
+    r <- sel_row()          # from your earlier code; NULL if incomplete/invalid
+    if (is.null(r)) return(NULL)
+    
+    opcao <- row_to_name(r)
+    htmltools::div(class="scenario-box",
+                   htmltools::h4(sprintf("Opção : %s", opcao)),
+                   htmltools::div(span(class="lbl","Amortização: "), labA[r$A]),
+                   htmltools::div(span(class="lbl","Contribuição ao FEF: "), labG[r$G]),
+                   htmltools::div(span(class="lbl","Investimento Direto: "), labI[r$I]),
+                   htmltools::div(span(class="lbl","Juros: "), labJ[r$J])
+    )
+  })
   
  
   
