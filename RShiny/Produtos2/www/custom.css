@@ -233,4 +233,8 @@ body {
   color: #1f5673 !important;
   font-weight: bold;
 }
+.checkbox-dark-panel .highlighted-note {
+  color: #00ffee !important;
+}
+
 

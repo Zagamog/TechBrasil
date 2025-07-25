@@ -8,11 +8,11 @@ library(tibble)
 
 
 # Define path and sheet names
-file_path <- "D:/Country/Brazil/TechBrazil/rawdata/fgv/fgv_fin.xlsx"
+file_path <- "D:/Country/Brazil/TechBrazil/rawdata/fgv/fgv_fin2.xlsx"
 sheet_names <- getSheetNames(file_path)
 
 # Define your desired names
-target_names <- c("df_2a", "df_2b", "df_2c", "df_3a", "df_3b", "df_3c", "df_4a", "df_4b")
+target_names <- c("df_2a", "df_2b", "df_2c", "df_3a", "df_3b", "df_3c", "df_4a", "df_4b", "df_nd")
 
 # Read sheets and assign with desired names
 df_list <- lapply(seq_along(target_names), function(i) {
@@ -23,18 +23,20 @@ df_list <- lapply(seq_along(target_names), function(i) {
 
 # Set names of the list as well
 names(df_2a) <- c("NM_UF", "DIVIDA", "Distr_FEF", "Valor_Abat",sprintf("Saldo%04d", 2025:2054),
-                           sprintf("ApoFEF%04d", 2025:2054), sprintf("InvDir2%04d", 2025:2054))
+                           sprintf("ApoFEF%04d", 2025:2054), sprintf("InvDir%04d", 2025:2054),
+                           sprintf("JurPag%04d", 2025:2054))           
 
 # Define your standard column names
 new_names <- c(
   "NM_UF", "DIVIDA", "Distr_FEF", "Valor_Abat",
   sprintf("Saldo%04d", 2025:2054),
   sprintf("ApoFEF%04d", 2025:2054),
-  sprintf("InvDir2%04d", 2025:2054)
+  sprintf("InvDir%04d", 2025:2054),
+  sprintf("JurPag%04d", 2025:2054)
 )
 
 # List of your data frame names
-dfs_to_rename <- c("df_2a", "df_2b", "df_2c", "df_3a", "df_3b", "df_3c", "df_4a", "df_4b")
+dfs_to_rename <- c("df_2a", "df_2b", "df_2c", "df_3a", "df_3b", "df_3c", "df_4a", "df_4b","df_nd")
 
 # Apply renaming
 for (df_name in dfs_to_rename) {
@@ -48,7 +50,7 @@ for (df_name in dfs_to_rename) {
 }
 
 # List of data frames to update
-dfs_to_update <- c("df_2a", "df_2b", "df_2c", "df_3a", "df_3b", "df_3c", "df_4a", "df_4b")
+dfs_to_update <- c("df_2a", "df_2b", "df_2c", "df_3a", "df_3b", "df_3c", "df_4a", "df_4b","df_nd")
 
 # Apply title-casing to NM_UF
 for (df_name in dfs_to_update) {
@@ -91,23 +93,33 @@ for (df_name in dfs_to_update) {
 
 names(df_2a)
 
+# [1] "NM_UF"      "DIVIDA"     "Distr_FEF"  "Valor_Abat" "Saldo2025"  "Saldo2026"  "Saldo2027"  "Saldo2028"  "Saldo2029"  "Saldo2030"  "Saldo2031"  "Saldo2032" 
+# [13] "Saldo2033"  "Saldo2034"  "Saldo2035"  "Saldo2036"  "Saldo2037"  "Saldo2038"  "Saldo2039"  "Saldo2040"  "Saldo2041"  "Saldo2042"  "Saldo2043"  "Saldo2044" 
+# [25] "Saldo2045"  "Saldo2046"  "Saldo2047"  "Saldo2048"  "Saldo2049"  "Saldo2050"  "Saldo2051"  "Saldo2052"  "Saldo2053"  "Saldo2054"  "ApoFEF2025" "ApoFEF2026"
+# [37] "ApoFEF2027" "ApoFEF2028" "ApoFEF2029" "ApoFEF2030" "ApoFEF2031" "ApoFEF2032" "ApoFEF2033" "ApoFEF2034" "ApoFEF2035" "ApoFEF2036" "ApoFEF2037" "ApoFEF2038"
+# [49] "ApoFEF2039" "ApoFEF2040" "ApoFEF2041" "ApoFEF2042" "ApoFEF2043" "ApoFEF2044" "ApoFEF2045" "ApoFEF2046" "ApoFEF2047" "ApoFEF2048" "ApoFEF2049" "ApoFEF2050"
+# [61] "ApoFEF2051" "ApoFEF2052" "ApoFEF2053" "ApoFEF2054" "InvDir2025" "InvDir2026" "InvDir2027" "InvDir2028" "InvDir2029" "InvDir2030" "InvDir2031" "InvDir2032"
+# [73] "InvDir2033" "InvDir2034" "InvDir2035" "InvDir2036" "InvDir2037" "InvDir2038" "InvDir2039" "InvDir2040" "InvDir2041" "InvDir2042" "InvDir2043" "InvDir2044"
+# [85] "InvDir2045" "InvDir2046" "InvDir2047" "InvDir2048" "InvDir2049" "InvDir2050" "InvDir2051" "InvDir2052" "InvDir2053" "InvDir2054" "JurPag2025" "JurPag2026"
+# [97] "JurPag2027" "JurPag2028" "JurPag2029" "JurPag2030" "JurPag2031" "JurPag2032" "JurPag2033" "JurPag2034" "JurPag2035" "JurPag2036" "JurPag2037" "JurPag2038"
+# [109] "JurPag2039" "JurPag2040" "JurPag2041" "JurPag2042" "JurPag2043" "JurPag2044" "JurPag2045" "JurPag2046" "JurPag2047" "JurPag2048" "JurPag2049" "JurPag2050"
+# [121] "JurPag2051" "JurPag2052" "JurPag2053" "JurPag2054"
 
-# [1] "NM_UF"       "DIVIDA"      "Distr_FEF"   "Valor_Abat"  "Saldo2025"   "Saldo2026"  
-# [7] "Saldo2027"   "Saldo2028"   "Saldo2029"   "Saldo2030"   "Saldo2031"   "Saldo2032"  
-# [13] "Saldo2033"   "Saldo2034"   "Saldo2035"   "Saldo2036"   "Saldo2037"   "Saldo2038"  
-# [19] "Saldo2039"   "Saldo2040"   "Saldo2041"   "Saldo2042"   "Saldo2043"   "Saldo2044"  
-# [25] "Saldo2045"   "Saldo2046"   "Saldo2047"   "Saldo2048"   "Saldo2049"   "Saldo2050"  
-# [31] "Saldo2051"   "Saldo2052"   "Saldo2053"   "Saldo2054"   "ApoFEF2025"  "ApoFEF2026" 
-# [37] "ApoFEF2027"  "ApoFEF2028"  "ApoFEF2029"  "ApoFEF2030"  "ApoFEF2031"  "ApoFEF2032" 
-# [43] "ApoFEF2033"  "ApoFEF2034"  "ApoFEF2035"  "ApoFEF2036"  "ApoFEF2037"  "ApoFEF2038" 
-# [49] "ApoFEF2039"  "ApoFEF2040"  "ApoFEF2041"  "ApoFEF2042"  "ApoFEF2043"  "ApoFEF2044" 
-# [55] "ApoFEF2045"  "ApoFEF2046"  "ApoFEF2047"  "ApoFEF2048"  "ApoFEF2049"  "ApoFEF2050" 
-# [61] "ApoFEF2051"  "ApoFEF2052"  "ApoFEF2053"  "ApoFEF2054"  "InvDir22025" "InvDir22026"
-# [67] "InvDir22027" "InvDir22028" "InvDir22029" "InvDir22030" "InvDir22031" "InvDir22032"
-# [73] "InvDir22033" "InvDir22034" "InvDir22035" "InvDir22036" "InvDir22037" "InvDir22038"
-# [79] "InvDir22039" "InvDir22040" "InvDir22041" "InvDir22042" "InvDir22043" "InvDir22044"
-# [85] "InvDir22045" "InvDir22046" "InvDir22047" "InvDir22048" "InvDir22049" "InvDir22050"
-# [91] "InvDir22051" "InvDir22052" "InvDir22053" "InvDir22054"
+
+# Let's save the rda data to D:/Country/Brazil/TechBrazil/working/fgv
+save(df_2a, file = "D:/Country/Brazil/TechBrazil/working/fgv/df_2a.rda")
+save(df_2b, file = "D:/Country/Brazil/TechBrazil/working/fgv/df_2b.rda")
+save(df_2c, file = "D:/Country/Brazil/TechBrazil/working/fgv/df_2c.rda")
+
+save(df_3a, file = "D:/Country/Brazil/TechBrazil/working/fgv/df_3a.rda")
+save(df_3b, file = "D:/Country/Brazil/TechBrazil/working/fgv/df_3b.rda")
+save(df_3c, file = "D:/Country/Brazil/TechBrazil/working/fgv/df_3c.rda")
+
+save(df_4a, file = "D:/Country/Brazil/TechBrazil/working/fgv/df_4a.rda")
+save(df_4b, file = "D:/Country/Brazil/TechBrazil/working/fgv/df_4b.rda")
+save(df_nd, file = "D:/Country/Brazil/TechBrazil/working/fgv/df_nd.rda")
+
+glimpse(df_2a)
 
 
 # Avila_Vidal codes

@@ -36,18 +36,45 @@ nome_ufs <- sort(unique(df_censo_UF$NM_UF))  # Ensure sorted and unique
 # Load options
 load("dfcen_val.rda")  # make sure A,G,I,J exist
 
+# Load propag fin data by option
+load("df_2a.rda")
+load("df_2b.rda")
+load("df_2c.rda")
+
+load("df_3a.rda")
+load("df_3b.rda")
+load("df_3c.rda")
+
+load("df_4a.rda")
+load("df_4b.rda")
+
+# Load df_nd for "Não Adere" option
+load("df_nd.rda")
+
+
+# map from option names → data frames
+df_list <- list(
+  "II-A" = df_2a, "II-B" = df_2b, "II-C" = df_2c,
+  "III-A"= df_3a, "III-B"= df_3b, "III-C"= df_3c,
+  "IV-A" = df_4a, "IV-B" = df_4b,
+  "ND"   = df_nd
+)
+
+# To assign fixed colors to UFs
+
+# prepare your UF‐color mapping up front
+library(RColorBrewer)
+uf_levels <- sort(unique(df_2a$NM_UF))  # or pull from any of them
+uf_colors <- setNames(
+  colorRampPalette(brewer.pal(9, "Set1"))(length(uf_levels)),
+  uf_levels
+)
 
 # --- Define variable choices for Oferta EPT ---
 ept_vars <- c("QT_MAT_PROF_TEC_PROPAG", "QT_MAT_TEC_NUM2", "QT_MAT_TEC_NUM3" )
 other_vars <- c("QT_MAT_MED")
 
-# To assign fixed colors to UFs
 
-uf_levels <- sort(unique(propag_ept_financeiro$UF))  # sorted for consistency
-uf_colors <- setNames(
-  colorRampPalette(brewer.pal(9, "Set1"))(length(uf_levels)),
-  uf_levels
-)
 
 # Define the `%||%` operator which returns the first non-null value of a pair of values 
 
@@ -287,16 +314,42 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
     });
   "))
                ),
-               
+  
+               tags$head(tags$style(HTML("
+  .pretty input + label {
+    font-size: 16px !important;
+  }
+"))),
+                            
                
                div(class = "checkbox-dark-panel",
                    # ---- ROW 1: UF + 4 groups + summary (all in one row) ----
+                   fluidRow(
+                     column(
+                       width = 12,
+                       div(
+                         style = "margin-top: 5px; margin-bottom: 10px; color: #f5f5f5; text-align: justify; font-size: 20px;",
+                         tagList(
+                           tags$strong("Instruções: "),
+                           "Por favor, marque as opções relevantes para o seu Estado. ",
+                           "À medida que você clicar em uma escolha, o painel à direita mostrará ",
+                           "apenas opções válidas que podem ser escolhidas. ",
+                           "Você pode começar por qualquer uma das quatro escolhas: ",
+                           tags$span(class = "highlighted-note", 
+                                     "(i) Abatimento (0%, 10% ou 20%) ; (ii) Aporte ao FEF (1%, 1.5% ou 2%); (iii) Investimento Direto (cinco opções);
+                                     (iv) Taxa de juro (0%, 1% ou 2%)")
+                         )
+                       )
+                     )
+                   ),
+                   
+                   
                    fluidRow(
                      # UF selector
                      column(
                        width = 2,
                        tags$label("Selecione a UF:",
-                                  style = "font-weight: bold; color: #f5f5f5;"),
+                                  style = "font-weight: bold; color: #f5f5f5; font-size: 16px;"),
                        selectizeInput("uf_select", label = NULL, choices = nome_ufs)
                      ),
                      
@@ -391,30 +444,38 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
                          uiOutput("choice_summary")
                        )
                      )
-                   ),  # end fluidRow 1
+                   )  # end fluidRow 2
                    
-                   # ---- ROW 2: Instructions ----
-                   fluidRow(
-                     column(
-                       width = 12,
-                       div(
-                         style = "margin-top: 20px; color: #f5f5f5; text-align: justify;",
-                         tags$strong("Instruções: "),
-                         paste(
-                           "Por favor, marque as opções relevantes para o seu Estado.",
-                           "À medida que você clicar em uma escolha, o painel à direita mostrará",
-                           "apenas opções válidas que podem ser escolhidas.",
-                           "Você pode começar por qualquer uma das quatro escolhas –",
-                           "(i) Abatimento; (ii) FEF; (iii) Investimento Direto; (iv) Taxa de juro."
-                         )
-                       )
-                     )
-                   )
-               ),
+
+               )
                
-               p("Esta aba servirá para visualizações complementares financeiras."),
-               br()
+               
+             ),
+             fluidRow(
+               column(4,
+                      selectizeInput("var_select", "O que mostrar:",
+                                     choices = c(
+                                       "Saldo da Dívida"     = "Saldo",
+                                       "Aporte para o FEF"   = "ApoFEF",
+                                       "Investimento Direto" = "InvDir",
+                                       "Juros Pagos"         = "JurPag"
+                                     ), selected = "Saldo"
+                      )
+               )
+             ),
+             
+             fluidRow(
+               column(12,
+                        plotOutput("PloTab1b",)
+               )
+             ),
+             
+             fluidRow(
+               column(12,
+                      DT::dataTableOutput("DTab1b")
+               )
              )
+             
            ),
            
            
@@ -574,6 +635,10 @@ server <- function(input, output, session) {
     return(df)
   })
   
+  
+  
+  
+    
   
   # Reactive data for Meta 11a - input of UF and variable choice for computing second part
   # Meta 11a second part
@@ -1018,7 +1083,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
   `%||%` <- function(x, y) if (is.null(x) || length(x) == 0) y else x
   
   ## -------- reactive pickers ------------------------------------------------
-  picked <- reactive({
+  RKT_picked <- reactive({
     list(A = input$choice_A,
          G = input$choice_G,
          I = input$choice_I,
@@ -1026,8 +1091,8 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
   })
   
   # find matching valid row or NULL
-  sel_row <- reactive({
-    s <- picked()
+ RKT_sel_row <- reactive({
+    s <- RKT_picked()
     if (any(lengths(s) == 0)) return(NULL)
     hit <- dfcen_val[dfcen_val$valid &
                        dfcen_val$A == s$A &
@@ -1051,68 +1116,126 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
   observeEvent(input$choice_J, { rv$last_dim <- "J" }, ignoreInit = TRUE)
   
   ## -------- main logic ------------------------------------------------------
-  observeEvent(picked(), {
-    sel <- picked()
+  observeEvent(RKT_picked(), {
     
-    # Rule: if J4 chosen, clear others immediately
-    if (identical(sel$J, "J4") && any(lengths(sel[c("A","G","I")]) > 0)) {
+    sel <- RKT_picked()
+    
+    # 1) “Não Adere” rule: picking J4 clears A/G/I immediately
+    if (identical(sel$J, "J4") &&
+        any(lengths(sel[c("A","G","I")]) > 0)) {
       sel$A <- sel$G <- sel$I <- character(0)
       updatePrettyCheckboxGroup(session, "choice_A", selected = character(0))
       updatePrettyCheckboxGroup(session, "choice_G", selected = character(0))
       updatePrettyCheckboxGroup(session, "choice_I", selected = character(0))
     }
     
-    r <- sel_row()
+    # 2) If still incomplete **but not yet dead**, just close any open modal
+    if (any(lengths(sel) == 0) && modal_shown()) {
+      removeModal(); modal_shown(FALSE)
+      shinyjs::enable(selector = ".pcg")
+    }
     
-    # Still incomplete? Just close modal (if any), store nothing
-    if (is.null(r) && any(lengths(sel) == 0)) {
-      if (modal_shown()) { removeModal(); modal_shown(FALSE); shinyjs::enable(selector = ".pcg") }
+    # 3) Check “partial validity” by filtering against ALL valid rows
+    vp <- dfcen_val[dfcen_val$valid, ]        # start with the 9 valid rows
+    for (dim in names(sel)) {
+      if (length(sel[[dim]]) > 0) {
+        vp <- vp[ vp[[dim]] %in% sel[[dim]] , , drop = FALSE ]
+      }
+    }
+    if (nrow(vp) == 0) {
+      # there is no valid row that matches the current partial sel → invalid
+      rv$lock_dim <- rv$last_dim %||% names(sel)[which.max(vapply(sel, length, 0))]
+      shinyjs::disable(selector = ".pcg")
+      
+      ##  -- inside your observeEvent(RKT_picked(), { … }) once you know it's invalid:
+      
+      # 1) detect the “culprit” dimension (where no valid codes remain)
+      bad_dims <- names(sel)[
+        vapply(names(sel), function(dim) {
+          # consider everything *but* this dim
+          others <- sel[names(sel) != dim]
+          # if zero codes remain valid for 'dim', that's bad
+          length(valid_codes(dim, others)) == 0L
+        }, logical(1))
+      ]
+      bad_dim <- bad_dims[1]  # first offending dimension
+      
+      # 2) pull our human‐label maps and dimension name
+      maps     <- list(A=labA, G=labG, I=labI, J=labJ)
+      dim_names<- c(A="Amortização", G="Contribuição p/ FEF",
+                    I="Invest. Direto", J="Juros")
+      bad_map   <- maps[[bad_dim]]
+      bad_label <- dim_names[bad_dim]
+      
+      # 3) what they *just* picked (in red)
+      bad_code  <- sel[[bad_dim]]
+      bad_text  <- bad_map[bad_code]
+      
+      # 4) what *would* be valid here (in green)
+      ok_codes  <- valid_codes(bad_dim, sel[names(sel)!=bad_dim])
+      ok_text   <- bad_map[ok_codes]
+      
+      # 5) craft the little hint HTML
+      hint_html <- sprintf(
+        "<p>Você escolheu <strong style='color:#e74c3c'>%s</strong> para <em>%s</em>,<br/>
+           mas apenas <strong style='color:#27ae60'>%s</strong> %s válidas.</p>",
+        bad_text,
+        bad_label,
+        paste(ok_text, collapse = ", "),
+        if (length(ok_text)>1) "são" else "é"
+      )
+      
+      # 6) show the modal (with your existing valid_html table below)
+      showModal(modalDialog(
+        title = HTML("💥 Combinação inválida"),
+        tagList(
+          HTML("Essa escolha não é permitida pelo <b>PROPAG</b>.<br>",
+               "Ajuste os percentuais para atender uma combinação válida."),
+          HTML(hint_html),
+          HTML(valid_html)
+        ),
+        easyClose = FALSE,
+        footer = actionButton("invalid_ok", "OK", class="btn-primary"),
+        size = "l"
+      ))
+      
+      
+      session$onFlushed(function(){
+        runjs("
+        var dlg = $('#shiny-modal .modal-dialog');
+        if(!dlg.hasClass('ui-draggable')){
+          dlg.draggable({ handle: '.modal-header' });
+          dlg.css('cursor','move');
+        }
+      ")
+      }, once = TRUE)
+      modal_shown(TRUE)
       return()
     }
     
-    # VALID -> store as last_ok, ensure UI is enabled / modal closed
-    if (!is.null(r)) {
-      rv$last_ok <- sel
-      if (modal_shown()) { removeModal(); modal_shown(FALSE); shinyjs::enable(selector = ".pcg") }
-      return()
+    # 4) If full combo chosen and matches one valid row, store it & close modal
+    if (all(lengths(sel) == 1)) {
+      hit <- vp[ vp$A == sel$A & vp$G == sel$G &
+                   vp$I == sel$I & vp$J == sel$J , , drop = FALSE]
+      if (nrow(hit) == 1) {
+        rv$last_ok <- sel
+        if (modal_shown()) {
+          removeModal(); modal_shown(FALSE)
+          shinyjs::enable(selector = ".pcg")
+        }
+        return()
+      }
     }
     
-    # INVALID ---------------------------------------------------------------
-    # If we already opened, do nothing (wait user)
-    if (modal_shown()) return()
-    
-    # culprit group
-    bad_dim <- rv$last_dim %||% names(sel)[which.max(vapply(sel, length, 0))]
-    rv$lock_dim <- bad_dim
-    
-    # Disable all groups (give each group container a class "pcg" in UI or disable individually)
-    shinyjs::disable(selector = ".pcg")
-    
-    showModal(modalDialog(
-      title = HTML("💥 Combinação inválida"),
-      tagList(
-        HTML("Essa escolha não é permitida pelo <b>PROPAG</b>.<br>
-         Ajuste os percentuais para atender uma combinação válida."),
-        HTML(valid_html)  # <- table goes here
-      ),
-      easyClose = FALSE,
-      footer = actionButton("invalid_ok", "OK", class = "btn-primary"),
-      size = "l"
-    ))
-    
-    # make it draggable by the header
-    session$onFlushed(function(){
-      runjs("
-    var dlg = $('#shiny-modal .modal-dialog');
-    if(!dlg.hasClass('ui-draggable')){
-      dlg.draggable({ handle: '.modal-header' });
-      dlg.css('cursor','move');
-    }
-  ")
-    }, once = TRUE)
-
-    modal_shown(TRUE)
+    # otherwise: still incomplete but not dead → do nothing (wait next pick)
   }, ignoreInit = TRUE)
+  
+  
+  
+  
+  
+  
+  
   
   ## -------- user clicks OK on modal ----------------------------------------
   observeEvent(input$invalid_ok, {
@@ -1164,7 +1287,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
   
   ## ---- choice summary card --------------------------------------------------
   output$choice_summary <- renderUI({
-    r <- sel_row()          # from your earlier code; NULL if incomplete/invalid
+    r <- RKT_sel_row()          # from your earlier code; NULL if incomplete/invalid
     if (is.null(r)) return(NULL)
     
     opcao <- row_to_name(r)
@@ -1178,6 +1301,106 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
   })
   
  
+  
+  ###################### REACTIVE TAB1b  REACTIVE Tab1b REACTIVE REACTIVE Tab1b REACTIVE REACTIVE Tab1b REACTIVE ############################
+  ###################### REACTIVE TAB1b  REACTIVE Tab1b REACTIVE REACTIVE Tab1b REACTIVE REACTIVE Tab1b REACTIVE ############################
+  
+  
+  # === DEBUG: print to R console ===
+  # observe({
+  #   # once ANY of the four checkboxes changes, this will run
+  #   sel <- RKT_picked()
+  #   cat(">>> picked()\n")
+  #   print(sel)
+  #   cat(">>> sel_row()\n")
+  #   sr <- RKT_sel_row()
+  #   if (is.null(sr)) {
+  #     cat("sel_row() is NULL\n\n")
+  #   } else {
+  #     # print the one‐row data.frame
+  #     print(sr)
+  #     cat("\n")
+  #   }
+  # })
+  
+  
+  
+  
+  # 1) what the user has chosen, NULL until valid:
+  RKT_scenario_name <- reactive({
+    r <- RKT_sel_row()         # your existing reactive that returns the one valid row or NULL
+    req(r)
+    row_to_name(r)         # e.g. "II-A", "III-B", … or "ND"
+  })
+  
+  # 2) pull the right df from the list
+  RKT_scenario_data <- reactive({
+    nm <- RKT_scenario_name()
+    df_list[[nm]]
+  })
+  
+  # 3) filter to the chosen UF
+  RKT_uf_data <- reactive({
+    df <- RKT_scenario_data()
+    req(input$uf_select)
+    df[df$NM_UF == input$uf_select, ]
+  })
+  
+  
+  ### 4) Pivot into long form for the ggplot ###
+  RKT_plot_data <- reactive({
+    df <- RKT_uf_data()
+    req(input$var_select)
+    years <- 2025:2054
+    sel_cols <- paste0(input$var_select, years)
+    df %>%
+      select(all_of(sel_cols)) %>%
+      setNames(years) %>%
+      pivot_longer(
+        cols      = everything(),
+        names_to  = "Ano",
+        values_to = "Valor"
+      ) %>%
+      mutate(Ano = as.integer(Ano))
+  })
+  
+  
+  
+  ###################### OUTPUT TAB1b  OUTPUT Tab1b OUTPUT OUTPUT Tab1b OUTPUT OUTPUT Tab1b OUTPUT ############################
+  ###################### OUTPUT TAB1b  OUTPUT Tab1b OUTPUT OUTPUT Tab1b OUTPUT OUTPUT Tab1b OUTPUT ############################
+  
+  
+  # render the bar chart
+  output$PloTab1b <- renderPlot({
+    
+ 
+    
+    pd <- RKT_plot_data()
+    req(nrow(pd) > 0)           # nothing below this line runs until pd has rows
+    req(input$uf_select)
+    req(input$var_select)
+    
+    ggplot(pd, aes(
+      x    = factor(Ano),
+      y    = Valor,
+      fill = input$uf_select
+    )) +
+      geom_col() +
+      scale_fill_manual(values = uf_colors) +
+      labs(
+        x     = "Ano",
+        y     = switch(input$var_select,
+                       Saldo   = "Saldo da Dívida",
+                       ApoFEF  = "Aporte ao FEF",
+                       InvDir  = "Investimento Direto",
+                       JurPag  = "Juros Pagos"),
+        title = names(input$var_select)
+      ) +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+  })
+  
+  
   
   #################
   # PLACE HOLDER FOR TAB 2 
@@ -1904,6 +2127,8 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
       
     })
     
+  
+  
       
 }  
   
