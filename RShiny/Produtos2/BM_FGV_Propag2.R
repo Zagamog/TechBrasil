@@ -389,6 +389,26 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
                        fluidRow(
                          column(
                            width = 3,
+                           tags$label("(iv) Taxa de Juros:",
+                                      style = "font-weight: bold; display: block;"),
+                           prettyCheckboxGroup(
+                             inputId  = "choice_J",
+                             label    = NULL,
+                             choices  = c("0%" = "J1",
+                                          "1%" = "J2",
+                                          "2%" = "J3",
+                                          "4% (Não Adere)" = "J4"),
+                             selected = character(0),
+                             icon     = icon("check"),
+                             fill     = TRUE,
+                             status   = "danger",
+                             bigger   = TRUE,
+                             inline   = TRUE
+                           )
+                         ),
+                         
+                         column(
+                           width = 3,
                            tags$label("(i) Amortização Inicial",
                                       style = "font-weight: bold; display: block;"),
                            prettyCheckboxGroup(
@@ -443,26 +463,8 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
                              bigger   = TRUE,
                              inline   = TRUE
                            )
-                             ),
-                         column(
-                           width = 3,
-                           tags$label("(iv) Taxa de Juros:",
-                                      style = "font-weight: bold; display: block;"),
-                           prettyCheckboxGroup(
-                             inputId  = "choice_J",
-                             label    = NULL,
-                             choices  = c("0%" = "J1",
-                                          "1%" = "J2",
-                                          "2%" = "J3",
-                                          "4% (Não Adere)" = "J4"),
-                             selected = character(0),
-                             icon     = icon("check"),
-                             fill     = TRUE,
-                             status   = "danger",
-                             bigger   = TRUE,
-                             inline   = TRUE
-                           )
-                         )
+                             )
+          
                        )
                      ),
                      
