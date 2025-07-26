@@ -60,6 +60,31 @@ df_list <- list(
   "ND"   = df_nd
 )
 
+
+df_choices <- tibble::tribble(
+  ~opcao,   ~amort,            ~fef,    ~inv,     ~juros,
+  "II-A",   "20% abatimento",  "1%",    "1%",     "0%",
+  "II-B",   "10% abatimento",  "1,5%",  "1,5%",   "0%",
+  "II-C",   "Sem abatimento",  "2%",    "2%",     "0%",
+  "III-A",  "20% abatimento",  "1%",    "0%",     "1%",
+  "III-B",  "10% abatimento",  "1,5%",  "0,5%",   "1%",
+  "III-C",  "Sem abatimento",  "2%",    "1%",     "1%",
+  "IV-A",   "10% abatimento",  "1%",    "0%",     "2%",
+  "IV-B",   "Sem abatimento",  "1,5%",  "0,5%",   "2%",
+  "ND",     " ",              "NA",    "NA",     "4% (Não Adere)"
+)
+
+named_scenarios <- setNames(
+  df_choices$opcao,
+  paste0(
+    df_choices$opcao, ": ",
+    df_choices$amort, ", ",
+    df_choices$fef, " FEF, ",
+    df_choices$inv, " Invest., ",
+    df_choices$juros, " Juros"
+  )
+)
+
 # To assign fixed colors to UFs
 
 # prepare your UF‐color mapping up front
@@ -69,6 +94,11 @@ uf_colors <- setNames(
   colorRampPalette(brewer.pal(9, "Set1"))(length(uf_levels)),
   uf_levels
 )
+
+
+library(colorspace)
+
+uf_colors_compare <- map_chr(uf_colors, ~ lighten(.x, amount = 0.4))
 
 # --- Define variable choices for Oferta EPT ---
 ept_vars <- c("QT_MAT_PROF_TEC_PROPAG", "QT_MAT_TEC_NUM2", "QT_MAT_TEC_NUM3" )
@@ -241,7 +271,7 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
       )
     ),
     
-    tabsetPanel(id = "tab_selection", selected = "Situação - Meta 11a",
+    tabsetPanel(id = "tab_selection", selected = "Finance 1b",
            ### UI - TAB 1 : FINANCE ##################################################
                   tabPanel("Tema Financiero",
                          fluidPage(
@@ -331,7 +361,7 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
                          style = "margin-top: 5px; margin-bottom: 10px; color: #f5f5f5; text-align: justify; font-size: 20px;",
                          tagList(
                            tags$strong("Instruções: "),
-                           "Por favor, marque as opções relevantes para o seu Estado. ",
+                           "Por favor, primeiro, seleccione o seu Estado, e depois, marque as opções relevantes para o seu Estado. ",
                            "À medida que você clicar em uma escolha, o painel à direita mostrará ",
                            "apenas opções válidas que podem ser escolhidas. ",
                            "Você pode começar por qualquer uma das quatro escolhas: ",
@@ -451,18 +481,60 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
                
                
              ),
+             # Explanation text + selectizeInput with updated font
              fluidRow(
-               column(4,
-                      selectizeInput("var_select", "O que mostrar:",
-                                     choices = c(
-                                       "Saldo da Dívida"     = "Saldo",
-                                       "Aporte para o FEF"   = "ApoFEF",
-                                       "Investimento Direto" = "InvDir",
-                                       "Juros Pagos"         = "JurPag"
-                                     ), selected = "Saldo"
-                      )
+               # Full-width explanation text
+               column(
+                 width = 12,
+                 div(
+                   style = "margin-top: 0px; margin-bottom: 5px; color: #1f5673; text-align: justify; font-size: 20px;",
+                   HTML("<strong>Nota:</strong> Uma vez selecionada a opção arriba, você pode selecionar entre quatro variaveis para ver a evolução para 
+                        o period estimado do Propag: 2025 ate 2054")
+                 )
+               ),
+               
+               # Select input with matching font style
+               column(
+                 width = 2,
+                 div(
+                   style = "margin-bottom: 10px;",
+                   tags$label("Selecionar a variavel:", style = "font-weight: bold; color: #1f5673; font-size: 18px;"),
+                   selectizeInput("var_select", label = NULL,
+                                  choices = c(
+                                    "Saldo da Dívida"     = "Saldo",
+                                    "Aporte para o FEF"   = "ApoFEF",
+                                    "Investimento Direto" = "InvDir",
+                                    "Juros Pagos"         = "JurPag"
+                                  ), selected = "Saldo"
+                   )
+                 )
+               ),
+               column(
+                 width = 4,
+                 div(
+                   style = "margin-bottom: 10px;",
+                   tags$label("Comparar com outro cenário:", 
+                              style = "font-weight: bold; color: #1f5673; font-size: 18px; display: block;"),
+                   selectizeInput(
+                     inputId  = "compare_with",
+                     label    = NULL,
+                     choices  = c("Nenhum" = "", named_scenarios),
+                     selected = "",
+                     options  = list(
+                       placeholder = "Escolha um cenário para comparar...",
+                       allowEmptyOption = TRUE,
+                       onInitialize = I('function() { this.clear(); }'),
+                       persist = FALSE,
+                       closeAfterSelect = TRUE
+                     )
+                   )
+                   
+                 )
                )
+               
+               
              ),
+             
              
              fluidRow(
                column(12,
@@ -1322,16 +1394,26 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
   #     cat("\n")
   #   }
   # })
+  observe({
+    session$sendCustomMessage("toggleAGI", "J4" %in% input$choice_J)
+  })
   
   
   
   
   # 1) what the user has chosen, NULL until valid:
   RKT_scenario_name <- reactive({
-    r <- RKT_sel_row()         # your existing reactive that returns the one valid row or NULL
+    # Case: J4 (Não Adere) overrides all other choices
+    if ("J4" %in% input$choice_J) {
+      return("ND")
+    }
+    
+    # Fallback to the existing logic
+    r <- RKT_sel_row()
     req(r)
-    row_to_name(r)         # e.g. "II-A", "III-B", … or "ND"
+    row_to_name(r)  # e.g. "II-A", "III-B", … or "ND"
   })
+  
   
   # 2) pull the right df from the list
   RKT_scenario_data <- reactive({
@@ -1364,6 +1446,88 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
       mutate(Ano = as.integer(Ano))
   })
   
+  RKT_DT1b <- reactive({
+    df <- RKT_uf_data()
+    req(input$var_select)
+    
+    var <- input$var_select
+    years <- 2025:2054
+    sel_cols <- paste0(var, years)
+    
+    # Build long-form table
+    df_long <- df %>%
+      select(all_of(sel_cols)) %>%
+      setNames(years) %>%
+      pivot_longer(
+        cols = everything(),
+        names_to = "Ano",
+        values_to = "Valor"
+      ) %>%
+      mutate(Ano = as.integer(Ano))
+    
+    is_flow_var <- var %in% c("ApoFEF", "InvDir", "JurPag")
+    
+    if (is_flow_var) {
+      total_5y <- df_long %>%
+        filter(Ano %in% 2025:2029) %>%
+        summarise(`Monto total 5 anos (2025 até 2029)` = sum(Valor, na.rm = TRUE)) %>%
+        pull()
+      
+      total_all <- df_long %>%
+        summarise(`Monto total do período` = sum(Valor, na.rm = TRUE)) %>%
+        pull()
+      
+      df_long <- df_long %>%
+        mutate(
+          `Monto total 5 anos (2025 até 2029)` = total_5y,
+          `Monto total do período` = total_all
+        )
+    }
+    
+    df_long
+  })
+  
+  
+  RKT_plot_data_compare <- reactive({
+    req(input$var_select, input$uf_select)
+    
+    var    <- input$var_select
+    years  <- 2025:2054
+    selcols <- paste0(var, years)
+    
+    # Selected scenario
+    df_sel <- RKT_scenario_data() %>%
+      filter(NM_UF == input$uf_select) %>%
+      select(all_of(selcols)) %>%
+      setNames(years) %>%
+      pivot_longer(cols = everything(), names_to = "Ano", values_to = "Valor") %>%
+      mutate(
+        Ano      = as.integer(Ano),
+        UF       = input$uf_select,
+        fill_key = UF  # plain UF name for selected
+      )
+    
+    # If no comparison selected, return single scenario
+    if (input$compare_with == "") return(df_sel)
+    
+    # Comparison scenario
+    df_cmp <- df_list[[input$compare_with]] %>%
+      filter(NM_UF == input$uf_select) %>%
+      select(all_of(selcols)) %>%
+      setNames(years) %>%
+      pivot_longer(cols = everything(), names_to = "Ano", values_to = "Valor") %>%
+      mutate(
+        Ano      = as.integer(Ano),
+        UF       = input$uf_select,
+        fill_key = paste0(UF, "_compare")  # tagged UF for comparison
+      )
+    
+    bind_rows(df_sel, df_cmp)
+  })
+  
+  
+  
+  
   
   
   ###################### OUTPUT TAB1b  OUTPUT Tab1b OUTPUT OUTPUT Tab1b OUTPUT OUTPUT Tab1b OUTPUT ############################
@@ -1371,22 +1535,26 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
   
   
   # render the bar chart
+
   output$PloTab1b <- renderPlot({
+    pd <- RKT_plot_data_compare()
+    req(nrow(pd) > 0)
     
- 
+    # Prepare full color mapping
+    all_colors <- c(
+      uf_colors,
+      setNames(uf_colors_compare, paste0(names(uf_colors), "_compare"))
+    )
     
-    pd <- RKT_plot_data()
-    req(nrow(pd) > 0)           # nothing below this line runs until pd has rows
-    req(input$uf_select)
-    req(input$var_select)
-    
-    ggplot(pd, aes(
+    # Base ggplot
+    gp2b <- ggplot(pd, aes(
       x    = factor(Ano),
       y    = Valor,
-      fill = input$uf_select
+      fill = fill_key
     )) +
-      geom_col() +
-      scale_fill_manual(values = uf_colors) +
+      geom_col(position = position_dodge(width = 0.9), width = 0.8) +
+      scale_fill_manual(values = all_colors) +
+      scale_y_continuous(labels = scales::comma) +
       labs(
         x     = "Ano",
         y     = switch(input$var_select,
@@ -1397,7 +1565,53 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
         title = names(input$var_select)
       ) +
       theme_minimal() +
-      theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+      theme(
+        legend.position = "none",
+        axis.text.x  = element_text(size = 16, angle = 90, vjust = 0.5),
+        axis.text.y  = element_text(size = 16),
+        axis.title.x = element_text(size = 16),
+        axis.title.y = element_text(size = 16),
+        plot.title   = element_text(size = 18, face = "bold")
+      )
+    
+    # Value labels
+    gp2b <- gp2b +
+      geom_text(
+        aes(label = paste0(scales::comma(Valor / 1e6), " mi")),
+        position  = position_dodge(width = 0.9),
+        color     = "white",
+        size      = 4.5,
+        fontface  = "bold",
+        vjust     = 1.2
+      )
+    
+    gp2b
+  })
+  
+  
+  
+  
+  output$DTab1b <- DT::renderDataTable({
+    df <- RKT_DT1b()
+    
+    # Dynamically choose columns to format
+    numeric_cols <- names(df)[sapply(df, is.numeric)]
+    currency_cols <- setdiff(numeric_cols, "Ano")
+    
+    DT::datatable(
+      df,
+      rownames = FALSE,
+      extensions = "Buttons",
+      options = list(
+        dom = 'Bfrtip',
+        buttons = c('copy', 'csv', 'excel'),
+        pageLength = 15
+      )
+    ) %>%
+      DT::formatCurrency(
+        columns = currency_cols,
+        currency = "R$ ", digits = 0, interval = 3, mark = "."
+      )
   })
   
   
