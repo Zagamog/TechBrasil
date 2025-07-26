@@ -1491,35 +1491,47 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
   RKT_plot_data_compare <- reactive({
     req(input$var_select, input$uf_select)
     
-    var    <- input$var_select
-    years  <- 2025:2054
+    var     <- input$var_select
+    years   <- 2025:2054
     selcols <- paste0(var, years)
     
-    # Selected scenario
+    main_op <- RKT_scenario_name()
+    cmp_op  <- input$compare_with %||% ""
+    
+    safe_named_scenario_label <- function(key) {
+      if (!is.null(key) && nzchar(key) && key %in% names(named_scenarios)) {
+        named_scenarios[[key]]
+      } else {
+        paste("Cenário", key %||% "ND")
+      }
+    }
+    label_main <- safe_named_scenario_label(main_op)
+    label_cmp  <- safe_named_scenario_label(cmp_op)
+    
     df_sel <- RKT_scenario_data() %>%
       filter(NM_UF == input$uf_select) %>%
       select(all_of(selcols)) %>%
       setNames(years) %>%
       pivot_longer(cols = everything(), names_to = "Ano", values_to = "Valor") %>%
       mutate(
-        Ano      = as.integer(Ano),
-        UF       = input$uf_select,
-        fill_key = UF  # plain UF name for selected
+        Ano        = as.integer(Ano),
+        UF         = input$uf_select,
+        fill_key   = UF,
+        fill_label = label_main    # 👈 Add this
       )
     
-    # If no comparison selected, return single scenario
     if (input$compare_with == "") return(df_sel)
     
-    # Comparison scenario
-    df_cmp <- df_list[[input$compare_with]] %>%
+    df_cmp <- df_list[[cmp_op]] %>%
       filter(NM_UF == input$uf_select) %>%
       select(all_of(selcols)) %>%
       setNames(years) %>%
       pivot_longer(cols = everything(), names_to = "Ano", values_to = "Valor") %>%
       mutate(
-        Ano      = as.integer(Ano),
-        UF       = input$uf_select,
-        fill_key = paste0(UF, "_compare")  # tagged UF for comparison
+        Ano        = as.integer(Ano),
+        UF         = input$uf_select,
+        fill_key   = paste0(UF, "_compare"),
+        fill_label = label_cmp     # 👈 Add this
       )
     
     bind_rows(df_sel, df_cmp)
@@ -1595,7 +1607,6 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
       fill = fill_key
     )) +
       geom_col(position = position_dodge(width = 0.9), width = 0.8) +
-      scale_fill_manual(values = all_colors) +
       scale_y_continuous(labels = scales::comma) +
       labs(
         x     = "Ano",
@@ -1608,11 +1619,11 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
       ) +
       theme_minimal() +
       theme(
-        legend.position = "none",
-        axis.text.x     = element_text(size = 16, angle = 90, vjust = 0.5),
-        axis.text.y     = element_text(size = 16),
-        axis.title.x    = element_text(size = 16),
-        axis.title.y    = element_text(size = 16),
+        legend.position = if (is_comparing) c(0.95, 0.95) else "none",
+        axis.text.x     = element_text(size = 16, angle = 90, vjust = 0.5,color="blue"),
+        axis.text.y     = element_text(size = 16,color="blue"),
+        axis.title.x    = element_text(size = 16, color="blue", face = "bold"),
+        axis.title.y    = element_text(size = 16,color="blue", face = "bold"),
         plot.title      = element_text(size = 18, face = "bold")
       )
     
@@ -1638,6 +1649,18 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
         hjust    = if (is_comparing) 1.1 else 0.5   # shift right slightly so it doesn't clip left edge
       )
     
+ 
+    legend_labels <- setNames(pd$fill_label, pd$fill_key)
+    
+    gp2b <- gp2b +
+      scale_fill_manual(
+        values = all_colors,
+        labels = legend_labels,
+        name = "Leyenda"
+      )+
+      theme(
+        legend.title = element_text(size = 16, face = "bold"),  # 👈 title size
+        legend.text  = element_text(size = 14))   
     
     
     gp2b
