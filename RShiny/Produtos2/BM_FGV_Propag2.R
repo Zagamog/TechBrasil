@@ -565,15 +565,11 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
              
              fluidRow(
                column(12,
-                        plotOutput("PloTab1b",)
-               )
-             ),
-             
-             fluidRow(
-               column(12,
-                      DT::dataTableOutput("DTab1b")
+                        plotOutput("PloTab1b",height = "600px", width = "100%")
                )
              )
+             
+             
              
            ),
            
@@ -1473,46 +1469,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
       mutate(Ano = as.integer(Ano))
   })
   
-  RKT_DT1b <- reactive({
-    df <- RKT_uf_data()
-    req(input$var_select)
-    
-    var <- input$var_select
-    years <- 2025:2054
-    sel_cols <- paste0(var, years)
-    
-    # Build long-form table
-    df_long <- df %>%
-      select(all_of(sel_cols)) %>%
-      setNames(years) %>%
-      pivot_longer(
-        cols = everything(),
-        names_to = "Ano",
-        values_to = "Valor"
-      ) %>%
-      mutate(Ano = as.integer(Ano))
-    
-    is_flow_var <- var %in% c("ApoFEF", "InvDir", "JurPag")
-    
-    if (is_flow_var) {
-      total_5y <- df_long %>%
-        filter(Ano %in% 2025:2029) %>%
-        summarise(`Monto total 5 anos (2025 até 2029)` = sum(Valor, na.rm = TRUE)) %>%
-        pull()
-      
-      total_all <- df_long %>%
-        summarise(`Monto total do período` = sum(Valor, na.rm = TRUE)) %>%
-        pull()
-      
-      df_long <- df_long %>%
-        mutate(
-          `Monto total 5 anos (2025 até 2029)` = total_5y,
-          `Monto total do período` = total_all
-        )
-    }
-    
-    df_long
-  })
+
   
   
   RKT_plot_data_compare <- reactive({
@@ -1653,7 +1610,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
         axis.text.y     = element_text(size = 16,color="blue"),
         axis.title.x    = element_text(size = 16, color="blue", face = "bold"),
         axis.title.y    = element_text(size = 16,color="blue", face = "bold"),
-        plot.title      = element_text(size = 18, face = "bold")
+        plot.title      = element_text(size = 22, face = "bold", hjust = 0.5, color = "#1f5673")
       )
     
     # Conditional labels:
@@ -1671,8 +1628,8 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
     
     # Adjust text size based on range
     label_size <- case_when(
-      n_years <= 10 ~ 6,       # Very large if only a few years
-      n_years <= 20 ~ 5.5,     # Medium-large for mid-range
+      n_years <= 10 ~ 8,       # Very large if only a few years
+      n_years <= 20 ~ 6,     # Medium-large for mid-range
       TRUE          ~ 4.5      # Default for full range
     )
 
@@ -1711,28 +1668,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
   
   
   
-  output$DTab1b <- DT::renderDataTable({
-    df <- RKT_DT1b()
-    
-    # Dynamically choose columns to format
-    numeric_cols <- names(df)[sapply(df, is.numeric)]
-    currency_cols <- setdiff(numeric_cols, "Ano")
-    
-    DT::datatable(
-      df,
-      rownames = FALSE,
-      extensions = "Buttons",
-      options = list(
-        dom = 'Bfrtip',
-        buttons = c('copy', 'csv', 'excel'),
-        pageLength = 15
-      )
-    ) %>%
-      DT::formatCurrency(
-        columns = currency_cols,
-        currency = "R$ ", digits = 0, interval = 3, mark = "."
-      )
-  })
+
   
   
   
