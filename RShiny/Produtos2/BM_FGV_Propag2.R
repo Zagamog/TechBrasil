@@ -1526,6 +1526,42 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
   })
   
   
+  RKT_plot_title <- reactive({
+    req(input$uf_select, RKT_scenario_name())
+    
+    uf      <- input$uf_select
+    main_op <- RKT_scenario_name()
+    cmp_op  <- input$compare_with
+    
+    main_row <- valid_tbl[valid_tbl$Opção == main_op, ]
+    main_desc <- if (nrow(main_row) == 1) {
+      paste0("Cenário ", main_op, " [", 
+             main_row$Amortização, ", ",
+             main_row$`Contribuição p/ FEF`, ", ",
+             main_row$`Invest. Direto`, ", ",
+             main_row$Juros, "]")
+    } else {
+      paste0("Cenário ", main_op)
+    }
+    
+    if (!nzchar(cmp_op)) {
+      paste0("Gráfico: UF ", uf, " — ", main_desc)
+    } else {
+      cmp_row <- valid_tbl[valid_tbl$Opção == cmp_op, ]
+      cmp_desc <- if (nrow(cmp_row) == 1) {
+        paste0("Cenário ", cmp_op, " [", 
+               cmp_row$Amortização, ", ",
+               cmp_row$`Contribuição p/ FEF`, ", ",
+               cmp_row$`Invest. Direto`, ", ",
+               cmp_row$Juros, "]")
+      } else {
+        paste0("Cenário ", cmp_op)
+      }
+      
+      paste0("Gráfico: UF ", uf, " — ", main_desc, " comparado com ", cmp_desc)
+    }
+  })
+  
   
   
   
@@ -1568,7 +1604,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
                        ApoFEF  = "Aporte ao FEF",
                        InvDir  = "Investimento Direto",
                        JurPag  = "Juros Pagos"),
-        title = names(input$var_select)
+        title = RKT_plot_title()
       ) +
       theme_minimal() +
       theme(
