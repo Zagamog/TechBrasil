@@ -1537,14 +1537,20 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
   # render the bar chart
 
   output$PloTab1b <- renderPlot({
+    
+
+    
     pd <- RKT_plot_data_compare()
     req(nrow(pd) > 0)
     
-    # Prepare full color mapping
+    # Color palette: full (original + comparison-shaded)
     all_colors <- c(
       uf_colors,
       setNames(uf_colors_compare, paste0(names(uf_colors), "_compare"))
     )
+    
+    # Check if comparison is active
+    is_comparing <- any(grepl("_compare$", pd$fill_key))
     
     # Base ggplot
     gp2b <- ggplot(pd, aes(
@@ -1567,23 +1573,35 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
       theme_minimal() +
       theme(
         legend.position = "none",
-        axis.text.x  = element_text(size = 16, angle = 90, vjust = 0.5),
-        axis.text.y  = element_text(size = 16),
-        axis.title.x = element_text(size = 16),
-        axis.title.y = element_text(size = 16),
-        plot.title   = element_text(size = 18, face = "bold")
+        axis.text.x     = element_text(size = 16, angle = 90, vjust = 0.5),
+        axis.text.y     = element_text(size = 16),
+        axis.title.x    = element_text(size = 16),
+        axis.title.y    = element_text(size = 16),
+        plot.title      = element_text(size = 18, face = "bold")
       )
     
-    # Value labels
+    # Conditional labels:
+    
+    # Compute appropriate label text colors based on brightness of fill color
+    text_colors <- sapply(pd$fill_key, function(key) {
+      col_hex <- all_colors[[key]]
+      rgb_vals <- hex2RGB(col_hex)@coords
+      luminance <- sum(rgb_vals * c(0.299, 0.587, 0.114))  # perceptual brightness
+      if (luminance > 0.6) "black" else "white"
+    })
+    
     gp2b <- gp2b +
       geom_text(
         aes(label = paste0(scales::comma(Valor / 1e6), " mi")),
         position  = position_dodge(width = 0.9),
-        color     = "white",
+        color     = text_colors,  # dynamic color
         size      = 4.5,
         fontface  = "bold",
-        vjust     = 1.2
+        vjust     = if (is_comparing) -0.2 else 1.2,
+        angle     = if (is_comparing) 90 else 0,
+        hjust     = if (is_comparing) -0.1 else 0.5
       )
+    
     
     gp2b
   })
