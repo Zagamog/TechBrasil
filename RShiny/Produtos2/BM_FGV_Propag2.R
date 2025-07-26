@@ -1593,14 +1593,15 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
     gp2b <- gp2b +
       geom_text(
         aes(label = paste0(scales::comma(Valor / 1e6), " mi")),
-        position  = position_dodge(width = 0.9),
-        color     = text_colors,  # dynamic color
-        size      = 4.5,
-        fontface  = "bold",
-        vjust     = if (is_comparing) -0.2 else 1.2,
-        angle     = if (is_comparing) 90 else 0,
-        hjust     = if (is_comparing) -0.1 else 0.5
+        position = position_dodge(width = 0.9),
+        color    = text_colors,
+        size     = 4.5,
+        fontface = "bold",
+        angle    = if (is_comparing) 90 else 0,
+        vjust    = if (is_comparing) 1.2 else 1.2,  # same vertical reference point (but for rotated text, this pulls it downward)
+        hjust    = if (is_comparing) 1.1 else 0.5   # shift right slightly so it doesn't clip left edge
       )
+    
     
     
     gp2b
