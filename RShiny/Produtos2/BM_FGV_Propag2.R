@@ -510,7 +510,7 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
                  )
                ),
                column(
-                 width = 4,
+                 width = 2,
                  div(
                    style = "margin-bottom: 10px;",
                    tags$label("Comparar com outro cenário:", 
@@ -530,7 +530,34 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
                    )
                    
                  )
+               ),
+               column(
+                 width = 4,
+                 div(
+                   style = "margin-bottom: 10px; display: flex; align-items: flex-start; gap: 20px;",
+                   
+                   # Top-aligned label
+                   tags$label("Selecionar intervalo de anos:",
+                              style = "font-weight: bold; color: #1f5673; font-size: 18px; margin-top: 5px; white-space: nowrap;"),
+                   
+                   # Slider takes remaining space
+                   div(
+                     style = "flex-grow: 1;",
+                     sliderInput(
+                       inputId = "year_range",
+                       label   = NULL,
+                       min     = 2025,
+                       max     = 2054,
+                       value   = c(2025, 2054),
+                       step    = 1,
+                       sep     = ""
+                     )
+                   )
+                 )
                )
+               
+               
+               
                
                
              ),
@@ -1492,7 +1519,9 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
     req(input$var_select, input$uf_select)
     
     var     <- input$var_select
-    years   <- 2025:2054
+    year_bounds <- input$year_range
+    years       <- seq(year_bounds[1], year_bounds[2])
+    
     selcols <- paste0(var, years)
     
     main_op <- RKT_scenario_name()
@@ -1637,12 +1666,25 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
       if (luminance > 0.6) "black" else "white"
     })
     
+    # Calculate number of years selected
+    n_years <- length(unique(pd$Ano))
+    
+    # Adjust text size based on range
+    label_size <- case_when(
+      n_years <= 10 ~ 6,       # Very large if only a few years
+      n_years <= 20 ~ 5.5,     # Medium-large for mid-range
+      TRUE          ~ 4.5      # Default for full range
+    )
+
+    
+    
+    
     gp2b <- gp2b +
       geom_text(
         aes(label = paste0(scales::comma(Valor / 1e6), " mi")),
         position = position_dodge(width = 0.9),
         color    = text_colors,
-        size     = 4.5,
+        size     = label_size,
         fontface = "bold",
         angle    = if (is_comparing) 90 else 0,
         vjust    = if (is_comparing) 1.2 else 1.2,  # same vertical reference point (but for rotated text, this pulls it downward)
