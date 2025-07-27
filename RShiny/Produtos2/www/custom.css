@@ -238,7 +238,7 @@ body {
 }
 .matrix-wrapper .matrix-row {
   margin-bottom: 1px;
-  height: 20px; /* or even 18px for extreme compactness */
+  height: 30px; /* or even 18px for extreme compactness */
 }
 
 .matrix-wrapper .matrix-row div:first-child {

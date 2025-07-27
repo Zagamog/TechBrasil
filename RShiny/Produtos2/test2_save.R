@@ -42,16 +42,16 @@ ui <- fluidPage(
   div(class = "checkbox-dark-panel matrix-wrapper",
       
       div(class = "matrix-row", style = "display: flex; align-items: center; margin-bottom: 6px;",
-          div(style = "width: 240px;", ""),
+          div(style = "width: 300px;", ""),
           div(style = "width: 40px; text-align: center; color: #f5f5f5; font-weight: bold;", "Todos"),
           lapply(ufs, function(uf) {
-            div(style = "width: 24px; text-align: center; font-size: 11px; font-weight: 500; color: #f5f5f5;", uf)
+            div(style = "width: 24px; text-align: center; font-size: 14px; font-weight: 500; color: #f5f5f5;", uf)
           })
       ),
       
       lapply(opcoes, function(op) {
         div(class = "matrix-row", style = "display: flex; align-items: center; margin-bottom: 2px; height: 22px;",
-            div(style = "width: 240px; text-align: left; padding-right: 6px; font-size: 11px; color: #f5f5f5;",
+            div(style = "width: 300px; text-align: left; padding-right: 6px; font-size: 14px; color: #f5f5f5;",
                 op_labels[[op]]
             ),
             div(style = "width: 40px; text-align: center;",
@@ -73,20 +73,40 @@ server <- function(input, output, session) {
   # Track current mode
   current_mode <- reactiveVal("uniform")
   
-  # Watch for mode switch
-  observeEvent(input$selection_mode, {
-    if (input$selection_mode != current_mode()) {
-      showModal(modalDialog(
-        title = "Mudar Modo de Seleção?",
-        "Essa ação limpará as seleções atuais. Deseja continuar?",
-        easyClose = FALSE,
-        footer = tagList(
-          modalButton("Cancelar"),
-          actionButton("confirm_mode_change", "Sim, mudar", class = "btn-danger")
-        )
-      ))
+  # Apply initial toggle states on startup
+  observe({
+    mode <- current_mode()
+    
+    for (op in opcoes) {
+      toggleState(id = paste0("chk_all_", op), condition = (mode == "uniform"))
+      for (uf in ufs) {
+        toggleState(id = paste0("chk_", op, "_", uf), condition = (mode == "per_uf"))
+      }
     }
   })
+  
+  
+  # Watch for mode switch
+  observeEvent(input$selection_mode, {
+    isolate({
+      # Only show modal if we've already initialized current_mode once
+      if (!is.null(current_mode()) && input$selection_mode != current_mode()) {
+        showModal(modalDialog(
+          title = "Mudar Modo de Seleção?",
+          "Essa ação limpará as seleções atuais. Deseja continuar?",
+          easyClose = FALSE,
+          footer = tagList(
+            modalButton("Cancelar"),
+            actionButton("confirm_mode_change", "Sim, mudar", class = "btn-danger")
+          )
+        ))
+      } else {
+        # If first load or same selection — just set mode silently
+        current_mode(input$selection_mode)
+      }
+    })
+  })
+  
   
   # Confirmed switch
   observeEvent(input$confirm_mode_change, {
@@ -94,7 +114,7 @@ server <- function(input, output, session) {
     new_mode <- isolate(input$selection_mode)
     current_mode(new_mode)
     
-    # Clear all checkboxes
+    # 1. Clear all checkboxes
     for (op in opcoes) {
       updateCheckboxInput(session, paste0("chk_all_", op), value = FALSE)
       for (uf in ufs) {
@@ -102,11 +122,34 @@ server <- function(input, output, session) {
       }
     }
     
-    # Enable/disable “Todos” checkboxes based on mode
-    for (op in opcoes) {
-      toggleState(id = paste0("chk_all_", op), condition = (new_mode == "uniform"))
-    }
+    # 2. Disable/enable controls after DOM is flushed
+    session$onFlushed(function() {
+      if (new_mode == "uniform") {
+        # Enable 'Todos' checkboxes, disable individual ones
+        for (op in opcoes) {
+          shinyjs::enable(paste0("chk_all_", op))
+          for (uf in ufs) {
+            shinyjs::disable(paste0("chk_", op, "_", uf))
+          }
+        }
+      } else {
+        # Disable 'Todos' checkboxes, enable individual ones
+        for (op in opcoes) {
+          shinyjs::disable(paste0("chk_all_", op))
+          for (uf in ufs) {
+            shinyjs::enable(paste0("chk_", op, "_", uf))
+          }
+        }
+      }
+    }, once = TRUE)
   })
+  
+
+  
+  
+  
+  
+  
   
   # Uniform: handle “Todos” row selection
   observe({
@@ -139,8 +182,7 @@ server <- function(input, output, session) {
           op_local <- op
           id <- paste0("chk_", op_local, "_", uf_local)
           observeEvent(input[[id]], {
-            req(current_mode() == "per_uf")
-            if (isTRUE(input[[id]])) {
+            if (current_mode() == "per_uf" && isTRUE(input[[id]])) {
               for (other_op in setdiff(opcoes, op_local)) {
                 updateCheckboxInput(session, paste0("chk_", other_op, "_", uf_local), value = FALSE)
               }
@@ -150,6 +192,7 @@ server <- function(input, output, session) {
       }
     }
   })
+  
 }
 
 shinyApp(ui, server)
