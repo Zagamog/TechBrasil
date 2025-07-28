@@ -100,9 +100,22 @@ op_labels <- setNames(
 # prepare your UF‐color mapping up front
 library(RColorBrewer)
 uf_levels <- sort(unique(df_2a$NM_UF))  # or pull from any of them
+
+# Colors by NM_UF
 uf_colors <- setNames(
   colorRampPalette(brewer.pal(9, "Set1"))(length(uf_levels)),
   uf_levels
+)
+
+# 1. Criar mapa UF → NM_UF (sigla para nome completo)
+uf_name_map <- df_censo_UF %>%
+  distinct(UF = SG_UF, Estado = NM_UF) %>%
+  filter(Estado %in% names(uf_colors))  # para garantir que o nome tem cor
+
+# 2. Criar novo vetor com nomes de UF e cores baseadas no nome completo
+uf_colors_bySG <- setNames(
+  uf_colors[uf_name_map$Estado],
+  uf_name_map$UF
 )
 
 
@@ -1047,6 +1060,7 @@ server <- function(input, output, session) {
         breaks = y_breaks_geral,
         labels = scales::label_number(scale_cut = scales::cut_short_scale())
       ) +
+      scale_fill_manual(values = uf_colors_bySG)+
       labs(title = paste("Demais Estados –", plot_label), x = "Estado", y = "Valor (R$)") +
       theme_minimal(base_size = 14) +
       theme(
@@ -1068,6 +1082,7 @@ server <- function(input, output, session) {
         breaks = y_breaks_divida,
         labels = scales::label_number(scale_cut = scales::cut_short_scale())
       ) +
+      scale_fill_manual(values = uf_colors_bySG)+
       labs(title = "Estados com Alta Dívida", x = "Estado", y = "Valor (R$)") +
       theme_minimal(base_size = 14) +
       theme(
