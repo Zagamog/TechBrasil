@@ -661,10 +661,47 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
                                  choices = nome_ufs,
                                  selected = "Alagoas"
                                )
+                        ),
+                        column(
+                          width = 4,
+                          div(
+                            style = "margin-bottom: 10px; display: flex; align-items: flex-start; gap: 20px;",
+                            
+                            # Top-aligned label
+                            tags$label("Selecionar intervalo de anos:",
+                                       style = "font-weight: bold; color: #1f5673; font-size: 18px; margin-top: 5px; white-space: nowrap;"),
+                            
+                            # Slider takes remaining space
+                            div(
+                              style = "flex-grow: 1;",
+                              sliderInput(
+                                inputId = "year_range",
+                                label   = NULL,
+                                min     = 2025,
+                                max     = 2054,
+                                value   = c(2025, 2054),
+                                step    = 1,
+                                sep     = ""
+                              )
+                            )
+                          )
                         )
+                        
+                        
+                        
                       )
     
                     ),
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
                     fluidRow(
                       column(12,
                              plotOutput("plotab2", height = "450px")
@@ -2172,9 +2209,10 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
     req(df)
     
     uf_input <- input$uf_select
+    year_bounds <- input$year_range
     df_uf <- dplyr::filter(df, NM_UF == uf_input)
     
-    # Gather data: ApoFEF* and LiqFEF*
+    # Gather and filter by year range
     df_long <- df_uf |>
       tidyr::pivot_longer(
         cols = matches("^(ApoFEF|LiqFEF)\\d+"),
@@ -2184,11 +2222,35 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
       dplyr::mutate(
         type = dplyr::if_else(stringr::str_starts(var, "ApoFEF"), "ApoFEF", "LiqFEF"),
         year = as.integer(stringr::str_remove(var, "^(ApoFEF|LiqFEF)"))
-      )
+      ) |>
+      dplyr::filter(year >= year_bounds[1], year <= year_bounds[2])  # 👈 filtra aqui
     
     df_long
   })
   
+  RKT_plot_title_tab2 <- reactive({
+    req(input$uf_select, input$year_range, RKT_fef_table())
+    
+    uf_code <- input$uf_select
+    df <- RKT_fef_table()
+    
+    # Buscar o nome da UF e sua opção
+    row <- df |>
+      dplyr::filter(NM_UF == uf_code) |>
+      dplyr::select(NM_UF, opcao) |>
+      dplyr::distinct()
+    
+    uf_name <- unique(row$NM_UF)
+    uf_op   <- unique(row$opcao)
+    
+    uf_name <- uf_name %||% uf_code
+    uf_op   <- uf_op   %||% "ND"
+    
+    paste0("UF: ", uf_name,
+           " — Opção: ", uf_op,
+           " — Anos: ", input$year_range[1], "–", input$year_range[2],
+           " — Aporte e Fluxo Líquido do FEF")
+  })
   
   
   
@@ -2284,16 +2346,16 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
       scale_y_continuous(labels = scales::comma_format(big.mark = ".", decimal.mark = ",")) +
       labs(
         x = "Ano", y = "Valor (R$)", fill = NULL,
-        title = paste("UF:", input$uf_select, "– Aporte e Fluxo Líquido do FEF")
+        title = RKT_plot_title_tab2()
       ) +
       theme_minimal() +
       theme(
         legend.position = "right",
-        axis.text.x     = element_text(size = 12, angle = 90, vjust = 0.5, color = "blue"),
-        axis.text.y     = element_text(size = 12, color = "blue"),
-        axis.title.x    = element_text(size = 14, color = "blue", face = "bold"),
-        axis.title.y    = element_text(size = 14, color = "blue", face = "bold"),
-        plot.title      = element_text(size = 18, face = "bold", hjust = 0.5, color = "#1f5673")
+        axis.text.x     = element_text(size = 16, angle = 90, vjust = 0.5, color = "blue"),
+        axis.text.y     = element_text(size = 16, color = "blue"),
+        axis.title.x    = element_text(size = 16, color = "blue", face = "bold"),
+        axis.title.y    = element_text(size = 16, color = "blue", face = "bold"),
+        plot.title      = element_text(size = 22, face = "bold", hjust = 0.5, color = "#1f5673")
       )
   })
   
