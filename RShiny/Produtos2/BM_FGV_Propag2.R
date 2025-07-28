@@ -1054,7 +1054,6 @@ server <- function(input, output, session) {
         aes(label = paste0(format(round(valor / 1e6), big.mark = ".", decimal.mark = ",", scientific = FALSE), " M")),
         angle = 90, vjust = 0.2, hjust=-0.1, size = 5, color = "blue",fontface = "bold"
       ) +
-      scale_fill_manual(values = uf_colors) +
       scale_y_continuous(
         limits = y_limits_geral,
         breaks = y_breaks_geral,
@@ -1076,7 +1075,6 @@ server <- function(input, output, session) {
         aes(label = paste0(format(round(valor / 1e6), big.mark = ".", decimal.mark = ",", scientific = FALSE), " M")),
         angle = 90, vjust = 0.2, hjust=-0.1, size = 7, color = "blue",fontface = "bold"
       ) +
-      scale_fill_manual(values = uf_colors) +
       scale_y_continuous(
         limits = y_limits_divida,
         breaks = y_breaks_divida,
