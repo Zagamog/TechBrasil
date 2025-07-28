@@ -71,9 +71,9 @@ df_censo_supl_tec <- bind_rows(df_censo_supl_tec23, df_censo_supl_tec24) %>%
 
 
 # get some variables from cnct
-df_cnct_ <- df_cnct2025a %>% select(course_id,`Eixo Tecnológico`,`Área Tecnológica`,`Denominação do Curso`,`Perfil Profissional de Conclusão`,
+df_cnct_ <- df_cnct2025a %>% select(IDX_EIXARECUR,`Eixo Tecnológico`,`Área Tecnológica`,`Denominação do Curso`,`Perfil Profissional de Conclusão`,
                                     `Campo de Atuação`, `Ocupações CBO Associadas`,`Infraestrutura Mínima`,eixo_code,area_code,curso_code) %>%
-        relocate(eixo_code, area_code, curso_code, .after = course_id)
+        relocate(eixo_code, area_code, curso_code, .after = IDX_EIXARECUR) 
 
 
 ### MERGING
