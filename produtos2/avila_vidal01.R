@@ -68,15 +68,18 @@ for (df_name in dfs_to_update) {
 normalize_uf_names <- function(df) {
   df %>%
     mutate(
-      NM_UF = stri_trans_totitle(NM_UF, locale = "pt"),
-      NM_UF = str_replace_all(NM_UF, c(
-        "Mato Grosso Do Sul" = "Mato Grosso do Sul",
-        "Rio Grande Do Norte" = "Rio Grande do Norte",
-        "Rio Grande Do Sul" = "Rio Grande do Sul",
-        "Rio De Janeiro" = "Rio de Janeiro"
-      ))
+      NM_UF = NM_UF |> 
+        stringr::str_squish() |>                         # Trim whitespace
+        stringi::stri_trans_totitle(locale = "pt") |>    # Title case
+        stringr::str_replace_all(c(                      # Fix special cases
+          "Mato Grosso Do Sul" = "Mato Grosso do Sul",
+          "Rio Grande Do Norte" = "Rio Grande do Norte",
+          "Rio Grande Do Sul" = "Rio Grande do Sul",
+          "Rio De Janeiro" = "Rio de Janeiro"
+        ))
     )
 }
+
 
 
 for (df_name in dfs_to_update) {

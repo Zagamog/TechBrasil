@@ -26,6 +26,7 @@ propag_ept_financeiro <- readRDS("propag_ept_financeiro.rds")
 
 # Load Censo Escolar data 2007 to 2024 UF aggregates
 load("df_censo_UF.rda")
+sg_ufs <- sort(unique(na.omit(df_censo_UF$SG_UF)))
 
 # Load calculations of PNE meta11a in the script: # Censo_UF_garabed1b.R 
 load("meta11a_opcoes.rda")  
@@ -83,6 +84,15 @@ named_scenarios <- setNames(
     df_choices$inv, " Invest., ",
     df_choices$juros, " Juros"
   )
+)
+
+
+opcoes <- tolower(gsub("-", "", gsub("\\.", "", df_choices$opcao)))
+
+op_labels <- setNames(
+  paste0(df_choices$opcao, ": ", df_choices$juros, " Jur., ",
+         df_choices$amort, ", ", df_choices$fef, " FEF, ", df_choices$inv, " Inv."),
+  opcoes
 )
 
 # To assign fixed colors to UFs
@@ -576,20 +586,107 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
            ),
            
            
-           ### UI - TAB 2 : DEMANDA  ##################################################      
-                tabPanel("Tema Demanda EPT",
-                         fluidRow(
-                           column(6,
-                                  tags$label("Choose Designation →", style = "color: black; font-weight: bold;"),
-                                  selectizeInput("P02_designation", "", choices = NULL, multiple = FALSE)
-                           ),
-                           column(6,
-                                  tags$label("Choose Person", style = "color: black; font-weight: bold;"),
-                                  selectizeInput("P02_name", "", choices = NULL, multiple = FALSE)
-                           )
-                         ),
-                         DTOutput("P02_table")
-                ),
+           ### UI - TAB 2 : FEF Opçoes  ##################################################      
+           tabPanel("Retorno FEF por opções",
+                    fluidPage(
+                      useShinyjs(),
+                      div(class = "checkbox-dark-panel",
+                      # ---- Instruction block (inserted first) ----
+                      fluidRow(
+                        column(
+                          width = 12,
+                          div(
+                            style = "margin-top: 5px; margin-bottom: 10px; color: #f5f5f5; text-align: justify; font-size: 20px;",
+                            tagList(
+                              tags$strong("Instruções: "),
+                              "Nesta aba, você pode simular a escolha de opções pelas UFs no contexto do PROPAG, ",
+                              "especificamente para calcular a contribuição total ao Fundo de Equalização Fiscal (FEF). ",
+                              "Você pode trabalhar em dois modos distintos: ",
+                              tags$span(class = "highlighted-note",
+                                        "(i) Todos os Estados seguem uma mesma opção ; (ii) Cada Estado escolhe sua própria opção. "),
+                              "A seleção feita aqui impacta diretamente a projeção do tamanho do FEF e seu fluxo líquido ao longo dos anos.",
+                              
+                              # Inline radio buttons follow directly
+                              div(
+                                style = "margin-top: 5px; font-size: 18px;",
+                                radioButtons("selection_mode", label = NULL,
+                                             choices = c("Todos os Estados seguem uma Opção" = "uniform",
+                                                         "Cada Estado escolhe uma Opção"     = "per_uf"),
+                                             selected = "uniform", inline = TRUE
+                                )
+                              )
+                            )
+                          )
+                        )  # end of column
+                        
+                        
+                      ), # end of fluid rows
+                      
+
+                      
+                      div(class = "checkbox-dark-panel matrix-wrapper",
+                          
+                          # Header row
+                          div(class = "matrix-row", style = "display: flex; align-items: center; margin-bottom: 6px;",
+                              div(style = "width: 300px;", ""),  # Opção + description
+                              div(style = "width: 40px; text-align: center; color: #f5f5f5; font-weight: bold;", "Todos"),
+                              lapply(sg_ufs, function(uf) {
+                                div(style = "width: 24px; text-align: center; font-size: 14px; font-weight: 500; color: #f5f5f5;", uf)
+                              })
+                          ),
+                          
+                          # Matrix rows per Opção
+                          lapply(opcoes, function(op) {
+                            div(class = "matrix-row", style = "display: flex; align-items: center; margin-bottom: 2px; height: 22px;",
+                                div(style = "width: 300px; text-align: left; padding-right: 6px; font-size: 14px; color: #f5f5f5;",
+                                    op_labels[[op]]
+                                ),
+                                div(style = "width: 40px; text-align: center;",
+                                    checkboxInput(paste0("chk_all_", op), label = NULL, value = FALSE)
+                                ),
+                                lapply(sg_ufs, function(uf) {
+                                  div(style = "width: 24px; text-align: center; padding: 0; margin: 0;",
+                                      checkboxInput(inputId = paste0("chk_", op, "_", uf), label = NULL, value = FALSE)
+                                  )
+                                })
+                            )
+                          })
+                      ),
+                      div(style = "margin-top: -20px; margin-bottom: 10px; text-align: justify; font-size: 40px;"),
+                              fluidRow(
+                        column(4,
+                               selectInput(
+                                 "uf_select",
+                                 label = tags$span("Escolha uma UF para visualizar os fluxos do FEF:", style = "color: white;"),
+                                 choices = nome_ufs,
+                                 selected = "Alagoas"
+                               )
+                        )
+                      )
+    
+                    ),
+                    fluidRow(
+                      column(12,
+                             plotOutput("plotab2", height = "450px")
+                      )
+                    )# end of div for checkbox-dark-panel
+                    ) # end of fluidPage
+           ), # end of tabPanel for FEF options
+ 
+    
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
+           
               
            ### UI - TAB 3 : META 11 VIGENTE  ##################################################
            
@@ -1675,11 +1772,534 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
   
   
   #################
-  # PLACE HOLDER FOR TAB 2 
+  # TAB 2 TAB2 TAB2 
   #################
   
+  # Track current mode
+  current_mode <- reactiveVal("uniform")
   
+  # Apply initial toggle states on startup
+  observe({
+    mode <- current_mode()
     
+    for (op in opcoes) {
+      toggleState(id = paste0("chk_all_", op), condition = (mode == "uniform"))
+      for (uf in sg_ufs) {
+        toggleState(id = paste0("chk_", op, "_", uf), condition = (mode == "per_uf"))
+      }
+    }
+  })
+  
+  
+  # Watch for mode switch
+  observeEvent(input$selection_mode, {
+    isolate({
+      # Only show modal if we've already initialized current_mode once
+      if (!is.null(current_mode()) && input$selection_mode != current_mode()) {
+        showModal(modalDialog(
+          title = "Mudar Modo de Seleção?",
+          "Essa ação limpará as seleções atuais. Deseja continuar?",
+          easyClose = FALSE,
+          footer = tagList(
+            modalButton("Cancelar"),
+            actionButton("confirm_mode_change", "Sim, mudar", class = "btn-danger")
+          )
+        ))
+      } else {
+        # If first load or same selection — just set mode silently
+        current_mode(input$selection_mode)
+      }
+    })
+  })
+  
+  
+  # Confirmed switch
+  observeEvent(input$confirm_mode_change, {
+    removeModal()
+    new_mode <- isolate(input$selection_mode)
+    current_mode(new_mode)
+    
+    # 1. Clear all checkboxes
+    for (op in opcoes) {
+      updateCheckboxInput(session, paste0("chk_all_", op), value = FALSE)
+      for (uf in sg_ufs) {
+        updateCheckboxInput(session, paste0("chk_", op, "_", uf), value = FALSE)
+      }
+    }
+    
+    # 2. Disable/enable controls after DOM is flushed
+    session$onFlushed(function() {
+      if (new_mode == "uniform") {
+        # Enable 'Todos' checkboxes, disable individual ones
+        for (op in opcoes) {
+          shinyjs::enable(paste0("chk_all_", op))
+          for (uf in sg_ufs) {
+            shinyjs::disable(paste0("chk_", op, "_", uf))
+          }
+        }
+      } else {
+        # Disable 'Todos' checkboxes, enable individual ones
+        for (op in opcoes) {
+          shinyjs::disable(paste0("chk_all_", op))
+          for (uf in sg_ufs) {
+            shinyjs::enable(paste0("chk_", op, "_", uf))
+          }
+        }
+      }
+    }, once = TRUE)
+  })
+  
+  
+  
+  
+  
+  
+  
+  
+  # Uniform: handle “Todos” row selection
+  observe({
+    for (op in opcoes) {
+      local({
+        op_local <- op
+        observeEvent(input[[paste0("chk_all_", op_local)]], {
+          req(current_mode() == "uniform")
+          selected <- isTRUE(input[[paste0("chk_all_", op_local)]])
+          for (other_op in setdiff(opcoes, op_local)) {
+            updateCheckboxInput(session, paste0("chk_all_", other_op), value = FALSE)
+            for (uf in sg_ufs) {
+              updateCheckboxInput(session, paste0("chk_", other_op, "_", uf), value = FALSE)
+            }
+          }
+          for (uf in sg_ufs) {
+            updateCheckboxInput(session, paste0("chk_", op_local, "_", uf), value = selected)
+          }
+        }, ignoreInit = TRUE)
+      })
+    }
+  })
+  
+  # Per-UF: column logic
+  observe({
+    for (uf in sg_ufs) {
+      for (op in opcoes) {
+        local({
+          uf_local <- uf
+          op_local <- op
+          id <- paste0("chk_", op_local, "_", uf_local)
+          observeEvent(input[[id]], {
+            if (current_mode() == "per_uf" && isTRUE(input[[id]])) {
+              for (other_op in setdiff(opcoes, op_local)) {
+                updateCheckboxInput(session, paste0("chk_", other_op, "_", uf_local), value = FALSE)
+              }
+            }
+          }, ignoreInit = TRUE)
+        })
+      }
+    }
+  })
+  
+  
+  
+  
+  # Track current mode
+  current_mode <- reactiveVal("uniform")
+  
+  # Apply initial toggle states on startup
+  observe({
+    mode <- current_mode()
+    
+    for (op in opcoes) {
+      toggleState(id = paste0("chk_all_", op), condition = (mode == "uniform"))
+      for (uf in sg_ufs) {
+        toggleState(id = paste0("chk_", op, "_", uf), condition = (mode == "per_uf"))
+      }
+    }
+  })
+  
+  
+  # Watch for mode switch
+  observeEvent(input$selection_mode, {
+    isolate({
+      # Only show modal if we've already initialized current_mode once
+      if (!is.null(current_mode()) && input$selection_mode != current_mode()) {
+        showModal(modalDialog(
+          title = "Mudar Modo de Seleção?",
+          "Essa ação limpará as seleções atuais. Deseja continuar?",
+          easyClose = FALSE,
+          footer = tagList(
+            modalButton("Cancelar"),
+            actionButton("confirm_mode_change", "Sim, mudar", class = "btn-danger")
+          )
+        ))
+      } else {
+        # If first load or same selection — just set mode silently
+        current_mode(input$selection_mode)
+      }
+    })
+  })
+  
+  
+  # Confirmed switch
+  observeEvent(input$confirm_mode_change, {
+    removeModal()
+    new_mode <- isolate(input$selection_mode)
+    current_mode(new_mode)
+    
+    # 1. Clear all checkboxes
+    for (op in opcoes) {
+      updateCheckboxInput(session, paste0("chk_all_", op), value = FALSE)
+      for (uf in sg_ufs) {
+        updateCheckboxInput(session, paste0("chk_", op, "_", uf), value = FALSE)
+      }
+    }
+    
+    # 2. Disable/enable controls after DOM is flushed
+    session$onFlushed(function() {
+      if (new_mode == "uniform") {
+        # Enable 'Todos' checkboxes, disable individual ones
+        for (op in opcoes) {
+          shinyjs::enable(paste0("chk_all_", op))
+          for (uf in sg_ufs) {
+            shinyjs::disable(paste0("chk_", op, "_", uf))
+          }
+        }
+      } else {
+        # Disable 'Todos' checkboxes, enable individual ones
+        for (op in opcoes) {
+          shinyjs::disable(paste0("chk_all_", op))
+          for (uf in sg_ufs) {
+            shinyjs::enable(paste0("chk_", op, "_", uf))
+          }
+        }
+      }
+    }, once = TRUE)
+  })
+  
+  
+  
+  
+  
+  
+  
+  
+  # Uniform: handle “Todos” row selection
+  observe({
+    for (op in opcoes) {
+      local({
+        op_local <- op
+        observeEvent(input[[paste0("chk_all_", op_local)]], {
+          req(current_mode() == "uniform")
+          selected <- isTRUE(input[[paste0("chk_all_", op_local)]])
+          for (other_op in setdiff(opcoes, op_local)) {
+            updateCheckboxInput(session, paste0("chk_all_", other_op), value = FALSE)
+            for (uf in sg_ufs) {
+              updateCheckboxInput(session, paste0("chk_", other_op, "_", uf), value = FALSE)
+            }
+          }
+          for (uf in sg_ufs) {
+            updateCheckboxInput(session, paste0("chk_", op_local, "_", uf), value = selected)
+          }
+        }, ignoreInit = TRUE)
+      })
+    }
+  })
+  
+  # Per-UF: column logic
+  observe({
+    for (uf in sg_ufs) {
+      for (op in opcoes) {
+        local({
+          uf_local <- uf
+          op_local <- op
+          id <- paste0("chk_", op_local, "_", uf_local)
+          observeEvent(input[[id]], {
+            if (current_mode() == "per_uf" && isTRUE(input[[id]])) {
+              for (other_op in setdiff(opcoes, op_local)) {
+                updateCheckboxInput(session, paste0("chk_", other_op, "_", uf_local), value = FALSE)
+              }
+            }
+          }, ignoreInit = TRUE)
+        })
+      }
+    }
+  })
+  
+############################################  #####
+# REACTIVE TABE TAB2 TAB2
+  
+
+  # Create a reactive that returns a named vector: names = sg_uf, values = chosen option
+  RKT_fef_choices <- reactive({ 
+    mode <- current_mode()
+    selected <- character(length(sg_ufs))
+    names(selected) <- sg_ufs
+    
+    if (mode == "uniform") {
+      # Check which chk_all_* is selected
+      for (op in opcoes) {
+        if (isTRUE(input[[paste0("chk_all_", op)]])) {
+          selected[] <- op
+          break
+        }
+      }
+    } else {
+      for (uf in sg_ufs) {
+        for (op in opcoes) {
+          if (isTRUE(input[[paste0("chk_", op, "_", uf)]])) {
+            selected[uf] <- op
+            break
+          }
+        }
+      }
+    }
+    selected
+  })
+  
+  
+  uf_map <- df_censo_UF |>
+    dplyr::select(sg_uf = SG_UF, NM_UF) |>
+    dplyr::distinct()
+  
+  
+  
+  RKT_fef_all_options <- reactive({
+    purrr::map_dfr(df_choices$opcao, function(op_label) {
+      df_base <- df_list[[op_label]]
+      if (is.null(df_base)) return(NULL)
+      
+      # Select required columns — NM_UF must be present and consistent with uf_map
+      df_base_min <- df_base |>
+        dplyr::select(NM_UF, Distr_FEF, dplyr::matches("^ApoFEF"))
+      
+      # Join on NM_UF with known-clean uf_map
+      df_joined <- dplyr::left_join(df_base_min, uf_map, by = "NM_UF")
+      
+      if (any(is.na(df_joined$sg_uf))) {
+        unmatched <- df_joined$NM_UF[is.na(df_joined$sg_uf)]
+        warning("Could not match all NM_UF values to sg_uf for option ", op_label,
+                ". Unmatched: ", paste(unique(unmatched), collapse = ", "))
+      }
+      
+      df_joined$opcao <- op_label
+      df_joined
+    })
+  })
+  
+  
+  
+
+  RKT_fef_table <- reactive({
+    choices <- RKT_fef_choices()
+    all_df <- RKT_fef_all_options()
+    
+    if (is.null(all_df)) return(NULL)
+    
+    mode <- current_mode()
+    
+    if (mode == "uniform") {
+      op_code <- unique(choices)
+      if (length(op_code) != 1 || !nzchar(op_code)) return(NULL)
+      
+      op_label <- df_choices$opcao[match(toupper(op_code), toupper(opcoes))]
+      return(dplyr::filter(all_df, opcao == op_label))
+    } else {
+      choice_df <- tibble::tibble(
+        sg_uf = names(choices),
+        op_code = choices
+      ) |>
+        dplyr::filter(nzchar(op_code)) |>
+        dplyr::mutate(opcao = df_choices$opcao[match(toupper(op_code), toupper(opcoes))]) |>
+        dplyr::select(sg_uf, opcao, op_code)      |>
+        dplyr::filter(nzchar(op_code)) |>
+        dplyr::mutate(opcao = df_choices$opcao[match(toupper(op_code), toupper(opcoes))])
+      
+      # Join only on sg_uf and opcao — NM_UF will come cleanly from all_df
+      dplyr::inner_join(all_df, choice_df, by = c("sg_uf","opcao"))
+    }
+  })
+  
+  
+  
+  
+  RKT_fef_total_by_year <- reactive({
+    df <- RKT_fef_table()
+    req(df)
+
+    # Select ApoFEF columns
+    cols <- grep("^ApoFEF", names(df), value = TRUE)
+
+    total <- colSums(df[, cols, drop = FALSE], na.rm = TRUE)
+
+    # Convert to tibble with year extracted from column names
+    tibble::tibble(
+      year = as.integer(sub("ApoFEF", "", names(total))),
+      total_fef = as.numeric(total)
+    )
+  })
+
+  
+  
+  RKT_fef_liq_flow_by_uf <- reactive({
+    df <- RKT_fef_table()
+    total <- RKT_fef_total_by_year()
+    
+    req(df, total)
+    
+    # Step 1: Identify all ApoFEF columns
+    fef_cols <- grep("^ApoFEF", names(df), value = TRUE)
+    years <- as.integer(sub("ApoFEF", "", fef_cols))
+    
+    # Step 2: Get total FEF per year as a named vector
+    total_vec <- setNames(total$total_fef, paste0("ApoFEF", total$year))
+    
+    # Step 3: Prepare starting df with core identity and ApoFEF columns
+    liq_df <- df[, c("sg_uf", "NM_UF", "opcao", "Distr_FEF", fef_cols)]
+    
+    # Step 4: Add LiqFEF columns
+    for (col in fef_cols) {
+      year <- sub("ApoFEF", "", col)
+      total_amt <- total_vec[[col]]
+      liq_df[[paste0("LiqFEF", year)]] <- (liq_df$Distr_FEF * total_amt) - df[[col]]
+    }
+    
+    liq_df
+  })
+  
+  
+  # Tab2: Prepare data for plotting
+  RKT_fef_plot_data <- reactive({
+    df <- RKT_fef_liq_flow_by_uf()
+    req(df)
+    
+    uf_input <- input$uf_select
+    df_uf <- dplyr::filter(df, NM_UF == uf_input)
+    
+    # Gather data: ApoFEF* and LiqFEF*
+    df_long <- df_uf |>
+      tidyr::pivot_longer(
+        cols = matches("^(ApoFEF|LiqFEF)\\d+"),
+        names_to = "var",
+        values_to = "value"
+      ) |>
+      dplyr::mutate(
+        type = dplyr::if_else(stringr::str_starts(var, "ApoFEF"), "ApoFEF", "LiqFEF"),
+        year = as.integer(stringr::str_remove(var, "^(ApoFEF|LiqFEF)"))
+      )
+    
+    df_long
+  })
+  
+  
+  
+  
+  
+  # # Print RKT_fef_choices to console
+  # observe({
+  #   cat("=== RKT_fef_choices() ===\n")
+  #   print(RKT_fef_choices())
+  # })
+  # 
+  # observe({
+  #   df <- RKT_fef_table()
+  #   if (!is.null(df)) {
+  #     cat("=== RKT_fef_choices() ===\n")
+  #     print(RKT_fef_choices())
+  # 
+  #     cat("=== RKT_fef_table() ===\n")
+  #     print(df, n = 100, na.print="NA")
+  # 
+  #     cat("=== Total aporte_fef across UFs ===\n")
+  #     cols <- grep("^ApoFEF", names(df), value = TRUE)
+  #     totals <- colSums(df[, cols, drop = FALSE], na.rm = TRUE)
+  #     print(round(totals, 2))
+  #   }
+  # })
+  # 
+  # observe({
+  #   total_df <- RKT_fef_total_by_year()
+  #   if (!is.null(total_df)) {
+  #     cat("=== Total FEF by Year ===\n")
+  #     print(total_df, n = nrow(total_df))
+  #   }
+  # })
+  
+  # observe({
+  #   liq_df <- RKT_fef_liq_flow_by_uf()
+  #   if (!is.null(liq_df)) {
+  #     cat("=== Net FEF Flow (LiqFEF) by UF ===\n")
+  #     print(liq_df, n = nrow(liq_df), na.print = "NA")
+  #   }
+  # })
+  # 
+  
+  
+  ###################### OUTPUT Tab2  OUTPUT Tab2 OUTPUT OUTPUT Tab2 OUTPUT OUTPUT Tab2 OUTPUT ############################
+  ###################### OUTPUT Tab2  OUTPUT Tab2 OUTPUT OUTPUT Tab2 OUTPUT OUTPUT Tab2 OUTPUT ############################
+  
+  output$plotab2 <- renderPlot({
+    df <- RKT_fef_plot_data()
+    req(nrow(df) > 0)
+    
+    # Define colors manually
+    fill_colors <- c("ApoFEF" = "#fbb4ae", "LiqFEF" = "#b30000")
+    
+    # Create label column
+    df$label <- paste0(scales::comma(df$value / 1e6), " mi")
+    
+    df$hjust <- dplyr::case_when(
+      df$value >= 0 ~ 1.2,  # slightly above the bar (negative = upward in y)
+      df$value <  0 ~  -0.2   # slightly below the bar
+    )
+    
+    # Consistent horontal centering of rotated text
+    df$vjust <- 0.5 # center
+    
+    dodge_width <- 0.75
+    pos_dodge <- position_dodge(width = dodge_width)
+    
+    # Font size can be adjusted for year range
+    n_years <- length(unique(df$year))
+    text_size <- dplyr::case_when(
+      n_years <= 10 ~ 10,
+      n_years <= 20 ~ 8,
+      TRUE          ~ 6
+    )
+
+
+    # Main ggplot
+    ggplot(df, aes(x = factor(year), y = value, fill = type)) +
+      geom_col(position = pos_dodge, width = dodge_width) +
+      geom_text(
+        aes(label = label, hjust = hjust),
+        position = pos_dodge,
+        color= "black",
+        size = text_size,
+        angle = 90,
+        vjust    = 0.5,
+        fontface = "bold"
+      ) +
+      scale_color_identity()+
+      scale_fill_manual(values = fill_colors,
+                        labels = c("ApoFEF" = "Aporte FEF", "LiqFEF" = "Fluxo Líquido")) +
+      scale_y_continuous(labels = scales::comma_format(big.mark = ".", decimal.mark = ",")) +
+      labs(
+        x = "Ano", y = "Valor (R$)", fill = NULL,
+        title = paste("UF:", input$uf_select, "– Aporte e Fluxo Líquido do FEF")
+      ) +
+      theme_minimal() +
+      theme(
+        legend.position = "right",
+        axis.text.x     = element_text(size = 12, angle = 90, vjust = 0.5, color = "blue"),
+        axis.text.y     = element_text(size = 12, color = "blue"),
+        axis.title.x    = element_text(size = 14, color = "blue", face = "bold"),
+        axis.title.y    = element_text(size = 14, color = "blue", face = "bold"),
+        plot.title      = element_text(size = 18, face = "bold", hjust = 0.5, color = "#1f5673")
+      )
+  })
+  
+  
+  
+  
   
   ######### TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  
   ##############################################################################################################################
