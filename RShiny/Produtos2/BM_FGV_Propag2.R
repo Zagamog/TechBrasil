@@ -281,7 +281,7 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
       )
     ),
     
-    tabsetPanel(id = "tab_selection", selected = "Finance 1b",
+    tabsetPanel(id = "tab_selection", selected = "Retorno FEF por opções",
            ### UI - TAB 1 : FINANCE ##################################################
                   tabPanel("Tema Financiero",
                          fluidPage(
@@ -2303,7 +2303,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
     req(nrow(df) > 0)
     
     # Define colors manually
-    fill_colors <- c("ApoFEF" = "#fbb4ae", "LiqFEF" = "#b30000")
+    fill_colors <- c("ApoFEF" = "#fbb4ae", "LiqFEF" = "#FF4D4D")
     
     # Create label column
     df$label <- paste0(scales::comma(df$value / 1e6), " mi")
