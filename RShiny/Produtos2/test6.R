@@ -93,7 +93,7 @@ server <- function(input, output, session) {
   # 1) populate eixo dropdown on startup
   observe({
     all_eixos <- sort(unique(df_mat_eixo_wide$`Eixo Tecnológico`))
-    all_eixos <- setdiff(all_eixos, "Militar")
+ #   all_eixos <- setdiff(all_eixos, "Militar")
     choices <- c("Total de todos eixos", all_eixos)
     updateSelectizeInput(
       session, "eixo_select",
