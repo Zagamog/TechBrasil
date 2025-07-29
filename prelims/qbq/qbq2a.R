@@ -458,11 +458,11 @@ junk2 <- df_censo_touse %>%
   mutate(tag_cnct = map_chr(tag_cnct, 1)) %>%
   left_join(
     df_cnct_full %>% 
-      select(IDX_EIXCUR, course_id, `Área Tecnológica`, `Perfil Profissional de Conclusão`,
+      select(IDX_EIXCUR, , `Área Tecnológica`, `Perfil Profissional de Conclusão`,
              `Campo de Atuação`, `Ocupações CBO Associadas`, `Infraestrutura Mínima`),
     by = c("tag_cnct" = "IDX_EIXCUR")
   ) %>%
-  arrange(IDX_EIXCUR) %>% select(1,2,7:16) %>% rename(course_id_cnct=course_id)
+  arrange(IDX_EIXCUR) 
 
 
 
@@ -497,6 +497,10 @@ sum(df_censo_notin_cnct$QT_MAT_CURSO_TEC)  # 55,707 individuals
 save(df_censo_notin_cnct, file = "D:/Country/Brazil/TechBrazil/working/mec_inep/df_censo_notin_cnct.rda")
 
 
+
+
+
+
 # Matched rows: keep only rows where we found a CNCT match
 
 df_censo_supl_tec_4qbqALL <- df_censo_supl_tec3 %>%
@@ -505,6 +509,136 @@ df_censo_supl_tec_4qbqALL <- df_censo_supl_tec3 %>%
 sum(df_censo_supl_tec_4qbqALL$QT_MAT_CURSO_TEC) # 4,526,525 
 
 # so 55707/4562525 = 1.2% of the data is unmatched in CNCT
+
+save(df_censo_supl_tec_4qbqALL, file = "D:/Country/Brazil/TechBrazil/working/qbq/df_censo_supl_tec_4qbqALL.rda")
+
+
+# Get censo data from Shiny App
+load("D:/Country/Brazil/TechBrazil/working/ibge/df_codes_ibge.rda")
+temp_UFs <- df_codes_ibge %>%
+  select(CO_MUN, NM_UF, SG_UF, CO_UF) %>%
+  distinct() %>%
+  arrange(SG_UF)
+
+## Enrollment by courses
+
+df_censo_cnct <- left_join(df_censo_supl_tec_4qbqALL, temp_UFs, by ="CO_MUN") %>% filter(Eixo_Tecnologico_CNCT != "Militar")
+
+
+# I need to create aggregates of QT_MAT_CURSO_TEC by Eixo_Tecnologico_CNCT, Area_Tecnologica_CNCT, IDX_EIXCUR,
+names(df_cnct2025a)
+
+# Aggrgated by UF
+
+df_mat_uf <- df_censo_cnct %>%
+  group_by(CO_UF, NM_UF, SG_UF, ANO) %>%
+  summarise(QT_MAT_CURSO_TEC_UF = sum(QT_MAT_CURSO_TEC, na.rm = TRUE)) %>%
+  arrange(SG_UF)
+
+# Create total row for each ANO (e.g. 2023 and 2024)
+total_rows <- df_mat_uf %>%
+  group_by(ANO) %>%
+  summarise(
+    QT_MAT_CURSO_TEC_UF = sum(QT_MAT_CURSO_TEC_UF, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    CO_UF = 0L,
+    NM_UF = "Brasil",
+    SG_UF = "BR"
+  ) %>%
+  dplyr::relocate(CO_UF, NM_UF, SG_UF, ANO, QT_MAT_CURSO_TEC_UF) 
+
+
+df_mat_uf <- bind_rows(df_mat_uf, total_rows) %>%
+  arrange(ANO, desc(SG_UF))  
+
+
+
+# Aggregates by Eixo
+# Base aggregation (already done)
+df_mat_eixo <- df_censo_cnct %>%
+  group_by(CO_UF, NM_UF, SG_UF, ANO, Eixo_Tecnologico_CNCT) %>%
+  summarise(QT_MAT_CURSO_TEC_EIX = sum(QT_MAT_CURSO_TEC, na.rm = TRUE)) %>%
+  rename(`Eixo Tecnológico` = Eixo_Tecnologico_CNCT)
+
+# Now: aggregate total Brasil by Eixo and ANO
+total_rows_eixo <- df_mat_eixo %>%
+  group_by(`Eixo Tecnológico`, ANO) %>%
+  summarise(
+    QT_MAT_CURSO_TEC_EIX = sum(QT_MAT_CURSO_TEC_EIX, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    CO_UF = 0L,
+    NM_UF = "Brasil",
+    SG_UF = "BR"
+  ) %>%
+  dplyr::relocate(CO_UF, NM_UF, SG_UF, ANO, QT_MAT_CURSO_TEC_EIX) 
+
+
+
+# Bind to main table
+df_mat_eixo <- bind_rows(df_mat_eixo, total_rows_eixo) %>%
+  arrange(ANO, `Eixo Tecnológico`, desc(SG_UF))  # optional sorting
+
+
+
+# Aggregates by Área
+df_mat_area <- df_censo_cnct %>%
+  group_by(CO_UF, NM_UF, SG_UF, ANO, Area_Tecnologica_CNCT) %>%
+  summarise(QT_MAT_CURSO_TEC_ARE = sum(QT_MAT_CURSO_TEC, na.rm = TRUE)) %>%
+  rename(`Área Tecnológica` = Area_Tecnologica_CNCT)
+
+# Add BR totals
+total_rows_area <- df_mat_area %>%
+  group_by(`Área Tecnológica`, ANO) %>%
+  summarise(QT_MAT_CURSO_TEC_ARE = sum(QT_MAT_CURSO_TEC_ARE, na.rm = TRUE)) %>%
+  mutate(
+    CO_UF = 0L,
+    NM_UF = "Brasil",
+    SG_UF = "BR"
+  ) %>%
+  dplyr::relocate(CO_UF, NM_UF, SG_UF, ANO, QT_MAT_CURSO_TEC_ARE) 
+
+
+df_mat_area <- bind_rows(df_mat_area, total_rows_area) %>%
+  arrange(ANO, `Área Tecnológica`, desc(SG_UF))
+
+# Aggregates by Curso (IDX_EIXCUR)
+df_mat_curso <- df_censo_cnct %>%
+  group_by(CO_UF, NM_UF, SG_UF, ANO, IDX_EIXCUR, Denominacao_Curso_CNCT) %>%
+  summarise(QT_MAT_CURSO_TEC_CUR = sum(QT_MAT_CURSO_TEC, na.rm = TRUE))  %>%
+  rename(`Denominação do Curso` = Denominacao_Curso_CNCT)
+
+# Add BR totals
+total_rows_curso <- df_mat_curso %>%
+  group_by(`Denominação do Curso`, IDX_EIXCUR, ANO) %>%
+  summarise(QT_MAT_CURSO_TEC_CUR = sum(QT_MAT_CURSO_TEC_CUR, na.rm = TRUE)) %>%
+  mutate(
+    CO_UF = 0L,
+    NM_UF = "Brasil",
+    SG_UF = "BR"
+  ) %>%
+  select(CO_UF, NM_UF, SG_UF, ANO, `Denominação do Curso`, IDX_EIXCUR, QT_MAT_CURSO_TEC_CUR)
+
+df_mat_curso <- bind_rows(df_mat_curso, total_rows_curso) %>%
+  arrange(ANO, `Denominação do Curso`, desc(SG_UF))
+
+
+# Add BR totals
+df_mat_curso <- df_mat_curso %>% ungroup()
+df_mat_area  <- df_mat_area  %>% ungroup()
+df_mat_eixo  <- df_mat_eixo  %>% ungroup()
+df_mat_uf    <- df_mat_uf    %>% ungroup()
+
+
+save(df_mat_uf, file = "D:/Country/Brazil/TechBrazil/working/mec_inep/df_mat_uf.rda")
+save(df_mat_eixo, file = "D:/Country/Brazil/TechBrazil/working/mec_inep/df_mat_eixo.rda")
+save(df_mat_area, file = "D:/Country/Brazil/TechBrazil/working/mec_inep/df_mat_area.rda")
+save(df_mat_curso, file = "D:/Country/Brazil/TechBrazil/working/mec_inep/df_mat_curso.rda")
+
+
 
 # To match with qbq data I dont need the entire data;
 
@@ -570,7 +704,6 @@ leftover_4digit <- df_censo_supl_tec_4qbq %>%
 
 
 
-save(df_censo_supl_tec_4qbqALL, file = "D:/Country/Brazil/TechBrazil/working/qbq/df_censo_supl_tec_4qbqALL.rda")
 save(df_censo_supl_tec_4qbq, file = "D:/Country/Brazil/TechBrazil/working/qbq/df_censo_supl_tec_4qbq.rda")
 openxlsx::write.xlsx(df_censo_supl_tec_4qbq, "D:/Country/Brazil/TechBrazil/working/qbq/df_censo_supl_tec_4qbq.xlsx", rowNames = FALSE)
 
