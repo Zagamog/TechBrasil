@@ -1,92 +1,214 @@
- 
-    # 1) Carrega a sua tabela de 145 cenários válidos
-    load("dfcen_val.rda")  # assume que dfcen_val tem colunas A, F, I, J
-    # agora a coluna F deve guardar "G1","G2","G3"
-    
-    # 2) Mapeamento completo label → valor, EXATAMENTE como no UI
-    all_choices <- list(
-      A = c(
-        "Sem abatimento"  = "A1",
-        "10% abatimento" = "A2",
-        "20% abatimento" = "A3"
-      ),
-      G = c(
-        "1%"   = "G1",
-        "1.5%" = "G2",
-        "2%"   = "G3"
-      ),
-      I = c(
-        "0%"   = "I1",
-        "0.5%" = "I2",
-        "2%"   = "I3",
-        "1%"   = "I4"
-      ),
-      J = c(
-        "0%"          = "J1",
-        "1%"          = "J2",
-        "2%"          = "J3",
-        "4% (Não Adere)" = "J4"
-      )
-    )
-    
-    # 3) Função auxiliar: dado um dimensão dim ∈ {A,F,I,J}
-    #    e as seleções nos demais sel (lista com 3 elementos),
-    #    retorna o vetor de códigos permitidos nessa dim
-    valid_codes <- function(dim, sel) {
-      df <- dfcen_val
-      for(d in names(sel)) {
-        df <- df[df[[d]] %in% sel[[d]], , drop = FALSE]
-      }
-      sort(unique(df[[dim]]))
-    }
-    
-    # 4) Observador único que reage a qualquer mudança nos 4 grupos
-    observeEvent(
-      list(input$choice_A, input$choice_G, input$choice_I, input$choice_J),
-      {
-        # 4.1) Agrupa seleções atuais
-        sel <- list(
-          A = input$choice_A,
-          G = input$choice_G,  # note: usamos G aqui porque a coluna ainda se chama F
-          I = input$choice_I,
-          J = input$choice_J
+# test6.R
+library(shiny)
+library(shinyjs)
+library(dplyr)
+library(tidyr)
+library(DT)
+
+# ————— 1) Load your four “_wide” tables exactly as before —————
+load("df_mat_uf.rda")
+load("df_mat_eixo.rda")
+load("df_mat_area.rda")
+load("df_mat_curso.rda")
+load("meta11a_opcoes.rda")
+load("df_exarcu.rda")      # << new
+
+df_mat_uf_wide <- df_mat_uf %>%
+  select(CO_UF, NM_UF, SG_UF, ANO, QT_MAT_CURSO_TEC_UF) %>%
+  pivot_wider(
+    names_from  = ANO,
+    values_from = QT_MAT_CURSO_TEC_UF,
+    values_fill = list(QT_MAT_CURSO_TEC_UF = 0),
+    values_fn   = sum
+  ) %>%
+  rename(`Matrículas 2023` = `2023`, `Matrículas 2024` = `2024`)
+
+df_mat_eixo_wide <- df_mat_eixo %>%
+  select(CO_UF, NM_UF, SG_UF, `Eixo Tecnológico`, ANO, QT_MAT_CURSO_TEC_EIX) %>%
+  pivot_wider(
+    names_from  = ANO,
+    values_from = QT_MAT_CURSO_TEC_EIX,
+    values_fill = list(QT_MAT_CURSO_TEC_EIX = 0),
+    values_fn   = sum
+  ) %>%
+  rename(`Matrículas 2023` = `2023`, `Matrículas 2024` = `2024`)
+
+df_mat_area_wide <- df_mat_area %>%
+  select(CO_UF, NM_UF, SG_UF, `Área Tecnológica`, ANO, QT_MAT_CURSO_TEC_ARE) %>%
+  pivot_wider(
+    names_from  = ANO,
+    values_from = QT_MAT_CURSO_TEC_ARE,
+    values_fill = list(QT_MAT_CURSO_TEC_ARE = 0),
+    values_fn   = sum
+  ) %>%
+  rename(`Matrículas 2023` = `2023`, `Matrículas 2024` = `2024`)
+
+df_mat_curso_wide <- df_mat_curso %>%
+  select(CO_UF, NM_UF, SG_UF, IDX_EIXCUR, `Denominação do Curso`, ANO, QT_MAT_CURSO_TEC_CUR) %>%
+  pivot_wider(
+    names_from  = ANO,
+    values_from = QT_MAT_CURSO_TEC_CUR,
+    values_fill = list(QT_MAT_CURSO_TEC_CUR = 0),
+    values_fn   = sum
+  ) %>%
+  rename(`Matrículas 2023` = `2023`, `Matrículas 2024` = `2024`)
+
+# ————— 2) UI: just UF selector + two DTs —————
+ui <- fluidPage(
+  useShinyjs(),
+  tags$head(includeCSS("www/custom.css")),
+  
+  div(class = "checkbox-dark-panel",
+      fluidRow(
+        column(
+          width = 3,
+          selectizeInput("uf_select", "Selecionar UF ou Brasil:",
+                         choices = NULL,
+                         options = list(placeholder = "Brasil"))
         )
-        
-        # 4.2) Para cada dimensão, decide quais opções manter
-        for(dim in c("A","G","I","J")) {
-          others <- sel[names(sel) != dim]
-          if (all(lengths(others) > 0)) {
-            ok <- valid_codes(dim, others)
-            # filtra o mapeamento completo para essas chaves
-            keep <- all_choices[[dim]][ all_choices[[dim]] %in% ok ]
-          } else {
-            # se algum dos outros ainda não foi selecionado, mostramos tudo
-            keep <- all_choices[[dim]]
-          }
-          
-          # 4.3) Atualiza o widget correspondente:
-          #      - para A → "choice_A"
-          #      - para F → "choice_G"
-          #      - para I → "choice_I"
-          #      - para J → "choice_J"
-          inputId <- switch(dim,
-                            A = "choice_A",
-                            G = "choice_G",
-                            I = "choice_I",
-                            J = "choice_J")
-          updatePrettyCheckboxGroup(
-            session,
-            inputId  = inputId,
-            choices  = keep,
-            selected = intersect(sel[[dim]], keep),
-            inline   = TRUE
-          )
-        }
-      },
-      ignoreInit = TRUE
+      ),
+      
+      fluidRow(
+        column(
+          width = 3,
+          h4("1) Matrículas por Eixo"),
+          DTOutput("agg_table"),
+          hr(),
+          h4("2) Matrículas por Área"),
+          DTOutput("area_table")
+        ),
+        column(
+          width = 3,
+          div(h4("Conteúdo do lado direito aqui"))
+        )
+      )
+  )
+)
+
+# ————— 3) Server: UF → Eixo-table → Área-table —————
+server <- function(input, output, session) {
+  
+  # populate UF dropdown
+  observe({
+    all_ufs <- sort(unique(df_mat_eixo_wide$NM_UF))
+    updateSelectizeInput(
+      session, "uf_select",
+      choices  = c("Brasil", all_ufs),
+      selected = "Brasil",
+      server   = TRUE
     )
+  })
+  
+  # reactive DF of Eixo rows for the chosen UF
+  agg_df <- reactive({
+    req(input$uf_select)
+    df_mat_eixo_wide %>%
+      filter(NM_UF == input$uf_select) %>%
+      select(NM_UF, `Eixo Tecnológico`, `Matrículas 2023`, `Matrículas 2024`) %>%
+      arrange(desc(`Matrículas 2024`))
+  })
+  
+  # 1) render the Eixo-table with single selection + total row + formatting
+  output$agg_table <- renderDT({
+    df0 <- agg_df()
     
-    # --- aqui você pode adicionar os seus outputs, gráficos, DT etc ---
-  }
+    # tack on the Total row
+    total_row <- df0 %>%
+      summarise(
+        NM_UF               = "Total",
+        `Eixo Tecnológico` = "",
+        `Matrículas 2023`   = sum(`Matrículas 2023`, na.rm = TRUE),
+        `Matrículas 2024`   = sum(`Matrículas 2024`, na.rm = TRUE)
+      )
+    df_final <- bind_rows(df0, total_row)
+    
+    datatable(
+      df_final,
+      selection = "single",
+      rownames  = FALSE,
+      class     = "compact stripe",
+      options   = list(
+        pageLength = nrow(df_final),
+        autoWidth  = TRUE,
+        language   = list(
+          url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json"
+        )
+      )
+    ) %>%
+      formatCurrency(
+        columns   = c("Matrículas 2023", "Matrículas 2024"),
+        currency  = "",
+        interval  = 3,
+        mark      = ".",
+        dec.mark  = ","
+      ) %>%
+      formatStyle(
+        columns     = c("Matrículas 2023", "Matrículas 2024"),
+        `text-align` = "right"
+      ) %>%
+      formatStyle(
+        "NM_UF",
+        target     = "row",
+        fontWeight = styleEqual("Total", "bold"),
+        background = styleEqual("Total", "#0d0863")
+      )
+  })
+  
+  # grab the clicked Eixo from agg_table
+  # Option A: base R [[
+  selected_eixo <- reactive({
+    req(input$agg_table_rows_selected)
+    df <- agg_df()
+    df[[ "Eixo Tecnológico" ]][ input$agg_table_rows_selected ]
+  })
+  
+  # 2) render the Área-table once an Eixo is clicked
+
+  output$area_table <- renderDT({
+    # 1) which Eixo was clicked?
+    eixo <- agg_df()$`Eixo Tecnológico`[ input$agg_table_rows_selected ]
+    req(eixo)
+    
+    # 2) get only the Áreas that belong to that Eixo from df_exarcu
+    df_ex_areas <- df_exarcu %>%
+      filter(`Eixo Tecnológico` == eixo) %>%
+      distinct(`Área Tecnológica`)
+    
+    # 3) join in the UF counts from df_mat_area_wide
+    df_ex_areas %>%
+      left_join(
+        df_mat_area_wide %>% filter(NM_UF == input$uf_select),
+        by = "Área Tecnológica"
+      ) %>%
+      select(
+        NM_UF,
+        `Área Tecnológica`,
+        `Matrículas 2023`,
+        `Matrículas 2024`
+      ) %>%
+      arrange(desc(`Matrículas 2024`)) %>%
+      datatable(
+        rownames = FALSE,
+        class    = "compact stripe",
+        options  = list(
+          pageLength = 12,
+          autoWidth  = TRUE,
+          language   = list(
+            url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json"
+          )
+        )
+      ) %>%
+      formatCurrency(
+        c("Matrículas 2023","Matrículas 2024"),
+        currency = "", interval = 3, mark = ".", dec.mark = ","
+      ) %>%
+      formatStyle(
+        c("Matrículas 2023","Matrículas 2024"),
+        `text-align` = "right"
+      )
+  })
   
   
+}
+
+shinyApp(ui, server)

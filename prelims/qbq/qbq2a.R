@@ -626,6 +626,20 @@ df_mat_curso <- bind_rows(df_mat_curso, total_rows_curso) %>%
   arrange(ANO, `Denominação do Curso`, desc(SG_UF))
 
 
+# Heirarchy
+df_exarcu <- df_censo_cnct %>%
+  distinct(
+    IDX_EIXCUR,
+    `Eixo Tecnológico`   = Eixo_Tecnologico_CNCT,
+    `Área Tecnológica`   = Area_Tecnologica_CNCT,
+    `Denominação do Curso` = Denominacao_Curso_CNCT
+  ) %>%
+  arrange(`Eixo Tecnológico`, `Área Tecnológica`, `Denominação do Curso`)
+
+
+
+
+
 # Add BR totals
 df_mat_curso <- df_mat_curso %>% ungroup()
 df_mat_area  <- df_mat_area  %>% ungroup()
@@ -637,7 +651,7 @@ save(df_mat_uf, file = "D:/Country/Brazil/TechBrazil/working/mec_inep/df_mat_uf.
 save(df_mat_eixo, file = "D:/Country/Brazil/TechBrazil/working/mec_inep/df_mat_eixo.rda")
 save(df_mat_area, file = "D:/Country/Brazil/TechBrazil/working/mec_inep/df_mat_area.rda")
 save(df_mat_curso, file = "D:/Country/Brazil/TechBrazil/working/mec_inep/df_mat_curso.rda")
-
+save(df_exarcu, file = "D:/Country/Brazil/TechBrazil/working/mec_inep/df_exarcu.rda")
 
 
 # To match with qbq data I dont need the entire data;
