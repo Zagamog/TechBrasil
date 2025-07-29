@@ -2,12 +2,14 @@ rm(list = ls())
 gc()
 options(scipen = 999)
 
+library(dplyr)
 library(tidyverse) #load tidyverse packages for data manipulation and visualization
 library(readxl) # read xlsx files
 library(here) #package to simplify directory definition and make the code more easily reproduceble.
 library(zoo) #to compute moving averages
 library(scales)
 library(dlookr)
+library(dplyr)
 
 input_folder1 <- here("rawdata/ibge") 
 input_folder2 <- here("rawdata/mintraemp")
@@ -109,3 +111,6 @@ descstats_cegedrais <- dlookr::describe(caged_rais)
 write_csv(caged_rais, here("working", "rais_caged_cbo2_rgint_2023_2024.csv"))
 
 
+
+
+sum(dfr$total_vinculo_ativo_3112, na.rm = TRUE) # 

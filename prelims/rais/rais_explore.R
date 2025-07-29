@@ -22,3 +22,7 @@ table(df$vinculo_ativo_3112)
 total_ativos_norte <- sum(df$v_nculo_ativo_31_12 == 1, na.rm = TRUE)
 
 table(df$natureza_jur_dica, useNA = "always")
+
+
+##
+
