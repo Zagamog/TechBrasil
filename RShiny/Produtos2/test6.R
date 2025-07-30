@@ -53,6 +53,91 @@ df_mat_curso_wide <- df_mat_curso %>%
   ) %>%
   rename(`Matrículas 2023` = `2023`, `Matrículas 2024` = `2024`)
 
+###
+#CBO
+
+# Combine and add year label
+df_rais_all <- bind_rows(
+  rais_cbo6_uf23 %>% mutate(ANO = 2023),
+  rais_cbo6_uf24 %>% mutate(ANO = 2024)
+)
+
+# ——— Aggregates by Brazil level ———
+
+# 1. CBO 1-digit (cbo_1dig)
+rais_br_cbo1 <- df_rais_all %>%
+  group_by(ANO, cbo_1dig, cbo_gragru) %>%
+  summarise(vinculos = sum(vinculos, na.rm = TRUE), .groups = "drop") %>%
+  mutate(NM_UF = "Brasil", SG_UF = "BR")
+
+# 2. CBO 4-digit
+rais_br_cbo4 <- df_rais_all %>%
+  group_by(ANO, cbo_4dig, cbo_familia) %>%
+  summarise(vinculos = sum(vinculos, na.rm = TRUE), .groups = "drop") %>%
+  mutate(NM_UF = "Brasil", SG_UF = "BR")
+
+# 3. Full CodCBO level (occupation level)
+rais_br_codcbo <- df_rais_all %>%
+  group_by(ANO, CodCBO, Ocupação) %>%
+  summarise(vinculos = sum(vinculos, na.rm = TRUE), .groups = "drop") %>%
+  mutate(NM_UF = "Brasil", SG_UF = "BR")
+
+# ——— Merge back Brasil with UF-level if needed ———
+df_rais1dig <- bind_rows(df_rais_all %>% 
+                           group_by(ANO, NM_UF, SG_UF, cbo_1dig, cbo_gragru) %>%
+                           summarise(vinculos = sum(vinculos, na.rm = TRUE), .groups = "drop"),
+                         rais_br_cbo1)
+
+df_rais4dig <- bind_rows(df_rais_all %>% 
+                           group_by(ANO, NM_UF, SG_UF, cbo_4dig, cbo_familia) %>%
+                           summarise(vinculos = sum(vinculos, na.rm = TRUE), .groups = "drop"),
+                         rais_br_cbo4)
+
+df_raisCodCBO <- bind_rows(df_rais_all %>% 
+                             group_by(ANO, NM_UF, SG_UF, CodCBO, Ocupação) %>%
+                             summarise(vinculos = sum(vinculos, na.rm = TRUE), .groups = "drop"),
+                           rais_br_codcbo)
+
+
+df_rais1dig_wide <- df_rais1dig %>%
+  pivot_wider(
+    names_from  = ANO,
+    values_from = vinculos,
+    values_fill = list(vinculos = 0),
+    values_fn   = sum
+  ) %>%
+  rename(`Vínculos 2023` = `2023`, `Vínculos 2024` = `2024`)
+
+
+df_rais4dig_wide <- df_rais4dig %>%
+  pivot_wider(
+    names_from  = ANO,
+    values_from = vinculos,
+    values_fill = list(vinculos = 0),
+    values_fn   = sum
+  ) %>%
+  rename(`Vínculos 2023` = `2023`, `Vínculos 2024` = `2024`)
+
+df_raisCodCBO_wide <- df_raisCodCBO %>%
+  pivot_wider(
+    names_from  = ANO,
+    values_from = vinculos,
+    values_fill = list(vinculos = 0),
+    values_fn   = sum
+  ) %>%
+  rename(`Vínculos 2023` = `2023`, `Vínculos 2024` = `2024`)
+
+
+
+
+
+
+
+
+
+
+
+
 # ————— 2) UI: just UF selector + two DTs —————
 ui <- fluidPage(
   useShinyjs(),

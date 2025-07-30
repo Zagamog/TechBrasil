@@ -5,7 +5,7 @@ library(data.table)
 
 # Dowload vinculos by muni
 
-extract_rais_txt_files <- function(ano = 2024) {
+extract_rais_txt_files <- function(ano = 2023) {
   # Base folders
   base_dir <- "D:/Country/Brazil/TechBrazil/rawdata/rais/mintraemp_download"
   z7_folder <- file.path(base_dir, "raw_7z_files", as.character(ano))
@@ -40,9 +40,9 @@ extract_rais_txt_files <- function(ano = 2024) {
 }
 
 # Example usage
-extract_rais_txt_files(ano = 2024)
+extract_rais_txt_files(ano = 2023)
 
-df_NI <- fread("D:/Country/Brazil/TechBrazil/rawdata/rais/mintraemp_download/txt_extracted/2024/RAIS_VINC_PUB_NI.txt",
+df_NI <- fread("D:/Country/Brazil/TechBrazil/rawdata/rais/mintraemp_download/txt_extracted/2023/RAIS_VINC_PUB_NI.txt",
             sep = ";", encoding = "Latin-1", showProgress = TRUE)
 
 df_NI <- df_NI[,c(8,12,13,18,20,25,35)]
@@ -54,7 +54,7 @@ sum(is.na(df_NI$`Mun Trab`))
 library(data.table)
 
 # 1. Define the list of .txt file paths
-caminho_base <- "D:/Country/Brazil/TechBrazil/rawdata/rais/mintraemp_download/txt_extracted/2024/"
+caminho_base <- "D:/Country/Brazil/TechBrazil/rawdata/rais/mintraemp_download/txt_extracted/2023/"
 lista_arquivos <- list.files(path = caminho_base, pattern = "\\.txt$", full.names = TRUE)
 
 # 2. Define the function to read and select columns
@@ -63,15 +63,16 @@ ler_rais_com_colunas <- function(arquivo, colunas = c(8,12,13,18,20,25,35)) {
   dt_selecionado <- dt[, ..colunas]
   return(dt_selecionado)
 }
-df_NI <- ler_rais_com_colunas(lista_arquivos[3])
-df_CO <- ler_rais_com_colunas(lista_arquivos[1])
-df_MJ <- ler_rais_com_colunas(lista_arquivos[2])
-df_NE <- ler_rais_com_colunas(lista_arquivos[4])
+df_NI <- ler_rais_com_colunas(lista_arquivos[4])
+df_CO <- ler_rais_com_colunas(lista_arquivos[2])
+df_MJ <- ler_rais_com_colunas(lista_arquivos[3])
+df_NE <- ler_rais_com_colunas(lista_arquivos[5])
+
 
 df_NICOMJNE <- rbind(df_NI, df_CO, df_MJ, df_NE)
 df_NICOMJNE <- df_NICOMJNE %>% rename(CO_MUN6 = `Mun Trab`)
 
-sum(df_NICOMJNE$CO_MUN6 == 999999) # 52,153 out of 24,646,504
+sum(df_NICOMJNE$CO_MUN6 == 999999) # 15,039  out of 38,833,820
 
 df_ <- df_codes_ibge %>% select(CO_MUN6, NM_MUN, SG_UF, CO_UF, NM_UF) %>% unique()
 
@@ -80,23 +81,25 @@ df_NICOMJNE <- left_join(df_NICOMJNE, df_, by = "CO_MUN6", relationship = "many-
   filter(CO_MUN6!= 999999) 
 
 
-df_NO <- ler_rais_com_colunas(lista_arquivos[5])
-df_SP <- ler_rais_com_colunas(lista_arquivos[6])
-df_SU <- ler_rais_com_colunas(lista_arquivos[7])
+df_NO <- ler_rais_com_colunas(lista_arquivos[6])
+df_SP <- ler_rais_com_colunas(lista_arquivos[7])
+df_SU <- ler_rais_com_colunas(lista_arquivos[8])
 df_NOSPSU <- rbind(df_NO, df_SP, df_SU)
 
 df_NOSPSU <- df_NOSPSU %>% rename(CO_MUN6 = `Mun Trab`)
-sum(df_NOSPSU$CO_MUN6 == 999999) # 82,421 out of 39,897,002
+sum(df_NOSPSU$CO_MUN6 == 999999) # 94,906 out of 42,703,647
 
 df_NOSPSU <- left_join(df_NOSPSU, df_, by = "CO_MUN6", relationship = "many-to-many") %>% 
       filter(CO_MUN6!= 999999) 
 
 
 
-save(df_NICOMJNE, file = "D:/Country/Brazil/TechBrazil/working/rais/df_NICOMJNE.rda")
-save(df_NOSPSU, file = "D:/Country/Brazil/TechBrazil/working/rais/df_NOSPSU.rda")
+save(df_NICOMJNE, file = "D:/Country/Brazil/TechBrazil/working/rais/2023/df_NICOMJNE.rda")
+save(df_NOSPSU, file = "D:/Country/Brazil/TechBrazil/working/rais/2023/df_NOSPSU.rda")
 
 
+rais2023 <- rbind(df_NICOMJNE, df_NOSPSU)
+save(rais2023, file = "D:/Country/Brazil/TechBrazil/working/rais/2023/rais2023.rda")
 
 
 
