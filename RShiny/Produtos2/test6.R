@@ -62,6 +62,8 @@ df_rais_all <- bind_rows(
   rais_cbo6_uf24 %>% mutate(ANO = 2024)
 )
 
+
+
 # ——— Aggregates by Brazil level ———
 
 # 1. CBO 1-digit (cbo_1dig)
