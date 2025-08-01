@@ -1,18 +1,18 @@
 # BM_FGV_Propag2.R
 library(shiny)
 library(shinydashboard)
+library(shinyBS)   # <- Adicionado para os tooltips do tab demanda/escassez
+library(tidyverse)
 library(DT)
-library(ggplot2)
 library(ggtext)
-library(DT)
 library(scales)
+library(lubridate)
 library(patchwork)
-library(dplyr)
-library(tidyr)
-library(purrr)
 library(RColorBrewer)
 library(shinyjs)
 library(shinyWidgets)
+library(shinycssloaders)
+
 
 options(warn=-1) # Too many pesky warnings, terrain, terrain, terrain, pull up, pull up 
 
@@ -52,6 +52,8 @@ load("df_4b.rda")
 # Load df_nd for "Não Adere" option
 load("df_nd.rda")
 
+#Load CAGED RAIS dataset Linked to CNCT course
+load("caged_rais_cnct_2020_2024_shiny.rda")
 
 # map from option names → data frames
 df_list <- list(
@@ -186,6 +188,139 @@ financeiro_dt_all <- {
   
   df_final <- rbind(df, as.data.frame(total_row, stringsAsFactors = FALSE))
   df_final
+}
+
+#Functions needed to manipulate dataframe in TAB6 - Escassez Profissionais Técnicos
+window_mean <- function(vec, lag = 6, lead = 5) {
+  n <- length(vec)
+  sapply(seq_along(vec), function(i) {
+    window <- vec[max(1, i - lag):min(n, i + lead)]
+    mean(window, na.rm = TRUE)
+  })
+}
+plot_caged_summary_double <- function(df, geo_value, curso_values, todos_no_eixo, eixo_values) {
+  color_group <- if (todos_no_eixo) {
+    "Eixo_Tecnologico"
+  } else {
+    "Curso"
+  }
+  
+  df_filtered <- df %>%
+    filter(NM_UF %in% geo_value) %>%
+    {
+      if (todos_no_eixo) {
+        group_by(., ANO, MES, NM_UF, Eixo_Tecnologico) %>%
+          summarise(media_sal_adm = weighted.mean(media_sal_adm, w = soma_mov_adm, na.rm = TRUE),
+                    media_sal_des = weighted.mean(media_sal_des, w = soma_mov_des, na.rm = TRUE),
+                    dif_sal_adm_des = media_sal_adm - media_sal_des,
+                    dif_sal_adm_des_pc = (media_sal_adm - media_sal_des) * 100 / media_sal_des,
+                    across(c(contains("soma_mov"), total_vinculo_ativo_3112, estoque_liquido), ~ sum(.x, na.rm = TRUE)),
+                    rotatividade = soma_mov_adm + soma_mov_des,
+                    tx_rotatividade = rotatividade / estoque_liquido) %>%
+          # CORREÇÃO APLICADA AQUI
+          group_by(NM_UF, Eixo_Tecnologico)
+      } else {
+        group_by(., ANO, MES, NM_UF, Curso) %>%
+          summarise(media_sal_adm = weighted.mean(media_sal_adm, w = soma_mov_adm, na.rm = TRUE),
+                    media_sal_des = weighted.mean(media_sal_des, w = soma_mov_des, na.rm = TRUE),
+                    dif_sal_adm_des = media_sal_adm - media_sal_des,
+                    dif_sal_adm_des_pc = (media_sal_adm - media_sal_des) * 100 / media_sal_des,
+                    across(c(contains("soma_mov"), total_vinculo_ativo_3112, estoque_liquido), ~ sum(.x, na.rm = TRUE)),
+                    rotatividade = soma_mov_adm + soma_mov_des,
+                    tx_rotatividade = rotatividade / estoque_liquido,
+                    across(.cols = c(dif_sal_adm_des_pc_m12, tx_rotatividade_m12, estoque_liquido),
+                           .fns = ~ percent_rank(.x)*100, 
+                           .names = 'p_{.col}')) %>%
+          # CORREÇÃO APLICADA AQUI
+          group_by(NM_UF, Curso)
+      }
+    } %>%
+    mutate(
+      across(c(dif_sal_adm_des_pc, tx_rotatividade), ~ if_else(is.infinite(.x), NA, .x)),
+      across(c(dif_sal_adm_des_pc, tx_rotatividade), ~ window_mean(.x), .names = "{.col}_m12")
+    ) %>%
+    {
+      if (todos_no_eixo) {
+        group_by(., ANO, MES, NM_UF) %>%
+          mutate(across(.cols = c(dif_sal_adm_des_pc_m12, tx_rotatividade_m12, estoque_liquido),
+                        .fns = ~ percent_rank(.x)*100, 
+                        .names = 'p_{.col}')) %>%
+          filter(., Eixo_Tecnologico %in% eixo_values) %>%
+          group_by(., NM_UF, Eixo_Tecnologico)
+      } else {
+        group_by(., ANO, MES, NM_UF) %>%
+          mutate(across(.cols = c(dif_sal_adm_des_pc_m12, tx_rotatividade_m12, estoque_liquido),
+                        .fns = ~ percent_rank(.x)*100, 
+                        .names = 'p_{.col}')) %>%
+          filter(., Curso %in% curso_values) %>%
+          group_by(., NM_UF, Curso)
+      }
+    } %>%
+    mutate(soma_mov_adm_media_ano = window_mean(soma_mov_adm, lag = 11, lead = 0)) %>%
+    ungroup() %>%
+    mutate(
+      data_ordem = ymd(sprintf("%04d-%02d-01", ANO, MES)),
+      color_label = paste(.data[[color_group]], "-", NM_UF),
+      linetype_group = if (length(geo_value) > 1) if_else(NM_UF == geo_value[2], "Comparação", "Principal") else "Principal"
+    ) %>%
+    filter(!is.na(dif_sal_adm_des_pc_m12) | !is.na(tx_rotatividade_m12))
+  
+  df_escassez <- df_filtered %>%
+    filter(ANO == max(ANO, na.rm = TRUE)) %>%
+    filter(MES == max(MES, na.rm = TRUE)) %>%
+    {
+      if (todos_no_eixo) {
+        group_by(., Eixo_Tecnologico)
+      } else {
+        group_by(., Curso)
+      }
+    } %>%
+    mutate(
+      tipologia_escassez = case_when(
+        p_dif_sal_adm_des_pc_m12 >= 75 & p_tx_rotatividade_m12 >= 50 & p_estoque_liquido >= 60 ~ "Alerta de Escassez",
+        (p_dif_sal_adm_des_pc_m12 >= 75 & p_tx_rotatividade_m12 >= 50 & p_estoque_liquido < 60) |
+          (between(p_dif_sal_adm_des_pc_m12, 74.9999, 50) & p_tx_rotatividade_m12 >= 50 & p_estoque_liquido >= 50) ~ "Tendência de Escassez",
+        (between(p_dif_sal_adm_des_pc_m12, 49.999, 25) | p_estoque_liquido >= 50) ~ "Situação Estável",
+        p_dif_sal_adm_des_pc_m12 < 25 ~ "Sinal de Excesso",
+        soma_mov_adm_media_ano < 30 ~ "Sem fluxo suficiente - INDICADORES DEIXAM DE SER INFORMATIVOS",
+        TRUE ~ "Indisponível/Indeterminado"
+      )
+    )
+  
+  list(
+    dif_sal_pc_plot = ggplot(df_filtered, aes(x = data_ordem, y = dif_sal_adm_des_pc_m12, color = color_label, linetype = linetype_group)) +
+      geom_line(size = 1) +
+      geom_hline(yintercept = 0, linetype = "dotted") +
+      scale_y_continuous(labels = label_number(suffix = "%", decimal_mark = ",", big.mark = ".")) +
+      scale_x_date(date_labels = "%Y-%m", date_breaks = "3 months") +
+      scale_linetype_manual(values = c("Principal" = "solid", "Comparação" = "dotdash")) +
+      labs(
+        x = "Ano-Mês", y = "Diferença salarial Admitidos e Desligados (%)",
+        color = "Legenda", linetype = "Seleção",
+        title = "(Salário adm - Salário des)/Salário des",
+        caption = "Fonte: CAGED / Elaboração equipe Banco Mundial e FGV"
+      ) +
+      theme_minimal(base_size = 12) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1)),
+    
+    rotatividade_plot = ggplot(df_filtered, aes(x = data_ordem, y = tx_rotatividade_m12, color = color_label, linetype = linetype_group)) +
+      geom_line(size = 1) +
+      geom_hline(yintercept = 0, linetype = "dotted") +
+      scale_y_continuous(labels = label_number(decimal_mark = ",", big.mark = ".")) +
+      scale_x_date(date_labels = "%Y-%m", date_breaks = "3 months") +
+      scale_linetype_manual(values = c("Principal" = "solid", "Comparação" = "dotdash")) +
+      labs(
+        x = "Ano-Mês", y = "Taxa de rotatividade",
+        color = "Legenda", linetype = "Seleção",
+        title = "(Admitidos + Desligados) / Estoque",
+        caption = "Fonte: CAGED e RAIS / Elaboração equipe Banco Mundial e FGV"
+      ) +
+      theme_minimal(base_size = 12) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1)),
+    
+    tipologia_escassez = df_escassez,
+    df_filtered = df_filtered
+  )
 }
 
 
@@ -841,8 +976,92 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
                 ),
                 
                 
-                
-                tabPanel("Painel 6", h4("Placeholder Content for Panel ") ),
+           ### UI - TAB 6 : Escassez de Profissionais Técnicos ##################################################       (CONTINUAR DAQUI)
+                tabPanel("Escassez de Profissionais Técnicos", 
+                         fluidPage(h3("🔎 Explore a Demanda e Escassez de Profissionais Técnicos no Brasil"),
+                           tags$head(
+                             tags$style(HTML(
+                               ".bigtext {font-size: 1.2em;}
+      .bullet-list {font-size: 1.1em; margin-top: 12px;}
+      .input-box {background: #F6F6F6; padding: 15px; border-radius: 12px; margin-bottom: 10px;}
+      .topbar-info {background: #F0F8FF; padding: 10px; border-radius: 10px; margin-bottom: 14px;}"
+                             ))
+                           ),
+                           
+                         #  titlePanel("🔎 Explore a Demanda e Escassez de Profissionais Técnicos no Brasil"),
+                           
+                           div(class = "topbar-info", #Suhas orientou usar checkbox-dark-panels, mas Fábio prefere "topbar-info"
+                               p("Este painel permite explorar a demanda e escassez de profissionais técnicos no Brasil, por estado, eixo e curso, com base nos dados do CAGED e da RAIS."),
+                               p("As ocupações são associadas aos cursos técnicos correspondentes, permitindo observar a movimentação do mercado de trabalho agregados no nível do curso técnico específico."),
+                               p("O indicador principal de escassez é o diferencial salarial entre admitidos e desligados. Valor alto sinaliza escassez e valores baixos sinalizam abundância de trabalhadores."),
+                               p("De forma complementar, a taxa de rotatividade e a participação da ocupação no total de vínculos na UF também são utilizadas: se o diferencial salarial se torna menor (indicando maior pressão salarial), a taxa de rotatividade é crescente e as ocupações para as quais o curso forma têm historicamente muitos vínculos, acende-se um alerta de escassez.")
+                           ),
+                           
+                           fluidRow(
+                             column(2, class = "input-box",
+                                    selectInput("ranking_criterio", "Critério de Ranking:",
+                                                choices = c(
+                                                  "Diferença Salarial Admitidos e Desligados (%)" = "dif_sal_adm_des_pc_m12",
+                                                  "Total Vínculos" = "estoque_liquido",
+                                                  "Diferença Salarial Ponderada pelo Total de Vínculos (escala 0 a 1000)" = "dif_sal_adm_des_pc_pond_m12"
+                                                ),
+                                                selected = "dif_sal_adm_des_pc_pond_m12"
+                                    ),
+                                    bsTooltip("ranking_criterio", "Escolha o indicador para ordenar o ranking dos Top 5 cursos.", placement = "right", trigger = "hover"),
+                                    selectInput("uf1", "Selecionar UF ou Brasil:", 
+                                                choices = sort(unique(caged_rais_curso$NM_UF)),
+                                                selected = "Brasil"
+                                    ),
+                                    bsTooltip("uf1", "Selecione uma unidade da federação para analisar os dados de mercado de trabalho técnico. A opção \"Brasil\" mostra o resultado agregando todas as UFs.", placement = "right", trigger = "hover")
+                             ),
+                             column(10,
+                                    uiOutput("ranking_uf_title"),
+                                    bsTooltip("ranking_uf_title", "Ranking dos 5 cursos técnicos com maior destaque segundo o critério selecionado.", placement = "top", trigger = "hover"),
+                                    withSpinner(tableOutput("ranking_uf"))
+                             )
+                           ),
+                           
+                           fluidRow(
+                             column(2, selectizeInput("eixos", "Selecionar Eixo(s) Tecnológico(s):", choices = NULL, multiple = TRUE)),
+                             column(2, checkboxInput("todos_no_eixo", "\U0001F4CC Considerar todos os Cursos nos Eixo(s) selecionados", value = FALSE)),
+                             column(2, selectizeInput("curso", "Selecionar Curso(s):", choices = NULL, multiple = TRUE)),
+                             column(2, checkboxInput("comparar_brasil", "🇧🇷 Adiciona comparação com Brasil no gráfico", value = FALSE)),
+                             bsTooltip("comparar_brasil", "Marque para comparar o gráfico da UF escolhida com o Brasil.", placement = "top", trigger = "hover")
+                           ),
+                           
+                           fluidRow(
+                             column(2, 
+                                    h5("Seleção atual:"),
+                                    uiOutput("selecao_atual"),
+                             ),
+                             column(2, actionButton("clear_filters", "Limpar Seleções", icon = icon("broom")))
+                           ),
+                           
+                           fluidRow(
+                             column(6,
+                                    h4("\U0001F4C8 Diferença Salarial Admitidos vs Desligados (%)", id = "plot_dif_salarial_title"),
+                                    bsTooltip("plot_dif_salarial_title", "Variação percentual entre salários dos admitidos e desligados. Valores altos sugerem escassez de mão de obra. É o indicador principal para a análise de escassez relativa.", placement = "top", trigger = "hover"),
+                                    withSpinner(plotOutput("plot_dif_salarial"))
+                             ),
+                             column(6,
+                                    h4("\U0001F501 Taxa de Rotatividade", id = "plot_rotatividade_title"),
+                                    bsTooltip("plot_rotatividade_title", "Mede o fluxo de admissões e desligamentos em relação ao estoque de vínculos ativos. Serve para complementar a análise de escassez relativa.", placement = "top", trigger = "hover"),
+                                    withSpinner(plotOutput("plot_rotatividade"))
+                             )
+                           ),
+                           
+                           fluidRow(
+                             column(12,
+                                    h4("\U0001F4AC Avaliação Escassez a Partir do Gráfico", id = "avaliacao_escassez_title"),
+                                    bsTooltip("avaliacao_escassez_title", "Classificação da situação de escassez laboral considerando conjuntamente percentis do indicador de diferença salarial, taxa de rotatividade e estoque. Verificar nota técnica xxxx para detalhamento da metodologia.", placement = "top", trigger = "hover"),
+                                    htmlOutput("texto_escassez")
+                             )
+                           )
+                         )),
+           
+           
+           
+  ################################################################################################################################         
                 tabPanel("Painel 7", h4("Placeholder Content for Panel 7")),
                 tabPanel("Estatísticas Relevantes", DTOutput("P8_table"))
     )
@@ -3095,7 +3314,175 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
     })
     
   
+  ######### TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 
+  ##############################################################################################################################
+  ### OUTPUT TABLE AND PLOT TAB 6  ESCASSEZ PROFISSIONAIS TÉCNICOS
+  #####################################
+  #########################################################################################
+  observe({
+    updateSelectizeInput(session, "eixos",
+                         choices = sort(unique(caged_rais_curso$Eixo_Tecnologico)), server = TRUE)
+  })
   
+  observeEvent(input$eixos, {
+    cursos <- caged_rais_curso %>%
+      filter(Eixo_Tecnologico %in% input$eixos) %>%
+      distinct(Curso) %>%
+      arrange(Curso) %>%
+      pull()
+    updateSelectizeInput(session, "curso", choices = cursos, server = TRUE)
+  })
+  
+  observeEvent(input$clear_filters, {
+    updateSelectInput(session, "uf1", selected = sort(unique(caged_rais_curso$NM_UF))[1])
+    updateSelectizeInput(session, "eixos", selected = character(0))
+    updateSelectizeInput(session, "curso", selected = character(0))
+    updateCheckboxInput(session, "todos_no_eixo", value = TRUE)
+    updateCheckboxInput(session, "comparar_brasil", value = TRUE)
+  })
+  
+  # Reactive sempre compara UF selecionada e Brasil (se checkbox ativado)
+  plots_reactive <- reactive({
+    geo_value <- input$uf1
+    if (input$comparar_brasil && input$uf1 != "Brasil") {
+      geo_value <- c(input$uf1, "Brasil")
+    }
+    
+    curso_input <- if (input$todos_no_eixo) {
+      caged_rais_curso %>%
+        filter(Eixo_Tecnologico %in% input$eixos) %>%
+        distinct(Curso) %>%
+        pull()
+    } else input$curso
+    
+    plot_caged_summary_double(
+      df = caged_rais_curso,
+      geo_value = geo_value,
+      curso_values = curso_input,
+      todos_no_eixo = input$todos_no_eixo,
+      eixo_values = input$eixos
+    )
+  })
+  
+  output$plot_dif_salarial <- renderPlot({
+    req(plots_reactive()$dif_sal_pc_plot)
+    plots_reactive()$dif_sal_pc_plot
+  })
+  
+  output$plot_rotatividade <- renderPlot({
+    req(plots_reactive()$rotatividade_plot)
+    plots_reactive()$rotatividade_plot
+  })
+  
+  output$ranking_uf_title <- renderUI({
+    req(input$uf1)
+    h4(paste("⚠️ Relação de Cursos com Maior Escassez -", input$uf1), id = "ranking_uf_title")
+  })
+  
+  output$ranking_uf <- renderTable({
+    req(input$uf1)
+    
+    tabela <- caged_rais_curso %>%
+      group_by(ANO, MES, Eixo_Tecnologico, Curso) %>%
+      mutate(
+        estoque_liquido_br = sum(if_else(NM_UF == "Brasil", NA, estoque_liquido), na.rm = TRUE)
+      ) %>%
+      filter(NM_UF == input$uf1) %>%
+      group_by(ANO, MES) %>%
+      mutate(
+        across(.cols = c(dif_sal_adm_des_pc_m12, tx_rotatividade_m12, estoque_liquido),
+               .fns = ~ percent_rank(.x)*100,
+               .names = 'p_{.col}') 
+      ) %>%
+      group_by(Curso) %>%
+      mutate(
+        dif_sal_adm_des_pc = if_else(is.infinite(dif_sal_adm_des_pc), NA, dif_sal_adm_des_pc),
+        dif_sal_adm_des_pc_m12 = window_mean(dif_sal_adm_des_pc, lag = 11, lead = 0),
+        
+        soma_mov_adm_media_ano = window_mean(soma_mov_adm, lag = 11, lead = 0),
+        `Estimativa Demanda Vagas` = window_mean(estoque_liquido, lag = 11, lead = 0)*0.15,
+        
+        `Demanda de vagas em relação ao total Brasil` = `Estimativa Demanda Vagas`/(window_mean(estoque_liquido_br, lag = 11, lead = 0)*0.15),
+        
+        tipologia_escassez = case_when(
+          p_dif_sal_adm_des_pc_m12 >= 75 & p_tx_rotatividade_m12 >= 50 & p_estoque_liquido >= 60 ~ "Alerta de Escassez",
+          (p_dif_sal_adm_des_pc_m12 >= 75 & p_tx_rotatividade_m12 >= 50 & p_estoque_liquido < 60) |
+            (between(p_dif_sal_adm_des_pc_m12, 74.9999, 50) & p_tx_rotatividade_m12 >= 50 & p_estoque_liquido >= 50) ~ "Tendência de Escassez",
+          (between(p_dif_sal_adm_des_pc_m12, 49.999, 25) | p_estoque_liquido >= 50) ~ "Situação Estável",
+          p_dif_sal_adm_des_pc_m12 < 25 ~ "Sinal de Excesso",
+          soma_mov_adm_media_ano < 30 ~ "Sem fluxo suficiente - INDICADORES DEIXAM DE SER INFORMATIVOS",
+          TRUE ~ "Indisponível/Indeterminado"
+        )
+      ) %>%
+      ungroup() %>%
+      filter(ANO == max(ANO, na.rm = TRUE)) %>%
+      filter(MES == max(MES, na.rm = TRUE)) %>%
+      mutate(dif_sal_adm_des_pc_pond_m12 = scales::rescale(dif_sal_adm_des_pc_m12*estoque_liquido,  to = c(0, 1000))) %>%
+      arrange(desc(dif_sal_adm_des_pc_pond_m12)) %>%
+      filter(tipologia_escassez %in% c("Alerta de Escassez", "Tendência de Escassez")) %>%
+      slice_head(n = 10) %>%
+      transmute(
+        `Eixo - Curso` = paste(Eixo_Tecnologico, Curso, sep = " - "),
+        `Situação da Escassez` = tipologia_escassez,
+        `Estimativa Demanda Vagas` = round(`Estimativa Demanda Vagas`),
+        `Demanda de vagas em relação ao total Brasil (%)` = `Demanda de vagas em relação ao total Brasil`*100,
+        #    `Demanda de vagas em relação ao total Brasil (%)` = `Demanda de vagas em relação ao total Brasil`*100,
+        #  `Dif. Salarial adm e des (%)` = round(dif_sal_adm_des_pc_m12, 2),
+        #  `Total Vínculos (milhares)` = round(estoque_liquido)/1000,
+        `Indicador de Escassez (Dif. Salarial*Total Vínculos (escala 0 a 1000))` = round(dif_sal_adm_des_pc_pond_m12)
+      )
+    
+    if (nrow(tabela) == 0) return(data.frame("Mensagem" = "Sem dados para este filtro."))
+    tabela
+  }, striped = TRUE, bordered = TRUE, spacing = "xs", digits = 1)
+  
+  output$texto_escassez <- renderUI({
+    df_escassez <- plots_reactive()$tipologia_escassez
+    req(df_escassez)
+    
+    if (input$todos_no_eixo) {
+      grupo_nome <- "Eixo Tecnológico"
+      valores <- input$eixos
+      col_grupo <- "Eixo_Tecnologico"
+    } else {
+      grupo_nome <- "Curso"
+      valores <- input$curso
+      col_grupo <- "Curso"
+    }
+    
+    df_resumo <- df_escassez %>%
+      filter(NM_UF == input$uf1) %>%
+      filter(.data[[col_grupo]] %in% valores) %>%
+      filter(ANO == max(ANO, na.rm = TRUE), MES == max(MES, na.rm = TRUE)) %>%
+      select(!!col_grupo, tipologia_escassez) %>%
+      distinct()
+    
+    if (nrow(df_resumo) == 0) {
+      return(HTML("<b>Sem resultados para a seleção atual.</b>"))
+    }
+    resumos <- df_resumo %>%
+      mutate(txt = paste0("<b>", grupo_nome, ":</b> ", .data[[col_grupo]], " — <b>", tipologia_escassez, "</b>")) %>%
+      pull(txt)
+    
+    HTML(sprintf(
+      "<div style='font-size:1.2em;line-height:1.5'>
+<b>Resultado da tipologia de escassez para %s:</b><br>%s
+</div>",
+      input$uf1,
+      paste(resumos, collapse = "<br>")
+    ))
+  })
+  
+  output$selecao_atual <- renderUI({
+    eixos <- if (is.null(input$eixos) || length(input$eixos) == 0) "Nenhum" else paste(input$eixos, collapse = ", ")
+    cursos <- if (is.null(input$curso) || length(input$curso) == 0) "Nenhum" else paste(input$curso, collapse = ", ")
+    HTML(sprintf(
+      "<ul class='bullet-list'><li><b>UF:</b> %s</li>
+      <li><b>Eixo(s):</b> %s</li>
+      <li><b>Curso(s):</b> %s</li></ul>",
+      input$uf1, eixos, cursos
+    ))
+  })
       
 }  
   
