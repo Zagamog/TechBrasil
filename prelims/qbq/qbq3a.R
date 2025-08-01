@@ -236,6 +236,9 @@ junk <- qbq_ocup_cmento1 %>% filter(cbo_familia=="Técnicos em transportes rodov
 
 junk$PerfilOcupacional
 
+library(dplyr)
+junk <- qbq_ocup_cmento1 %>% filter(NivelOcupacao==6)
+
  
 
   

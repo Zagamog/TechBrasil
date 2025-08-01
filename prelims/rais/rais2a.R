@@ -129,10 +129,7 @@ df_cbo_hier <- df_ocup %>%
 ##################################################
 ##################################################
 temp_ocup <- df_cbo_hier %>% select(CodCBO,`Ocupação`) %>% unique()
-
-
 tofix_CBOs <- rais_cbo6_uf24 %>% filter(is.na(`Ocupação`)) %>% select(CodCBO) %>% unique()
-
 blix <- left_join(tofix_CBOs, temp_ocup, by = "CodCBO", relationship = "many-to-many")
 sum(is.na(blix$`Ocupação`))
 # 38
@@ -141,7 +138,42 @@ rais_cbo6_uf24 <- rais_cbo6_uf24 %>%
   mutate(`Ocupação` = coalesce(`Ocupação.x`, `Ocupação.y`)) %>%
   select(-`Ocupação.x`, -`Ocupação.y`)
 
+# fix cbo_gragru
+temp_ocup <- df_cbo_hier %>% select(CodCBO,`cbo_gragru`) %>% unique()
+tofix_CBOs <- rais_cbo6_uf24 %>% filter(is.na(`cbo_gragru`)) %>% select(CodCBO) %>% unique()
+blix <- left_join(tofix_CBOs, temp_ocup, by = "CodCBO", relationship = "many-to-many")
+sum(is.na(blix$`cbo_gragru`))
+rais_cbo6_uf24 <- rais_cbo6_uf24 %>%
+  left_join(temp_ocup, by = "CodCBO", relationship = "many-to-many") %>%
+  mutate(`cbo_gragru` = coalesce(`cbo_gragru.x`, `cbo_gragru.y`)) %>%
+  select(-`cbo_gragru.x`, -`cbo_gragru.y`)
+
+# fix cbo_familia
+temp_ocup <- df_cbo_hier %>% select(CodCBO,`cbo_familia`) %>% unique()
+tofix_CBOs <- rais_cbo6_uf24 %>% filter(is.na(`cbo_familia`)) %>% select(CodCBO) %>% unique()
+blix <- left_join(tofix_CBOs, temp_ocup, by = "CodCBO", relationship = "many-to-many")
+sum(is.na(blix$`cbo_familia`))
+rais_cbo6_uf24 <- rais_cbo6_uf24 %>%
+  left_join(temp_ocup, by = "CodCBO", relationship = "many-to-many") %>%
+  mutate(`cbo_familia` = coalesce(`cbo_familia.x`, `cbo_familia.y`)) %>%
+  select(-`cbo_familia.x`, -`cbo_familia.y`)
+
+rais_cbo6_uf24 <- rais_cbo6_uf24 %>%
+  mutate(
+    cbo_1dig = if_else(is.na(cbo_1dig), substr(CodCBO, 1, 1), cbo_1dig),
+    cbo_2dig = if_else(is.na(cbo_2dig), substr(CodCBO, 1, 2), cbo_2dig),
+    cbo_4dig = if_else(is.na(cbo_4dig), substr(CodCBO, 1, 4), cbo_4dig))
+  
+
 sum(is.na(rais_cbo6_uf24$`Ocupação`)) # 248
+sum(is.na(rais_cbo6_uf24$cbo_gragru)) # 352
+sum(is.na(rais_cbo6_uf24$vinculos)) # 0
+sum(is.na(rais_cbo6_uf24$cbo_1dig)) # 14630
+sum(is.na(rais_cbo6_uf24$cbo_2dig)) # 14630
+sum(is.na(rais_cbo6_uf24$cbo_4dig)) # 14630
+sum(is.na(rais_cbo6_uf24$`cbo_gragru`)) # 248
+sum(is.na(rais_cbo6_uf24$`cbo_familia`)) # 352
+
 
 
 # Lets save working/rais
@@ -150,11 +182,7 @@ save(rais_cbo6_uf24, file = "D:/Country/Brazil/TechBrazil/working/rais/rais_cbo6
 
 
 
-# rais2a.R
 
-load("D:/Country/Brazil/TechBrazil/working/rais/2023/rais2023.rda")
-load("D:/Country/Brazil/TechBrazil/working/ibge/df_codes_ibge.rda")
-load("D:/Country/Brazil/TechBrazil/working/qbq/qbq_ocup_cmento1.rda")
 
 
 
@@ -205,6 +233,29 @@ sum(rais_cbo4_uf23$vinculos) # 54613569 good
 sum(is.na(rais_cbo6_uf23$`Ocupação`)) # 17395
 
 
+# fix cbo_gragru
+temp_ocup <- df_cbo_hier %>% select(CodCBO,`cbo_gragru`) %>% unique()
+tofix_CBOs <- rais_cbo6_uf23 %>% filter(is.na(`cbo_gragru`)) %>% select(CodCBO) %>% unique()
+blix <- left_join(tofix_CBOs, temp_ocup, by = "CodCBO", relationship = "many-to-many")
+sum(is.na(blix$`cbo_gragru`))
+rais_cbo6_uf23 <- rais_cbo6_uf23 %>%
+  left_join(temp_ocup, by = "CodCBO", relationship = "many-to-many") %>%
+  mutate(`cbo_gragru` = coalesce(`cbo_gragru.x`, `cbo_gragru.y`)) %>%
+  select(-`cbo_gragru.x`, -`cbo_gragru.y`)
+
+# fix cbo_familia
+temp_ocup <- df_cbo_hier %>% select(CodCBO,`cbo_familia`) %>% unique()
+tofix_CBOs <- rais_cbo6_uf23 %>% filter(is.na(`cbo_familia`)) %>% select(CodCBO) %>% unique()
+blix <- left_join(tofix_CBOs, temp_ocup, by = "CodCBO", relationship = "many-to-many")
+sum(is.na(blix$`cbo_familia`))
+rais_cbo6_uf23 <- rais_cbo6_uf23 %>%
+  left_join(temp_ocup, by = "CodCBO", relationship = "many-to-many") %>%
+  mutate(`cbo_familia` = coalesce(`cbo_familia.x`, `cbo_familia.y`)) %>%
+  select(-`cbo_familia.x`, -`cbo_familia.y`)
+
+
+
+
 
 tofix_CBOs <- rais_cbo6_uf23 %>% filter(is.na(`Ocupação`)) %>% select(CodCBO) %>% unique()
 
@@ -218,6 +269,21 @@ rais_cbo6_uf23 <- rais_cbo6_uf23 %>%
   select(-`Ocupação.x`, -`Ocupação.y`)
 
 sum(is.na(rais_cbo6_uf23$`Ocupação`)) # 739
+
+rais_cbo6_uf23 <- rais_cbo6_uf23 %>%
+  mutate(
+    cbo_1dig = if_else(is.na(cbo_1dig), substr(CodCBO, 1, 1), cbo_1dig),
+    cbo_2dig = if_else(is.na(cbo_2dig), substr(CodCBO, 1, 2), cbo_2dig),
+    cbo_4dig = if_else(is.na(cbo_4dig), substr(CodCBO, 1, 4), cbo_4dig))
+
+
+sum(is.na(rais_cbo6_uf23$`Ocupação`)) # 739
+sum(is.na(rais_cbo6_uf23$cbo_gragru)) # 910
+sum(is.na(rais_cbo6_uf23$cbo_1dig)) # 0
+sum(is.na(rais_cbo6_uf23$cbo_2dig)) # 0
+sum(is.na(rais_cbo6_uf23$cbo_4dig)) # 0
+sum(is.na(rais_cbo6_uf23$`cbo_gragru`)) # 910
+sum(is.na(rais_cbo6_uf23$`cbo_familia`)) # 910
 
 
 # Lets save working/rais

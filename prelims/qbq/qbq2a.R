@@ -19,7 +19,8 @@ library(stringi)
 library(purrr)
 
 # Load credentials
-dotenv::load_dot_env()
+
+dotenv::load_dot_env("D:/AdvancedR/knowbankedu/openai/.env")
 bucket_name <- "techbrazildata"
 
 # Helper function to check/download if missing
@@ -513,6 +514,8 @@ sum(df_censo_supl_tec_4qbqALL$QT_MAT_CURSO_TEC) # 4,526,525
 save(df_censo_supl_tec_4qbqALL, file = "D:/Country/Brazil/TechBrazil/working/qbq/df_censo_supl_tec_4qbqALL.rda")
 
 
+
+
 # Get censo data from Shiny App
 load("D:/Country/Brazil/TechBrazil/working/ibge/df_codes_ibge.rda")
 temp_UFs <- df_codes_ibge %>%
@@ -520,13 +523,10 @@ temp_UFs <- df_codes_ibge %>%
   distinct() %>%
   arrange(SG_UF)
 
-## Enrollment by courses
 
 df_censo_cnct <- left_join(df_censo_supl_tec_4qbqALL, temp_UFs, by ="CO_MUN") %>% filter(Eixo_Tecnologico_CNCT != "Militar")
 
 
-# I need to create aggregates of QT_MAT_CURSO_TEC by Eixo_Tecnologico_CNCT, Area_Tecnologica_CNCT, IDX_EIXCUR,
-names(df_cnct2025a)
 
 # Aggrgated by UF
 

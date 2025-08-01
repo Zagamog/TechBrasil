@@ -1,214 +1,73 @@
-# test6.R
-library(shiny)
-library(shinyjs)
 library(dplyr)
-library(tidyr)
-library(DT)
 
-# ————— 1) Load your four “_wide” tables exactly as before —————
-load("df_mat_uf.rda")
-load("df_mat_eixo.rda")
-load("df_mat_area.rda")
-load("df_mat_curso.rda")
-load("meta11a_opcoes.rda")
-load("df_exarcu.rda")      # << new
-
-df_mat_uf_wide <- df_mat_uf %>%
-  select(CO_UF, NM_UF, SG_UF, ANO, QT_MAT_CURSO_TEC_UF) %>%
-  pivot_wider(
-    names_from  = ANO,
-    values_from = QT_MAT_CURSO_TEC_UF,
-    values_fill = list(QT_MAT_CURSO_TEC_UF = 0),
-    values_fn   = sum
+# Step 1: Filter matches and map to 5-digit IDX_EIXCUR
+df <- cnct_qbq_matches %>%
+  filter(final_score >= 0.2) %>%
+  mutate(
+    CodCBO      = as.character(CodCBO),
+    eixo_code   = substr(IDX_EIXARECUR,1,2),
+    curso_code  = substr(IDX_EIXARECUR,5,6),
+    IDX_EIXCUR = paste0(eixo_code, sprintf("%03d", as.integer(curso_code)))
   ) %>%
-  rename(`Matrículas 2023` = `2023`, `Matrículas 2024` = `2024`)
+  inner_join(qbq_ocup_cmento1, by = "CodCBO") %>%
+  filter(NivelOcupacao %in% 3) %>%
+  mutate(cbo_1dig = substr(CodCBO, 1, 1)) %>%
+  inner_join(df_exarcu %>% select(IDX_EIXCUR, `Eixo Tecnológico`), by = "IDX_EIXCUR")
 
-df_mat_eixo_wide <- df_mat_eixo %>%
-  select(CO_UF, NM_UF, SG_UF, `Eixo Tecnológico`, ANO, QT_MAT_CURSO_TEC_EIX) %>%
-  pivot_wider(
-    names_from  = ANO,
-    values_from = QT_MAT_CURSO_TEC_EIX,
-    values_fill = list(QT_MAT_CURSO_TEC_EIX = 0),
-    values_fn   = sum
+# Step 2: Bring in matriculas for a specific UF
+df_mat_curso_filtered <- df_mat_curso_wide %>%
+  filter(NM_UF == "São Paulo") %>%
+  select(IDX_EIXCUR, `Matrículas 2023`, `Matrículas 2024`)
+
+# Step 3: Join and aggregate
+df_summary <- df %>%
+  inner_join(df_mat_curso_filtered, by = "IDX_EIXCUR") %>%
+  group_by(`Eixo Tecnológico`, cbo_1dig) %>%
+  summarise(
+    n_matches         = n(),
+    avg_score         = mean(final_score),
+    `Matrículas 2023` = sum(`Matrículas 2023`, na.rm = TRUE),
+    `Matrículas 2024` = sum(`Matrículas 2024`, na.rm = TRUE),
+    .groups           = "drop"
   ) %>%
-  rename(`Matrículas 2023` = `2023`, `Matrículas 2024` = `2024`)
+  arrange(desc(`Matrículas 2024`))
 
-df_mat_area_wide <- df_mat_area %>%
-  select(CO_UF, NM_UF, SG_UF, `Área Tecnológica`, ANO, QT_MAT_CURSO_TEC_ARE) %>%
-  pivot_wider(
-    names_from  = ANO,
-    values_from = QT_MAT_CURSO_TEC_ARE,
-    values_fill = list(QT_MAT_CURSO_TEC_ARE = 0),
-    values_fn   = sum
+View(df_summary)
+library(dplyr)
+
+
+# Step 1: Filter matches and map to 5-digit IDX_EIXCUR
+df <- cnct_qbq_matches %>%
+  filter(final_score >= 0.2) %>%
+  mutate(
+    CodCBO      = as.character(CodCBO),
+    eixo_code   = substr(IDX_EIXARECUR,1,2),
+    curso_code  = substr(IDX_EIXARECUR,5,6),
+    IDX_EIXCUR  = paste0(eixo_code, sprintf("%03d", as.integer(curso_code)))
   ) %>%
-  rename(`Matrículas 2023` = `2023`, `Matrículas 2024` = `2024`)
+  inner_join(qbq_ocup_cmento1, by = "CodCBO") %>%
+  filter(NivelOcupacao %in% 3) %>%
+  inner_join(df_exarcu %>% select(IDX_EIXCUR, `Eixo Tecnológico`), by = "IDX_EIXCUR") %>%
+  mutate(cbo_1dig = substr(CodCBO, 1, 1))
 
-df_mat_curso_wide <- df_mat_curso %>%
-  select(CO_UF, NM_UF, SG_UF, IDX_EIXCUR, `Denominação do Curso`, ANO, QT_MAT_CURSO_TEC_CUR) %>%
-  pivot_wider(
-    names_from  = ANO,
-    values_from = QT_MAT_CURSO_TEC_CUR,
-    values_fill = list(QT_MAT_CURSO_TEC_CUR = 0),
-    values_fn   = sum
+# Step 2: Filter RAIS vínculos for a UF
+df_rais_filtered <- rais_cbo6_uf24 %>%
+  filter(CO_UF == "35") %>%  # São Paulo
+  select(CodCBO, vinc_2023 = vinculos)  # Assuming only 2023 is available
+
+# Step 3: Join and aggregate
+df_summary_vinc <- df %>%
+  inner_join(df_rais_filtered, by = "CodCBO") %>%
+  group_by(`Eixo Tecnológico`, cbo_1dig) %>%
+  summarise(
+    n_matches  = n(),
+    avg_score  = mean(final_score),
+    vinc_2023  = sum(vinc_2023, na.rm = TRUE),
+    .groups    = "drop"
   ) %>%
-  rename(`Matrículas 2023` = `2023`, `Matrículas 2024` = `2024`)
+  arrange(desc(vinc_2023))
 
-# ————— 2) UI: just UF selector + two DTs —————
-ui <- fluidPage(
-  useShinyjs(),
-  tags$head(includeCSS("www/custom.css")),
-  
-  div(class = "checkbox-dark-panel",
-      fluidRow(
-        column(
-          width = 3,
-          selectizeInput("uf_select", "Selecionar UF ou Brasil:",
-                         choices = NULL,
-                         options = list(placeholder = "Brasil"))
-        )
-      ),
-      
-      fluidRow(
-        column(
-          width = 3,
-          h4("1) Matrículas por Eixo"),
-          DTOutput("agg_table"),
-          hr(),
-          h4("2) Matrículas por Área"),
-          DTOutput("area_table")
-        ),
-        column(
-          width = 3,
-          div(h4("Conteúdo do lado direito aqui"))
-        )
-      )
-  )
-)
+View(df_summary_vinc)
 
-# ————— 3) Server: UF → Eixo-table → Área-table —————
-server <- function(input, output, session) {
-  
-  # populate UF dropdown
-  observe({
-    all_ufs <- sort(unique(df_mat_eixo_wide$NM_UF))
-    updateSelectizeInput(
-      session, "uf_select",
-      choices  = c("Brasil", all_ufs),
-      selected = "Brasil",
-      server   = TRUE
-    )
-  })
-  
-  # reactive DF of Eixo rows for the chosen UF
-  agg_df <- reactive({
-    req(input$uf_select)
-    df_mat_eixo_wide %>%
-      filter(NM_UF == input$uf_select) %>%
-      select(NM_UF, `Eixo Tecnológico`, `Matrículas 2023`, `Matrículas 2024`) %>%
-      arrange(desc(`Matrículas 2024`))
-  })
-  
-  # 1) render the Eixo-table with single selection + total row + formatting
-  output$agg_table <- renderDT({
-    df0 <- agg_df()
-    
-    # tack on the Total row
-    total_row <- df0 %>%
-      summarise(
-        NM_UF               = "Total",
-        `Eixo Tecnológico` = "",
-        `Matrículas 2023`   = sum(`Matrículas 2023`, na.rm = TRUE),
-        `Matrículas 2024`   = sum(`Matrículas 2024`, na.rm = TRUE)
-      )
-    df_final <- bind_rows(df0, total_row)
-    
-    datatable(
-      df_final,
-      selection = "single",
-      rownames  = FALSE,
-      class     = "compact stripe",
-      options   = list(
-        pageLength = nrow(df_final),
-        autoWidth  = TRUE,
-        language   = list(
-          url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json"
-        )
-      )
-    ) %>%
-      formatCurrency(
-        columns   = c("Matrículas 2023", "Matrículas 2024"),
-        currency  = "",
-        interval  = 3,
-        mark      = ".",
-        dec.mark  = ","
-      ) %>%
-      formatStyle(
-        columns     = c("Matrículas 2023", "Matrículas 2024"),
-        `text-align` = "right"
-      ) %>%
-      formatStyle(
-        "NM_UF",
-        target     = "row",
-        fontWeight = styleEqual("Total", "bold"),
-        background = styleEqual("Total", "#0d0863")
-      )
-  })
-  
-  # grab the clicked Eixo from agg_table
-  # Option A: base R [[
-  selected_eixo <- reactive({
-    req(input$agg_table_rows_selected)
-    df <- agg_df()
-    df[[ "Eixo Tecnológico" ]][ input$agg_table_rows_selected ]
-  })
-  
-  # 2) render the Área-table once an Eixo is clicked
 
-  output$area_table <- renderDT({
-    # 1) which Eixo was clicked?
-    eixo <- agg_df()$`Eixo Tecnológico`[ input$agg_table_rows_selected ]
-    req(eixo)
-    
-    # 2) get only the Áreas that belong to that Eixo from df_exarcu
-    df_ex_areas <- df_exarcu %>%
-      filter(`Eixo Tecnológico` == eixo) %>%
-      distinct(`Área Tecnológica`)
-    
-    # 3) join in the UF counts from df_mat_area_wide
-    df_ex_areas %>%
-      left_join(
-        df_mat_area_wide %>% filter(NM_UF == input$uf_select),
-        by = "Área Tecnológica"
-      ) %>%
-      select(
-        NM_UF,
-        `Área Tecnológica`,
-        `Matrículas 2023`,
-        `Matrículas 2024`
-      ) %>%
-      arrange(desc(`Matrículas 2024`)) %>%
-      datatable(
-        rownames = FALSE,
-        class    = "compact stripe",
-        options  = list(
-          pageLength = 12,
-          autoWidth  = TRUE,
-          language   = list(
-            url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json"
-          )
-        )
-      ) %>%
-      formatCurrency(
-        c("Matrículas 2023","Matrículas 2024"),
-        currency = "", interval = 3, mark = ".", dec.mark = ","
-      ) %>%
-      formatStyle(
-        c("Matrículas 2023","Matrículas 2024"),
-        `text-align` = "right"
-      )
-  })
-  
-  
-}
 
-shinyApp(ui, server)
