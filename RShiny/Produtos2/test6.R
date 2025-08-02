@@ -185,29 +185,41 @@ ui <- fluidPage(
         conditionalPanel(
           condition = "input.match_direction == 'Oferta \u2192 Demanda'",
           column(width = 6,
-                 h4("1a) Matrículas por Eixo, Área e Curso"),
+                 h4("1a - Matrículas por Eixo, Área e Curso"),
                  DTOutput("agg_table"),
                  hr(),
-                 h4("1b) Matrículas por Área"),
+                 h4("1b - Matrículas por Área"),
                  DTOutput("area_table"),
                  hr(),
-                 h4("1c) Matrículas por Curso"),
+                 h4("1c - Matrículas por Curso"),
                  DTOutput("curso_table")
-          ),
-        conditionalPanel(
-          condition = "input.match_direction == 'Oferta \u2192 Demanda'",
+          ),  # 👈 CLOSE this column!
+          
           column(width = 6,
-                 h4("2a) Vínculos por Grande Grupo"),
-                 DTOutput("cbo1_table"),
+                 h4("2a – Vínculos por Grande Grupo"),
+                 DTOutput("match_summary_table"),
                  hr(),
-                 h4("2b) Vínculos por Família"),
-                 DTOutput("cbo4_table"),
+                 h4("2b – Vínculos por Família"),
+                 DTOutput("match_familia_table"),
                  hr(),
-                 h4("2c) Vínculos por Ocupação"),
+                 h4("2c – Vínculos por Ocupação"),
                  DTOutput("cbo6_table")
           )
+        ),
+        
+        conditionalPanel(
+          condition = "input.match_direction == 'Demanda \u2192 Oferta'",
+          column(width = 6,
+                 h4("3a – Vínculos por Grande Grupo"),
+                 DTOutput("cbo1_table"),
+                 hr(),
+                 h4("3b – Vínculos por Família"),
+                 DTOutput("cbo4_table"),
+                 hr(),
+                 h4("3c – Vínculos por Ocupação"),
+                 DTOutput("cbo6b_table")  # or remove if not used in this direction
+          )
         )
-      )      # Content row with conditional panels
       )
   ) # end div
 ) # end fluidPage
@@ -504,7 +516,7 @@ server <- function(input, output, session) {
   })
   
 
-  RKT_cbo_cod_df <- reactive({
+  RKT_cbo6b_table <- reactive({
     req(input$uf_select, RKT_selected_cbo_familia())
     
     # Get the actual 4-digit CBO prefix
@@ -525,8 +537,8 @@ server <- function(input, output, session) {
   })
   
   
-  output$cbo_cod_table <- renderDT({
-    dat <- RKT_cbo_cod_df()
+  output$cbo6b_table <- renderDT({
+    dat <- RKT_cbo6b_table()
     datatable(
       dat,
       rownames = FALSE,
@@ -552,6 +564,39 @@ server <- function(input, output, session) {
 ######MATCH MATCH MATCH ###########################################################################
 ######################################## EIXO-AREA   EIXO-AREA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+  # observeEvent(RKT_selected_eixo(), {
+  #   cat("🧲 Forcing renderDT for cbo6_table after eixo selection\n")
+  #   output$cbo6_table <- renderDT({  # re-bind the output
+  #     req(RKT_selected_eixo())
+  #     cat("🚀 renderDT for cbo6_table running...\n")
+  #     
+  #     df <- RKT_cbo6_df()
+  #     validate(need(nrow(df) > 0, "Nenhuma ocupação correspondente encontrada."))
+  #     
+  #     datatable(
+  #       df,
+  #       rownames = FALSE,
+  #       class = "compact stripe",
+  #       options = list(
+  #         pageLength = 10,
+  #         paging     = TRUE,
+  #         autoWidth  = TRUE,
+  #         language   = list(url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json")
+  #       )
+  #     ) %>%
+  #       formatCurrency(c("Vínculos 2023", "Vínculos 2024"), currency = "", interval = 3, mark = ".", dec.mark = ",") %>%
+  #       formatStyle(c("Vínculos 2023", "Vínculos 2024"), `text-align` = "right")
+  #   })
+  # })
+  # 
+  # 
+  # Deduplicated df_gg for safe joins
+  df_gg_clean <- df_gg %>%
+    group_by(cbo_gragru) %>%
+    slice(1) %>%
+    ungroup()
+  
+  
   RKT_base_matches <- reactive({
     req(input$uf_select, input$level_filter, input$score_thresh, RKT_selected_eixo())
     
@@ -579,9 +624,9 @@ server <- function(input, output, session) {
   
   
   
-    observe({
-    cat("Selected Eixo:", RKT_selected_eixo(), "\n")
-  })
+  #   observe({
+  #   cat("Selected Eixo:", RKT_selected_eixo(), "\n")
+  # })
   
   # Oferta → Demanda
   RKT_match_summary_df <- reactive({
@@ -604,13 +649,6 @@ server <- function(input, output, session) {
       arrange(desc(`Vínculos 2024`))
   })
   
-  
-  
-  
-  
-  
-  
-
   output$match_summary_table <- renderDT({
     df <- RKT_match_summary_df()
     datatable(
@@ -653,21 +691,22 @@ server <- function(input, output, session) {
     
   RKT_match_detail_df <- reactive({
     base <- RKT_base_matches()
+  #  cat("📌 RKT_base_matches rows (detail):", nrow(base), "\n")
     
     selected_cbo1 <- if (!is.null(input$cbo1_table_rows_selected)) {
       RKT_selected_grande_grupo() %>%
-
-        left_join(df_gg %>% distinct(cbo_gragru, cbo_1dig), by = c("Grande Grupo" = "cbo_gragru")) %>%
-      
+        left_join(df_gg_clean, by = c("Grande Grupo" = "cbo_gragru")) %>%
         pull(cbo_1dig)
     } else {
       RKT_match_summary_df() %>%
-        left_join(df_gg %>% distinct(cbo_gragru, cbo_1dig), by = c("Grande Grupo" = "cbo_gragru")) %>%
-      
+        left_join(df_gg_clean, by = c("Grande Grupo" = "cbo_gragru")) %>%
         pull(cbo_1dig)
     }
     
-    base %>%
+    selected_cbo1 <- as.character(selected_cbo1)
+  #  cat("📌 Selected cbo_1dig (detail):", paste(unique(selected_cbo1), collapse = ", "), "\n")
+    
+    df_out <- base %>%
       filter(cbo_1dig %in% selected_cbo1) %>%
       distinct(`Área Tecnológica`, CodCBO, .keep_all = TRUE) %>%
       group_by(`Área Tecnológica`) %>%
@@ -677,7 +716,11 @@ server <- function(input, output, session) {
         .groups = "drop"
       ) %>%
       arrange(desc(`Vínculos 2024`))
+    
+  #  cat("📦 Rows in match_familia_table:", nrow(df_out), "\n")
+    return(df_out)
   })
+  
   
   
   
@@ -685,6 +728,8 @@ server <- function(input, output, session) {
   
   output$match_familia_table <- renderDT({
     df <- RKT_match_detail_df()
+    validate(need(nrow(df) > 0, "Nenhuma família encontrada."))
+    
     datatable(
       df,
       rownames = FALSE,
@@ -693,32 +738,44 @@ server <- function(input, output, session) {
         pageLength = 10,
         paging     = TRUE,
         autoWidth  = TRUE,
-        language = list(url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json")
+        language   = list(url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json")
       )
     ) %>%
       formatCurrency(c("Vínculos 2023", "Vínculos 2024"), currency = "", interval = 3, mark = ".", dec.mark = ",") %>%
       formatStyle(c("Vínculos 2023", "Vínculos 2024"), `text-align` = "right")
   })
   
+  
   ######MATCH MATCH MATCH ###########################################################################
   ######################################## FAMILIA-OCUPACAO   FAMILIA-OCUPACAO %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
   
   RKT_cbo6_df <- reactive({
+    req(RKT_selected_eixo())  # 👈 blocks until user picks an eixo
     base <- RKT_base_matches()
+  #  cat("🔍 [cbo6] RKT_base_matches rows:", nrow(base), "\n")
     
     selected_cbo1 <- if (!is.null(input$cbo1_table_rows_selected)) {
+    #  cat("🔍 [cbo6] Using clicked row from DT1 (cbo1_table_rows_selected)\n")
       RKT_selected_grande_grupo() %>%
-        left_join(df_gg %>% distinct(cbo_gragru, cbo_1dig), by = c("Grande Grupo" = "cbo_gragru")) %>%
-          pull(cbo_1dig)
+        left_join(df_gg_clean, by = c("Grande Grupo" = "cbo_gragru")) %>%
+        pull(cbo_1dig)
     } else {
+   #   cat("🔍 [cbo6] Using all rows from RKT_match_summary_df()\n")
       RKT_match_summary_df() %>%
-        left_join(df_gg %>% distinct(cbo_gragru, cbo_1dig), by = c("Grande Grupo" = "cbo_gragru")) %>%
+        left_join(df_gg_clean, by = c("Grande Grupo" = "cbo_gragru")) %>%
         pull(cbo_1dig)
     }
     
-    base %>%
-      filter(cbo_1dig %in% selected_cbo1) %>%
+    selected_cbo1 <- as.character(selected_cbo1)
+  #  cat("🔍 [cbo6] Selected cbo_1dig values:", paste(unique(selected_cbo1), collapse = ", "), "\n")
+    
+    filtered_base <- base %>%
+      filter(cbo_1dig %in% selected_cbo1)
+    
+  #  cat("🔍 [cbo6] Rows after filtering base:", nrow(filtered_base), "\n")
+    
+    df_out <- filtered_base %>%
       distinct(CodCBO, .keep_all = TRUE) %>%
       group_by(CodCBO, cbo_prigru) %>%
       summarise(
@@ -727,14 +784,19 @@ server <- function(input, output, session) {
         .groups = "drop"
       ) %>%
       arrange(desc(`Vínculos 2024`))
+    
+ #   cat("📦 [cbo6] Final output rows:", nrow(df_out), "\n")
+    return(df_out)
   })
   
   
+  
+  
   output$cbo6_table <- renderDT({
-    
+    req(RKT_selected_eixo())  # 👈 blocks until user picks an eixo
+#    cat("🚀 renderDT for cbo6_table running...\n")  # <— MUST appear when Eixo is selected
     df <- RKT_cbo6_df()
-    cat("📦 Rows in cbo6_table:", nrow(df), "\n")
-    print(head(df))
+    validate(need(nrow(df) > 0, "Nenhuma ocupação correspondente encontrada."))
     
     datatable(
       df,
@@ -750,6 +812,9 @@ server <- function(input, output, session) {
       formatCurrency(c("Vínculos 2023", "Vínculos 2024"), currency = "", interval = 3, mark = ".", dec.mark = ",") %>%
       formatStyle(c("Vínculos 2023", "Vínculos 2024"), `text-align` = "right")
   })
+  
+  
+  
   
   
 }

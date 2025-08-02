@@ -429,7 +429,101 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
       )
     ),
     
-    tabsetPanel(id = "tab_selection", selected = "Retorno FEF por opções",
+    tabsetPanel(id = "tab_selection", selected = "Introdução",
+            ### UI - TAB 0 : INTRO TAB ##################################################      
+            tabPanel(
+              "Introdução",
+              tags$style(HTML("
+    .tab-pane[data-value='Introdução'] {
+      background-color: #f9f9f9 !important;
+      color: #222 !important;
+      padding: 30px;
+      font-size: 17px;
+    }
+
+    .intro-heading {
+      text-align: center;
+      font-size: 26px;
+      font-weight: bold;
+      color: #c0392b;
+      margin-bottom: 30px;
+    }
+
+    .tab-link-line {
+      margin-bottom: 4px;
+      font-size: 17px;
+      font-weight: bold;
+    }
+
+    .tab-link-line a {
+      color: #2c3e90 !important;
+      text-decoration: none;
+    }
+
+    .tab-link-line a:hover {
+      text-decoration: underline;
+    }
+
+    .tab-explanation {
+      margin-bottom: 20px;
+      margin-left: 32px;
+      font-weight: normal;
+      font-size: 17px;
+      color: #333;
+    }
+
+    .tab-link-line .arrow {
+      display: inline-block;
+      margin-right: 10px;
+      font-size: 17px;
+      color: #3E4A89;
+    }
+  ")),
+              
+              div(class = "intro-heading",
+                  "Introdução: Ferramenta customizada pela UF – Análise e Simulação sobre o PROPAG"
+              ),
+              
+              div(class = "tab-link-line",
+                  span(class = "arrow", HTML("▸")),
+                  actionLink("link_fin1", "Cenário Financeiro e Simulações de Investimento em EPT e Fundo FEF")
+              ),
+              div(class = "tab-explanation", "Projeções de investimento e impacto fiscal no 1º e 5º ano, considerando os aportes à Educação Profissional Técnica (EPT) e ao Fundo de Equalização Fiscal (FEF)."),
+              
+              div(class = "tab-link-line",
+                  span(class = "arrow", HTML("▸")),
+                  actionLink("link_impacto", "Impacto Financeiro do PROPAG: Simulações com e sem Adesão")
+              ),
+              div(class = "tab-explanation", "Comparativo da situação financeira e do endividamento do estado em cenários com e sem adesão ao PROPAG."),
+              
+              div(class = "tab-link-line",
+                  span(class = "arrow", HTML("▸")),
+                  actionLink("link_fef", "Contribuição, Aporte e Fluxo Líquido ao Fundo de Equalização Fiscal (FEF)")
+              ),
+              div(class = "tab-explanation", "Simulação do valor da contribuição estadual ao FEF, dos aportes recebidos e do fluxo líquido estimado, com base nas decisões de adesão."),
+              
+              div(class = "tab-link-line",
+                  span(class = "arrow", HTML("▸")),
+                  actionLink("link_meta11", "Projeção da Oferta de EPT versus a Meta 11A do PNE Vigente (2014–2024)")
+              ),
+              div(class = "tab-explanation", "Comparação da oferta de educação técnica em relação à meta de triplicar as matrículas de EPTN."),
+              
+              div(class = "tab-link-line",
+                  span(class = "arrow", HTML("▸")),
+                  actionLink("link_expansao", "Projeções de Expansão de Matrículas de EPT em relação ao Novo PNE (2025–2035)")
+              ),
+              div(class = "tab-explanation", "Projeção da expansão de matrículas na EPT, com oferta integrada para 50% dos estudantes do ensino médio."),
+              
+              div(class = "tab-link-line",
+                  span(class = "arrow", HTML("▸")),
+                  actionLink("link_escassez", "Demanda e Escassez de Profissionais Técnicos no Brasil")
+              ),
+              div(class = "tab-explanation", "Diagnóstico da escassez de profissionais técnicos por curso e UF com base nos dados de mercado de trabalho (RAIS/CAGED).")
+            ),
+            
+            
+                
+                
            ### UI - TAB 1 : FINANCE ##################################################
                   tabPanel("Tema Financiero",
                          fluidPage(
@@ -1074,7 +1168,34 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
 
 server <- function(input, output, session) {
 
-
+## Tab choice
+  observeEvent(input$link_fin1, {
+    updateTabsetPanel(session, "tab_selection", selected = "Tema Financiero")
+  })
+  
+  observeEvent(input$link_impacto, {
+    updateTabsetPanel(session, "tab_selection", selected = "Finance 1b")
+  })
+  
+  observeEvent(input$link_fef, {
+    updateTabsetPanel(session, "tab_selection", selected = "Retorno FEF por opções")
+  })
+  
+  observeEvent(input$link_meta11, {
+    updateTabsetPanel(session, "tab_selection", selected = "Situação - Meta 11 (vigente)")
+  })
+  
+  observeEvent(input$link_expansao, {
+    updateTabsetPanel(session, "tab_selection", selected = "Situação - Meta 11a")
+  })
+  
+  observeEvent(input$link_escassez, {
+    updateTabsetPanel(session, "tab_selection", selected = "Escassez de Profissionais Técnicos")
+  })
+  
+  
+  
+  
 ### REACTIVES OF USE ACROSS TABS
 ##################  
 
