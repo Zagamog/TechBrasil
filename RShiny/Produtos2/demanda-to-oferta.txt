@@ -1,0 +1,112 @@
+RKT_selected_cbo1dig <- reactive({
+  req(input$cbo1_table_rows_selected)
+  df_rais1dig_wide %>%
+    filter(NM_UF == input$uf_select) %>%
+    slice(input$cbo1_table_rows_selected) %>%
+    pull(cbo_1dig)
+})
+
+
+RKT_base_matches_reverse <- reactive({
+  req(input$uf_select, input$level_filter, input$score_thresh, input$match_direction == "Demanda \u2192 Oferta")
+  req(input$cbo1_table_rows_selected)
+
+  selected_cbo1dig <- df_rais1dig_wide %>%
+    filter(NM_UF == input$uf_select) %>%
+    slice(input$cbo1_table_rows_selected) %>%
+    pull(cbo_1dig)
+
+  qbq_cnct_matches %>%
+    filter(final_score >= input$score_thresh) %>%
+    mutate(CodCBO = as.character(CodCBO)) %>%
+    filter(substr(CodCBO, 1, 1) == selected_cbo1dig) %>%
+    mutate(
+      eixo_code    = substr(IDX_EIXARECUR, 1, 2),
+      curso_code   = substr(IDX_EIXARECUR, 5, 6),
+      IDX_EIXCUR   = paste0(eixo_code, sprintf("%03d", as.integer(curso_code))),
+      cbo_1dig     = substr(CodCBO, 1, 1)
+    ) %>%
+    inner_join(qbq_ocup_cmento1 %>% select(-cbo_1dig), by = "CodCBO") %>%
+    filter(NivelOcupacao %in% input$level_filter) %>%
+    inner_join(df_exarcu %>% select(IDX_EIXCUR, `Área Tecnológica`, `Eixo Tecnológico`, `Denominação do Curso`), by = "IDX_EIXCUR") %>%
+    left_join(
+      df_mat_curso_wide %>%
+        filter(NM_UF == input$uf_select) %>%
+        select(IDX_EIXCUR, `Matrículas 2023`, `Matrículas 2024`),
+      by = "IDX_EIXCUR"
+    ) %>%
+    distinct(CodCBO, IDX_EIXCUR, .keep_all = TRUE)
+})
+
+
+## LEVEL 1 DEMANDA --> OFERTA
+
+RKT_matricula_by_eixo <- reactive({
+  RKT_base_matches_reverse() %>%
+    group_by(`Eixo Tecnológico`) %>%
+    summarise(
+      `Matrículas 2023` = sum(`Matrículas 2023`, na.rm = TRUE),
+      `Matrículas 2024` = sum(`Matrículas 2024`, na.rm = TRUE),
+      .groups = "drop"
+    ) %>%
+    arrange(desc(`Matrículas 2024`))
+})
+
+## DEMANDA -> OFERTA Level 2
+
+
+RKT_selected_eixo_reverse <- reactive({
+  req(input$eixo_table_rev_rows_selected)
+  RKT_matricula_by_eixo()$`Eixo Tecnológico`[input$eixo_table_rev_rows_selected]
+})
+
+RKT_matricula_by_area <- reactive({
+  RKT_base_matches_reverse() %>%
+    filter(`Eixo Tecnológico` %in% RKT_selected_eixo_reverse()) %>%
+    group_by(`Área Tecnológica`) %>%
+    summarise(
+      `Matrículas 2023` = sum(`Matrículas 2023`, na.rm = TRUE),
+      `Matrículas 2024` = sum(`Matrículas 2024`, na.rm = TRUE),
+      .groups = "drop"
+    ) %>%
+    arrange(desc(`Matrículas 2024`))
+})
+
+
+## DEMANDA --> OFERTA Level 3
+
+RKT_selected_area_reverse <- reactive({
+  req(input$area_table_rev_rows_selected)
+  RKT_matricula_by_area()$`Área Tecnológica`[input$area_table_rev_rows_selected]
+})
+
+RKT_matricula_by_curso <- reactive({
+  RKT_base_matches_reverse() %>%
+    filter(`Área Tecnológica` %in% RKT_selected_area_reverse()) %>%
+    group_by(`Denominação do Curso`) %>%
+    summarise(
+      `Matrículas 2023` = sum(`Matrículas 2023`, na.rm = TRUE),
+      `Matrículas 2024` = sum(`Matrículas 2024`, na.rm = TRUE),
+      .groups = "drop"
+    ) %>%
+    arrange(desc(`Matrículas 2024`))
+})
+
+
+# DT1a – Matriculas by Eixo
+output$agg_table_rev <- renderDT({
+  datatable(RKT_matricula_by_eixo(), options = list(pageLength = 10)) %>%
+    formatCurrency(c("Matrículas 2023", "Matrículas 2024"), "", interval = 3, mark = ".", dec.mark = ",")
+})
+
+# DT1b – Matriculas by Área
+output$area_table_rev <- renderDT({
+  datatable(RKT_matricula_by_area(), options = list(pageLength = 10)) %>%
+    formatCurrency(c("Matrículas 2023", "Matrículas 2024"), "", interval = 3, mark = ".", dec.mark = ",")
+})
+
+# DT1c – Matriculas by Curso
+output$curso_table_rev <- renderDT({
+  datatable(RKT_matricula_by_curso(), options = list(pageLength = 10)) %>%
+    formatCurrency(c("Matrículas 2023", "Matrículas 2024"), "", interval = 3, mark = ".", dec.mark = ",")
+})
