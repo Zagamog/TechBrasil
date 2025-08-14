@@ -4,6 +4,60 @@ library(tidyverse)
 library(readr)
 library(DT)
 
+load("D:/Country/Brazil/TechBrazil/working/qbq/cnct_qbq_matches.rda")
+load("D:/Country/Brazil/TechBrazil/working/qbq/qbq_cnct_matches.rda")
+
+
+load("D:/Country/Brazil/TechBrazil/working/mec_inep/df_exarcu.rda")
+
+cnct_qbq_matches2 <- cnct_qbq_matches
+qbq_cnct_matches2 <- qbq_cnct_matches
+
+cnct_qbq_matches2$IDX_EIXCUR = paste0(
+  substr(cnct_qbq_matches2$IDX_EIXARECUR, 1, 2), 
+  sprintf("%03d", as.numeric(substr(cnct_qbq_matches2$IDX_EIXARECUR, 5, 6)))
+)
+
+cnct_qbq_matches2 <- left_join(cnct_qbq_matches2,df_exarcu,by="IDX_EIXCUR") 
+cnct_qbq_matches2 <- cnct_qbq_matches2 %>% filter(!is.na(`Eixo Tecnológico`))
+cnct_qbq_matches2 %>% select(IDX_EIXARECUR) %>% n_distinct() # 171 courses out of 184 in df_exarcu, 218 in matches 
+
+# 171 * 50 or 8550 rows from original 218 * 50 or 10900 rows
+
+qbq_cnct_matches2$IDX_EIXCUR = paste0(
+  substr(qbq_cnct_matches2$IDX_EIXARECUR, 1, 2), 
+  sprintf("%03d", as.numeric(substr(qbq_cnct_matches2$IDX_EIXARECUR, 5, 6)))
+)
+
+qbq_cnct_matches2 <- left_join(qbq_cnct_matches2,df_exarcu,by="IDX_EIXCUR") 
+qbq_cnct_matches2 <- qbq_cnct_matches2 %>% filter(!is.na(`Eixo Tecnológico`))
+qbq_cnct_matches2 %>% select(IDX_EIXARECUR) %>% n_distinct() # 171 courses out of 184 in df_exarcu, 218 in matches
+qbq_cnct_matches2 %>% select(CodCBO) %>% n_distinct() # 1899 CodCBOs; but some CodCBOs have less than 20 matched courses due to
+
+
+cnct_qbq_matches2$CodCBO <- as.character(cnct_qbq_matches2$CodCBO)
+qbq_cnct_matches2$CodCBO <- as.character(qbq_cnct_matches2$CodCBO)
+
+save(cnct_qbq_matches2, file="D:/Country/Brazil/TechBrazil/working/qbq/cnct_qbq_matches2.rda")
+save(qbq_cnct_matches2, file="D:/Country/Brazil/TechBrazil/working/qbq/qbq_cnct_matches2.rda")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # --- Step 1: Load match results and course/occupation metadata ---
 df_matches <- read_csv("D:/Country/Brazil/TechBrazil/working/qbq/cnct_qbq_matches.csv")
 

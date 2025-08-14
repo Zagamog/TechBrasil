@@ -38,7 +38,8 @@ df_qbq1 <- unique(qbq_ocup_cmento1[, c("cbo_1dig", "cbo_gragru")]) %>%
   mutate(cbo_gragru = toupper(cbo_gragru))
 
 # My invented gragru based on Informaçoes gerais CBO 6.0.6 Page 15 at mtecbo 
-df_qbq1$cbo_gragru[df_qbq1$cbo_1dig == "8"] <- "TRABALHADORES DA PRODUÇÃO DE BENS E SERVIÇOS INDUSTRIAIS CONTINUOS"
+# df_qbq1$cbo_gragru[df_qbq1$cbo_1dig == "8"] <- "TRABALHADORES DA PRODUÇÃO DE BENS E SERVIÇOS INDUSTRIAIS CONTINUOS"
+# No need anymore as I amended the base df in qbq3a.R
 
 
 df_qbq2 <- unique(qbq_ocup_cmento1[, c("cbo_2dig", "cbo_prigru")]) %>% 

@@ -5,18 +5,18 @@ library(dplyr)
 library(tidyr)
 library(DT)
 
-# ————— 1) Load your four “_wide” tables exactly as before —————
-load("df_mat_uf.rda")
-load("df_mat_eixo.rda")
-load("df_mat_area.rda")
-load("df_mat_curso.rda")
-load("meta11a_opcoes.rda")
-load("df_exarcu.rda")      # << new
-load("rais_cbo6_uf23.rda")  
-load("rais_cbo6_uf24.rda")
+# Load required data files
+load("df_mat_uf.rda")       # Matricula in EPT by UF and ANO 
+load("df_mat_eixo.rda")     # Matriculas by Eixo Tecnológico
+load("df_mat_area.rda")     # Matriculas by Área Tecnológica
+load("df_mat_curso.rda")    # Matriculas by Course
+load("df_exarcu.rda")       # Course metadata (IDX_EIXCUR, Eixo, Area, Denominação)
+load("rais_cbo6_uf23.rda")  # RAIS employment data 2023
+load("rais_cbo6_uf24.rda")  # RAIS employment data 2024
+load("cnct_qbq_matches2.rda") # Course to occupation matches
+load("qbq_cnct_matches2.rda") # Occupation to course matches
 
-
-
+# Create wide format datasets for matriculas
 df_mat_uf_wide <- df_mat_uf %>%
   select(CO_UF, NM_UF, SG_UF, ANO, QT_MAT_CURSO_TEC_UF) %>%
   pivot_wider(
@@ -57,75 +57,63 @@ df_mat_curso_wide <- df_mat_curso %>%
   ) %>%
   rename(`Matrículas 2023` = `2023`, `Matrículas 2024` = `2024`)
 
-###
-#CBO
-# Combine and add year label
+# Combine RAIS data and create aggregations
 df_rais_all <- bind_rows(
   rais_cbo6_uf23 %>% mutate(ANO = 2023),
   rais_cbo6_uf24 %>% mutate(ANO = 2024)
 )
 
-
-# Build df_gg from df_rais_all — ensures no hidden dependency
-df_gg <- df_rais_all %>%
-  filter(!is.na(cbo_1dig), !is.na(cbo_gragru)) %>%
-  distinct(cbo_1dig, cbo_gragru) %>%
-  arrange(cbo_1dig)
-
-df_gg_clean <- df_gg %>%
-  group_by(cbo_gragru) %>%
-  slice(1) %>%
-  ungroup()
-
-
-# ——— Aggregates by Brazil level ———
-
-# 1. CBO 1-digit (cbo_1dig)
-rais_br_cbo1 <- df_rais_all %>% filter(!is.na(cbo_gragru)) %>%
+# Create Brazil-level aggregations
+rais_br_cbo1 <- df_rais_all %>% 
+  filter(!is.na(cbo_gragru)) %>%
   group_by(ANO, cbo_1dig, cbo_gragru) %>%
   summarise(vinculos = sum(vinculos, na.rm = TRUE), .groups = "drop") %>%
   mutate(NM_UF = "Brasil", SG_UF = "BR")
-sum(is.na(rais_br_cbo1$cbo_1dig))
 
-
-# 2. CBO 4-digit
-rais_br_cbo4 <- df_rais_all %>% filter(!is.na(cbo_familia)) %>%
+rais_br_cbo4 <- df_rais_all %>% 
+  filter(!is.na(cbo_familia)) %>%
   group_by(ANO, cbo_4dig, cbo_familia) %>%
   summarise(vinculos = sum(vinculos, na.rm = TRUE), .groups = "drop") %>%
   mutate(NM_UF = "Brasil", SG_UF = "BR")
 
-# 3. Full CodCBO level (occupation level)
-rais_br_codcbo <- df_rais_all %>% filter(!is.na(`Ocupação`)) %>%
+rais_br_codcbo <- df_rais_all %>% 
+  filter(!is.na(`Ocupação`)) %>%
   group_by(ANO, CodCBO, `Ocupação`) %>%
   summarise(vinculos = sum(vinculos, na.rm = TRUE), .groups = "drop") %>%
   mutate(NM_UF = "Brasil", SG_UF = "BR")
 
-# ——— Merge back Brasil with UF-level if needed ———
-df_rais1dig <- bind_rows(df_rais_all %>% 
-                           group_by(ANO, NM_UF, SG_UF, cbo_1dig, cbo_gragru) %>%
-                           summarise(vinculos = sum(vinculos, na.rm = TRUE), .groups = "drop"),
-                         rais_br_cbo1)
+# Combine UF and Brazil level data
+df_rais1dig <- bind_rows(
+  df_rais_all %>% 
+    group_by(ANO, NM_UF, SG_UF, cbo_1dig, cbo_gragru) %>%
+    summarise(vinculos = sum(vinculos, na.rm = TRUE), .groups = "drop"),
+  rais_br_cbo1
+)
 
-df_rais4dig <- bind_rows(df_rais_all %>% 
-                           group_by(ANO, NM_UF, SG_UF, cbo_4dig, cbo_familia) %>%
-                           summarise(vinculos = sum(vinculos, na.rm = TRUE), .groups = "drop"),
-                         rais_br_cbo4)
+df_rais4dig <- bind_rows(
+  df_rais_all %>% 
+    group_by(ANO, NM_UF, SG_UF, cbo_4dig, cbo_familia) %>%
+    summarise(vinculos = sum(vinculos, na.rm = TRUE), .groups = "drop"),
+  rais_br_cbo4
+)
 
-df_raisCodCBO <- bind_rows(df_rais_all %>% 
-                             group_by(ANO, NM_UF, SG_UF, CodCBO, `Ocupação`) %>%
-                             summarise(vinculos = sum(vinculos, na.rm = TRUE), .groups = "drop"),
-                           rais_br_codcbo)
+df_raisCodCBO <- bind_rows(
+  df_rais_all %>% 
+    group_by(ANO, NM_UF, SG_UF, CodCBO, `Ocupação`) %>%
+    summarise(vinculos = sum(vinculos, na.rm = TRUE), .groups = "drop"),
+  rais_br_codcbo
+)
 
-
+# Convert to wide format
 df_rais1dig_wide <- df_rais1dig %>%
   pivot_wider(
     names_from  = ANO,
     values_from = vinculos,
     values_fill = list(vinculos = 0),
     values_fn   = sum
-  ) %>%
+  ) %>% 
+  filter(!is.na(cbo_gragru)) %>% 
   rename(`Vínculos 2023` = `2023`, `Vínculos 2024` = `2024`)
-
 
 df_rais4dig_wide <- df_rais4dig %>%
   pivot_wider(
@@ -133,7 +121,8 @@ df_rais4dig_wide <- df_rais4dig %>%
     values_from = vinculos,
     values_fill = list(vinculos = 0),
     values_fn   = sum
-  ) %>%
+  ) %>% 
+  filter(!is.na(cbo_familia)) %>% 
   rename(`Vínculos 2023` = `2023`, `Vínculos 2024` = `2024`)
 
 df_raisCodCBO_wide <- df_raisCodCBO %>%
@@ -142,36 +131,20 @@ df_raisCodCBO_wide <- df_raisCodCBO %>%
     values_from = vinculos,
     values_fill = list(vinculos = 0),
     values_fn   = sum
-  ) %>%
-  rename(`Vínculos 2023` = `2023`, `Vínculos 2024` = `2024`)
-
-df_raisCodCBO_wide <- df_raisCodCBO_wide %>%
+  ) %>%  
+  filter(!is.na(NM_UF), !is.na(`Ocupação`)) %>% 
+  rename(`Vínculos 2023` = `2023`, `Vínculos 2024` = `2024`) %>%
   mutate(
     CodCBO   = as.character(CodCBO),
     cbo_1dig = substr(CodCBO, 1, 1)
   )
 
-
-
-# For third part of tab both supply and demand together
-load("qbq_ocup_cmento1.rda")
-load("cnct_qbq_matches.rda")
-load("qbq_cnct_matches.rda")
-
-
-
-# ————— 2) UI: just UF selector + two DTs —————
-# Simplified UI layout based on new design:
-# 1. Top row: UF + match direction selector
-# 2. Main content: two conditional columns based on match direction
-
+# UI
 ui <- fluidPage(
   useShinyjs(),
   tags$head(includeCSS("www/custom.css")),
   
   div(class = "checkbox-dark-panel",
-      
-      # Top controls row (unchanged)
       fluidRow(
         column(
           width = 3,
@@ -187,126 +160,99 @@ ui <- fluidPage(
                        inline = TRUE)
         ),
         column(
-          width = 3,
-          checkboxGroupInput("level_filter", "Níveis de Trabalhador Técnico:",
-                             choices = 1:6,
-                             selected = 1:3,
-                             inline = TRUE)
-        ),
-        column(
-          width = 3,
+          width = 2,
           sliderInput("score_thresh", "Limite de Proximidade:",
                       min = 0, max = 1, value = 0.2, step = 0.01)
+        ),
+        column(
+          width = 2,
+          numericInput("top_n", "Melhores Correspondências:",
+                       value = 5, min = 1, max = 10, step = 1),
+          helpText("Atualizado automaticamente com base no limite de proximidade.")
         )
       ),
       fluidRow(
         # OFERTA → DEMANDA
         conditionalPanel(
           condition = "input.match_direction == 'Oferta \u2192 Demanda'",
-          
           column(width = 6,
                  h4("1a - Matrículas por Eixo, Área e Curso"),
-                 DTOutput("agg_table"),
-                 hr(),
+                 DTOutput("agg_table"), hr(),
                  h4("1b - Matrículas por Área"),
-                 DTOutput("area_table"),
-                 hr(),
+                 DTOutput("area_table"), hr(),
                  h4("1c - Matrículas por Curso"),
                  DTOutput("curso_table")
           ),
-          
           column(width = 6,
-                 h4("2a – Vínculos por Grande Grupo"),
-                 DTOutput("match_summary_table"),
-                 hr(),
-                 h4("2b – Vínculos por Família"),
-                 DTOutput("match_familia_table"),
-                 hr(),
-                 h4("2c – Vínculos por Ocupação"),
-                 DTOutput("cbo6_table")
+                 h4("Melhores Ocupações e Vínculos"),
+                 DTOutput("course_occ_table")
           )
         ),
-        
         # DEMANDA → OFERTA
         conditionalPanel(
           condition = "input.match_direction == 'Demanda \u2192 Oferta'",
-          
           column(width = 6,
                  h4("1a - Vínculos por Grande Grupo"),
-                 DTOutput("cbo1_table"),
-                 hr(),
+                 DTOutput("cbo1_table"), hr(),
                  h4("1b - Vínculos por Família"),
-                 DTOutput("cbo4_table"),
-                 hr(),
+                 DTOutput("cbo4_table"), hr(),
                  h4("1c - Vínculos por Ocupação"),
                  DTOutput("cbo6b_table")
           ),
-          
           column(width = 6,
-                 h4("2a – Matrículas por Eixo, Área e Curso"),
-                 DTOutput("agg_table_rev"),
-                 hr(),
-                 h4("2b – Matrículas por Área"),
-                 DTOutput("area_table_rev"),
-                 hr(),
-                 h4("2c – Matrículas por Curso"),
-                 DTOutput("curso_table_rev")
+                 h4("Melhores Cursos e Matrículas"),
+                 DTOutput("course_agg_table_rev")
           )
         )
-      ) # end of fluid row
-  ) # end div
-) # end fluidPage
+      )
+  )
+)
 
-
-
-
-
-
-# ————— 3) Server: UF → Eixo-table → Área-table —————
+# Server
 server <- function(input, output, session) {
   
-
-  # populate UF dropdown
+  # Initialize UF choices
   observe({
     all_ufs <- sort(unique(df_mat_eixo_wide$NM_UF))
     updateSelectizeInput(
       session, "uf_select",
-      choices  = c("Brasil", all_ufs),
-      selected = "Brasil",
-      server   = TRUE
+      choices = c("Brasil", setdiff(all_ufs, "Brasil")),
+      selected = "Brasil"
     )
   })
   
-  # reactive DF of Eixo rows for the chosen UF
+  #### OFERTA → DEMANDA ####
+  
+  # Table 1a - Matrículas por Eixo
   RKT_agg_df <- reactive({
+    req(input$match_direction == "Oferta \u2192 Demanda")
     req(input$uf_select)
+    
     df_mat_eixo_wide %>%
       filter(NM_UF == input$uf_select) %>%
-      select(NM_UF, `Eixo Tecnológico`, `Matrículas 2023`, `Matrículas 2024`) %>%
+      select(
+        NM_UF,
+        `Eixo Tecnológico`,
+        `Matrículas 2023`,
+        `Matrículas 2024`
+      ) %>%
       arrange(desc(`Matrículas 2024`))
   })
   
-  # 1) render the Eixo-table with single selection + total row + formatting
+  RKT_selected_eixo <- reactive({
+    req(input$agg_table_rows_selected)
+    df <- RKT_agg_df()
+    df$`Eixo Tecnológico`[input$agg_table_rows_selected]
+  })
+  
   output$agg_table <- renderDT({
-    df0 <- RKT_agg_df()
-    
-    # tack on the Total row
-    total_row <- df0 %>%
-      summarise(
-        NM_UF               = "Total",
-        `Eixo Tecnológico` = "",
-        `Matrículas 2023`   = sum(`Matrículas 2023`, na.rm = TRUE),
-        `Matrículas 2024`   = sum(`Matrículas 2024`, na.rm = TRUE)
-      )
-    df_final <- bind_rows(df0, total_row)
-    
     datatable(
-      df_final,
+      RKT_agg_df(),
       selection = "single",
       rownames  = FALSE,
       class     = "compact stripe",
       options   = list(
-        pageLength = nrow(df_final),
+        pageLength = nrow(RKT_agg_df()),
         autoWidth  = TRUE,
         language   = list(
           url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json"
@@ -314,49 +260,33 @@ server <- function(input, output, session) {
       )
     ) %>%
       formatCurrency(
-        columns   = c("Matrículas 2023", "Matrículas 2024"),
-        currency  = "",
-        interval  = 3,
-        mark      = ".",
-        dec.mark  = ","
+        c("Matrículas 2023","Matrículas 2024"),
+        currency = "", interval = 3, mark = ".", dec.mark = ","
       ) %>%
       formatStyle(
-        columns     = c("Matrículas 2023", "Matrículas 2024"),
+        c("Matrículas 2023","Matrículas 2024"),
         `text-align` = "right"
-      ) %>%
-      formatStyle(
-        "NM_UF",
-        target     = "row",
-        fontWeight = styleEqual("Total", "bold"),
-        background = styleEqual("Total", "#0d0863")
       )
   })
   
-  # grab the clicked Eixo from agg_table
-  # Option A: base R [[
-  RKT_selected_eixo <- reactive({
-    req(input$agg_table_rows_selected)
-    df <- RKT_agg_df()
-    df[[ "Eixo Tecnológico" ]][ input$agg_table_rows_selected ]
-  })
+  # Reset selections when eixo changes
+  observeEvent(input$agg_table_rows_selected, {
+    DT::dataTableProxy("curso_table") %>% 
+      DT::selectRows(NULL)
+  }, ignoreNULL = FALSE)
   
-  # 2) render the Área-table once an Eixo is clicked
- 
-  # --- 3) build a reactive DF for Área so selection indices line up ---
+  # Table 1b - Matrículas por Área
   RKT_area_df <- reactive({
-    eixo <- RKT_selected_eixo()
-    req(eixo, input$uf_select)
-    # valid Áreas for this eixo
+    req(input$match_direction == "Oferta → Demanda", input$agg_table_rows_selected)
+    sel_eixo <- RKT_selected_eixo()
     df_exarcu %>%
-      filter(`Eixo Tecnológico` == eixo) %>%
+      filter(`Eixo Tecnológico` == sel_eixo) %>%
       distinct(`Área Tecnológica`) %>%
-      # join in the UF counts
       left_join(
         df_mat_area_wide %>% filter(NM_UF == input$uf_select),
         by = "Área Tecnológica"
       ) %>%
       select(
-        NM_UF,
         `Área Tecnológica`,
         `Matrículas 2023`,
         `Matrículas 2024`
@@ -364,16 +294,14 @@ server <- function(input, output, session) {
       arrange(desc(`Matrículas 2024`))
   })
   
-  # replace your existing renderDT for area_table with this (enabling single selection)
   output$area_table <- renderDT({
-    dat <- RKT_area_df()
     datatable(
-      dat,
+      RKT_area_df(),
       selection = "single",
       rownames  = FALSE,
       class     = "compact stripe",
       options   = list(
-        pageLength = nrow(dat),
+        pageLength = nrow(RKT_area_df()),
         autoWidth  = TRUE,
         language   = list(
           url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json"
@@ -390,33 +318,34 @@ server <- function(input, output, session) {
       )
   })
   
-  # capture the clicked Área
+  observeEvent(input$area_table_rows_selected, {
+    DT::dataTableProxy("curso_table") %>% 
+      DT::selectRows(NULL)
+  }, ignoreNULL = FALSE)
+  
+  # Table 1c - Matrículas por Curso
   RKT_selected_area <- reactive({
     req(input$area_table_rows_selected)
-    RKT_area_df()$`Área Tecnológica`[ input$area_table_rows_selected ]
+    RKT_area_df()$`Área Tecnológica`[input$area_table_rows_selected]
   })
   
-  # --- 4) cursos for the selected UF ↦ Eixo ↦ Área ---
   RKT_curso_df <- reactive({
-    uf   <- input$uf_select
+    req(input$area_table_rows_selected)
+    uf <- input$uf_select
     eixo <- RKT_selected_eixo()
     area <- RKT_selected_area()
-    req(uf, eixo, area)
-    
-    # which cursos belong?
     df_exarcu %>%
       filter(
         `Eixo Tecnológico` == eixo,
         `Área Tecnológica` == area
       ) %>%
       distinct(IDX_EIXCUR, `Denominação do Curso`) %>%
-      # join in the UF×curso counts
       left_join(
         df_mat_curso_wide %>% filter(NM_UF == uf),
         by = c("IDX_EIXCUR", "Denominação do Curso")
       ) %>%
       select(
-        NM_UF,
+        IDX_EIXCUR,
         `Denominação do Curso`,
         `Matrículas 2023`,
         `Matrículas 2024`
@@ -424,558 +353,441 @@ server <- function(input, output, session) {
       arrange(desc(`Matrículas 2024`))
   })
   
-  # 5) render the Curso‐table
   output$curso_table <- renderDT({
-    dat <- RKT_curso_df()
     datatable(
-      dat,
-      rownames = FALSE,
-      class    = "compact stripe",
-      options  = list(
-        pageLength = nrow(dat),
-        autoWidth  = TRUE,
-        language   = list(
-          url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json"
-        )
-      )
-    ) %>%
-      formatCurrency(
-        c("Matrículas 2023","Matrículas 2024"),
-        currency = "", interval = 3, mark = ".", dec.mark = ","
-      ) %>%
-      formatStyle(
-        c("Matrículas 2023","Matrículas 2024"),
-        `text-align` = "right"
-      )
-  })
-  
-############################################ CBO CBO
-  
-############ Level 1 Level  CBO
-#################################################
-
-  RKT_cbo1_df <- reactive({
-    req(input$uf_select)
-    req(input$match_direction == "Demanda \u2192 Oferta")
-    
-    df_rais1dig_wide %>%
-      filter(NM_UF == input$uf_select) %>%
-      select(cbo_gragru, `Vínculos 2023`, `Vínculos 2024`) %>%
-      arrange(desc(`Vínculos 2024`))
-  })
-  
-
-  
-  
-  output$cbo1_table <- renderDT({
-    req(input$match_direction == "Demanda \u2192 Oferta")  # ensure correct tab
-    
-    dat <- RKT_cbo1_df()
-    datatable(
-      dat,
+      RKT_curso_df(),
       selection = "single",
       rownames  = FALSE,
       class     = "compact stripe",
       options   = list(
-        pageLength = nrow(dat),
-        autoWidth  = TRUE,
-        language   = list(
-          url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json"
-        )
-      )
-    ) %>%
-      formatCurrency(
-        c("Vínculos 2023","Vínculos 2024"),
-        currency = "", interval = 3, mark = ".", dec.mark = ","
-      ) %>%
-      formatStyle(
-        c("Vínculos 2023","Vínculos 2024"),
-        `text-align` = "right"
-      )
-  })
-  
-  ############ Level 2 Level  Familia
-  #################################################
-  
-  RKT_selected_cbo1 <- reactive({
-    req(input$cbo1_table_rows_selected)
-    RKT_cbo1_df()$cbo_gragru[ input$cbo1_table_rows_selected ]
-  })
-  
-  
-  RKT_cbo4_df <- reactive({
-    req(input$uf_select, RKT_selected_cbo1())
-    
-    selected_1dig <- df_rais1dig %>%
-      filter(cbo_gragru == RKT_selected_cbo1()) %>%
-      distinct(cbo_1dig) %>%
-      pull(cbo_1dig)
-    
-    df_rais4dig_wide %>%
-      filter(
-        NM_UF == input$uf_select,
-        substr(cbo_4dig, 1, 1) %in% selected_1dig
-      ) %>%
-      select(NM_UF, cbo_familia, `Vínculos 2023`, `Vínculos 2024`) %>%
-      arrange(desc(`Vínculos 2024`))
-  })
-
-  output$cbo4_table <- renderDT({
-    dat <- RKT_cbo4_df()
-    datatable(
-      dat,
-      selection = "single",
-      rownames  = FALSE,
-      class     = "compact stripe",
-      options   = list(
-        pageLength = 10,                          # default to 10 rows
-        scrollY    = "300px",                     # optional scroll height
-        paging     = TRUE,
-        lengthMenu = c(5, 10, 25, 50, 100),       # allow user to choose
-        autoWidth  = TRUE,
-        language   = list(
-          url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json"
-        )
-      )
-    ) %>%
-      formatCurrency(
-        c("Vínculos 2023", "Vínculos 2024"),
-        currency = "", interval = 3, mark = ".", dec.mark = ","
-      ) %>%
-      formatStyle(
-        c("Vínculos 2023", "Vínculos 2024"),
-        `text-align` = "right"
-      )
-  })
-  
-  
-  ############ Level 3 Level  Ocupação
-  #################################################  
-  
-  RKT_selected_cbo_familia <- reactive({
-    req(input$cbo4_table_rows_selected)
-    RKT_cbo4_df()$cbo_familia[ input$cbo4_table_rows_selected ]
-  })
-  
-
-  RKT_cbo6b_table <- reactive({
-    req(input$uf_select, RKT_selected_cbo_familia())
-    
-    # Get the actual 4-digit CBO prefix
-    selected_4dig <- df_rais4dig %>%
-      filter(cbo_familia == RKT_selected_cbo_familia()) %>%
-      distinct(cbo_4dig) %>%
-      pull(cbo_4dig)
-    
-    req(length(selected_4dig) > 0)
-    
-    df_raisCodCBO_wide %>%
-      filter(
-        NM_UF == input$uf_select,
-        substr(CodCBO, 1, 4) %in% selected_4dig
-      ) %>%
-      select(NM_UF, Ocupação, `Vínculos 2023`, `Vínculos 2024`) %>%
-      arrange(desc(`Vínculos 2024`))
-  })
-  
-  
-  output$cbo6b_table <- renderDT({
-    dat <- RKT_cbo6b_table()
-    datatable(
-      dat,
-      rownames = FALSE,
-      class = "compact stripe",
-      options = list(
-        pageLength = nrow(dat),
-        autoWidth  = TRUE,
-        language   = list(
-          url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json"
-        )
-      )
-    ) %>%
-      formatCurrency(
-        c("Vínculos 2023", "Vínculos 2024"),
-        currency = "", interval = 3, mark = ".", dec.mark = ","
-      ) %>%
-      formatStyle(
-        c("Vínculos 2023", "Vínculos 2024"),
-        `text-align` = "right"
-      )
-  })
-  
-######MATCH MATCH MATCH ###########################################################################
-######################################## EIXO-AREA   EIXO-AREA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-  observeEvent(RKT_selected_eixo(), {
-    cat("🧲 Forcing renderDT for cbo6_table after eixo selection\n")
-    output$cbo6_table <- renderDT({  # re-bind the output
-      req(RKT_selected_eixo())
-      cat("🚀 renderDT for cbo6_table running...\n")
-
-      df <- RKT_cbo6_df()
-      validate(need(nrow(df) > 0, "Nenhuma ocupação correspondente encontrada."))
-
-      datatable(
-        df,
-        rownames = FALSE,
-        class = "compact stripe",
-        options = list(
-          pageLength = 10,
-          paging     = TRUE,
-          autoWidth  = TRUE,
-          language   = list(url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json")
-        )
-      ) %>%
-        formatCurrency(c("Vínculos 2023", "Vínculos 2024"), currency = "", interval = 3, mark = ".", dec.mark = ",") %>%
-        formatStyle(c("Vínculos 2023", "Vínculos 2024"), `text-align` = "right")
-    })
-  })
-
-
-
-  RKT_base_matches <- reactive({
-    req(input$uf_select, input$level_filter, input$score_thresh, RKT_selected_eixo())
-    
-    eixo_sel <- RKT_selected_eixo()
-    
-    cnct_qbq_matches %>%
-      filter(final_score >= input$score_thresh) %>%
-      mutate(
-        CodCBO     = as.character(CodCBO),
-        eixo_code  = substr(IDX_EIXARECUR, 1, 2),
-        curso_code = substr(IDX_EIXARECUR, 5, 6),
-        IDX_EIXCUR = paste0(eixo_code, sprintf("%03d", as.integer(curso_code)))
-      ) %>%
-      inner_join(qbq_ocup_cmento1 %>% select(-cbo_1dig), by = "CodCBO") %>%
-      filter(NivelOcupacao %in% input$level_filter) %>%
-      inner_join(df_exarcu %>% select(IDX_EIXCUR, `Área Tecnológica`, `Eixo Tecnológico`), by = "IDX_EIXCUR") %>%
-      filter(`Eixo Tecnológico` == eixo_sel) %>%
-      mutate(cbo_1dig = substr(CodCBO, 1, 1)) %>%
-      left_join(df_raisCodCBO_wide %>%
-                  filter(NM_UF == input$uf_select) %>%
-                  select(CodCBO, `Vínculos 2023`, `Vínculos 2024`),
-                by = "CodCBO") %>%
-      distinct(CodCBO, IDX_EIXCUR, .keep_all = TRUE)  # de-dupe matching combos
-  })
-  
-  
-  
-  #   observe({
-  #   cat("Selected Eixo:", RKT_selected_eixo(), "\n")
-  # })
-  
-  # Oferta → Demanda
-  RKT_match_summary_df <- reactive({
-    req(input$match_direction == "Oferta \u2192 Demanda")
-    req(RKT_selected_eixo())
-    
-    base <- RKT_base_matches()
-    
-    # Already filtered by selected eixo in base
-    base %>%
-      distinct(cbo_1dig, CodCBO, .keep_all = TRUE) %>%
-      group_by(cbo_1dig) %>%
-      summarise(
-        `Vínculos 2023` = sum(`Vínculos 2023`, na.rm = TRUE),
-        `Vínculos 2024` = sum(`Vínculos 2024`, na.rm = TRUE),
-        .groups = "drop"
-      ) %>%
-      left_join(df_gg, by = "cbo_1dig") %>%
-      select(`Grande Grupo` = cbo_gragru, `Vínculos 2023`, `Vínculos 2024`) %>%
-      arrange(desc(`Vínculos 2024`))
-  })
-  
-  output$match_summary_table <- renderDT({
-    df <- RKT_match_summary_df()
-    datatable(
-      df,
-      rownames = FALSE,
-      class = "compact stripe",
-      options = list(
-        pageLength = 15,
-        autoWidth = TRUE,
-        language = list(url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json")
-      )
-    ) %>%
-      formatCurrency(c("Vínculos 2023", "Vínculos 2024"), currency = "", interval = 3, mark = ".", dec.mark = ",") %>%
-      formatStyle(c("Vínculos 2023", "Vínculos 2024"), `text-align` = "right")
-  })
-  
-
-  
-
-  ######MATCH MATCH MATCH ###########################################################################
-  ######################################## AREA-FAMILIA   AREA-FAMILIA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  
-  RKT_selected_grande_grupo <- reactive({
-    req(input$match_summary_table_rows_selected)
-    df <- RKT_match_summary_df()
-    df$`Grande Grupo`[input$match_summary_table_rows_selected]
-    
-  })
-  
-    
-  RKT_match_detail_df <- reactive({
-    base <- RKT_base_matches()
-  #  cat("📌 RKT_base_matches rows (detail):", nrow(base), "\n")
-    
-    selected_cbo1 <- if (!is.null(input$cbo1_table_rows_selected)) {
-      RKT_selected_grande_grupo() %>%
-        left_join(df_gg_clean, by = c("Grande Grupo" = "cbo_gragru")) %>%
-        pull(cbo_1dig)
-    } else {
-      RKT_match_summary_df() %>%
-        left_join(df_gg_clean, by = c("Grande Grupo" = "cbo_gragru")) %>%
-        pull(cbo_1dig)
-    }
-    
-    selected_cbo1 <- as.character(selected_cbo1)
-  #  cat("📌 Selected cbo_1dig (detail):", paste(unique(selected_cbo1), collapse = ", "), "\n")
-    
-    df_out <- base %>%
-      filter(cbo_1dig %in% selected_cbo1) %>%
-      distinct(`Área Tecnológica`, CodCBO, .keep_all = TRUE) %>%
-      group_by(`Área Tecnológica`) %>%
-      summarise(
-        `Vínculos 2023` = sum(`Vínculos 2023`, na.rm = TRUE),
-        `Vínculos 2024` = sum(`Vínculos 2024`, na.rm = TRUE),
-        .groups = "drop"
-      ) %>%
-      arrange(desc(`Vínculos 2024`))
-    
-  #  cat("📦 Rows in match_familia_table:", nrow(df_out), "\n")
-    return(df_out)
-  })
-  
-  
-  
-  
-  
-  
-  output$match_familia_table <- renderDT({
-    df <- RKT_match_detail_df()
-    validate(need(nrow(df) > 0, "Nenhuma família encontrada."))
-    
-    datatable(
-      df,
-      rownames = FALSE,
-      class = "compact stripe",
-      options = list(
-        pageLength = 10,
-        paging     = TRUE,
+        pageLength = nrow(RKT_curso_df()),
         autoWidth  = TRUE,
         language   = list(url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json")
       )
     ) %>%
-      formatCurrency(c("Vínculos 2023", "Vínculos 2024"), currency = "", interval = 3, mark = ".", dec.mark = ",") %>%
-      formatStyle(c("Vínculos 2023", "Vínculos 2024"), `text-align` = "right")
+      formatCurrency(
+        c("Matrículas 2023","Matrículas 2024"),
+        currency = "", interval = 3, mark = ".", dec.mark = ","
+      ) %>%
+      formatStyle(
+        c("Matrículas 2023","Matrículas 2024"),
+        `text-align` = "right"
+      )
   })
   
+  RKT_selected_course <- reactive({
+    req(input$curso_table_rows_selected)
+    df <- RKT_curso_df()
+    df$IDX_EIXCUR[input$curso_table_rows_selected]
+  })
   
-  ######MATCH MATCH MATCH ###########################################################################
-  ######################################## FAMILIA-OCUPACAO   FAMILIA-OCUPACAO %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  
-  
-  RKT_cbo6_df <- reactive({
-    req(RKT_selected_eixo())  # 👈 blocks until user picks an eixo
-    base <- RKT_base_matches()
-  #  cat("🔍 [cbo6] RKT_base_matches rows:", nrow(base), "\n")
+  # Auto-update top_n based on available matches within threshold
+  observeEvent(list(RKT_selected_course(), input$score_thresh), {
+    req(input$match_direction == "Oferta \u2192 Demanda")
+    req(input$curso_table_rows_selected)
+    req(input$score_thresh)
     
-    selected_cbo1 <- if (!is.null(input$cbo1_table_rows_selected)) {
-    #  cat("🔍 [cbo6] Using clicked row from DT1 (cbo1_table_rows_selected)\n")
-      RKT_selected_grande_grupo() %>%
-        left_join(df_gg_clean, by = c("Grande Grupo" = "cbo_gragru")) %>%
-        pull(cbo_1dig)
-    } else {
-   #   cat("🔍 [cbo6] Using all rows from RKT_match_summary_df()\n")
-      RKT_match_summary_df() %>%
-        left_join(df_gg_clean, by = c("Grande Grupo" = "cbo_gragru")) %>%
-        pull(cbo_1dig)
+    selected_course_id <- RKT_selected_course()
+    
+    # Count matches above the current threshold
+    n_matches <- cnct_qbq_matches2 %>%
+      filter(
+        IDX_EIXCUR == selected_course_id,
+        final_score >= input$score_thresh
+      ) %>%
+      nrow()
+    
+    # Set top_n to the number of available matches
+    new_top_n <- min(n_matches, 50)
+    new_max <- max(n_matches, 50)
+    
+    updateNumericInput(
+      session,
+      "top_n",
+      value = new_top_n,
+      min = 1,
+      max = new_max
+    )
+  })
+  
+  # Table 2a - Course to Occupation matches
+  RKT_course_occ_df <- reactive({
+    req(input$match_direction == "Oferta \u2192 Demanda")
+    req(input$curso_table_rows_selected)
+    req(input$score_thresh, input$top_n)
+    
+    selected_course_id <- RKT_selected_course()
+    
+    # Filter by score threshold and apply top_n limit
+    matches_final <- cnct_qbq_matches2 %>%
+      filter(
+        IDX_EIXCUR == selected_course_id,
+        final_score >= input$score_thresh
+      ) %>%
+      arrange(desc(final_score)) %>%
+      slice_head(n = input$top_n)
+    
+    if (nrow(matches_final) == 0) {
+      return(data.frame(
+        CodCBO = character(0),
+        Ocupação = character(0),
+        `Vínculos 2023` = integer(0),
+        `Vínculos 2024` = integer(0),
+        final_score = numeric(0),
+        semantic = numeric(0),
+        tfidf = numeric(0),
+        check.names = FALSE
+      ))
     }
     
-    selected_cbo1 <- as.character(selected_cbo1)
-  #  cat("🔍 [cbo6] Selected cbo_1dig values:", paste(unique(selected_cbo1), collapse = ", "), "\n")
+    # Bring in RAIS info
+    rais_filtered <- df_raisCodCBO_wide %>%
+      filter(NM_UF == input$uf_select) %>%
+      select(CodCBO, `Ocupação`, `Vínculos 2023`, `Vínculos 2024`)
     
-    filtered_base <- base %>%
-      filter(cbo_1dig %in% selected_cbo1)
+    # Merge and return
+    result <- left_join(matches_final, rais_filtered, by = "CodCBO") %>%
+      select(CodCBO, `Ocupação`, `Vínculos 2023`, `Vínculos 2024`, final_score, semantic, tfidf) %>%
+      arrange(desc(final_score))
     
-  #  cat("🔍 [cbo6] Rows after filtering base:", nrow(filtered_base), "\n")
-    
-    df_out <- filtered_base %>%
-      distinct(CodCBO, .keep_all = TRUE) %>%
-      group_by(CodCBO, cbo_prigru) %>%
-      summarise(
-        `Vínculos 2023` = sum(`Vínculos 2023`, na.rm = TRUE),
-        `Vínculos 2024` = sum(`Vínculos 2024`, na.rm = TRUE),
-        .groups = "drop"
-      ) %>%
-      arrange(desc(`Vínculos 2024`))
-    
- #   cat("📦 [cbo6] Final output rows:", nrow(df_out), "\n")
-    return(df_out)
+    return(result)
   })
   
-  
-  output$cbo6_table <- renderDT({
-    req(RKT_selected_eixo())  # 👈 blocks until user picks an eixo
-#    cat("🚀 renderDT for cbo6_table running...\n")  # <— MUST appear when Eixo is selected
-    df <- RKT_cbo6_df()
-    validate(need(nrow(df) > 0, "Nenhuma ocupação correspondente encontrada."))
+  output$course_occ_table <- renderDT({
+    df <- RKT_course_occ_df()
+    
+    validate(need(nrow(df) > 0, "Nenhuma correspondência encontrada."))
+    
+    # Format the score columns for better display
+    df_display <- df %>%
+      mutate(
+        final_score = round(final_score, 3),
+        semantic = round(semantic, 3),
+        tfidf = round(tfidf, 3)
+      )
     
     datatable(
-      df,
+      df_display,
+      rownames = FALSE,
+      selection = "single",
+      class = "compact stripe",
+      options = list(
+        pageLength = nrow(df_display),
+        autoWidth = TRUE,
+        language = list(
+          url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json"
+        )
+      )
+    ) %>%
+      formatCurrency(
+        c("Vínculos 2023", "Vínculos 2024"),
+        currency = "", interval = 3, mark = ".", dec.mark = ","
+      ) %>%
+      formatStyle(
+        c("Vínculos 2023", "Vínculos 2024"),
+        `text-align` = "right"
+      ) %>%
+      formatStyle(
+        c("final_score", "semantic", "tfidf"),
+        `text-align` = "center"
+      )
+  })
+  
+  #### DEMANDA → OFERTA ####
+  
+  # Table 1a - Vínculos por Grande Grupo (1-digit)
+  RKT_cbo1_df <- reactive({
+    req(input$match_direction == "Demanda \u2192 Oferta", input$uf_select)
+    df <- df_rais1dig_wide %>%
+      dplyr::filter(NM_UF == input$uf_select) %>%
+      dplyr::select(
+        cbo_1dig,
+        `Grande Grupo` = cbo_gragru,
+        `Vínculos 2023`,
+        `Vínculos 2024`
+      )
+    
+    # Ensure numeric columns
+    vcols <- c("Vínculos 2023", "Vínculos 2024")
+    df[vcols] <- lapply(df[vcols], function(x) suppressWarnings(as.numeric(x)))
+    
+    df %>% dplyr::arrange(dplyr::desc(`Vínculos 2024`))
+  })
+  
+  output$cbo1_table <- DT::renderDT({
+    DT::datatable(
+      RKT_cbo1_df(),
+      selection = "single",
+      rownames  = FALSE,
+      class     = "compact stripe",
+      options   = list(
+        pageLength = 10,
+        autoWidth  = TRUE,
+        columnDefs = list(list(visible = FALSE, targets = 0))
+      )
+    ) %>%
+      DT::formatCurrency(
+        columns  = c("Vínculos 2023","Vínculos 2024"),
+        currency = "",
+        digits   = 0,
+        interval = 3,
+        mark     = ".",
+        dec.mark = ","
+      ) %>%
+      DT::formatStyle(
+        c("Vínculos 2023","Vínculos 2024"),
+        `text-align` = "right"
+      )
+  })
+  
+  # Clear lower level selections when Grande Grupo changes
+  observeEvent(input$cbo1_table_rows_selected, {
+    DT::dataTableProxy("cbo4_table")  %>% DT::selectRows(NULL)
+    DT::dataTableProxy("cbo6b_table") %>% DT::selectRows(NULL)
+  }, ignoreInit = TRUE)
+  
+  RKT_selected_cbo1_code <- reactive({
+    req(input$match_direction == "Demanda \u2192 Oferta")
+    idx <- input$cbo1_table_rows_selected
+    req(length(idx) == 1)
+    as.character(RKT_cbo1_df()$cbo_1dig[idx])
+  })
+  
+  # Table 1b - Família (CBO 4 dígitos)
+  RKT_cbo4_df <- reactive({
+    req(input$match_direction == "Demanda \u2192 Oferta",
+        input$uf_select, input$cbo1_table_rows_selected)
+    sel1 <- RKT_selected_cbo1_code()
+    df <- df_rais4dig_wide %>%
+      dplyr::filter(
+        NM_UF == input$uf_select,
+        substr(cbo_4dig, 1, 1) == sel1
+      ) %>%
+      dplyr::select(
+        cbo_4dig,
+        `Família (CBO 4d)` = cbo_familia,
+        `Vínculos 2023`,
+        `Vínculos 2024`
+      )
+    
+    vcols <- c("Vínculos 2023", "Vínculos 2024")
+    df[vcols] <- lapply(df[vcols], function(x) suppressWarnings(as.numeric(x)))
+    
+    df %>% dplyr::arrange(dplyr::desc(`Vínculos 2024`))
+  })
+  
+  output$cbo4_table <- DT::renderDT({
+    DT::datatable(
+      RKT_cbo4_df(),
+      selection = "single",
+      rownames  = FALSE,
+      class     = "compact stripe",
+      options   = list(
+        pageLength = 10,
+        autoWidth  = TRUE,
+        columnDefs = list(list(visible = FALSE, targets = 0))
+      )
+    ) %>%
+      DT::formatCurrency(
+        columns  = c("Vínculos 2023","Vínculos 2024"),
+        currency = "",
+        digits   = 0,
+        interval = 3,
+        mark     = ".",
+        dec.mark = ","
+      ) %>%
+      DT::formatStyle(
+        c("Vínculos 2023","Vínculos 2024"),
+        `text-align` = "right"
+      )
+  })
+  
+  RKT_selected_cbo4_code <- reactive({
+    req(input$match_direction == "Demanda \u2192 Oferta")
+    idx <- input$cbo4_table_rows_selected
+    req(length(idx) == 1)
+    as.character(RKT_cbo4_df()$cbo_4dig[idx])
+  })
+  
+  # Table 1c - Ocupações (CBO 6 dígitos)
+  RKT_cbo6_df <- reactive({
+    req(input$match_direction == "Demanda \u2192 Oferta",
+        input$uf_select,
+        input$cbo4_table_rows_selected)
+    
+    sel4 <- RKT_selected_cbo4_code()
+    
+    df <- df_raisCodCBO_wide %>%
+      dplyr::filter(
+        NM_UF == input$uf_select,
+        substr(CodCBO, 1, 4) == sel4
+      ) %>%
+      dplyr::select(
+        CodCBO,
+        Ocupação = `Ocupação`,
+        `Vínculos 2023`,
+        `Vínculos 2024`
+      )
+    
+    vcols <- c("Vínculos 2023", "Vínculos 2024")
+    df[vcols] <- lapply(df[vcols], function(x) suppressWarnings(as.numeric(x)))
+    
+    df %>% dplyr::arrange(dplyr::desc(`Vínculos 2024`))
+  })
+  
+  output$cbo6b_table <- DT::renderDT({
+    df <- RKT_cbo6_df()
+    
+    DT::datatable(
+      df %>% dplyr::select(CodCBO, Ocupação, `Vínculos 2023`, `Vínculos 2024`),
+      selection = "single",
+      rownames  = FALSE,
+      class     = "compact stripe",
+      options   = list(
+        pageLength = 10,
+        autoWidth  = TRUE,
+        columnDefs = list(list(visible = FALSE, targets = 0)),
+        language   = list(
+          url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json"
+        )
+      )
+    ) %>%
+      DT::formatCurrency(
+        columns  = c("Vínculos 2023", "Vínculos 2024"),
+        currency = "",
+        digits   = 0,
+        interval = 3,
+        mark     = ".",
+        dec.mark = ","
+      ) %>%
+      DT::formatStyle(
+        c("Vínculos 2023","Vínculos 2024"),
+        `text-align` = "right"
+      )
+  })
+  
+  # Table 2a - Occupation to Course matches
+  RKT_selected_cbo_code <- reactive({
+    req(input$cbo6b_table_rows_selected)
+    RKT_cbo6_df()$CodCBO[input$cbo6b_table_rows_selected]
+  })
+  
+  RKT_course_matches_df <- reactive({
+    req(input$match_direction == "Demanda → Oferta")
+    req(input$cbo6b_table_rows_selected)
+    req(input$score_thresh)
+    req(input$top_n)
+    
+    cbo_code <- RKT_selected_cbo_code()
+    
+    # Get matches
+    matches <- qbq_cnct_matches2 %>%
+      filter(
+        CodCBO == cbo_code,
+        final_score >= input$score_thresh
+      ) %>%
+      arrange(desc(final_score)) %>%
+      slice_head(n = input$top_n)
+    
+    if (nrow(matches) == 0) {
+      return(data.frame(
+        `Denominação do Curso` = character(0),
+        `Matrículas 2023` = integer(0),
+        `Matrículas 2024` = integer(0),
+        final_score = numeric(0),
+        check.names = FALSE
+      ))
+    }
+    
+    # Get enrollment data for the selected UF
+    enrollments <- df_mat_curso_wide %>%
+      filter(NM_UF == input$uf_select) %>%
+      select(IDX_EIXCUR, `Matrículas 2023`, `Matrículas 2024`)
+    
+    # Join and combine
+    result <- matches %>%
+      left_join(enrollments, by = "IDX_EIXCUR") %>%
+      select(
+        `Denominação do Curso`,
+        `Matrículas 2023`, 
+        `Matrículas 2024`, 
+        final_score
+      ) %>%
+      mutate(
+        `Matrículas 2023` = ifelse(is.na(`Matrículas 2023`), 0, `Matrículas 2023`),
+        `Matrículas 2024` = ifelse(is.na(`Matrículas 2024`), 0, `Matrículas 2024`)
+      ) %>%
+      arrange(desc(final_score))
+    
+    return(result)
+  })
+  
+  # Render the occupation to course matches table
+  output$course_agg_table_rev <- renderDT({
+    df <- RKT_course_matches_df()
+    
+    if (nrow(df) == 0) {
+      return(datatable(
+        data.frame(`Denominação do Curso` = "Nenhuma correspondência encontrada",
+                   `Matrículas 2023` = 0,
+                   `Matrículas 2024` = 0,
+                   final_score = 0,
+                   check.names = FALSE),
+        options = list(dom = 't'),
+        rownames = FALSE
+      ))
+    }
+    
+    # Format scores for display
+    df_display <- df %>%
+      mutate(final_score = round(final_score, 3))
+    
+    datatable(
+      df_display,
+      selection = "single",
       rownames = FALSE,
       class = "compact stripe",
       options = list(
-        pageLength = 10,
-        paging     = TRUE,
-        autoWidth  = TRUE,
-        language = list(url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json")
+        pageLength = nrow(df_display),
+        autoWidth = TRUE,
+        language = list(
+          url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json"
+        )
       )
     ) %>%
-      formatCurrency(c("Vínculos 2023", "Vínculos 2024"), currency = "", interval = 3, mark = ".", dec.mark = ",") %>%
-      formatStyle(c("Vínculos 2023", "Vínculos 2024"), `text-align` = "right")
-  })
-  
-
-  RKT_selected_cbo1dig <- reactive({
-    req(input$cbo1_table_rows_selected)
-    df_rais1dig_wide %>%
-      filter(NM_UF == input$uf_select) %>%
-      slice(input$cbo1_table_rows_selected) %>%
-      pull(cbo_1dig)
-  })
-  
-  
-############### MATCH  DEMANDA - OFERTA
-##########################################################
-  ############### MATCH  DEMANDA - OFERTA
-  ##########################################################
-  
-  # STEP 0: Selected CBO 1-digit
-  RKT_selected_cbo1dig <- reactive({
-    req(input$cbo1_table_rows_selected)
-    df_rais1dig_wide %>%
-      filter(NM_UF == input$uf_select) %>%
-      slice(input$cbo1_table_rows_selected) %>%
-      pull(cbo_1dig)
-  })
-  
-  # STEP 1: Reverse matching — CodCBO → CNCT Course
-  RKT_base_matches_reverse <- reactive({
-    req(input$uf_select, input$level_filter, input$score_thresh)
-    req(input$match_direction == "Demanda → Oferta")
-    req(input$cbo1_table_rows_selected)
-    
-    selected_cbo1dig <- RKT_selected_cbo1dig()
-    
-    valid_cbo_codes <- df_raisCodCBO_wide %>%
-      mutate(CodCBO = as.character(CodCBO), cbo_1dig = substr(CodCBO, 1, 1)) %>%
-      filter(NM_UF == input$uf_select, cbo_1dig == selected_cbo1dig) %>%
-      pull(CodCBO) %>% unique()
-    
-    matched <- qbq_cnct_matches %>%
-      filter(final_score >= input$score_thresh) %>%
-      mutate(CodCBO = as.character(CodCBO)) %>%
-      filter(CodCBO %in% valid_cbo_codes) %>%
-      mutate(
-        eixo_code = substr(IDX_EIXARECUR, 1, 2),
-        curso_code = substr(IDX_EIXARECUR, 5, 6),
-        IDX_EIXCUR = paste0(eixo_code, sprintf("%03d", as.integer(curso_code)))
+      formatCurrency(
+        c("Matrículas 2023", "Matrículas 2024"),
+        currency = "", interval = 3, mark = ".", dec.mark = ","
       ) %>%
-      arrange(desc(final_score)) %>%
-      distinct(CodCBO, IDX_EIXCUR, .keep_all = TRUE) %>%
-      inner_join(
-        qbq_ocup_cmento1 %>%
-          mutate(CodCBO = as.character(CodCBO), NivelOcupacao = as.integer(NivelOcupacao)) %>%
-          select(-cbo_1dig),
-        by = "CodCBO"
+      formatStyle(
+        c("Matrículas 2023", "Matrículas 2024"),
+        `text-align` = "right"
       ) %>%
-      filter(NivelOcupacao %in% input$level_filter) %>%
-      inner_join(
-        df_exarcu %>% select(IDX_EIXCUR, `Área Tecnológica`, `Eixo Tecnológico`, `Denominação do Curso`),
-        by = "IDX_EIXCUR"
-      ) %>%
-      left_join(
-        df_mat_curso_wide %>%
-          filter(NM_UF == input$uf_select) %>%
-          select(IDX_EIXCUR, `Matrículas 2023`, `Matrículas 2024`),
-        by = "IDX_EIXCUR"
+      formatStyle(
+        "final_score",
+        `text-align` = "center"
       )
+  })
+  
+  # Auto-update top_n based on available matches for occupation to course
+  observeEvent(list(RKT_selected_cbo_code(), input$score_thresh), {
+    req(input$match_direction == "Demanda → Oferta")
+    req(input$cbo6b_table_rows_selected)
     
-    matched
-  })
-  
-  # LEVEL 1: Aggregate by Eixo
-  RKT_matricula_by_eixo <- reactive({
-    RKT_base_matches_reverse() %>%
-      group_by(`Eixo Tecnológico`) %>%
-      summarise(`Matrículas 2023` = sum(`Matrículas 2023`, na.rm = TRUE),
-                `Matrículas 2024` = sum(`Matrículas 2024`, na.rm = TRUE), .groups = "drop") %>%
-      arrange(desc(`Matrículas 2024`))
-  })
-  
-  RKT_selected_eixo_reverse <- reactive({
-    rows <- input$eixo_table_rev_rows_selected
-    if (is.null(rows) || length(rows) == 0) {
-      RKT_matricula_by_eixo()$`Eixo Tecnológico`  # all
-    } else {
-      RKT_matricula_by_eixo()$`Eixo Tecnológico`[rows]
+    cbo_code <- RKT_selected_cbo_code()
+    
+    # Count available matches
+    n_matches <- qbq_cnct_matches2 %>%
+      filter(CodCBO == cbo_code, final_score >= input$score_thresh) %>%
+      nrow()
+    
+    # Update top_n input
+    if (n_matches > 0) {
+      updateNumericInput(session, "top_n", 
+                         value = min(n_matches, 10), 
+                         max = min(n_matches, 50))
     }
-  })
-  
-  
-  
-  # LEVEL 2: Aggregate by Área
-  RKT_matricula_by_area <- reactive({
-    RKT_base_matches_reverse() %>%
-      filter(`Eixo Tecnológico` %in% RKT_selected_eixo_reverse()) %>%
-      group_by(`Área Tecnológica`) %>%
-      summarise(`Matrículas 2023` = sum(`Matrículas 2023`, na.rm = TRUE),
-                `Matrículas 2024` = sum(`Matrículas 2024`, na.rm = TRUE), .groups = "drop") %>%
-      arrange(desc(`Matrículas 2024`))
-  })
-  
-  
-  RKT_selected_area_reverse <- reactive({
-    rows <- input$area_table_rev_rows_selected
-    if (is.null(rows) || length(rows) == 0) {
-      RKT_matricula_by_area()$`Área Tecnológica`  # all
-    } else {
-      RKT_matricula_by_area()$`Área Tecnológica`[rows]
-    }
-  })
-  
-  # LEVEL 3: Aggregate by Curso
-  RKT_matricula_by_curso <- reactive({
-    RKT_base_matches_reverse() %>%
-      filter(`Área Tecnológica` %in% RKT_selected_area_reverse()) %>%
-      group_by(`Denominação do Curso`) %>%
-      summarise(`Matrículas 2023` = sum(`Matrículas 2023`, na.rm = TRUE),
-                `Matrículas 2024` = sum(`Matrículas 2024`, na.rm = TRUE), .groups = "drop") %>%
-      arrange(desc(`Matrículas 2024`))
-  })
-  
-  # DATATABLE OUTPUTS (2a / 2b / 2c)
-  output$agg_table_rev <- renderDT({
-    datatable(RKT_matricula_by_eixo(), options = list(pageLength = 10)) %>%
-      formatCurrency(c("Matrículas 2023", "Matrículas 2024"), "", interval = 3, mark = ".", dec.mark = ",")
-  })
-  
-  output$area_table_rev <- renderDT({
-    datatable(RKT_matricula_by_area(), options = list(pageLength = 10)) %>%
-      formatCurrency(c("Matrículas 2023", "Matrículas 2024"), "", interval = 3, mark = ".", dec.mark = ",")
-  })
-  
-  output$curso_table_rev <- renderDT({
-    datatable(RKT_matricula_by_curso(), options = list(pageLength = 10)) %>%
-      formatCurrency(c("Matrículas 2023", "Matrículas 2024"), "", interval = 3, mark = ".", dec.mark = ",")
-  })
-  
-  
-  
-  
-  
+  }, ignoreInit = TRUE)
 }
 
 shinyApp(ui, server)

@@ -653,6 +653,8 @@ save(df_mat_area, file = "D:/Country/Brazil/TechBrazil/working/mec_inep/df_mat_a
 save(df_mat_curso, file = "D:/Country/Brazil/TechBrazil/working/mec_inep/df_mat_curso.rda")
 save(df_exarcu, file = "D:/Country/Brazil/TechBrazil/working/mec_inep/df_exarcu.rda")
 
+write.csv(df_exarcu,file = "D:/Country/Brazil/TechBrazil/working/mec_inep/df_exarcu.csv")
+
 
 # To match with qbq data I dont need the entire data;
 

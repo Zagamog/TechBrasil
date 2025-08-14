@@ -150,12 +150,17 @@ df_gg <- read_delim(paste0(base, "CBO2002 - Grande Grupo.csv"), delim = ";", loc
   clean_names() %>%
   rename(cbo_1dig = codigo, cbo_gragru = titulo) %>%
   mutate(cbo_1dig = str_pad(as.character(cbo_1dig), 1, pad = "0"))
+# My invented gragru based on Informaçoes gerais CBO 6.0.6 Page 15 at mtecbo 
+df_gg$cbo_gragru[df_gg$cbo_1dig == "8"] <- "TRABALHADORES DA PRODUÇÃO DE BENS E SERVIÇOS INDUSTRIAIS CONTINUOS"
+df_gg %>% select(cbo_gragru) %>% n_distinct() # 10 distinct values with addition from SP
 
 # Subgrupo Principal (2 dígitos)
 df_sgp <- read_delim(paste0(base, "CBO2002 - SubGrupo Principal.csv"), delim = ";", locale = locale(encoding = "LATIN1")) %>%
   clean_names() %>%
   rename(cbo_2dig = codigo, cbo_prigru = titulo) %>%
   mutate(cbo_2dig = str_pad(as.character(cbo_2dig), 2, pad = "0"))
+df_sgp %>% select(cbo_prigru)%>% n_distinct()
+
 
 # Subgrupo (3 dígitos)
 df_sg <- read_delim(paste0(base, "CBO2002 - SubGrupo.csv"), delim = ";", locale = locale(encoding = "LATIN1")) %>%
@@ -168,6 +173,7 @@ df_fam <- read_delim(paste0(base, "CBO2002 - Familia.csv"), delim = ";", locale 
   clean_names() %>%
   rename(cbo_4dig = codigo, cbo_familia = titulo) %>%
   mutate(cbo_4dig = str_pad(as.character(cbo_4dig), 4, pad = "0"))
+df_fam %>% select(cbo_familia) %>% n_distinct() # 627 distinct values
 
 # Ocupações (6 dígitos finais)
 df_ocup <- read_delim(paste0(base, "CBO2002 - Ocupacao.csv"), delim = ";", locale = locale(encoding = "LATIN1")) %>%
@@ -179,6 +185,15 @@ df_ocup <- read_delim(paste0(base, "CBO2002 - Ocupacao.csv"), delim = ";", local
     cbo_3dig = str_sub(cbo_6dig, 1, 3),
     cbo_4dig = str_sub(cbo_6dig, 1, 4)
   )
+
+df_ocup %>% select(cbo_nome) %>% n_distinct() # 2,718 distinct values from 2,719 obs; 1 repeat
+find <- df_ocup %>% select(cbo_nome) %>% duplicated()
+df_ocup[find,]
+
+df_ocup %>% filter(stringr::str_detect(cbo_nome,"Operador de pá carregadeira"))
+
+df_ocup$cbo_nome[df_ocup$cbo_nome == "Operador de pá carregadeira" & df_ocup$cbo_3dig =="715"] <- "Operador de pá carregadeira715" 
+df_ocup %>% select(cbo_nome) %>% n_distinct() # 2,719 distinct values
 
 # --- Unir tudo em um só dataframe ---
 df_cbo_hier <- df_ocup %>%
