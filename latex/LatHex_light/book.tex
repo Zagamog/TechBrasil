@@ -10,29 +10,45 @@
 % =======================================================================================
 \coverpage{\TITLE}{\SUBTITLE}{\AUTHOR}{\DATE}{\SUBJECT}
 %----------------------------------------------------------------------------------------
+% Blank Page----------------------------------------------------------------------------------------
+\newpage
+\thispagestyle{empty}
+\mbox{}
+
+
+\newpage
+\section*{Equipe Responsável}
+\input{sections/part0/equipe}
+
+% Introduction----------------------------------------------------------------------------------------
+\newpage
+\part{Introdução}
+\chapter{Introdução} \label{ch:intro}
+%\addcontentsline{toc}{section}{Introdução}
+\input{sections/part0/Introdução}
+\clearpage
+
 \newpage
 \tableofcontents
 
 % =======================================================================================
 %                                   PART I
 % =======================================================================================
-\part{Lorem ipsum}
+\part{Contexto sobre EPT}
 %----------------------------------------------------------------------------------------
 \newpage
-\chapter{Lorem} \label{ch:lorem}
-\input{sections/part1/phasellus}
+\chapter{Lorem} \label{ch:popu}
+\input{sections/part1/População}
 %----------------------------------------------------------------------------------------
 \newpage
-\chapter{Ipsum}\label{ch:ipsum}
-\input{sections/part1/quam}
+\chapter{Ipsum}\label{ch:cre_econ}
+\input{sections/part1/CrecimentoEconômico}
 
-% =======================================================================================
-%                                   PART II
-% =======================================================================================
-\part{Dolor sit amet}
+
+\part{Oferta da EPT}
 %----------------------------------------------------------------------------------------
 \newpage
-\chapter{Hendrerit sapien} \label{ch:hendrerit}
+\chapter{Metas PNE} \label{ch:metas_pne}
 \input{sections/part1/dolor}
 \newpage
 \input{sections/part1/accumsan}

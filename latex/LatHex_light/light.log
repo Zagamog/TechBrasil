@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.22.0 (MiKTeX 25.4) (format=lualatex 2025.8.18)  19 AUG 2025 10:07
+This is LuaHBTeX, Version 1.22.0 (MiKTeX 25.4) (format=lualatex 2025.8.18)  19 AUG 2025 12:18
  restricted system commands enabled.
 **light.tex
 (./light.tex
@@ -1590,7 +1590,7 @@ Package: makeidx 2021/10/04 v1.0m Standard LaTeX package
 \openout5 = light.idx
 
 Writing index file light.idx
-)) (./main.tex
+)) (./book.tex
 (C:/Users/wb164718/AppData/Roaming/MiKTeX/tex/latex/lipsum/lipsum.sty
 Package: lipsum 2021-09-20 v2.7 150 paragraphs of Lorem Ipsum dummy text
 \g__lipsum_par_int=\count504
@@ -1885,6 +1885,61 @@ LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/b/n' will be
 
 
 {C:/Users/wb164718/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}]
+
+[2
+
+]
+LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/m/n' will be
+(Font)              scaled to size 11.35675pt on input line 20.
+LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/b/n' will be
+(Font)              scaled to size 11.35675pt on input line 20.
+ (./sections/part0/equipe.tex
+LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/b/n' will be
+(Font)              scaled to size 10.36302pt on input line 40.
+)
+
+[3]
+LaTeX Font Info:    Trying to load font information for U+msa on input line 25.
+
+ ("C:/Program Files/MIKTEX1/tex/latex/amsfonts/umsa.fd"
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+(C:/Users/wb164718/AppData/Roaming/MiKTeX/tex/latex/microtype/mt-msa.cfg
+File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
+)
+LaTeX Font Info:    Trying to load font information for U+msb on input line 25.
+
+
+("C:/Program Files/MIKTEX1/tex/latex/amsfonts/umsb.fd"
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+(C:/Users/wb164718/AppData/Roaming/MiKTeX/tex/latex/microtype/mt-msb.cfg
+File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
+)
+(C:/Users/wb164718/AppData/Roaming/MiKTeX/tex/latex/microtype/mt-cmr.cfg
+File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman 
+(RS)
+)
+LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/m/n' will be
+(Font)              scaled to size 45.427pt on input line 25.
+
+
+[4
+
+]
+Chapter 1.
+LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/m/n' will be
+(Font)              scaled to size 19.62825pt on input line 26.
+LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/b/n' will be
+(Font)              scaled to size 22.7135pt on input line 26.
+(./sections/part0/Introdução.tex
+("C:/Program Files/MIKTEX1/tex/generic/hyph-utf8/loadhyph/loadhyph-la.tex"
+UTF-8 Latin hyphenation patterns
+("C:/Program Files/MIKTEX1/tex/generic/hyph-utf8/patterns/tex/hyph-la.tex")))
+
+[5
+
+]
 *geometry* verbose mode - [ newgeometry ] result:
 * driver: luatex
 * paper: a4paper
@@ -1920,29 +1975,29 @@ LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/b/n' will be
 
 
 Package hyperref Warning: Option `backref' has already been used,
-(hyperref)                setting the option has no effect on input line 14.
+(hyperref)                setting the option has no effect on input line 32.
 
 
 Package hyperref Warning: Option `pagebackref' has already been used,
-(hyperref)                setting the option has no effect on input line 14.
+(hyperref)                setting the option has no effect on input line 32.
 
 
 Package hyperref Warning: Option `hyperindex' has already been used,
-(hyperref)                setting the option has no effect on input line 14.
+(hyperref)                setting the option has no effect on input line 32.
 
 
 Package hyperref Warning: Option `colorlinks' has already been used,
-(hyperref)                setting the option has no effect on input line 14.
+(hyperref)                setting the option has no effect on input line 32.
 
-Package hyperref Info: Option `breaklinks' set `true' on input line 14.
+Package hyperref Info: Option `breaklinks' set `true' on input line 32.
 
 Package hyperref Warning: Option `bookmarks' has already been used,
-(hyperref)                setting the option has no effect on input line 14.
+(hyperref)                setting the option has no effect on input line 32.
 
-Package hyperref Info: Option `bookmarksopen' set `false' on input line 14.
+Package hyperref Info: Option `bookmarksopen' set `false' on input line 32.
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\\' on input line 14.
+(hyperref)                removing `\\' on input line 32.
 
 (./light.toc
 Package microtype Info: Loading generic protrusion settings for font family
@@ -1965,22 +2020,22 @@ Overfull \hbox (22.97252pt too wide) in paragraph at lines 4--4
  []
 
 
-Overfull \hbox (22.97252pt too wide) in paragraph at lines 8--8
+Overfull \hbox (22.97252pt too wide) in paragraph at lines 5--5
 [][][][][][][]  
  []
 
 
-Overfull \hbox (22.97252pt too wide) in paragraph at lines 9--9
+Overfull \hbox (22.97252pt too wide) in paragraph at lines 6--6
 [][][][][][][]  
  []
 
 
-Overfull \hbox (22.97252pt too wide) in paragraph at lines 12--12
+Overfull \hbox (22.97252pt too wide) in paragraph at lines 10--10
 [][][][][][][]  
  []
 
 
-Overfull \hbox (22.97252pt too wide) in paragraph at lines 13--13
+Overfull \hbox (22.97252pt too wide) in paragraph at lines 11--11
 [][][][][][][]  
  []
 
@@ -1990,12 +2045,12 @@ Overfull \hbox (22.97252pt too wide) in paragraph at lines 14--14
  []
 
 
-Overfull \hbox (22.97252pt too wide) in paragraph at lines 18--18
+Overfull \hbox (22.97252pt too wide) in paragraph at lines 15--15
 [][][][][][][]  
  []
 
 
-Overfull \hbox (22.97252pt too wide) in paragraph at lines 19--19
+Overfull \hbox (22.97252pt too wide) in paragraph at lines 16--16
 [][][][][][][]  
  []
 
@@ -2014,88 +2069,61 @@ Overfull \hbox (22.97252pt too wide) in paragraph at lines 22--22
 [][][][][][][]  
  []
 
+
+Overfull \hbox (22.97252pt too wide) in paragraph at lines 23--23
+[][][][][][][]  
+ []
+
+
+Overfull \hbox (22.97252pt too wide) in paragraph at lines 24--24
+[][][][][][][]  
+ []
+
 )
 \tf@toc=\write6
 
 \openout6 = light.toc
 
 
-[2
+[6
 
 
 ]
-LaTeX Font Info:    Trying to load font information for U+msa on input line 19.
 
- ("C:/Program Files/MIKTEX1/tex/latex/amsfonts/umsa.fd"
-File: umsa.fd 2013/01/14 v3.01 AMS symbols A
-)
-(C:/Users/wb164718/AppData/Roaming/MiKTeX/tex/latex/microtype/mt-msa.cfg
-File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
-)
-LaTeX Font Info:    Trying to load font information for U+msb on input line 19.
-
-
-("C:/Program Files/MIKTEX1/tex/latex/amsfonts/umsb.fd"
-File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-)
-(C:/Users/wb164718/AppData/Roaming/MiKTeX/tex/latex/microtype/mt-msb.cfg
-File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
-)
-(C:/Users/wb164718/AppData/Roaming/MiKTeX/tex/latex/microtype/mt-cmr.cfg
-File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman 
-(RS)
-)
-LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/m/n' will be
-(Font)              scaled to size 45.427pt on input line 19.
-
-
-[3
+[7
 
 
 
 ]
-Chapter 1.
-LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/m/n' will be
-(Font)              scaled to size 19.62825pt on input line 22.
-LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/b/n' will be
-(Font)              scaled to size 22.7135pt on input line 22.
-(./sections/part1/phasellus.tex
-LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/m/n' will be
-(Font)              scaled to size 11.35675pt on input line 1.
-LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/b/n' will be
-(Font)              scaled to size 11.35675pt on input line 1.
+Chapter 2.
+(./sections/part1/População.tex
 LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/b/n' will be
 (Font)              scaled to size 15.14233pt on input line 1.
-LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/b/n' will be
-(Font)              scaled to size 10.36302pt on input line 9.
 
 
-[4
+[8
 
 ])
 
-[5]
-Chapter 2.
-(./sections/part1/quam.tex
-<images/orange2.jpg, id=114, 246.6816pt x 123.3408pt>
+[9]
+Chapter 3.
+(./sections/part1/CrecimentoEconômico.tex
+<images/orange2.jpg, id=137, 246.6816pt x 123.3408pt>
 File: images/orange2.jpg Graphic file (type jpg)
 <use images/orange2.jpg>
 Package luatex.def Info: images/orange2.jpg  used on input line 17.
 (luatex.def)             Requested size: 246.68098pt x 123.34048pt.
 )
 
-[6
+[10
 
 <./images/orange2.jpg>]
 
-[7
+[11
 
 ]
-Chapter 3.
+Chapter 4.
 (./sections/part1/dolor.tex
-("C:/Program Files/MIKTEX1/tex/generic/hyph-utf8/loadhyph/loadhyph-la.tex"
-UTF-8 Latin hyphenation patterns
-("C:/Program Files/MIKTEX1/tex/generic/hyph-utf8/patterns/tex/hyph-la.tex"))
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `lmtt' (encoding: TU).
 (microtype)             For optimal results, create family-specific settings.
@@ -2104,7 +2132,7 @@ LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <9> not available
 (Font)              Font shape `TU/lmtt/b/n' tried instead on input line 26.
 )
 
-[8
+[12
 
 ] (./sections/part1/accumsan.tex
 Overfull \hbox (39.80385pt too wide) in paragraph at lines 11--66
@@ -2113,26 +2141,26 @@ Overfull \hbox (39.80385pt too wide) in paragraph at lines 11--66
 
 )
 
-[9]
+[13]
 
-[10
-
-]
-Chapter 4.
-(./sections/appendices/consectetur.tex)
-
-[11
+[14
 
 ]
 Chapter 5.
+(./sections/appendices/consectetur.tex)
+
+[15
+
+]
+Chapter 6.
 (./sections/appendices/adipiscing.tex
 
-LaTeX Warning: Reference `sec:vestibulum' on page 12 undefined on input line 6.
+LaTeX Warning: Reference `sec:vestibulum' on page 16 undefined on input line 6.
 
 
 )
 
-[12
+[16
 
 ] (./light.lof)
 \tf@lof=\write7
@@ -2144,12 +2172,12 @@ LaTeX Warning: Reference `sec:vestibulum' on page 12 undefined on input line 6.
 \openout8 = light.lot
 
 
-[13
+[17
 
 
 ]
 
-LaTeX Warning: Empty bibliography on input line 58.
+LaTeX Warning: Empty bibliography on input line 74.
 
 (./light.aux)
  ***********
@@ -2169,25 +2197,25 @@ Package logreq Info: Writing requests to 'light.run.xml'.
 ))
 
 Here is how much of LuaTeX's memory you used:
- 49201 strings out of 470118
- 195344,2373549 words of node,token memory allocated
+ 49258 strings out of 470118
+ 195345,2373549 words of node,token memory allocated
  1460 words of node memory still in use:
    32 hlist, 2 vlist, 14 rule, 1 local_par, 4 glue, 4 kern, 1 penalty, 3 glyph, 
 89 attribute, 73 glue_spec, 82 attribute_list, 3 write, 24 pdf_literal, 24 pdf_c
 olorstack nodes
-   avail lists: 1:10,2:11466,3:7379,4:3308,5:2540,6:68,7:6310,8:21,9:6486,10:28,
-11:482
- 76136 multiletter control sequences out of 65536+600000
+   avail lists: 1:8,2:11462,3:7382,4:3310,5:2540,6:75,7:6294,8:18,9:6486,10:28,1
+1:500
+ 76175 multiletter control sequences out of 65536+600000
  64 fonts using 5503623 bytes
  131i,15n,123p,1949b,2130s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <c:/program files/miktex1/fonts/opentype/public/lm/lmmono9-regular.otf><c:/progr
 am files/miktex1/fonts/opentype/public/lm/lmmonolt10-bold.otf><c:/program files/
 miktex1/fonts/opentype/public/lm/lmroman9-regular.otf><c:/program files/miktex1/
 fonts/opentype/public/lm/lmroman10-italic.otf><c:/program files/miktex1/fonts/op
-entype/public/lm/lmroman10-bold.otf><c:/program files/miktex1/fonts/opentype/pub
-lic/lm/lmroman10-regular.otf><c:/program files/miktex1/fonts/opentype/public/lm/
-lmsans10-regular.otf><c:/program files/miktex1/fonts/opentype/public/lm/lmsans10
--bold.otf><./template/generic/fonts/inconsolata/Inconsolata-LGC.otf><./template/
+entype/public/lm/lmsans10-regular.otf><c:/program files/miktex1/fonts/opentype/p
+ublic/lm/lmsans10-bold.otf><c:/program files/miktex1/fonts/opentype/public/lm/lm
+roman10-bold.otf><c:/program files/miktex1/fonts/opentype/public/lm/lmroman10-re
+gular.otf><./template/generic/fonts/inconsolata/Inconsolata-LGC.otf><./template/
 generic/fonts/inconsolata/Inconsolata-LGC-Bold.otf><C:/Program Files/MIKTEX1/fon
 ts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Program Files/MIKTEX1/fonts/type1/pub
 lic/amsfonts/cm/cmmi6.pfb><C:/Program Files/MIKTEX1/fonts/type1/public/amsfonts/
@@ -2195,9 +2223,9 @@ cm/cmmi8.pfb><C:/Program Files/MIKTEX1/fonts/type1/public/amsfonts/cm/cmr10.pfb>
 <C:/Program Files/MIKTEX1/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Program Fi
 les/MIKTEX1/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Program Files/MIKTEX1/
 fonts/type1/public/amsfonts/cm/cmsy8.pfb>
-Output written on light.pdf (13 pages, 345946 bytes).
+Output written on light.pdf (17 pages, 360100 bytes).
 
-PDF statistics: 330 PDF objects out of 1000 (max. 8388607)
- 70 named destinations out of 1000 (max. 131072)
- 360 words of extra memory for PDF output out of 10000 (max. 100000000)
+PDF statistics: 359 PDF objects out of 1000 (max. 8388607)
+ 76 named destinations out of 1000 (max. 131072)
+ 376 words of extra memory for PDF output out of 10000 (max. 100000000)
 
