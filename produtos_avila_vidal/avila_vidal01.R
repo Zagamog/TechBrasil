@@ -8,7 +8,8 @@ library(tibble)
 
 
 # Define path and sheet names
-file_path <- "D:/Country/Brazil/TechBrazil/rawdata/fgv/fgv_fin2.xlsx"
+file_path <- "D:/Country/Brazil/TechBrazil/rawdata/fgv/fgv_fin2b.xlsx"
+# Revised  data from Vidal, July 29, 2025
 sheet_names <- getSheetNames(file_path)
 
 # Define your desired names

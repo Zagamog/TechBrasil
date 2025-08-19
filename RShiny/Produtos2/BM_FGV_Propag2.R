@@ -19,9 +19,6 @@ options(warn=-1) # Too many pesky warnings, terrain, terrain, terrain, pull up, 
 #############################################################
 # LOAD DATA AND ANY NEEDED DATA OPERATIONS
 #############################################################
-#############################################################
-# LOAD DATA AND ANY NEEDED DATA OPERATIONS
-#############################################################
 
 
 # Load Propag scraped data

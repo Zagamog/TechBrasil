@@ -1,4 +1,4 @@
-# rais_download_finaljul25a.R
+# rais_download_finaljul25b.R
 
 library(dplyr)
 library(data.table)
@@ -19,7 +19,6 @@ df_NICOMJNE_UF <- df_NICOMJNE %>%
     ungroup()
 
 
-
-
-
 names(df_NICOMJNE)
+table(df_NICOMJNE$`Escolaridade após 2005`)
+# Labels in Rais2021 manual page 28, no Secondary technical, only Secondary overall.

@@ -20,7 +20,7 @@ library(purrr)
 
 # Load credentials
 
-dotenv::load_dot_env("D:/AdvancedR/knowbankedu/openai/.env")
+dotenv::load_dot_env()
 bucket_name <- "techbrazildata"
 
 # Helper function to check/download if missing
@@ -176,6 +176,7 @@ patch_censo_area_initial <- function(df, area_name, patch_info, tag_map) {
   
   return(df)
 }
+
 
 
 
@@ -442,7 +443,6 @@ junk <- df_censo_touse %>%
 
 # 186 rows with data (some lost because there are censo courses not in CNCT)
 
-
 # # Recover other columns from df_cnct_ 
 df_cnct_full <- df_cnct_ %>%
   mutate(
@@ -499,9 +499,6 @@ save(df_censo_notin_cnct, file = "D:/Country/Brazil/TechBrazil/working/mec_inep/
 
 
 
-
-
-
 # Matched rows: keep only rows where we found a CNCT match
 
 df_censo_supl_tec_4qbqALL <- df_censo_supl_tec3 %>%
@@ -528,7 +525,7 @@ df_censo_cnct <- left_join(df_censo_supl_tec_4qbqALL, temp_UFs, by ="CO_MUN") %>
 
 
 
-# Aggrgated by UF
+# Aggregated by UF
 
 df_mat_uf <- df_censo_cnct %>%
   group_by(CO_UF, NM_UF, SG_UF, ANO) %>%
@@ -743,6 +740,28 @@ put_object(file = "D:/Country/Brazil/TechBrazil/working/qbq/df_censo_supl_tec_4q
 put_object(file = "D:/Country/Brazil/TechBrazil/working/qbq/df_censo_supl_tec_4qbq.xlsx",
            object = "working/qbq/df_censo_supl_tec_4qbq.xlsx",
            bucket = bucket_name)
+
+
+put_object(file = "D:/Country/Brazil/TechBrazil/working/mec_inep/df_mat_uf.rda",
+           object = "working/mec_inep/df_mat_uf.rda",
+           bucket = bucket_name)
+
+put_object(file = "D:/Country/Brazil/TechBrazil/working/mec_inep/df_mat_eixo.rda",
+           object = "working/mec_inep/df_mat_eixo.rda",
+           bucket = bucket_name)
+
+put_object(file = "D:/Country/Brazil/TechBrazil/working/mec_inep/df_mat_area.rda",
+           object = "working/mec_inep/df_mat_area.rda",
+           bucket = bucket_name)
+
+put_object(file = "D:/Country/Brazil/TechBrazil/working/mec_inep/df_mat_curso.rda",
+           object = "working/mec_inep/df_mat_curso.rda",
+           bucket = bucket_name)
+
+put_object(file = "D:/Country/Brazil/TechBrazil/working/mec_inep/df_exarcu.rda",
+           object = "working/mec_inep/df_exarcu.rda",
+           bucket = bucket_name)
+
 
 
 
