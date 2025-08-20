@@ -16,7 +16,7 @@
   format=listing,
   labelfont=accent,
   textfont=fg,
-  labelformat=empty,
+  labelformat=default,
   listformat=empty,
   singlelinecheck=false,
   margin=0pt,
@@ -36,7 +36,11 @@
 %   FIGURES
 %----------------------------------------------------------------------------------------
 
+
 \captionsetup[figure]{
-  labelformat=empty,
-  listformat=empty,
+	labelformat=default,
+	listformat=empty,
+	labelfont={bf,footnotesize},  % Bold and small label like lstlisting
+	textfont=footnotesize,        % Small text
+	font=footnotesize             % Overall small font
 }

@@ -1,7 +1,7 @@
 \usepackage{lipsum}
 
 \begin{document}
-
+\renewcommand{\figurename}{Figura}
 % =======================================================================================
 %\cleardoublepage % Forces the first chapter to start on an odd page so it's on the right
 
@@ -20,52 +20,65 @@
 \section*{Equipe Responsável}
 \input{sections/part0/equipe}
 
-% Introduction----------------------------------------------------------------------------------------
+% TOC
+
+\newpage
+\tableofcontents
+\clearpage
+
+% Part 0 Separator and Introduction  --------------------------------------------------------------
 \newpage
 \part{Introdução}
 \chapter{Introdução} \label{ch:intro}
 %\addcontentsline{toc}{section}{Introdução}
 \input{sections/part0/Introdução}
-\clearpage
+\clearpage  % for vertical line text
 
-\newpage
-\tableofcontents
 
-% =======================================================================================
-%                                   PART I
-% =======================================================================================
+% Part 1 Separator and Chapter 2===========================================================
 \part{Contexto sobre EPT}
-%----------------------------------------------------------------------------------------
-\newpage
-\chapter{Lorem} \label{ch:popu}
+\chapter{População para EPT} \label{ch:popu}
 \input{sections/part1/População}
-%----------------------------------------------------------------------------------------
+
+% Chapter 3  --------------------------------------------------------------
 \newpage
-\chapter{Ipsum}\label{ch:cre_econ}
+\chapter{Crecimento Econômico Regional}\label{ch:cre_econ}
 \input{sections/part1/CrecimentoEconômico}
 
-
-\part{Oferta da EPT}
-%----------------------------------------------------------------------------------------
+% Chapter 4  --------------------------------------------------------------
 \newpage
+\chapter{Cenários de Financiamento no PROPAG}\label{ch:cen_fin}
+\input{sections/part1/Cenários}
+\clearpage
+
+% Part 2 Separator and Chapter 5===========================================================
+\part{Oferta e Demanda da EPT}
 \chapter{Metas PNE} \label{ch:metas_pne}
-\input{sections/part1/dolor}
-\newpage
-\input{sections/part1/accumsan}
+\input{sections/part1/MetasPNE}
 
-% =======================================================================================
-%                                   APPENDICES
-% =======================================================================================
-\part{Appendices}
-%----------------------------------------------------------------------------------------
+
+% Chapter 6  --------------------------------------------------------------
 \newpage
-\chapter{Vestibulum commodo} \label{ch:commodo}
-\input{sections/appendices/consectetur}
-%----------------------------------------------------------------------------------------
+\chapter{Demanda para Técnicos} \label{ch:metas_pne}
+\input{sections/part1/Metodología}
 \newpage
-\chapter{Etiam facilisis} \label{ch:etiam}
-\input{sections/appendices/adipiscing}
+\input{sections/part1/Resultados}
+\clearpage
+
+
+\part{Desenvolvimento do Plano de Aplicação}
+% Chapter 7---------------------------------------------------------------------
+\chapter{Estrutura de Plano de Aplicação} \label{ch:commodo}
+\input{sections/part2/EstruturaPlano}
+% Chapter 8---------------------------------------------------------
+\newpage
+\chapter{Protocolo de Preparação} \label{ch:etiam}
+\input{sections/part2/Protocolo}
+\clearpage
+
+
 %----------------------------------------------------------------------------------------
+\part{Apêndice}
 \newpage
 \listoffigures
 \listoftables
