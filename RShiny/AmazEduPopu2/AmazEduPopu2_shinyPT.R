@@ -55,42 +55,27 @@ percentage_variables <- c(
 local_colors <- c(
   "Brasil" = "#1f77b4", "Norte" = "#ff7f0e", "Nordeste" = "#2ca02c",
   "Sudeste" = "#d62728", "Sul" = "#9467bd", "Centro-Oeste" = "#8c564b",
-  "Amazonia_Legal" = "#8c564b", "Nordeste_r" = "#e377c2", "Centro-Oeste_r" = "#7f7f7f",
-  "Acre" = "#1b9e77", "Amapá" = "#d95f02", "Amazonas" = "#7570b3",
-  "Pará" = "#e7298a", "Rondônia" = "#66a61e", "Roraima" = "#e6ab02",
-  "Tocantins" = "#a6761d", "Alagoas" = "#1f77b4", "Bahia" = "#ff7f0e",
-  "Ceará" = "#2ca02c", "Maranhão" = "#d62728", "Paraíba" = "#9467bd",
-  "Pernambuco" = "#8c564b", "Piauí" = "#e377c2", "Rio Grande do Norte" = "#7f7f7f",
-  "Sergipe" = "#bcbd22", "Espírito Santo" = "#17becf", "Minas Gerais" = "#ff9896",
-  "Rio de Janeiro" = "#c5b0d5", "São Paulo" = "#c49c94", "Paraná" = "#8c564b",
-  "Rio Grande do Sul" = "#e377c2", "Santa Catarina" = "#7f7f7f",
-  "Distrito Federal" = "#bcbd22", "Goiás" = "#17becf",
-  "Mato Grosso" = "#ff7f0e", "Mato Grosso do Sul" = "#2ca02c"
+  "Acre" = "#e377c2", "Alagoas" = "#7f7f7f", "Amapá" = "#bcbd22", "Amazonas" = "#17becf",
+  "Bahia" = "#aec7e8", "Ceará" = "#ffbb78", "Distrito Federal" = "#98df8a", "Espírito Santo" = "#ff9896",
+  "Goiás" = "#c5b0d5", "Maranhão" = "#c49c94", "Mato Grosso" = "#f7b6d3", "Mato Grosso do Sul" = "#c7c7c7",
+  "Minas Gerais" = "#dbdb8d", "Pará" = "#9edae5", "Paraíba" = "#ad494a", "Paraná" = "#8c6d31",
+  "Pernambuco" = "#393b79", "Piauí" = "#5254a3", "Rio de Janeiro" = "#6b6ecf", "Rio Grande do Norte" = "#9c9ede",
+  "Rio Grande do Sul" = "#637939", "Rondônia" = "#8ca252", "Roraima" = "#b5cf6b", "Santa Catarina" = "#cedb9c",
+  "São Paulo" = "#8c6d31", "Sergipe" = "#bd9e39", "Tocantins" = "#e7ba52"
 )
-
-# Get available locations from the combined data
-available_locations <- unique(combined_data$LOCAL)
-available_locations <- available_locations[!is.na(available_locations)]
 
 # UI
 ui <- fluidPage(
-  div(
-    style = "text-align: center; margin-bottom: 20px;",
-    div(
-      style = "font-size: 28px; font-weight: bold; color: #333;",
-      "Brasil: População EPT (15-19 anos) vs Matrículas por Estado"
-    )
-  ),
-  
+  titlePanel("Brasil: População EPT (15-19 anos) vs Matrículas por Estado"),
   sidebarLayout(
     sidebarPanel(
       pickerInput(
         "localInput",
         label = "Selecionar Localização(ões):",
-        choices = available_locations,
+        choices = sort(unique(combined_data$LOCAL)),
         options = list(`actions-box` = TRUE),
         multiple = TRUE,
-        selected = if("Brasil" %in% available_locations) "Brasil" else available_locations[1]
+        selected = "Piauí"
       ),
       radioButtons(
         "dataType",
@@ -170,7 +155,8 @@ server <- function(input, output, session) {
         axis.text.y = element_text(size = 14)
       ) +
       scale_y_continuous(limits = c(y_min, y_max), labels = y_labels) +
-      scale_x_continuous(breaks = seq(2007, 2035, by = 5)) +
+      # Fixed x-axis breaks to show 2007, 2010, 2015, 2020, 2025, 2030, 2035
+      scale_x_continuous(breaks = c(2007, seq(2010, 2035, by = 5))) +
       scale_color_manual(values = local_colors)
     
     # Line types and Plotly annotations
@@ -191,32 +177,41 @@ server <- function(input, output, session) {
         # Add the line for each y-variable and LOCAL
         p <- p + geom_line(data = loc_data, aes(y = !!y_sym), linetype = line_type, linewidth = 1, color = loc_color)
         
-        # Get the last year and value for labeling
-        last_year <- max(loc_data$ANO, na.rm = TRUE)
-        last_value <- loc_data %>%
-          filter(ANO == last_year) %>%
-          pull(!!y_sym)
+        # Determine the last year for this variable (enrollment ends at 2024, population at 2035)
+        is_enrollment <- y_var %in% c("QT_MAT_PROF_TEC_PROPAG", "QT_MAT_MED", "PCT_MAT_EPT", "PCT_MAT_MED")
+        last_year <- if (is_enrollment) 2024 else 2035
         
-        if(length(last_value) > 0 && !is.na(last_value)) {
-          # Get the display name for the variable
-          var_display_name <- names(current_variables)[current_variables == y_var]
+        # Filter data to the appropriate end year for this variable
+        var_data <- loc_data %>% filter(ANO <= last_year)
+        
+        # Get the last value for labeling
+        if (nrow(var_data) > 0) {
+          final_year <- max(var_data$ANO, na.rm = TRUE)
+          last_value <- var_data %>%
+            filter(ANO == final_year) %>%
+            pull(!!y_sym)
           
-          # Construct the label text
-          label_text <- paste(var_display_name, "-", loc)
-          
-          # Add Plotly annotation for the label
-          annotations <- append(annotations, list(
-            list(
-              x = last_year,
-              y = last_value,
-              text = label_text,
-              showarrow = TRUE,
-              arrowhead = 2,
-              ax = 0,
-              ay = 40,
-              font = list(color = "black", size = 12, family = "Arial")
-            )
-          ))
+          if(length(last_value) > 0 && !is.na(last_value)) {
+            # Get the display name for the variable
+            var_display_name <- names(current_variables)[current_variables == y_var]
+            
+            # Construct the label text
+            label_text <- paste(var_display_name, "-", loc)
+            
+            # Add Plotly annotation for the label
+            annotations <- append(annotations, list(
+              list(
+                x = final_year,
+                y = last_value,
+                text = label_text,
+                showarrow = TRUE,
+                arrowhead = 2,
+                ax = 0,
+                ay = 40,
+                font = list(color = "black", size = 12, family = "Arial")
+              )
+            ))
+          }
         }
       }
     }
