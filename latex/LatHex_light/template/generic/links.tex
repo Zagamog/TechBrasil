@@ -6,35 +6,45 @@
 %   HYPERLINKS IN THE DOCUMENTS
 %----------------------------------------------------------------------------------------
 \hypersetup{
-hidelinks,
-backref=true,
-pagebackref=true,
-hyperindex=true,
-colorlinks=true,
-breaklinks=true,
-urlcolor=accent,
-bookmarks=true,
-bookmarksopen=false,
-pdftitle={\TITLE},
-pdfauthor={\AUTHOR},
-pdfsubject={\SUBJECT}}
+	hidelinks=false,        % Changed to show colored links
+	backref=true,
+	pagebackref=true,
+	hyperindex=true,
+	colorlinks=true,
+	breaklinks=true,
+	urlcolor=blue,          % Standard blue for URLs
+	linkcolor=black,        % Internal links stay black
+	citecolor=green,        % Citations in green
+	bookmarks=true,
+	bookmarksopen=false,
+	pdftitle={\TITLE},
+	pdfauthor={\AUTHOR},
+	pdfsubject={\SUBJECT}}
+
+% Alternative color options:
+% urlcolor=teal,        % Teal is also standard
+% urlcolor=purple,      % Purple is another option
+% urlcolor=red,         % Red if you want it to stand out
 
 \bookmarksetup{
-open,
-numbered,
-addtohook={%
-\ifnum\bookmarkget{level}=0 % chapter
-\bookmarksetup{bold}%
-\fi
-\ifnum\bookmarkget{level}=-1 % part
-\bookmarksetup{color=accent,bold}%
-\fi
-}
+	open,
+	numbered,
+	addtohook={%
+		\ifnum\bookmarkget{level}=0 % chapter
+		\bookmarksetup{bold}%
+		\fi
+		\ifnum\bookmarkget{level}=-1 % part
+		\bookmarksetup{color=accent,bold}%
+		\fi
+	}
 }
 
 %----------------------------------------------------------------------------------------
-%   BOLD HREF
+%   REMOVE BOLD HREF (Comment out or delete the bold formatting)
 %----------------------------------------------------------------------------------------
+% \let\oldhref\href
+% \renewcommand{\href}[2]{\oldhref{#1}{\headingfontfamily\textbf{#2}}}
 
-\let\oldhref\href
-\renewcommand{\href}[2]{\oldhref{#1}{\headingfontfamily\textbf{#2}}}
+% If you want to keep some custom formatting but not bold:
+% \let\oldhref\href
+% \renewcommand{\href}[2]{\oldhref{#1}{\textcolor{blue}{#2}}}

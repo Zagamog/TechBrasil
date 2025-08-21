@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.22.0 (MiKTeX 25.4) (format=lualatex 2025.8.18)  19 AUG 2025 23:24
+This is LuaHBTeX, Version 1.22.0 (MiKTeX 25.4) (format=lualatex 2025.8.18)  20 AUG 2025 20:02
  restricted system commands enabled.
 **light.tex
 (./light.tex
@@ -631,27 +631,31 @@ Package: hypcap 2024-07-26 v1.13 Adjusting the anchors of captions (HO)
 Package: letltxmacro 2019/12/03 v1.6 Let assignment for LaTeX macros (HO)
 ))
 
+Package hyperref Warning: Unexpected value for option `hidelinks'
+(hyperref)                is ignored on input line 22.
+
+
 Package hyperref Warning: Option `backref' has already been used,
-(hyperref)                setting the option has no effect on input line 20.
+(hyperref)                setting the option has no effect on input line 22.
 
 
 Package hyperref Warning: Option `pagebackref' has already been used,
-(hyperref)                setting the option has no effect on input line 20.
+(hyperref)                setting the option has no effect on input line 22.
 
 
 Package hyperref Warning: Option `hyperindex' has already been used,
-(hyperref)                setting the option has no effect on input line 20.
+(hyperref)                setting the option has no effect on input line 22.
 
-Package hyperref Info: Option `colorlinks' set `true' on input line 20.
-Package hyperref Info: Option `breaklinks' set `true' on input line 20.
+Package hyperref Info: Option `colorlinks' set `true' on input line 22.
+Package hyperref Info: Option `breaklinks' set `true' on input line 22.
 
 Package hyperref Warning: Option `bookmarks' has already been used,
-(hyperref)                setting the option has no effect on input line 20.
+(hyperref)                setting the option has no effect on input line 22.
 
-Package hyperref Info: Option `bookmarksopen' set `false' on input line 20.
+Package hyperref Info: Option `bookmarksopen' set `false' on input line 22.
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\\' on input line 20.
+(hyperref)                removing `\\' on input line 22.
 
 ) (./template/generic/lists.tex
 (C:/Users/wb164718/AppData/Roaming/MiKTeX/tex/latex/enumitem/enumitem.sty
@@ -1612,10 +1616,16 @@ Package biblatex Warning: 'babel/polyglossia' detected but 'csquotes' missing.
 \@quotereset=\count508
 (./light.aux
 
-LaTeX Warning: Label `fig:integer' multiply defined.
+LaTeX Warning: Label `ch:popu' multiply defined.
 
 
 LaTeX Warning: Label `ch:metas_pne' multiply defined.
+
+
+LaTeX Warning: Label `fig:duis' multiply defined.
+
+
+LaTeX Warning: Label `sec:phasellus-tristique' multiply defined.
 
 
 LaTeX Warning: Label `fig:duis' multiply defined.
@@ -1845,47 +1855,47 @@ Package biblatex Info: Reference segment=0 on input line 3.
 \pgf@layerbox@fg=\box114
 \pgf@layerboxsaved@fg=\box115
 LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/m/n' will be
-(Font)              scaled to size 10.36302pt on input line 11.
+(Font)              scaled to size 10.36302pt on input line 12.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `Inconsolata-LGC' (encoding: TU).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/m/n' will be
-(Font)              scaled to size 23.54633pt on input line 11.
+(Font)              scaled to size 23.54633pt on input line 12.
 
 LaTeX Font Warning: Font shape `TU/Inconsolata-LGC(0)/m/sc' undefined
-(Font)              using `TU/Inconsolata-LGC(0)/m/n' instead on input line 11.
+(Font)              using `TU/Inconsolata-LGC(0)/m/n' instead on input line 12.
 
 
 
 LaTeX Font Warning: Font shape `TU/Inconsolata-LGC(0)/b/sc' undefined
-(Font)              using `TU/Inconsolata-LGC(0)/b/n' instead on input line 11.
+(Font)              using `TU/Inconsolata-LGC(0)/b/n' instead on input line 12.
 
 
 LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/b/n' will be
-(Font)              scaled to size 23.54633pt on input line 11.
+(Font)              scaled to size 23.54633pt on input line 12.
 
-Underfull \hbox (badness 10000) in paragraph at lines 11--11
+Underfull \hbox (badness 10000) in paragraph at lines 12--12
  [][][][]\TU/Inconsolata-LGC(0)/b/n/24.88 PROPAG/Juros por Ed-u-cação[]
  []
 
 LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/m/n' will be
-(Font)              scaled to size 13.62808pt on input line 11.
+(Font)              scaled to size 13.62808pt on input line 12.
 LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/m/sc' will be
-(Font)              scaled to size 13.62808pt on input line 11.
+(Font)              scaled to size 13.62808pt on input line 12.
 
-Underfull \hbox (badness 10000) in paragraph at lines 11--11
+Underfull \hbox (badness 10000) in paragraph at lines 12--12
  []\TU/Inconsolata-LGC(0)/m/sc/14.4 Apoio para preparar Plano de Apli-cação[]
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 11--11
+Underfull \hbox (badness 10000) in paragraph at lines 12--12
  [][][]\TU/Inconsolata-LGC(0)/m/sc/14.4 Banco Mundi-al/ FGV - DGPE
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 11--11
+Underfull \hbox (badness 10000) in paragraph at lines 12--12
  []\TU/Inconsolata-LGC(0)/m/sc/14.4 18/08/2025[]
  []
 
@@ -1894,9 +1904,9 @@ Underfull \hbox (badness 10000) in paragraph at lines 11--11
 LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/bx/n' in size <20.74> not
  available
 (Font)              Font shape `TU/Inconsolata-LGC(0)/b/n' tried instead on inp
-ut line 11.
+ut line 12.
 LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/b/n' will be
-(Font)              scaled to size 19.62825pt on input line 11.
+(Font)              scaled to size 19.62825pt on input line 12.
 [1
 
 
@@ -1906,15 +1916,14 @@ LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/b/n' will be
 
 ]
 LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/m/n' will be
-(Font)              scaled to size 11.35675pt on input line 20.
+(Font)              scaled to size 11.35675pt on input line 21.
 LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/b/n' will be
-(Font)              scaled to size 11.35675pt on input line 20.
- (./sections/part0/equipe.tex
-LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/b/n' will be
-(Font)              scaled to size 10.36302pt on input line 40.
-)
+(Font)              scaled to size 11.35675pt on input line 21.
+ (./sections/part0/equipe.tex)
 
 [3]
+
+[4]
 *geometry* verbose mode - [ newgeometry ] result:
 * driver: luatex
 * paper: a4paper
@@ -1950,29 +1959,29 @@ LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/b/n' will be
 
 
 Package hyperref Warning: Option `backref' has already been used,
-(hyperref)                setting the option has no effect on input line 26.
+(hyperref)                setting the option has no effect on input line 32.
 
 
 Package hyperref Warning: Option `pagebackref' has already been used,
-(hyperref)                setting the option has no effect on input line 26.
+(hyperref)                setting the option has no effect on input line 32.
 
 
 Package hyperref Warning: Option `hyperindex' has already been used,
-(hyperref)                setting the option has no effect on input line 26.
+(hyperref)                setting the option has no effect on input line 32.
 
 
 Package hyperref Warning: Option `colorlinks' has already been used,
-(hyperref)                setting the option has no effect on input line 26.
+(hyperref)                setting the option has no effect on input line 32.
 
-Package hyperref Info: Option `breaklinks' set `true' on input line 26.
+Package hyperref Info: Option `breaklinks' set `true' on input line 32.
 
 Package hyperref Warning: Option `bookmarks' has already been used,
-(hyperref)                setting the option has no effect on input line 26.
+(hyperref)                setting the option has no effect on input line 32.
 
-Package hyperref Info: Option `bookmarksopen' set `false' on input line 26.
+Package hyperref Info: Option `bookmarksopen' set `false' on input line 32.
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\\' on input line 26.
+(hyperref)                removing `\\' on input line 32.
 
 (./light.toc
 Package microtype Info: Loading generic protrusion settings for font family
@@ -2005,12 +2014,17 @@ Overfull \hbox (22.97252pt too wide) in paragraph at lines 6--6
  []
 
 
-Overfull \hbox (22.97252pt too wide) in paragraph at lines 10--10
+Overfull \hbox (22.97252pt too wide) in paragraph at lines 9--9
 [][][][][][][]  
  []
 
 
-Overfull \hbox (22.97252pt too wide) in paragraph at lines 11--11
+Overfull \hbox (22.97252pt too wide) in paragraph at lines 12--12
+[][][][][][][]  
+ []
+
+
+Overfull \hbox (22.97252pt too wide) in paragraph at lines 13--13
 [][][][][][][]  
  []
 
@@ -2030,7 +2044,7 @@ Overfull \hbox (22.97252pt too wide) in paragraph at lines 16--16
  []
 
 
-Overfull \hbox (22.97252pt too wide) in paragraph at lines 17--17
+Overfull \hbox (22.97252pt too wide) in paragraph at lines 19--19
 [][][][][][][]  
  []
 
@@ -2040,17 +2054,12 @@ Overfull \hbox (22.97252pt too wide) in paragraph at lines 20--20
  []
 
 
+Overfull \hbox (22.97252pt too wide) in paragraph at lines 21--21
+[][][][][][][]  
+ []
+
+
 Overfull \hbox (22.97252pt too wide) in paragraph at lines 22--22
-[][][][][][][]  
- []
-
-
-Overfull \hbox (22.97252pt too wide) in paragraph at lines 23--23
-[][][][][][][]  
- []
-
-
-Overfull \hbox (22.97252pt too wide) in paragraph at lines 24--24
 [][][][][][][]  
  []
 
@@ -2060,7 +2069,17 @@ Overfull \hbox (22.97252pt too wide) in paragraph at lines 25--25
  []
 
 
-Overfull \hbox (22.97252pt too wide) in paragraph at lines 26--26
+Overfull \hbox (22.97252pt too wide) in paragraph at lines 27--27
+[][][][][][][]  
+ []
+
+
+Overfull \hbox (22.97252pt too wide) in paragraph at lines 28--28
+[][][][][][][]  
+ []
+
+
+Overfull \hbox (22.97252pt too wide) in paragraph at lines 29--29
 [][][][][][][]  
  []
 
@@ -2070,7 +2089,17 @@ Overfull \hbox (22.97252pt too wide) in paragraph at lines 30--30
  []
 
 
-Overfull \hbox (22.97252pt too wide) in paragraph at lines 34--34
+Overfull \hbox (22.97252pt too wide) in paragraph at lines 31--31
+[][][][][][][]  
+ []
+
+
+Overfull \hbox (22.97252pt too wide) in paragraph at lines 35--35
+[][][][][][][]  
+ []
+
+
+Overfull \hbox (22.97252pt too wide) in paragraph at lines 39--39
 [][][][][][][]  
  []
 
@@ -2080,10 +2109,10 @@ Overfull \hbox (22.97252pt too wide) in paragraph at lines 34--34
 \openout6 = light.toc
 
 
-[4
+[5
 
 ]
-LaTeX Font Info:    Trying to load font information for U+msa on input line 31.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 37.
 
  ("C:/Program Files/MIKTEX1/tex/latex/amsfonts/umsa.fd"
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
@@ -2091,7 +2120,7 @@ File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 (C:/Users/wb164718/AppData/Roaming/MiKTeX/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 31.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 37.
 
 
 ("C:/Program Files/MIKTEX1/tex/latex/amsfonts/umsb.fd"
@@ -2105,10 +2134,10 @@ File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman
 (RS)
 )
 LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/m/n' will be
-(Font)              scaled to size 45.427pt on input line 31.
+(Font)              scaled to size 45.427pt on input line 37.
 
 
-[5
+[6
 
 
 
@@ -2116,88 +2145,71 @@ LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/m/n' will be
 ]
 Chapter 1.
 LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/m/n' will be
-(Font)              scaled to size 19.62825pt on input line 32.
+(Font)              scaled to size 19.62825pt on input line 38.
 LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/b/n' will be
-(Font)              scaled to size 22.7135pt on input line 32.
+(Font)              scaled to size 22.7135pt on input line 38.
 (./sections/part0/Introdução.tex)
-
-[6
-
-]
 
 [7
 
+]
+
+[8
+
+]
+
+[9
 
 ]
 Chapter 2.
 (./sections/part1/População.tex
 LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/b/n' will be
 (Font)              scaled to size 15.14233pt on input line 1.
-<images/2a_PopuBra.png, id=123, 1340.00626pt x 795.97375pt>
+LaTeX Font Info:    Font shape `TU/Inconsolata-LGC(0)/b/n' will be
+(Font)              scaled to size 10.36302pt on input line 6.
+<images/2a_PopuBra.png, id=139, 1340.00626pt x 795.97375pt>
 File: images/2a_PopuBra.png Graphic file (type png)
 <use images/2a_PopuBra.png>
 Package luatex.def Info: images/2a_PopuBra.png  used on input line 12.
 (luatex.def)             Requested size: 320.0935pt x 190.12668pt.
 
 
-[8
+[10
 
 <./images/2a_PopuBra.png>]
-<images/orange2.jpg, id=134, 246.6816pt x 123.3408pt>
-File: images/orange2.jpg Graphic file (type jpg)
-<use images/orange2.jpg>
-Package luatex.def Info: images/orange2.jpg  used on input line 40.
-(luatex.def)             Requested size: 246.68098pt x 123.34048pt.
+<images/2b_PopuBra.png, id=151, 1267.73625pt x 601.24625pt>
+File: images/2b_PopuBra.png Graphic file (type png)
+<use images/2b_PopuBra.png>
+Package luatex.def Info: images/2b_PopuBra.png  used on input line 28.
+(luatex.def)             Requested size: 320.0935pt x 151.8066pt.
 
+Underfull \hbox (badness 10000) in paragraph at lines 37--43
 
-[9<./images/orange2.jpg>])
-
-[10]
-Chapter 3.
-(./sections/part1/CrecimentoEconômico.tex
-File: images/orange2.jpg Graphic file (type jpg)
-<use images/orange2.jpg>
-Package luatex.def Info: images/orange2.jpg  used on input line 17.
-(luatex.def)             Requested size: 246.68098pt x 123.34048pt.
-)
-
-[11
-
-]
-Chapter 4.
-(./sections/part1/Cenários.tex)
-
-[12
-
-]
-Overfull \hbox (5.60622pt too wide) in paragraph at lines 55--55
- |[] []\TU/Inconsolata-LGC(0)/m/n/48 OFERTA E DE-MANDA DA
  []
 
 
+Underfull \hbox (badness 2435) in paragraph at lines 55--55
+[]|[][]\TU/lmr/bx/n/9 Hor-i-zonte da Tran-
+ []
 
-[13
 
+Underfull \hbox (badness 10000) in paragraph at lines 55--56
+[]|[][]\TU/lmr/bx/n/9 Unidade de
+ []
 
-]
-Chapter 5.
-(./sections/part1/MetasPNE.tex
 ("C:/Program Files/MIKTEX1/tex/generic/hyph-utf8/loadhyph/loadhyph-la.tex"
 UTF-8 Latin hyphenation patterns
 ("C:/Program Files/MIKTEX1/tex/generic/hyph-utf8/patterns/tex/hyph-la.tex"))
-Package microtype Info: Loading generic protrusion settings for font family
-(microtype)             `lmtt' (encoding: TU).
-(microtype)             For optimal results, create family-specific settings.
-(microtype)             See the microtype manual for details.
-LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <9> not available
-(Font)              Font shape `TU/lmtt/b/n' tried instead on input line 30.
-)
 
-[14
+[11<./images/2b_PopuBra.png>]
 
-]
-Chapter 6.
-(./sections/part1/Metodología.tex
+[12])
+
+[13]
+
+[14]
+Chapter 3.
+(./sections/part1/RedesEPT.tex
 Overfull \hbox (39.80385pt too wide) in paragraph at lines 11--66
 []|  [] 
  []
@@ -2206,6 +2218,60 @@ Overfull \hbox (39.80385pt too wide) in paragraph at lines 11--66
 
 [15
 
+]
+
+[16]
+Chapter 4.
+(./sections/part1/CrecimentoEconômico.tex
+<images/orange2.jpg, id=189, 246.6816pt x 123.3408pt>
+File: images/orange2.jpg Graphic file (type jpg)
+<use images/orange2.jpg>
+Package luatex.def Info: images/orange2.jpg  used on input line 17.
+(luatex.def)             Requested size: 246.68098pt x 123.34048pt.
+)
+
+[17
+
+<./images/orange2.jpg>]
+Chapter 5.
+(./sections/part1/Cenários.tex)
+
+[18
+
+]
+Overfull \hbox (5.60622pt too wide) in paragraph at lines 81--81
+ |[] []\TU/Inconsolata-LGC(0)/m/n/48 OFERTA E DE-MANDA DA
+ []
+
+
+
+[19
+
+
+]
+Chapter 6.
+(./sections/part1/MetasPNE.tex
+Package microtype Info: Loading generic protrusion settings for font family
+(microtype)             `lmtt' (encoding: TU).
+(microtype)             For optimal results, create family-specific settings.
+(microtype)             See the microtype manual for details.
+LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <9> not available
+(Font)              Font shape `TU/lmtt/b/n' tried instead on input line 30.
+)
+
+[20
+
+]
+Chapter 7.
+(./sections/part1/Metodología.tex
+Overfull \hbox (39.80385pt too wide) in paragraph at lines 11--66
+[]|  [] 
+ []
+
+)
+
+[21
+
 ] (./sections/part1/Resultados.tex
 Overfull \hbox (39.80385pt too wide) in paragraph at lines 11--66
 []|  [] 
@@ -2213,45 +2279,41 @@ Overfull \hbox (39.80385pt too wide) in paragraph at lines 11--66
 
 )
 
-[16]
-Overfull \hbox (142.93948pt too wide) in paragraph at lines 69--69
+[22]
+Overfull \hbox (142.93948pt too wide) in paragraph at lines 95--95
  |[] []\TU/Inconsolata-LGC(0)/m/n/48 DE-SEN-VOLVI-MENTO DO PLANO
  []
 
 
 
-[17
+[23
 
 
 ]
-Chapter 7.
+Chapter 8.
 (./sections/part2/EstruturaPlano.tex
 
-LaTeX Warning: Reference `sec:vestibulum' on page 18 undefined on input line 5.
+LaTeX Warning: Reference `sec:vestibulum' on page 24 undefined on input line 5.
 
 
 )
 
-[18
+[24
 
 ]
-
-[19]
-Chapter 8.
+Chapter 9.
 (./sections/part2/Protocolo.tex
 
-LaTeX Warning: Reference `sec:vestibulum' on page 20 undefined on input line 4.
+LaTeX Warning: Reference `sec:vestibulum' on page 25 undefined on input line 4.
 
 
 )
 
-[20
+[25
 
 ]
 
-[21]
-
-[22
+[26
 
 
 ] (./light.lof)
@@ -2264,12 +2326,12 @@ LaTeX Warning: Reference `sec:vestibulum' on page 20 undefined on input line 4.
 \openout8 = light.lot
 
 
-[23
+[27
 
 
 ]
 
-LaTeX Warning: Empty bibliography on input line 87.
+LaTeX Warning: Empty bibliography on input line 113.
 
 (./light.aux)
  ***********
@@ -2292,17 +2354,17 @@ Package logreq Info: Writing requests to 'light.run.xml'.
 ))
 
 Here is how much of LuaTeX's memory you used:
- 49372 strings out of 470118
- 195338,2373549 words of node,token memory allocated
- 1472 words of node memory still in use:
-   32 hlist, 2 vlist, 14 rule, 1 local_par, 4 glue, 4 kern, 1 penalty, 3 glyph, 
-91 attribute, 73 glue_spec, 83 attribute_list, 3 write, 24 pdf_literal, 1 pdf_ac
+ 49441 strings out of 470118
+ 244180,2373549 words of node,token memory allocated
+ 1510 words of node memory still in use:
+   32 hlist, 2 vlist, 14 rule, 1 local_par, 6 glue, 4 kern, 1 penalty, 3 glyph, 
+95 attribute, 73 glue_spec, 85 attribute_list, 3 write, 24 pdf_literal, 3 pdf_ac
 tion, 24 pdf_colorstack nodes
-   avail lists: 1:11,2:11457,3:7380,4:3322,5:2540,6:94,7:6372,8:18,9:6500,10:28,
-11:480
- 76245 multiletter control sequences out of 65536+600000
- 65 fonts using 5635311 bytes
- 131i,15n,123p,1949b,2130s stack positions out of 10000i,1000n,20000p,200000b,200000s
+   avail lists: 1:10,2:11452,3:7379,4:3322,5:2540,6:112,7:8363,8:5,9:6500,10:28,
+11:898
+ 76303 multiletter control sequences out of 65536+600000
+ 78 fonts using 6511303 bytes
+ 131i,16n,123p,1949b,2130s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <c:/program files/miktex1/fonts/opentype/public/lm/lmmono9-regular.otf><c:/progr
 am files/miktex1/fonts/opentype/public/lm/lmmonolt10-bold.otf><c:/program files/
 miktex1/fonts/opentype/public/lm/lmroman9-regular.otf><c:/program files/miktex1/
@@ -2314,14 +2376,13 @@ d.otf><c:/program files/miktex1/fonts/opentype/public/lm/lmroman10-regular.otf><
 ./template/generic/fonts/inconsolata/Inconsolata-LGC.otf><./template/generic/fon
 ts/inconsolata/Inconsolata-LGC-Bold.otf><C:/Program Files/MIKTEX1/fonts/type1/pu
 blic/amsfonts/cm/cmmi10.pfb><C:/Program Files/MIKTEX1/fonts/type1/public/amsfont
-s/cm/cmmi6.pfb><C:/Program Files/MIKTEX1/fonts/type1/public/amsfonts/cm/cmmi8.pf
-b><C:/Program Files/MIKTEX1/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Program
- Files/MIKTEX1/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Program Files/MIKTEX1
-/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Program Files/MIKTEX1/fonts/type1
-/public/amsfonts/cm/cmsy8.pfb>
-Output written on light.pdf (23 pages, 443549 bytes).
+s/cm/cmmi8.pfb><C:/Program Files/MIKTEX1/fonts/type1/public/amsfonts/cm/cmr10.pf
+b><C:/Program Files/MIKTEX1/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Program 
+Files/MIKTEX1/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Program Files/MIKTEX1
+/fonts/type1/public/amsfonts/cm/cmsy9.pfb>
+Output written on light.pdf (27 pages, 577893 bytes).
 
-PDF statistics: 445 PDF objects out of 1000 (max. 8388607)
- 97 named destinations out of 1000 (max. 131072)
- 408 words of extra memory for PDF output out of 10000 (max. 100000000)
+PDF statistics: 483 PDF objects out of 1000 (max. 8388607)
+ 102 named destinations out of 1000 (max. 131072)
+ 440 words of extra memory for PDF output out of 10000 (max. 100000000)
 
