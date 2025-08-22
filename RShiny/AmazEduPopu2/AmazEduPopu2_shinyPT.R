@@ -65,7 +65,7 @@ local_colors <- c(
 
 # UI
 ui <- fluidPage(
-  titlePanel("Brasil: População EPT (15-19 anos) vs Matrículas por Estado"),
+  titlePanel("Brasil: População 15-19 anos e Matrículas EM e EPT"),
   sidebarLayout(
     sidebarPanel(
       pickerInput(
@@ -240,8 +240,25 @@ server <- function(input, output, session) {
         y_sym <- sym(y_var)
         line_type <- line_types[(i - 1) %% length(line_types) + 1]
         
+        # Add tooltip text to the data
+        loc_data <- loc_data %>%
+          mutate(
+            tooltip_text = paste0(
+              names(current_variables)[current_variables == y_var], "<br>",
+              "Ano: ", ANO, "<br>",
+              "Valor: ", if (input$dataType == "numbers") {
+                format(round(!!y_sym), big.mark = ".", decimal.mark = ",")
+              } else {
+                paste0(round(!!y_sym, 2), "%")
+              },
+              "<br>Estado: ", loc
+            )
+          )
+        
         # Add the line for each y-variable and LOCAL
-        p <- p + geom_line(data = loc_data, aes(y = !!y_sym), linetype = line_type, linewidth = 1, color = loc_color)
+        p <- p + geom_line(data = loc_data, 
+                           aes(y = !!y_sym), 
+                           linetype = line_type, linewidth = 1, color = loc_color)
         
         # Determine the last year for this variable (enrollment ends at 2024, population at 2035)
         is_enrollment <- y_var %in% c("QT_MAT_PROF_TEC_PROPAG", "QT_MAT_MED", "PCT_MAT_EPT", "PCT_MAT_MED")
