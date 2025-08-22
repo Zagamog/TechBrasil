@@ -46,7 +46,6 @@ number_variables <- c(
 )
 
 percentage_variables <- c(
-  "Pop 15-19" = "15-19_T",
   "% Matrícula EPT" = "PCT_MAT_EPT",
   "% Matrícula Ensino Médio" = "PCT_MAT_MED"
 )
@@ -116,7 +115,7 @@ server <- function(input, output, session) {
         choices = percentage_variables,
         options = list(`actions-box` = TRUE),
         multiple = TRUE,
-        selected = c("15-19_T", "PCT_MAT_EPT")
+        selected = c("PCT_MAT_EPT")
       )
     }
   })
@@ -131,21 +130,28 @@ server <- function(input, output, session) {
     # Get the current variable choices based on data type
     current_variables <- if (input$dataType == "numbers") number_variables else percentage_variables
     
-    # Determine y-axis limits and labels
-    y_min <- 0
-    y_max <- max(filtered_data[input$yVariables], na.rm = TRUE)
-    y_labels <- if (input$dataType == "numbers") scales::comma else function(x) paste0(x, "%")
+    # Determine y-axis limits and labels based on data type
+    if (input$dataType == "numbers") {
+      y_min <- 0
+      y_max <- max(filtered_data[input$yVariables], na.rm = TRUE) * 1.1
+      y_labels <- scales::comma
+      y_axis_title <- "Contagem"
+      plot_title <- "População 15-19 anos e Matrículas EPT/Ensino Médio (2007-2035)"
+    } else {
+      # For percentage mode, set appropriate limits for percentages
+      y_min <- 0
+      y_max <- max(c(100, max(filtered_data[input$yVariables], na.rm = TRUE) * 1.1))
+      y_labels <- function(x) paste0(x, "%")
+      y_axis_title <- "Percentagem (%)"
+      plot_title <- "Percentagem de Matrículas EPT/Ensino Médio (2007-2035)"
+    }
     
     # Create the base ggplot object
     p <- ggplot(filtered_data, aes(x = ANO, color = LOCAL)) +
       labs(
         x = "Ano",
-        y = if (input$dataType == "numbers") "Contagem" else "Percentagem (%)",
-        title = if (input$dataType == "numbers") {
-          "População 15-19 anos e Matrículas EPT/Ensino Médio (2007-2035)"
-        } else {
-          "População 15-19 anos e Percentagem de Matrículas EPT/Ensino Médio (2007-2035)"
-        },
+        y = y_axis_title,
+        title = plot_title,
         color = "Localização"
       ) +
       theme_minimal() +
