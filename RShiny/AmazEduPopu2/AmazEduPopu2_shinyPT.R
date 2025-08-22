@@ -169,6 +169,66 @@ server <- function(input, output, session) {
     line_types <- c("solid", "dashed", "dotted", "dotdash", "longdash", "twodash")
     annotations <- list()
     
+    # Calculate individual PNE Meta 11 targets for each selected location
+    meta_targets <- combined_data %>%
+      filter(LOCAL %in% input$localInput, ANO == 2013) %>%
+      group_by(LOCAL) %>%
+      summarise(
+        ept_2013_absolute = sum(QT_MAT_PROF_TEC_PROPAG, na.rm = TRUE),
+        meta_pne_11_target = ept_2013_absolute * 3,
+        .groups = 'drop'
+      )
+    
+    # Add meta lines for each location
+    for (loc in input$localInput) {
+      loc_target <- meta_targets %>% filter(LOCAL == loc)
+      
+      if (nrow(loc_target) > 0 && !is.na(loc_target$meta_pne_11_target)) {
+        target_absolute <- loc_target$meta_pne_11_target
+        loc_color <- local_colors[loc]
+        if(is.na(loc_color)) loc_color <- "darkorange"
+        
+        if (input$dataType == "numbers") {
+          # In numbers mode, show the absolute target
+          target_line_value <- target_absolute
+          target_label <- paste0("Meta PNE 11 - ", loc, ": ", format(target_line_value, big.mark = ".", decimal.mark = ","))
+        } else {
+          # In percentage mode, calculate what % this represents of recent population for this location
+          recent_population <- combined_data %>%
+            filter(LOCAL == loc, ANO >= 2020) %>%
+            summarise(avg_pop = mean(`15-19_T`, na.rm = TRUE)) %>%
+            pull(avg_pop)
+          
+          if (length(recent_population) > 0 && !is.na(recent_population) && recent_population > 0) {
+            target_line_value <- (target_absolute / recent_population) * 100
+            target_label <- paste0("Meta PNE 11 - ", loc, ": ", round(target_line_value, 1), "%")
+          } else {
+            target_line_value <- NULL
+            target_label <- NULL
+          }
+        }
+        
+        # Add horizontal line for this location's PNE Meta 11
+        if (!is.null(target_line_value) && target_line_value <= y_max) {
+          p <- p + 
+            geom_hline(yintercept = target_line_value, 
+                       linetype = "dotdash", 
+                       color = loc_color, 
+                       linewidth = 1.0, 
+                       alpha = 0.7) +
+            annotate("text", 
+                     x = 2032, 
+                     y = target_line_value, 
+                     label = target_label,
+                     color = loc_color, 
+                     vjust = -0.3, 
+                     fontface = "bold",
+                     size = 3.0,
+                     alpha = 0.8)
+        }
+      }
+    }
+    
     # Add lines and annotations for each selected y-variable
     for (loc in unique(filtered_data$LOCAL)) {
       loc_data <- filtered_data %>% filter(LOCAL == loc)
