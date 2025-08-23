@@ -217,14 +217,13 @@ server <- function(input, output, session) {
                        linewidth = 1.0, 
                        alpha = 0.7) +
             annotate("text", 
-                     x = 2032, 
-                     y = target_line_value, 
-                     label = target_label,
+                     x = 2012, 
+                     y = target_line_value+(0.1*target_line_value), 
+                     label = paste0("Meta 11 vigente triplicar matricula EPT - ", loc),
                      color = loc_color, 
-                     vjust = -0.3, 
                      fontface = "bold",
-                     size = 3.0,
-                     alpha = 0.8)
+                     size = 4.0,
+                     alpha = 1)
         }
       }
     }

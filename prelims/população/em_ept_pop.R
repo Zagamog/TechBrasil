@@ -4,6 +4,8 @@
 
 library(dplyr)
 library(tidyr)
+library(xtable)
+library(stargazer)
 
 # Load the data (adjust paths as needed)
 load("meta11a_opcoes.rda")
@@ -16,6 +18,7 @@ pop_data <- pop01_70b %>%
   select(ANO, SIGLA, `15-17_T`, `18-21_T`) %>%
   mutate(`15-19_T` = `15-17_T` + (`18-21_T` * 0.5)) %>%
   filter(ANO %in% c(2024, 2035)) %>%
+  filter(SIGLA != "CO_" & SIGLA != "ND_") %>% 
   select(ANO, SIGLA, `15-19_T`) %>%
   pivot_wider(names_from = ANO, values_from = `15-19_T`, 
               names_prefix = "Pop_", values_fill = NA)
@@ -101,15 +104,14 @@ combined_data <- pop_data %>%
   left_join(enrollment_data, by = c("SIGLA" = "SG_UF")) %>%
   # Use NM_UF from enrollment data, fallback to LOCAL if missing
   mutate(
-    UF_Name = ifelse(is.na(NM_UF), LOCAL, NM_UF),
     # Calculate percentage EPT of 15-19 population
     Pct_EPT_2024 = ifelse(!is.na(Pop_2024) & Pop_2024 > 0 & !is.na(EPT_2024), 
                           (EPT_2024 / Pop_2024) * 100, 0)
   ) %>%
   # Select and arrange final columns
   select(
-    UF = SIGLA,
-    UF_Name,
+    SG_UF = SIGLA,
+    NM_UF, 
     Pop_2024,
     Pop_2035, 
     EM_2024,
@@ -117,7 +119,7 @@ combined_data <- pop_data %>%
     Pct_EPT_2024
   ) %>%
   # Sort alphabetically by UF (same as app)
-  arrange(UF) %>%
+  arrange(SG_UF) %>%
   # Format numbers for LaTeX output
   mutate(
     Pop_2024 = format(round(Pop_2024), big.mark = ".", decimal.mark = ","),
@@ -127,8 +129,35 @@ combined_data <- pop_data %>%
     Pct_EPT_2024 = format(round(Pct_EPT_2024, 2), nsmall = 2, decimal.mark = ",")
   )
 
-# Display the final table
-cat("=== COMPLETE STATE TABLE ===\n")
-print(combined_data, n = Inf)
 
-cat("\nAnalysis complete!\n")
+combined_data2 <- combined_data %>% 
+  mutate(
+    order_priority = case_when(
+      SG_UF == "BR" ~ 1,
+      SG_UF == "AML" ~ 2,
+      SG_UF %in% c("NO", "AC", "AP", "AM", "PA", "RO", "RR", "TO") ~ 3,
+      SG_UF %in% c("ND", "ND_", "AL", "BA", "CE", "MA", "PB", "PE", "PI", "RN", "SE") ~ 4,
+      SG_UF %in% c("SD", "ES", "MG", "RJ", "SP") ~ 5,
+      SG_UF %in% c("SU", "PR", "RS", "SC") ~ 6,
+      SG_UF %in% c("CO", "CO_", "DF", "GO", "MS", "MT") ~ 7,
+      TRUE ~ 8
+    ),
+    # Sub-ordering within groups
+    sub_order = case_when(
+      SG_UF == "NO" ~ 1, TRUE ~ 2,  # Norte region first, then states
+      SG_UF == "ND" ~ 1, TRUE ~ 2,  # Nordeste, then states
+      SG_UF == "SD" ~ 1, TRUE ~ 2,  # Sudeste region first, then states
+      SG_UF == "SU" ~ 1, TRUE ~ 2,  # Sul region first, then states
+      SG_UF == "CO" ~ 1, TRUE ~ 2  # Centro-Oeste, then 
+    )
+  ) %>%
+  # Sort by custom order
+  arrange(order_priority, sub_order, SG_UF) %>%
+  select(-order_priority,-sub_order,-SG_UF)
+
+
+# Export as LaTeX table
+stargazer::stargazer(combined_data2, summary = FALSE, rownames = FALSE) 
+
+
+# saves to file

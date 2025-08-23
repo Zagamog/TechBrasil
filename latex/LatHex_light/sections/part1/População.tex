@@ -9,7 +9,7 @@ Em primeiro lugar, impõe a necessidade de políticas de requalificação e educ
 
 \begin{figure}[htbp!]
 	\centering
-	\includegraphics[width=0.75\textwidth]{images/2a_PopuBra.png}
+	\includegraphics[width=1\textwidth]{images/2a_PopuBra.png}
 	\caption{Transição demográfica no Brasil: evolução das populações de 0-14 e 60+ anos (2000-2070)} 
 	\label{fig:2a_PopuBra}
 \end{figure}
@@ -25,8 +25,8 @@ A Painel 1 da Plataforma Analítica Juros por Educação do BM–FGV fornece o c
 
 \begin{figure}[htbp!]
 	\centering
-	\includegraphics[width=0.75\textwidth]{images/2b_PopuBra.png}
-	\caption{Aba 1: Por UF - evolução das populações de 0-14 e 60+ anos (2000-2070)} 
+	\includegraphics[width=1\textwidth]{images/2b_PopuBra.png}
+	\caption{Aba A: Por UF - evolução das populações de 0-14 e 60+ anos (2000-2070)} 
 	\label{fig:2b_PopuBra}
 \end{figure}
 
@@ -38,11 +38,8 @@ A Painel 1 da Plataforma Analítica Juros por Educação do BM–FGV fornece o c
 \makebox[4cm][l]{\textbf{Alta proximidade:}} Estados com transição demográfica já ocorrida ou iminente.\\
 \makebox[4cm][l]{\textbf{Média proximidade:}} Estados com transição prevista para a próxima década.\\
 \makebox[4cm][l]{\textbf{Baixa proximidade:}} Estados com transição em horizonte mais distante.\\
-% table_example.tex - Complete working example
-% Copy this entire block into your document
 
-% Required packages (add to your preamble if not already there)
-% \usepackage{array}
+A Tabela~\ref{tab:transicao} detalha as implicações de cada horizonte temporal para o planejamento da EPT.
 
 \begin{table}[h]
 	\centering
@@ -95,10 +92,149 @@ A Painel 1 da Plataforma Analítica Juros por Educação do BM–FGV fornece o c
 
 A população de 15-19 anos define o espaço demográfico disponível para expansão da EPT, variando significativamente entre estados devido à transição demográfica diferenciada. A Aba B da Plataforma Analítica permite comparar a evolução desta população-alvo com as matrículas atuais em EPT e ensino médio, identificando onde existem maiores potenciais de crescimento ou pressões de capacidade. A Meta 11 do PNE vigente estabelece triplicar as matrículas de EPT em relação ao baseline de 2013, meta que determina a obrigatoriedade de alocar 60\% dos recursos do Propag para EPT até seu cumprimento. Após atingida a meta, os estados aderentes ao Propag ganham flexibilidade para alocar os recursos entre as modalidades elegíveis, mantendo a possibilidade de continuar financiando EPT.
 
-\subsection{População Jovem e Matrícula EPT por Estado}
-\lipsum[2]
+
 \subsection{Plataforma Aba B - Espaço Demográfico}
-\lipsum[3-5]
+
+A Aba B da Plataforma Analítica complementa a análise demográfica ao focar na população de 15-19 anos e sua relação com as matrículas de EPT e ensino médio. Esta ferramenta permite o analista comparar a evolução da população-alvo com a capacidade atual de atendimento por EM e EPT, revelando o espaço existente para expansão. A interface oferece visualização tanto em números absolutos quanto em percentuais, facilitando a identificação de estados com baixa penetração da EPT em relação ao público elegível. A linha de Meta 11 do PNE é exibida automaticamente, permitindo avaliar a distância entre a situação atual e o atingimento da meta referenciada na reglamentação do Propag. Acesse o painel aqui: \href{https://datanalytics.worldbank.org/content/378126af-f24c-4b24-a374-a3400d3b223e}{https://datanalytics.worldbank.org/Plataforma-Aba-B}.
+
+\begin{figure}[htbp!]
+	\centering
+	\includegraphics[width=1\textwidth]{images/2c_PopuBra.png}
+	\caption{Aba B: Por UF - População 15-19 e matricula EPT e EM )} 
+	\label{fig:2c_PopuBra}
+\end{figure}
+
+
+\begin{table}[!htbp] \centering 
+	\caption{Populaçao e Matriculas na Aba B}
+	\label{tab:popematri}
+	\footnotesize
+	\begin{tabular}{@{\extracolsep{5pt}} lrrrrr} 
+		\\[-1.8ex]\hline 
+		\hline \\[-1.8ex] 
+		NM\_UF & Pop\_2024 & Pop\_2035 & EM\_2024 & EPT\_2024 & EPT por Pop\_2024 \\ 
+		\hline \\[-1.8ex] 
+		Brasil & 15.020.650 & 14.327.278 & 7.790.396 & 2.352.083 & 15,66\% \\ 
+		Amazonia\_Legal &  2.532.878 &  2.317.000 & 1.220.927 &   237.661 &  9,38\% \\ 
+		Norte &  1.628.140 &  1.493.704 &   788.015 &   145.546 &  8,94\% \\ 
+		Acre &     83.570 &     70.949 &    40.079 &     8.492 & 10,16\% \\ 
+		Amazonas &    387.482 &    374.802 &   192.683 &    44.127 & 11,39\% \\ 
+		Amapá &     71.799 &     68.340 &    33.346 &     5.605 &  7,81\% \\ 
+		Pará &    765.600 &    653.050 &   350.746 &    61.194 &  7,99\% \\ 
+		Rondônia &    134.180 &    126.478 &    73.187 &    11.583 &  8,63\% \\ 
+		Roraima &     61.660 &     80.982 &    27.890 &     4.045 &  6,56\% \\ 
+		Tocantins &    123.848 &    119.102 &    70.084 &    10.500 &  8,48\% \\ 
+		Alagoas &    252.955 &    220.396 &   127.231 &    24.589 &  9,72\% \\ 
+		Bahia &  1.080.362 &    956.098 &   510.586 &   177.727 & 16,45\% \\ 
+		Ceará &    677.062 &    633.072 &   364.898 &   114.569 & 16,92\% \\ 
+		Maranhão &    621.135 &    502.454 &   291.650 &    71.075 & 11,44\% \\ 
+		Nordeste &  4.350.096 &  3.862.336 & 2.121.473 &   719.114 & 16,53\% \\ 
+		Paraíba &    309.321 &    287.622 &   145.571 &    52.368 & 16,93\% \\ 
+		Pernambuco &    723.427 &    653.463 &   338.112 &   108.288 & 14,97\% \\ 
+		Piauí &    261.848 &    224.922 &   130.065 &    99.338 & 37,94\% \\ 
+		Rio Grande do Norte &    249.106 &    225.820 &   127.576 &    55.628 & 22,33\% \\ 
+		Sergipe &    174.880 &    158.490 &    85.784 &    15.532 &  8,88\% \\ 
+		Espírito Santo &    278.903 &    282.896 &   127.820 &    60.658 & 21,75\% \\ 
+		Minas Gerais &  1.403.982 &  1.314.378 &   737.456 &   259.015 & 18,45\% \\ 
+		Rio de Janeiro &  1.079.832 &  1.059.168 &   550.676 &   146.789 & 13,59\% \\ 
+		Sudeste &  5.805.078 &  5.610.752 & 3.269.093 &   998.368 & 17,20\% \\ 
+		São Paulo &  3.042.360 &  2.954.310 & 1.853.141 &   531.906 & 17,48\% \\ 
+		Paraná &    804.420 &    806.264 &   417.836 &   158.011 & 19,64\% \\ 
+		Rio Grande do Sul &    696.279 &    674.763 &   331.216 &   138.757 & 19,93\% \\ 
+		Santa Catarina &    507.089 &    601.474 &   271.501 &    82.602 & 16,29\% \\ 
+		Sul &  2.007.788 &  2.082.502 & 1.020.553 &   379.370 & 18,89\% \\ 
+		Centro-Oeste &  1.229.548 &  1.277.982 &   591.262 &   109.685 &  8,92\% \\ 
+		Distrito Federal &    211.897 &    195.290 &   104.486 &    30.053 & 14,18\% \\ 
+		Goiás &    519.454 &    536.772 &   240.835 &    37.664 &  7,25\% \\ 
+		Mato Grosso do Sul &    214.594 &    225.078 &   104.679 &    20.928 &  9,75\% \\ 
+		Mato Grosso &    283.604 &    320.842 &   141.262 &    21.040 &  7,42\% \\ 
+		\hline \\[-1.8ex] 
+	\end{tabular} 
+\end{table}
+
+\subsection{População Jovem e Matrícula EPT e Matricula EM por Estado}
+
+A Tabela~\ref{tab:popematri} apresenta o panorama quantitativo do espaço demográfico para EPT em 2024, consolidando dados populacionais do IBGE com estatísticas do Censo Escolar. Os dados revelam diferenças significativas na cobertura da EPT: enquanto Piauí atinge 37,94\% da população de 15-19 anos, estados como Roraima (6,56\%) e Goiás (7,25\%) apresentam amplo espaço para expansão. Esta variação não segue necessariamente padrões regionais óbvios -- por exemplo, dentro do Nordeste, o percentual varia de 8,88\% (Sergipe) a 37,94\% (Piauí). A Tabela~\ref{tab:matriz_ept_transicao} cruza estes dados de cobertura com o horizonte da transição demográfica, revelando empiricamente que a maioria dos estados concentra-se na combinação de cobertura moderada com transição distante, indicando oportunidades significativas de expansão planejada da EPT.
+
+\begin{table}[h]
+	\centering
+	\caption{Matriz: Cobertura EPT $\times$ Horizonte da Transição Demográfica}
+	\label{tab:matriz_ept_transicao}
+	\footnotesize
+	\begin{tabular}{|P{2cm}|P{3.8cm}|P{3.8cm}|P{3.8cm}|}
+		\hline
+		\rowcolor{gray!20}
+		\textbf{Cobertura EPT $\downarrow$ / Transição $\rightarrow$}
+		& \textbf{Iminente (2020--2027)}
+		& \textbf{Média (2028--2035)}
+		& \textbf{Distante (pós-2035)} \\ \hline
+		
+		\textbf{Elevada ($>$20\%)} &
+		\cellcolor{green!12}
+		\statecell{%
+			RS [2020, 19{,}93\%]\\
+			\textit{(exemplo)}
+		}{Modernização tecnológica; certificação profissional} &
+		\cellcolor{green!6}
+		\statecell{%
+			\textit{Nenhum estado (célula vazia)}
+		}{Monitorar; manter qualidade} &
+		\cellcolor{green!15}
+		\statecell{%
+			PI [2030, 37{,}94\%]\\
+			RN [2029, 22{,}33\%]\\
+			ES [2029, 21{,}75\%]
+		}{Evitar oversupply; foco em qualidade e atualização \vspace{2pt}} \\ \hline
+		
+		\textbf{Moderada (10--20\%)} &
+		\cellcolor{yellow!20}
+		\statecell{%
+			SP [2026, 17{,}48\%]\\
+			RJ [2023, 13{,}59\%]\\
+			MG [2024, 18{,}45\%]
+		}{Requalificação de adultos; ajustes curriculares} &
+		\cellcolor{yellow!15}
+		\statecell{%
+			PR [2027, 19{,}64\%]\\
+			SC [2030, 16{,}29\%]\\
+			DF [2030, 14{,}18\%]
+		}{Expansão controlada; inovação pedagógica} &
+		\cellcolor{yellow!10}
+		\statecell{%
+			PB [2030, 16{,}93\%]\\
+			CE [2031, 16{,}92\%]\\
+			PE [2031, 14{,}97\%]\\
+			BA [2029, 16{,}45\%]\\
+			MA [2036, 11{,}44\%]\\
+			AM [2043, 11{,}39\%]
+		}{Planejar expansão jovem; infraestrutura e docentes \vspace{2pt}} \\ \hline
+		
+		\textbf{Baixa ($<$10\%)} &
+		\cellcolor{red!10}
+		\statecell{%
+			\textit{Nenhum estado (célula vazia)}
+		}{Acelerar preparativos; projetos-piloto} &
+		\cellcolor{pink!18}
+		\statecell{%
+			MS [2034, 9{,}75\%]\\
+			SE [2032, 8{,}88\%]
+		}{Investimento gradual; preparar transição} &
+		\cellcolor{pink!22}
+		\statecell{%
+			AL [2034, 9{,}72\%]\\
+			PA [2038, 7{,}99\%]\\
+			TO [2036, 8{,}48\%]\\
+			RO [2035, 8{,}63\%]\\
+			MT [2040, 7{,}42\%]\\
+			AP [2041, 7{,}81\%]\\
+			RR [2047, 6{,}56\%]
+		}{Expansão massiva; desenvolvimento regional; acesso digital \vspace{2pt}} \\ \hline
+	\end{tabular}
+\end{table}
+
+
+
+
 
 \section{EPT no contexto do Ensino Médio}
 

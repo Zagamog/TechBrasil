@@ -23,4 +23,19 @@
 %   HEADERS
 %----------------------------------------------------------------------------------------
 
+
+% For tables in chapter 2
 \newcommand{\thead}[1]{\large\uppercase{#1}}
+
+
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\setlength{\extrarowheight}{2pt} % a little breathing room
+
+% Helper to make tidy cell blocks with bullets
+\newcommand{\statecell}[2]{% #1 = lines with \\; #2 = short policy note
+	\begin{minipage}[t]{\linewidth}\vspace{2pt}
+		#1
+		\par\smallskip
+		\textit{Políticas:} #2
+	\end{minipage}
+}
