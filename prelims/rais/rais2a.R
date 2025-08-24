@@ -10,6 +10,9 @@ library(dplyr)
 library(janitor)
 
 
+# rais2024 <- rais2024 %>% rename(CO_MUN6=`Mun Trab`)
+# save(rais2024, file = "D:/Country/Brazil/TechBrazil/working/rais/2024/rais2024.rda")
+
 # load("D:/Country/Brazil/TechBrazil/working/mintraemp/rais_caged_cbo4_mun_2023_2024.rda")
 # dplyr::glimpse(rais_caged_cbo4_mun_2023_2024)
 # 
@@ -23,7 +26,7 @@ library(janitor)
 # junk2_1
 names(rais2024)
 
-rais_cbo_uf24_ <- rais2024 %>% rename(CodCBO=`CBO Ocupação 2002`, vinculos =`Vínculo Ativo 31/12`, CO_MUN6=`Mun Trab`) %>%
+rais_cbo_uf24_ <- rais2024 %>% rename(CodCBO=`CBO Ocupação 2002`, vinculos =`Vínculo Ativo 31/12`) %>%
   mutate(CodCBO=as.character(CodCBO)) 
 
 temp_uf <- df_codes_ibge %>% select(CO_MUN6,CO_UF,SG_UF,NM_UF) %>% unique()
