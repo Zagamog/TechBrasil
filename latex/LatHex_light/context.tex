@@ -2,11 +2,26 @@
 %								VARIABLES
 % =============================================================================
 
+% Manual Portuguese date setup that always works
+\usepackage{ifthen}
+
+% Portuguese month names
+\newcommand{\monthname}[1]{%
+	\ifcase#1\or janeiro\or fevereiro\or mar\c{c}o\or abril\or maio\or junho\or
+	julho\or agosto\or setembro\or outubro\or novembro\or dezembro\fi}
+
+% Custom Portuguese date command
+\newcommand{\PTDATE}{\number\day~de \monthname{\month} de \number\year}
+
+
 \newcommand{\AUTHOR}{Banco Mundial/ FGV - DGPE}
 \newcommand{\CLIENT}{Client Name}
-\newcommand{\DATE}{18/08/2025}
+%\newcommand{\DATE}{\DTMtoday}
+\newcommand{\DATE}{\PTDATE}
 \newcommand{\VERSION}{0.2.1}
 \newcommand{\TITLE}{PROPAG/Juros por Educação}
 \newcommand{\SUBTITLE}{Apoio para preparar Plano de Aplicação}
 \newcommand{\SUBJECT}{Metas \\ PNE}
 \newcommand{\URL}{https://datanalytics.worldbank.org/}
+
+
