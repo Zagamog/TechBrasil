@@ -148,3 +148,69 @@ Esses elementos, usados em conjunto, permitem ao analista explorar de forma
 interativa quais setores produtivos apresentam maior concentração regional, onde 
 estão localizados e como se comparam em termos de emprego e empresas.
 
+
+\subsection{Arranjos Produtivos Locais Ocupacionais (APLO)}
+
+Apresentamos uma abordagem baseada em ocupações (CBO) para a identificação de arranjos produtivos locais, utilizando microdados da RAIS para os anos de 2023 e 2024. A metodologia estima a especialização relativa de ocupações nos níveis municipal, regional e estadual. Por se apoiar diretamente na estrutura ocupacional, esta abordagem permite associar os arranjos identificados aos cursos técnicos do Catálogo Nacional de Cursos Técnicos (CNCT), oferecendo subsídios para o planejamento da oferta de EPT alinhada ao perfil produtivo dos territórios.
+
+\textbf{Identificação de Ocupações com Especialização Local}
+
+A identificação das ocupações com possível base produtiva local é realizada a partir da base RAIS, utilizando códigos CBO de 4 dígitos (famílias ocupacionais) e aplicando a métrica de quociente locacional (QL), também conhecida como \textit{Revealed Comparative Advantage} (RCA). O QL compara a participação de uma ocupação no total de vínculos formais do município com a respectiva participação da mesma ocupação no total de vínculos do Brasil:
+
+\[
+QL_{m,o} = \frac{\frac{E_{m,o}}{E_m}}{\frac{E_{br,o}}{E_{br}}}
+\]
+
+Onde:
+
+\begin{itemize}
+	\item $E_{m,o}$ = número de vínculos para ocupação $o$ no município $m$
+	\item $E_m$ = total de vínculos no município $m$
+	\item $E_{br,o}$ = vínculos para ocupação $o$ no Brasil
+	\item $E_{br}$ = total de vínculos no Brasil
+\end{itemize}
+
+Considera-se que um município tem especialização local em determinada ocupação se $QL_{m,o} \geq 1$, desde que haja também um mínimo de 30 vínculos registrados para aquela ocupação no município. A análise é aplicada para os anos de 2023 e 2024 e, como critério adicional de robustez, considera-se apenas os casos em que a ocupação satisfaz os critérios em ambos os anos (persistência).
+
+\vspace{1em}
+
+\textbf{Métricas de Diversidade, Ubiquidade e Complexidade}
+
+A partir da matriz binária de presença de ocupações com especialização local ($QL_{m,o} \geq 1$), são extraídas medidas de estrutura da base produtiva local. Essas métricas complementam a identificação de APLs e ajudam a caracterizar os territórios e as ocupações:
+
+\begin{itemize}
+	\item \underline{Diversidade municipal}: mede a variedade de especializações ocupacionais observadas em cada município. Utilizamos duas métricas:
+	\begin{itemize}
+		\item \textit{Índice de Herfindahl-Hirschman (HHI)} — indica concentração; valores altos sugerem baixa diversidade.
+		\item \textit{Entropia de Shannon} — mede dispersão; valores altos indicam maior diversidade.
+	\end{itemize}
+	
+	\[
+	HHI_m = \sum_o \left(\frac{E_{m,o}}{E_m}\right)^2
+	\qquad\text{e}\qquad
+	Shannon_m = -\sum_o \left(\frac{E_{m,o}}{E_m} \cdot \log \left( \frac{E_{m,o}}{E_m} \right) \right)
+	\]
+	
+	\item \underline{Ubiquidade ocupacional}: número de municípios nos quais a ocupação apresenta especialização ($QL \geq 1$).
+	
+	\item \underline{Complexidade ocupacional}: média da diversidade (HHI ou Shannon) dos municípios onde a ocupação aparece com $QL \geq 1$.
+	
+	\item \underline{Complexidade municipal}: média da ubiquidade das ocupações especializadas naquele município.
+\end{itemize}
+
+\textbf{Correspondência das Ocupações (CBO) com Cursos Técnicos (CNCT)}
+
+Para cada ocupação com especialização local identificada no passo anterior, realiza-se uma correspondência com cursos técnicos do Catálogo Nacional de Cursos Técnicos (CNCT), utilizando métodos de similaridade semântica entre descrições de cursos e ocupações.
+ A correspondência é baseada em embeddings gerados a partir de modelos de linguagem e envolve múltiplos critérios (semântica, TF-IDF, vetores densos), resultando em uma pontuação final de similaridade ($\text{final\_score}$). Para cada ocupação (CBO de 6 dígitos), são selecionados os 20 cursos mais próximos. Em seguida, agregamos esses resultados para o nível de família ocupacional (CBO de 4 dígitos), retendo os 5 cursos com maior pontuação média. Essa etapa produz, para cada ocupação com RCA ≥ 1, uma lista dos cursos técnicos mais coerentes com seu perfil, permitindo inferir quais formações técnicas seriam mais adequadas ao perfil produtivo local.
+
+
+\textbf{Correspondência das Ocupações (CBO) com Cursos Técnicos (CNCT)}
+
+Para cada ocupação com especialização local identificada no passo anterior, realiza-se uma correspondência com cursos técnicos do Catálogo Nacional de Cursos Técnicos (CNCT), utilizando métodos de similaridade semântica entre descrições de cursos e ocupações.
+A correspondência é baseada em embeddings gerados a partir de modelos de linguagem e envolve múltiplos critérios (semântica, TF-IDF, vetores densos), resultando em uma pontuação final de similaridade ($\text{final\_score}$). Para cada ocupação (CBO de 6 dígitos), são selecionados os 20 cursos mais próximos. Em seguida, agregamos esses resultados para o nível de família ocupacional (CBO de 4 dígitos), retendo os 5 cursos com maior pontuação média.
+Essa etapa produz, para cada ocupação com RCA ≥ 1, uma lista dos cursos técnicos mais coerentes com seu perfil, permitindo inferir quais formações técnicas seriam mais adequadas ao perfil produtivo local.
+
+
+\textbf{Integração com Dados de Matrícula do Censo Escolar}
+
+Os cursos técnicos identificados como relevantes para os APLs são cruzados com os dados de matrícula disponíveis no Censo Escolar de 2023 e 2024. A comparação é realizada por estado (UF) e, quando possível, desagregada por curso e por dependência administrativa da escola (rede federal, estadual, municipal ou privada). Essa integração permite evidenciar eventuais lacunas entre a demanda ocupacional (inferida a partir dos APLs) e a oferta educacional atual. Embora a correspondência entre denominações de cursos possa não ser exata, utilizamos normalizações de texto para aproximar os nomes de cursos técnicos do CNCT com os registrados no Censo.

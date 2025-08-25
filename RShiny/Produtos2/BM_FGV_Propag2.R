@@ -12,6 +12,9 @@ library(RColorBrewer)
 library(shinyjs)
 library(shinyWidgets)
 library(shinycssloaders)
+library(sf)
+library(leaflet)
+library(data.table)
 
 
 options(warn=-1) # Too many pesky warnings, terrain, terrain, terrain, pull up, pull up 
@@ -325,7 +328,54 @@ plot_caged_summary_double <- function(df, geo_value, curso_values, todos_no_eixo
   )
 }
 
+##############################################################################################################
+# TAB 7  DATA LOADING TAB 7  DATA LOADING  TAB 7  DATA LOADING  TAB 7  DATA LOADING  TAB 7  DATA LOADING  
+##############################################################################################################
 
+load("dft_apl_MUN_final.rda")
+# dft_apl_MUN_final has: CO_MUN6, cbo_4dig, E_mun_cbo, LQ, cbo_familia, persist, QL_2023, QL_2024, E_cm_2023, E_cm_2024
+load("df_codes_ibge.rda") 
+# df_codes_ibge has: CO_MUN, CO_MUN6, SG_UF, NM_UF, NM_MUN, CO_UF, CO_RGIMED, NM_RGIMED, CO_RGINTM, NM_RGIINTM
+# Simple one-to-one join: APL data (CO_MUN6) + geographic codes (CO_MUN6)  
+load("qbq_ocup_cmento1.rda")
+
+gpkg_local_path <- "sf_regioes.gpkg"
+sf_regioes <- st_read(dsn = gpkg_local_path, layer = "sf_regioes_ibge", quiet = TRUE)
+
+
+# ===== APL DATA LOADING (SIMPLIFIED) =====
+# Fix the geo keys to include CO_MUN (which sf_regioes uses)
+dft_geo_keys <- as.data.table(df_codes_ibge)[
+  , .(CO_MUN6, CO_MUN, SG_UF, NM_UF, CO_UF, NM_MUN,
+      CO_RGIMED, NM_RGIMED, CO_RGINTM, NM_RGIINTM)
+]
+dft_geo_keys <- unique(dft_geo_keys, by = "CO_MUN6")
+
+# Simple one-to-one join: select only needed columns to avoid .x/.y duplication
+apl_geo <- merge(
+  dft_apl_MUN_final[, .(CO_MUN6, cbo_4dig, persist, E_mun_cbo, LQ, cbo_familia)],  # APL data only
+  dft_geo_keys,                                                                      # Complete geo keys
+  by = "CO_MUN6",         
+  all.x = TRUE
+)
+
+cat("apl_geo columns:", names(apl_geo), "\n")
+cat("apl_geo nrow:", nrow(apl_geo), "\n")
+
+
+# Join UF codes to sf_regioes - fix type mismatch
+# Join UF codes to sf_regioes - fix type mismatch
+df_ufs_apl <- dft_geo_keys[, .(CO_UF, SG_UF, NM_UF)] %>% 
+  unique() %>%
+  mutate(CO_UF = as.character(CO_UF))  # Convert to character to match sf_regioes
+
+sf_regioes <- sf_regioes %>%
+  left_join(df_ufs_apl, by = "CO_UF")
+
+cat("sf_regioes columns after join:", names(sf_regioes), "\n")
+
+# Get CBO family names
+cbo_familias <- unique(qbq_ocup_cmento1[, c("cbo_4dig", "cbo_familia")])
 
 
 # UI drop-in replacement (only the ui object)
@@ -1159,7 +1209,101 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
            
            
   ################################################################################################################################         
-                tabPanel("Painel 7", h4("Placeholder Content for Panel 7")),
+                tabPanel("Painel X", h4("Placeholder Content for Panel X")),
+  
+  
+  
+  ### UI - TAB 7 : APL EXPLORER ##################################################
+  tabPanel("APL Explorer",
+           
+           
+           
+           fluidPage(
+             h3("Arranjos Produtivos Locais - Base CBO", style = "color: #1f5673; font-weight: bold;"),
+             
+             div(class = "topbar-info",
+                 p("Este painel permite explorar os Arranjos Produtivos Locais (APLs) identificados com base em especialização ocupacional (CBO)."),
+                 p("APLs são determinados por localização geográfica (QL ≥ 1,25) e persistência nos anos 2023-2024."),
+                 p("Use os filtros hierárquicos para navegar entre níveis geográficos e ajustar critérios de especialização.")
+             ),
+             
+             sidebarLayout(
+               sidebarPanel(
+                 width = 3,
+                 h4("Filtros Geográficos", style = "color: #1f5673;"),
+                 
+                 pickerInput(
+                   "uf_apl", "UF(s):",
+                   choices = NULL,
+                   selected = "Ceará",
+                   multiple = TRUE,
+                   options = list(`actions-box` = TRUE, `live-search` = TRUE)
+                 ),
+                 
+                 pickerInput(
+                   "rgintm_apl", "Região(ões) Intermediária(s):",
+                   choices = NULL,
+                   selected = NULL,
+                   multiple = TRUE,
+                   options = list(`actions-box` = TRUE, `live-search` = TRUE)
+                 ),
+                 
+                 pickerInput(
+                   "rgimed_apl", "Região(ões) Imediata(s):",
+                   choices = NULL,
+                   selected = NULL,
+                   multiple = TRUE,
+                   options = list(`actions-box` = TRUE, `live-search` = TRUE)
+                 ),
+                 
+                 pickerInput(
+                   "mun_apl", "Município(s):",
+                   choices = NULL,
+                   selected = NULL,
+                   multiple = TRUE,
+                   options = list(`actions-box` = TRUE, `live-search` = TRUE)
+                 ),
+                 
+                 hr(),
+                 h4("Filtros de Especialização", style = "color: #1f5673;"),
+                 
+                 sliderInput(
+                   "min_lq_apl", "QL Mínimo:",
+                   min = 1, max = 5, value = 1.25, step = 0.1
+                 ),
+                 
+                 sliderInput(
+                   "min_emp_apl", "Emprego Mínimo:",
+                   min = 50, max = 500, value = 100, step = 10
+                 ),
+                 
+                 hr(),
+                 h5("Resumo da Seleção:", style = "color: #1f5673;"),
+                 uiOutput("apl_summary")
+               ),
+               
+               mainPanel(
+                 width = 9,
+                 fluidRow(
+                   column(12,
+                          h4("Mapa de APLs", style = "color: #1f5673;"),
+                          
+                          withSpinner(leafletOutput("apl_map", height = "500px"))
+                   )
+                 ),
+                 
+                 br(),
+                 
+                 fluidRow(
+                   column(12,
+                          h4("APLs na Região Selecionada", style = "color: #1f5673;"),
+                          withSpinner(DTOutput("apl_table"))
+                   )
+                 )
+               )
+             )
+           )
+  ),
                 tabPanel("Estatísticas Relevantes", DTOutput("P8_table"))
     )
   )
@@ -3630,6 +3774,302 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
       input$uf1, eixos, cursos
     ))
   })
+
+################################################################################################################
+## TAB 9 REACTIVES OBSERVE OUTPUT TAB 7 REACTIVES OBSERVE OUTPUT  TAB 7 REACTIVES OBSERVE OUTPUT   
+################################################################################################################
+
+  # ===== APL EXPLORER SERVER LOGIC (CORRECTED) =====
+  
+  # ===== APL EXPLORER SERVER LOGIC (add to server function) =====
+  
+  # Initialize geographic choices
+  
+  
+  observe({
+    updatePickerInput(session, "uf_apl", 
+                      choices = sort(unique(apl_geo$NM_UF[!is.na(apl_geo$NM_UF)])),
+                      selected = "Ceará")
+  })
+  
+  # Update Região Intermediária based on UF selection
+  observeEvent(input$uf_apl, {
+    if (is.null(input$uf_apl) || length(input$uf_apl) == 0) {
+      updatePickerInput(session, "rgintm_apl", choices = character(0), selected = character(0))
+      updatePickerInput(session, "rgimed_apl", choices = character(0), selected = character(0))
+      updatePickerInput(session, "mun_apl", choices = character(0), selected = character(0))
+    } else {
+      uf_filtered <- apl_geo[apl_geo$NM_UF %in% input$uf_apl & !is.na(apl_geo$NM_RGIINTM), ]
+      rgi_choices <- sort(unique(uf_filtered$NM_RGIINTM))
+      updatePickerInput(session, "rgintm_apl", choices = rgi_choices, selected = rgi_choices)
+    }
+  }, ignoreInit = FALSE)
+  
+  # Update Região Imediata based on Região Intermediária
+  observeEvent(input$rgintm_apl, {
+    if (is.null(input$rgintm_apl) || length(input$rgintm_apl) == 0) {
+      updatePickerInput(session, "rgimed_apl", choices = character(0), selected = character(0))
+      updatePickerInput(session, "mun_apl", choices = character(0), selected = character(0))
+    } else {
+      rgi_filtered <- apl_geo[apl_geo$NM_RGIINTM %in% input$rgintm_apl & !is.na(apl_geo$NM_RGIMED), ]
+      rgimed_choices <- sort(unique(rgi_filtered$NM_RGIMED))
+      updatePickerInput(session, "rgimed_apl", choices = rgimed_choices, selected = rgimed_choices)
+    }
+  }, ignoreInit = FALSE)
+  
+  # Update municipalities based on Região Imediata
+  observeEvent(input$rgimed_apl, {
+    if (is.null(input$rgimed_apl) || length(input$rgimed_apl) == 0) {
+      updatePickerInput(session, "mun_apl", choices = character(0), selected = character(0))
+    } else {
+      rgimed_filtered <- apl_geo[apl_geo$NM_RGIMED %in% input$rgimed_apl & !is.na(apl_geo$NM_MUN), ]
+      mun_choices <- sort(unique(rgimed_filtered$NM_MUN))
+      updatePickerInput(session, "mun_apl", choices = mun_choices, selected = character(0))
+    }
+  }, ignoreInit = FALSE)
+  
+  # Filtered APL data reactive
+  rkt_filtered_apl_data <- reactive({
+    data <- apl_geo
+    
+    # Apply geographic filters
+    if (!is.null(input$uf_apl) && length(input$uf_apl) > 0) {
+      data <- data[data$NM_UF %in% input$uf_apl, ]
+    }
+    if (!is.null(input$rgintm_apl) && length(input$rgintm_apl) > 0) {
+      data <- data[data$NM_RGIINTM %in% input$rgintm_apl, ]
+    }
+    if (!is.null(input$rgimed_apl) && length(input$rgimed_apl) > 0) {
+      data <- data[data$NM_RGIMED %in% input$rgimed_apl, ]
+    }
+    if (!is.null(input$mun_apl) && length(input$mun_apl) > 0) {
+      data <- data[data$NM_MUN %in% input$mun_apl, ]
+    }
+    
+    # Apply specialization filters
+    data <- data[data$LQ >= input$min_lq_apl & data$E_mun_cbo >= input$min_emp_apl, ]
+    
+    return(data)
+  })
+  
+  # Determine current aggregation level
+  rkt_apl_aggregation_level <- reactive({
+    if (!is.null(input$mun_apl) && length(input$mun_apl) > 0) {
+      return("municipal")
+    } else if (!is.null(input$rgimed_apl) && length(input$rgimed_apl) > 0) {
+      return("rgimed") 
+    } else if (!is.null(input$rgintm_apl) && length(input$rgintm_apl) > 0) {
+      return("rgintm")
+    } else if (!is.null(input$uf_apl) && length(input$uf_apl) > 0) {
+      return("uf")
+    } else {
+      return("brasil")
+    }
+  })
+  
+  # Dynamic aggregated data based on level
+  rkt_apl_dynamic_data <- reactive({
+    level <- rkt_apl_aggregation_level()
+    data <- rkt_filtered_apl_data()
+    
+    req(nrow(data) > 0)
+    
+    switch(level,
+           "municipal" = {
+             # Individual APLs (current behavior)
+             data %>% select(SG_UF, NM_RGIINTM, NM_RGIMED, NM_MUN, cbo_familia, LQ, E_mun_cbo)
+           },
+           "rgimed" = {
+             # Aggregate by Região Imediata
+             data %>% 
+               group_by(SG_UF, NM_RGIINTM, NM_RGIMED) %>%
+               summarise(
+                 n_apls = n(),
+                 n_municipios = n_distinct(CO_MUN6),
+                 avg_lq = round(mean(LQ, na.rm = TRUE), 2),
+                 total_emp = sum(E_mun_cbo, na.rm = TRUE),
+                 top_ocupacao = first(cbo_familia[order(-LQ)]),
+                 .groups = 'drop'
+               )
+           },
+           "rgintm" = {
+             # Aggregate by Região Intermediária  
+             data %>%
+               group_by(SG_UF, NM_RGIINTM) %>%
+               summarise(
+                 n_apls = n(),
+                 n_municipios = n_distinct(CO_MUN6),
+                 avg_lq = round(mean(LQ, na.rm = TRUE), 2), 
+                 total_emp = sum(E_mun_cbo, na.rm = TRUE),
+                 top_ocupacao = first(cbo_familia[order(-LQ)]),
+                 .groups = 'drop'
+               )
+           },
+           "uf" = {
+             # Aggregate by UF
+             data %>%
+               group_by(SG_UF) %>%
+               summarise(
+                 n_apls = n(),
+                 n_municipios = n_distinct(CO_MUN6),
+                 avg_lq = round(mean(LQ, na.rm = TRUE), 2),
+                 total_emp = sum(E_mun_cbo, na.rm = TRUE), 
+                 top_ocupacao = first(cbo_familia[order(-LQ)]),
+                 .groups = 'drop'
+               )
+           }
+    )
+  })
+  
+  # Map data reactive
+  rkt_apl_map_data <- reactive({
+    req(nrow(rkt_filtered_apl_data()) > 0)
+    
+    # Aggregate APL data by municipality for mapping
+    # Aggregate APL data by municipality for mapping - convert CO_MUN to character
+    apl_summary <- rkt_filtered_apl_data() %>%
+      group_by(CO_MUN6, CO_MUN, NM_MUN, SG_UF) %>%
+      summarise(
+        n_apls = n(),
+        avg_lq = mean(LQ, na.rm = TRUE),
+        total_emp = sum(E_mun_cbo, na.rm = TRUE),
+        .groups = 'drop'
+      ) %>%
+      mutate(CO_MUN = as.character(CO_MUN))  # Convert to match sf_regioes
+    
+    # Filter sf_regioes to selected geography
+    map_data <- sf_regioes
+    if (!is.null(input$uf_apl) && length(input$uf_apl) > 0) {
+      map_data <- map_data %>% filter(NM_UF %in% input$uf_apl)
+    }
+    
+    # Join with APL summary
+    # Join with APL summary - now use CO_MUN
+    map_data <- map_data %>%
+      left_join(apl_summary, by = c("CO_MUN", "NM_MUN"))
+    # Replace NA with 0 for municipalities without APLs
+    map_data$n_apls[is.na(map_data$n_apls)] <- 0
+    
+    return(map_data)
+  })
+  
+  # Summary reactive
+  output$apl_summary <- renderUI({
+    level <- rkt_apl_aggregation_level()
+    data <- rkt_filtered_apl_data()
+    
+    level_names <- c(
+      "municipal" = "Municipal",
+      "rgimed" = "Região Imediata", 
+      "rgintm" = "Região Intermediária",
+      "uf" = "UF",
+      "brasil" = "Brasil"
+    )
+    
+    HTML(paste0(
+      "<strong>Nível de Agregação:</strong> ", level_names[level], "<br>",
+      "<strong>APLs encontrados:</strong> ", nrow(data), "<br>",
+      "<strong>Municípios:</strong> ", length(unique(data$CO_MUN6)), "<br>",
+      "<strong>Ocupações (4-dig):</strong> ", length(unique(data$cbo_4dig))
+    ))
+  })
+  
+  # Map output
+  output$apl_map <- renderLeaflet({
+    map_data <- rkt_apl_map_data()
+    
+    # Create color palette
+    pal <- colorNumeric(
+      palette = "viridis",
+      domain = map_data$n_apls,
+      na.color = "transparent"
+    )
+    
+    leaflet(map_data) %>%
+      addTiles() %>%
+      addPolygons(
+        fillColor = ~pal(n_apls),
+        weight = 1,
+        opacity = 1,
+        color = "white",
+        dashArray = "3",
+        fillOpacity = 0.7,
+        highlight = highlightOptions(
+          weight = 2,
+          color = "#666",
+          dashArray = "",
+          fillOpacity = 0.7,
+          bringToFront = TRUE
+        ),
+        label = ~paste0(NM_MUN, ": ", n_apls, " APLs"),
+        popup = ~paste0(
+          "<strong>", NM_MUN, "</strong><br/>",
+          "UF: ", NM_UF, "<br/>",
+          "APLs: ", n_apls, "<br/>",
+          "QL Médio: ", round(avg_lq, 2), "<br/>",
+          "Emprego Total: ", formatC(total_emp, format="d", big.mark=".")
+        )
+      ) %>%
+      addLegend(
+        pal = pal,
+        values = ~n_apls,
+        opacity = 0.7,
+        title = "Número de APLs",
+        position = "bottomright"
+      )
+  })
+  
+  
+  
+  # Table output
+  # Replace your current output$apl_table with this:
+  output$apl_table <- renderDT({
+    level <- rkt_apl_aggregation_level()
+    table_data <- rkt_apl_dynamic_data()
+    
+    req(nrow(table_data) > 0)
+    
+    # Dynamic column names and formatting based on aggregation level
+    if (level == "municipal") {
+      # Format individual APL data
+      table_data$LQ <- round(table_data$LQ, 2)
+      table_data$E_mun_cbo <- formatC(table_data$E_mun_cbo, format = "d", big.mark = ".")
+      colnames(table_data) <- c("UF", "Região Intermediária", "Região Imediata", "Município", "Ocupação (Família CBO)", "QL", "Emprego")
+    } else {
+      # Format aggregated data
+      table_data$total_emp <- formatC(table_data$total_emp, format = "d", big.mark = ".")
+      
+      if (level == "rgimed") {
+        colnames(table_data) <- c("UF", "Região Intermediária", "Região Imediata", "APLs", "Municípios", "QL Médio", "Emprego Total", "Ocupação Principal")
+      } else if (level == "rgintm") {
+        colnames(table_data) <- c("UF", "Região Intermediária", "APLs", "Municípios", "QL Médio", "Emprego Total", "Ocupação Principal")
+      } else if (level == "uf") {
+        colnames(table_data) <- c("UF", "APLs", "Municípios", "QL Médio", "Emprego Total", "Ocupação Principal")
+      }
+    }
+    
+    datatable(
+      table_data,
+      rownames = FALSE,
+      extensions = 'Buttons',
+      options = list(
+        pageLength = 15,
+        scrollX = TRUE,
+        dom = 'Bfrtip',
+        buttons = list(
+          list(extend = "copy", text = "Copiar"),
+          list(extend = "csv", filename = paste0("APL_", toupper(level)), text = "CSV"),
+          list(extend = "excel", filename = paste0("APL_", toupper(level)), text = "Excel")
+        )
+      ),
+      class = "stripe nowrap display"
+    )
+  })
+  
+  
+  
+  
+    
       
 }  
   

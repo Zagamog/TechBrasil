@@ -24,44 +24,46 @@ body {
 }
 
 
-/* ======= TAB COLORS (Viridis Palette) ======= */
-.nav-tabs > li > a {
+/* ======= TAB COLORS (Extended Viridis Palette) ======= */
+  .nav-tabs > li > a {
     color: white !important;
     font-weight: bold !important;
     border-radius: 5px 5px 0 0;
     font-size: inherit;
-}
+  }
 
 /* Specifically target the first tab when active */
-.nav-tabs > li:nth-child(1).active > a {
+  .nav-tabs > li:nth-child(1).active > a {
     background-color: #482878 !important; /* desired purple */
-}
-
-
-
+  }
 
 .nav-tabs > li:nth-child(1) a { background-color: #482878 !important; }
-.nav-tabs > li:nth-child(2) a { background-color: #3E4A89 !important; }
-.nav-tabs > li:nth-child(3) a { background-color: #31678E !important; }
-.nav-tabs > li:nth-child(4) a { background-color: #1F9E89 !important; }
-.nav-tabs > li:nth-child(5) a { background-color: #6DCD59 !important; }
-.nav-tabs > li:nth-child(6) a { background-color: #B4DD2C !important; }
-.nav-tabs > li:nth-child(7) a { background-color: #FDE725 !important; }
-.nav-tabs > li:nth-child(8) a { background-color: #440154 !important; }
-
-.nav-tabs > li.active > a {
-    background-color: #6DCD59 !important;
-    color: #ffffff !important;
-    border: 3px solid red !important;
-    font-weight: bold;
-}
-
-
-.nav-tabs > li > a:hover {
-    background-color: #8E24AA !important;
-    color: #FFFFFF !important;
-}
-
+    .nav-tabs > li:nth-child(2) a { background-color: #3E4A89 !important; }
+        .nav-tabs > li:nth-child(3) a { background-color: #31678E !important; }
+            .nav-tabs > li:nth-child(4) a { background-color: #1F9E89 !important; }
+                .nav-tabs > li:nth-child(5) a { background-color: #6DCD59 !important; }
+                    .nav-tabs > li:nth-child(6) a { background-color: #B4DD2C !important; }
+                        .nav-tabs > li:nth-child(7) a { background-color: #FDE725 !important; }
+                            .nav-tabs > li:nth-child(8) a { background-color: #440154 !important; }
+                                .nav-tabs > li:nth-child(9) a { background-color: #721F81 !important; }
+                                    .nav-tabs > li:nth-child(10) a { background-color: #2D6A8E !important; }
+                                        .nav-tabs > li:nth-child(11) a { background-color: #1E8B8B !important; }
+                                            .nav-tabs > li:nth-child(12) a { background-color: #5EC962 !important; }
+                                                .nav-tabs > li:nth-child(13) a { background-color: #C7E41C !important; }
+                                                    .nav-tabs > li:nth-child(14) a { background-color: #F0F921 !important; }
+                                                        .nav-tabs > li:nth-child(15) a { background-color: #330154 !important; }
+                                                            
+                                                            .nav-tabs > li.active > a {
+                                                              background-color: #6DCD59 !important;
+                                                                color: #ffffff !important;
+                                                                border: 3px solid red !important;
+                                                              font-weight: bold;
+                                                            }
+                                                          
+                                                          .nav-tabs > li > a:hover {
+                                                            background-color: #8E24AA !important;
+                                                              color: #FFFFFF !important;
+                                                          }
 /* ======= DATA TABLE STYLING ======= */
 .dataTables_wrapper {
     background-color: #2b3e50 !important;
