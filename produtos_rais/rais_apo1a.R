@@ -98,7 +98,7 @@ gc()
 
 
 # Process 2024
-# Process 2024 - same pattern
+
 load("working/rais/2024/rais2024.rda")
 dt_2024 <- process_rais_year(rais2024, 2024)
 
