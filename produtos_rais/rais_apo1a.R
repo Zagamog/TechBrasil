@@ -58,18 +58,39 @@ process_rais_year <- function(rais_data, year) {
   return(dt)
 }
 
+
 # Process 2023 - 
 dt_2023 <- process_rais_year(rais2023, 2023)
 
-# Step 1: Create cubes for 2023 and save
+# Create ALL cubes for 2023 before clearing memory
+# Municipal level
 employment_2023 <- dt_2023[, .N, by = .(year, cbo_4dig, CO_MUN6)]
 mun_totals_2023 <- dt_2023[, .N, by = .(year, CO_MUN6)]
+
+# Regional level - Imediata  
+employment_rgimed_2023 <- dt_2023[, .N, by = .(year, cbo_4dig, CO_RGIMED)]
+rgimed_totals_2023 <- dt_2023[, .N, by = .(year, CO_RGIMED)]
+
+# Regional level - Intermediária
+employment_rgintm_2023 <- dt_2023[, .N, by = .(year, cbo_4dig, CO_RGINTM)]
+rgintm_totals_2023 <- dt_2023[, .N, by = .(year, CO_RGINTM)]
+
+# UF level
+employment_uf_2023 <- dt_2023[, .N, by = .(year, cbo_4dig, SG_UF)]
+uf_totals_2023 <- dt_2023[, .N, by = .(year, SG_UF)]
+
+# National level
 br_cbo_2023 <- dt_2023[, .N, by = .(year, cbo_4dig)]
 br_total_2023 <- dt_2023[, .N, by = year]
 
-# Save 2023 cubes and clear memory
-save(employment_2023, mun_totals_2023, br_cbo_2023, br_total_2023, 
+# Save ALL 2023 cubes
+save(employment_2023, mun_totals_2023, 
+     employment_rgimed_2023, rgimed_totals_2023,
+     employment_rgintm_2023, rgintm_totals_2023,
+     employment_uf_2023, uf_totals_2023,
+     br_cbo_2023, br_total_2023, 
      file = "working/rais/2023/cubes_2023.rda")
+
 rm(dt_2023, rais2023)  # Clear memory
 gc()
 
@@ -77,15 +98,28 @@ gc()
 
 
 # Process 2024
+# Process 2024 - same pattern
 load("working/rais/2024/rais2024.rda")
 dt_2024 <- process_rais_year(rais2024, 2024)
 
+# Create ALL cubes for 2024
 employment_2024 <- dt_2024[, .N, by = .(year, cbo_4dig, CO_MUN6)]
 mun_totals_2024 <- dt_2024[, .N, by = .(year, CO_MUN6)]
+employment_rgimed_2024 <- dt_2024[, .N, by = .(year, cbo_4dig, CO_RGIMED)]
+rgimed_totals_2024 <- dt_2024[, .N, by = .(year, CO_RGIMED)]
+employment_rgintm_2024 <- dt_2024[, .N, by = .(year, cbo_4dig, CO_RGINTM)]
+rgintm_totals_2024 <- dt_2024[, .N, by = .(year, CO_RGINTM)]
+employment_uf_2024 <- dt_2024[, .N, by = .(year, cbo_4dig, SG_UF)]
+uf_totals_2024 <- dt_2024[, .N, by = .(year, SG_UF)]
 br_cbo_2024 <- dt_2024[, .N, by = .(year, cbo_4dig)]
 br_total_2024 <- dt_2024[, .N, by = year]
 
-save(employment_2024, mun_totals_2024, br_cbo_2024, br_total_2024,
+save(employment_2024, mun_totals_2024,
+     employment_rgimed_2024, rgimed_totals_2024,
+     employment_rgintm_2024, rgintm_totals_2024,
+     employment_uf_2024, uf_totals_2024,
+     br_cbo_2024, br_total_2024,
      file = "working/rais/2024/cubes_2024.rda")
+
 rm(dt_2024, rais2024)
 gc()
