@@ -65,10 +65,24 @@ apl_matri_MUN <- merge(
   all.x = TRUE
 )
 
+
+
+
+# Clean and save
+apl_matri_MUN[, c("IDX_EIXARECUR", "final_score", "semantic", "tfidf") := NULL]
+
 # Clean and save
 apl_matri_MUN[, c("IDX_EIXARECUR", "final_score", "semantic", "tfidf") := NULL]
 apl_matri_MUN <- unique(apl_matri_MUN)
 setorder(apl_matri_MUN, CO_MUN6, nome_curso_clean)
 
+# Replace NA enrollment values with 0 (keep geo/occupation NAs as they indicate data quality issues)
+enrollment_cols <- c("QT_MAT_CURSO_TEC_FED", "QT_MAT_CURSO_TEC_EST", 
+                     "QT_MAT_CURSO_TEC_MUN", "QT_MAT_CURSO_TEC_PRI", "QT_MAT_CURSO_TEC_TOT")
+apl_matri_MUN[, (enrollment_cols) := lapply(.SD, function(x) fifelse(is.na(x), 0, x)), .SDcols = enrollment_cols]
+
 save(apl_matri_MUN, file = "working/rais/indices/apl_matri_MUN.rda")
 #write.csv(apl_matri_MUN, "working/rais/indices/apl_matri_MUN.csv", row.names = FALSE)
+
+
+

@@ -359,12 +359,8 @@ apl_geo <- merge(
   all.x = TRUE
 )
 
-cat("apl_geo columns:", names(apl_geo), "\n")
-cat("apl_geo nrow:", nrow(apl_geo), "\n")
 
-
-# Join UF codes to sf_regioes - fix type mismatch
-# Join UF codes to sf_regioes - fix type mismatch
+# Join UF codes to sf_regioes 
 df_ufs_apl <- dft_geo_keys[, .(CO_UF, SG_UF, NM_UF)] %>% 
   unique() %>%
   mutate(CO_UF = as.character(CO_UF))  # Convert to character to match sf_regioes
@@ -372,12 +368,19 @@ df_ufs_apl <- dft_geo_keys[, .(CO_UF, SG_UF, NM_UF)] %>%
 sf_regioes <- sf_regioes %>%
   left_join(df_ufs_apl, by = "CO_UF")
 
-cat("sf_regioes columns after join:", names(sf_regioes), "\n")
 
 # Get CBO family names
 cbo_familias <- unique(qbq_ocup_cmento1[, c("cbo_4dig", "cbo_familia")])
 
 
+##########
+
+# ===== END JOIN TESTING =====
+
+
+###UI  UI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UI
+## UI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UI
+# UI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI U
 # UI drop-in replacement (only the ui object)
 ui <- dashboardPage(
 

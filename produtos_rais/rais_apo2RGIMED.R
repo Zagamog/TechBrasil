@@ -5,10 +5,7 @@ library(data.table)
 load("working/rais/indices/dft_apl_MUN_2324.rda")
 
 # Load geo lookup if not already available
-if (!exists("dft_geo_keys")) {
-  load("working/ibge/df_codes_ibge.rda")
-  dft_geo_keys <- unique(as.data.table(df_codes_ibge)[, .(CO_MUN6, SG_UF, NM_UF, CO_RGIMED, NM_RGIMED)], by = "CO_MUN6")
-}
+dft_geo_keys <- unique(as.data.table(df_codes_ibge)[, .(CO_MUN6, SG_UF, NM_UF, CO_RGIMED, NM_RGIMED)], by = "CO_MUN6")
 
 # Merge with geo keys to get CO_RGIMED
 dft_apl_RGIMED <- merge(dft_apl_MUN_2324, dft_geo_keys, by = "CO_MUN6", all.x = TRUE)

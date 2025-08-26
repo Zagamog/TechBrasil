@@ -6,6 +6,10 @@ library(data.table)
 library(dplyr)
 library(stringr)
 
+
+load("D:/Country/Brazil/TechBrazil/working/mec_inep/Tecnico_Forma_Cursos_Garabed1.rda")
+load("D:/Country/Brazil/TechBrazil/working/qbq/qbq_cnct_matches2.rda")
+
 # Get AI created matched from 6 to 4 digits
 qbq_cnct_matches3_ <- as.data.table(qbq_cnct_matches2)
 qbq_cnct_matches3_[, cbo_4dig := substr(CodCBO, 1, 4)]
@@ -24,6 +28,8 @@ top5_qbq_cnct <- qbq_cnct_matches3[
   , .SD[1:5], by = cbo_4dig
 ]
 
+load("D:/Country/Brazil/TechBrazil/working/rais/indices/dft_apl_UF_final.rda")
+
 # Merge with APL data
 
 apl_to_cnct_UF <- merge(
@@ -34,7 +40,7 @@ apl_to_cnct_UF <- merge(
 ) |> unique()
 
 #write.csv(apl_to_cnct_UF, "D:/Country/Brazil/TechBrazil/working/rais/indices/apl_to_cnct_UF.csv", row.names = FALSE)
-
+load("D:/Country/Brazil/TechBrazil/working/mec_inep/Tecnico_Forma_Cursos_Garabed1.rda")
 
 # Convert to data.table if not already
 dt_garabed <- as.data.table(Tecnico_Forma_Cursos_Garabed1)
@@ -79,6 +85,6 @@ setorder(apl_matri_UF, SG_UF, nome_curso_clean)  # Optional: sort
 # 584 obs 
 
 
-
+save(apl_matri_UF, file="D:/Country/Brazil/TechBrazil/working/rais/indices/apl_matri_UF.rda")
 write.csv(apl_matri_UF, "D:/Country/Brazil/TechBrazil/working/rais/indices/apl_matri_UF.csv", row.names = FALSE)
 
