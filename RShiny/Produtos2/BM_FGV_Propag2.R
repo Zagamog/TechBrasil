@@ -3871,6 +3871,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
   })
   
   # Dynamic aggregated data based on level
+  # Dynamic aggregated data with improved occupation display
   rkt_apl_dynamic_data <- reactive({
     level <- rkt_apl_aggregation_level()
     data <- rkt_filtered_apl_data()
@@ -3879,11 +3880,12 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
     
     switch(level,
            "municipal" = {
-             # Individual APLs (current behavior)
-             data %>% select(SG_UF, NM_RGIINTM, NM_RGIMED, NM_MUN, cbo_familia, LQ, E_mun_cbo)
+             # Individual APLs - keep current format
+             data %>% select(SG_UF, NM_RGIINTM, NM_RGIMED, NM_MUN, cbo_familia, LQ, E_mun_cbo) %>%
+               arrange(desc(LQ))
            },
            "rgimed" = {
-             # Aggregate by Região Imediata
+             # Aggregate by Região Imediata with specialization distribution
              data %>% 
                group_by(SG_UF, NM_RGIINTM, NM_RGIMED) %>%
                summarise(
@@ -3891,12 +3893,17 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
                  n_municipios = n_distinct(CO_MUN6),
                  avg_lq = round(mean(LQ, na.rm = TRUE), 2),
                  total_emp = sum(E_mun_cbo, na.rm = TRUE),
-                 top_ocupacao = first(cbo_familia[order(-LQ)]),
+                 especializacao = paste0(
+                   sum(LQ >= 5), " muito alta, ", 
+                   sum(LQ >= 2.5 & LQ < 5), " alta, ", 
+                   sum(LQ >= 1.25 & LQ < 2.5), " moderada"
+                 ),
                  .groups = 'drop'
-               )
+               ) %>%
+               arrange(desc(avg_lq))
            },
            "rgintm" = {
-             # Aggregate by Região Intermediária  
+             # Aggregate by Região Intermediária with specialization distribution  
              data %>%
                group_by(SG_UF, NM_RGIINTM) %>%
                summarise(
@@ -3904,12 +3911,17 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
                  n_municipios = n_distinct(CO_MUN6),
                  avg_lq = round(mean(LQ, na.rm = TRUE), 2), 
                  total_emp = sum(E_mun_cbo, na.rm = TRUE),
-                 top_ocupacao = first(cbo_familia[order(-LQ)]),
+                 especializacao = paste0(
+                   sum(LQ >= 5), " muito alta, ", 
+                   sum(LQ >= 2.5 & LQ < 5), " alta, ", 
+                   sum(LQ >= 1.25 & LQ < 2.5), " moderada"
+                 ),
                  .groups = 'drop'
-               )
+               ) %>%
+               arrange(desc(avg_lq))
            },
            "uf" = {
-             # Aggregate by UF
+             # Aggregate by UF with specialization distribution
              data %>%
                group_by(SG_UF) %>%
                summarise(
@@ -3917,9 +3929,14 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
                  n_municipios = n_distinct(CO_MUN6),
                  avg_lq = round(mean(LQ, na.rm = TRUE), 2),
                  total_emp = sum(E_mun_cbo, na.rm = TRUE), 
-                 top_ocupacao = first(cbo_familia[order(-LQ)]),
+                 especializacao = paste0(
+                   sum(LQ >= 5), " muito alta, ", 
+                   sum(LQ >= 2.5 & LQ < 5), " alta, ", 
+                   sum(LQ >= 1.25 & LQ < 2.5), " moderada"
+                 ),
                  .groups = 'drop'
-               )
+               ) %>%
+               arrange(desc(avg_lq))
            }
     )
   })
@@ -4025,7 +4042,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
   
   
   # Table output
-  # Replace your current output$apl_table with this:
+  # Enhanced table with updated column names
   output$apl_table <- renderDT({
     level <- rkt_apl_aggregation_level()
     table_data <- rkt_apl_dynamic_data()
@@ -4043,11 +4060,11 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
       table_data$total_emp <- formatC(table_data$total_emp, format = "d", big.mark = ".")
       
       if (level == "rgimed") {
-        colnames(table_data) <- c("UF", "Região Intermediária", "Região Imediata", "APLs", "Municípios", "QL Médio", "Emprego Total", "Ocupação Principal")
+        colnames(table_data) <- c("UF", "Região Intermediária", "Região Imediata", "APLs", "Municípios", "QL Médio", "Emprego Total", "Especialização")
       } else if (level == "rgintm") {
-        colnames(table_data) <- c("UF", "Região Intermediária", "APLs", "Municípios", "QL Médio", "Emprego Total", "Ocupação Principal")
+        colnames(table_data) <- c("UF", "Região Intermediária", "APLs", "Municípios", "QL Médio", "Emprego Total", "Especialização")
       } else if (level == "uf") {
-        colnames(table_data) <- c("UF", "APLs", "Municípios", "QL Médio", "Emprego Total", "Ocupação Principal")
+        colnames(table_data) <- c("UF", "APLs", "Municípios", "QL Médio", "Emprego Total", "Especialização")
       }
     }
     
