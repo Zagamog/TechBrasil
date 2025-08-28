@@ -329,7 +329,7 @@ plot_caged_summary_double <- function(df, geo_value, curso_values, todos_no_eixo
 }
 
 ##############################################################################################################
-# TAB 7  DATA LOADING TAB 7  DATA LOADING  TAB 7  DATA LOADING  TAB 7  DATA LOADING  TAB 7  DATA LOADING  
+# TAB APL  DATA LOADING TAB APL  DATA LOADING  
 ##############################################################################################################
 
 load("dft_apl_MUN_final.rda")
@@ -368,16 +368,106 @@ df_ufs_apl <- dft_geo_keys[, .(CO_UF, SG_UF, NM_UF)] %>%
 sf_regioes <- sf_regioes %>%
   left_join(df_ufs_apl, by = "CO_UF")
 
-
 # Get CBO family names
 cbo_familias <- unique(qbq_ocup_cmento1[, c("cbo_4dig", "cbo_familia")])
-
-
 ##########
+# Load course data at different aggregation levels
+load("apl_matri_UF.rda")     # For UF-level course matching
+load("apl_matri_MUN.rda")    # For municipal-level course matching
 
-# ===== END JOIN TESTING =====
+# Create municipal course data with full geographic hierarchy
+apl_matri_MUN_geo <- merge(
+  apl_matri_MUN,           # Left: municipal course data (has CO_MUN6)
+  dft_geo_keys,            # Right: complete geo hierarchy  
+  by = "CO_MUN6",          # Join on CO_MUN6
+  all.x = TRUE
+)
+
+#############
+##############################################################################################################
+# ECONOMIC DYNAMISM DATA LOADING
+##############################################################################################################
+
+# Load municipal dynamism index results
+load("MUN_dyna02_21.rda")
+
+# Convert to data.table if needed
+if (!is.data.table(MUN_dyna02_21)) {
+  setDT(MUN_dyna02_21)
+}
+
+# Select only the economic variables we need from dynamism data
+
+### DATA PAINEL X
+# Keep CO_MUN as numeric to match dft_geo_keys
+dynamism_base <- MUN_dyna02_21[, .(
+  CO_MUN = `Código.do.Município`,  # Keep as numeric
+  dynamism_index = dynamism_index,
+  dynamism_decile = dynamism_decile, 
+  dynamism_percentile = dynamism_percentile,
+  avg_population = avg_population,
+  period1_avg_growth = period1_avg_growth,
+  period2_avg_growth = period2_avg_growth,
+  pop_weighted_contribution = pop_weighted_contribution
+)]
+
+# Clean merge - geographic names come from dft_geo_keys only
+dynamism_geo <- merge(
+  dft_geo_keys,           # Geographic hierarchy (left side) 
+  dynamism_base,          # Economic data (right side)
+  by = "CO_MUN",
+  all.y = TRUE            # Keep all municipalities with dynamism data
+)
+
+# Convert for sf mapping AFTER merge
+dynamism_geo$CO_MUN <- as.character(dynamism_geo$CO_MUN)
+
+# Remove any rows with missing geographic data
+dynamism_geo <- dynamism_geo[!is.na(NM_UF)]
 
 
+# Join with latest PIB data for additional economic context
+# Join with latest PIB data for additional economic context
+latest_pib_data <- df_pibmunis %>%
+  filter(Ano == 2021) %>%  # Most recent year
+  select(
+    CO_MUN = 7,            # Código.do.Município
+    pib_total_2021 = 39,   # Produto.Interno.Bruto
+    pib_per_capita_2021 = 40,  # PIB per capita
+    agro_va = 33,          # Agropecuária VA
+    industria_va = 34,     # Indústria VA
+    servicos_va = 35,      # Serviços VA
+    admin_va = 36,         # Administração VA
+    total_va = 37,         # Total VA
+    main_activity = 41,    # Atividade principal
+    second_activity = 42,  # Segunda atividade
+    third_activity = 43    # Terceira atividade
+  ) %>%
+  mutate(
+    CO_MUN = as.character(CO_MUN),
+    # Calculate sector percentages
+    agro_pct = ifelse(total_va > 0, round((agro_va / total_va) * 100, 1), NA),
+    industria_pct = ifelse(total_va > 0, round((industria_va / total_va) * 100, 1), NA),
+    servicos_pct = ifelse(total_va > 0, round((servicos_va / total_va) * 100, 1), NA),
+    admin_pct = ifelse(total_va > 0, round((admin_va / total_va) * 100, 1), NA),
+    # Create combined top 3 activities string
+    top_activities = paste(
+      ifelse(is.na(main_activity) | main_activity == "", "", paste("1:", substr(main_activity, 1, 12))),
+      ifelse(is.na(second_activity) | second_activity == "", "", paste("2:", substr(second_activity, 1, 12))),
+      ifelse(is.na(third_activity) | third_activity == "", "", paste("3:", substr(third_activity, 1, 12))),
+      sep = " | "
+    ),
+    # Clean up extra separators
+    top_activities = gsub("^\\s*\\|\\s*|\\s*\\|\\s*$", "", top_activities),
+    top_activities = gsub("\\s*\\|\\s*\\|\\s*", " | ", top_activities)
+  )
+
+# Join PIB data with dynamism data
+dynamism_geo_enhanced <- dynamism_geo %>%
+  left_join(latest_pib_data, by = "CO_MUN")
+
+# Replace the original dynamism_geo
+dynamism_geo <- dynamism_geo_enhanced
 ###UI  UI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UI
 ## UI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UI
 # UI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI U
@@ -1212,7 +1302,91 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
            
            
   ################################################################################################################################         
-                tabPanel("Painel X", h4("Placeholder Content for Panel X")),
+    
+  ### UI - TAB X : ECONOMIC DYNAMISM EXPLORER ##################################################
+  tabPanel("Dinamismo Econômico",
+           fluidPage(
+             h3("Dinamismo Econômico Municipal - Índice de Crescimento", style = "color: #1f5673; font-weight: bold;"),
+             
+             div(class = "topbar-info",
+                 style = "color: black !important;",
+                 p("Este painel permite explorar o dinamismo econômico municipal com base no crescimento do PIB per capita.", 
+                   style = "color: black !important;"),
+                 p("O índice combina dois períodos: 2002-2011 (peso 1.0) e 2012-2021 (peso 1.5), classificando municípios em decis.", 
+                   style = "color: black !important;"),
+                 p("Use os filtros hierárquicos para navegar entre níveis geográficos e identificar regiões prioritárias para investimento EPT.", 
+                   style = "color: black !important;")
+             ),
+             
+             sidebarLayout(
+               sidebarPanel(
+                 width = 3,
+                 
+                 h4("Filtros Geográficos", style = "color: #1f5673;"),
+                 
+                 pickerInput(
+                   "uf_dyn", "UF(s):",
+                   choices = NULL,
+                   selected = "São Paulo",
+                   multiple = TRUE,
+                   options = list(`actions-box` = TRUE, `live-search` = TRUE)
+                 ),
+                 
+                 pickerInput(
+                   "rgintm_dyn", "Região(ões) Intermediária(s):",
+                   choices = NULL, selected = NULL, multiple = TRUE,
+                   options = list(`actions-box` = TRUE, `live-search` = TRUE)
+                 ),
+                 
+                 pickerInput(
+                   "rgimed_dyn", "Região(ões) Imediata(s):",
+                   choices = NULL, selected = NULL, multiple = TRUE,
+                   options = list(`actions-box` = TRUE, `live-search` = TRUE)
+                 ),
+                 
+                 pickerInput(
+                   "mun_dyn", "Município(s):",
+                   choices = NULL, selected = NULL, multiple = TRUE,
+                   options = list(`actions-box` = TRUE, `live-search` = TRUE)
+                 ),
+                 
+                 hr(),
+                 h4("Filtros de Performance", style = "color: #1f5673;"),
+                 
+                 sliderInput(
+                   "min_decile_dyn", "Decil Mínimo:",
+                   min = 1, max = 10, value = 1, step = 1
+                 ),
+                 
+                 sliderInput(
+                   "min_pop_dyn", "População Mínima:",
+                   min = 1000, max = 100000, value = 5000, step = 1000
+                 ),
+                 
+                 hr(),
+                 h5("Resumo da Seleção:", style = "color: #1f5673;"),
+                 uiOutput("dyn_summary")
+               ),
+               
+               mainPanel(
+                 width = 9,
+                 fluidRow(
+                   column(12,
+                          h4("Mapa de Dinamismo Econômico", style = "color: #1f5673;"),
+                          withSpinner(leafletOutput("dyn_map", height = "500px"))
+                   )
+                 ),
+                 br(),
+                 fluidRow(
+                   column(12,
+                          h4("Municípios na Região Selecionada", style = "color: #1f5673;"),
+                          withSpinner(DTOutput("dyn_table"))
+                   )
+                 )
+               )
+             )
+           )
+  ),
   
   
   
@@ -1225,14 +1399,35 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
              h3("Arranjos Produtivos Locais - Base CBO", style = "color: #1f5673; font-weight: bold;"),
              
              div(class = "topbar-info",
-                 p("Este painel permite explorar os Arranjos Produtivos Locais (APLs) identificados com base em especialização ocupacional (CBO)."),
-                 p("APLs são determinados por localização geográfica (QL ≥ 1,25) e persistência nos anos 2023-2024."),
-                 p("Use os filtros hierárquicos para navegar entre níveis geográficos e ajustar critérios de especialização.")
+                 style = "color: black !important;",
+                 p("Este painel permite explorar os Arranjos Produtivos Locais (APLs) identificados com base em especialização ocupacional (CBO).", 
+                   style = "color: black !important;"),
+                 p("APLs são determinados por localização geográfica (QL ≥ 1,25) e persistência nos anos 2023-2024.", 
+                   style = "color: black !important;"),
+                 p("Use os filtros hierárquicos para navegar entre níveis geográficos e ajustar critérios de especialização.", 
+                   style = "color: black !important;")
              ),
              
              sidebarLayout(
                sidebarPanel(
                  width = 3,
+                 
+                 div(style = "margin-bottom: 15px;",
+                     tags$style(HTML("
+                    .radio label {
+                     color: black !important;
+                        }
+                     .radio input[type='radio'] + span {
+                       color: black !important;
+                             }
+                    ")),
+                     radioButtons("apl_analysis_mode",
+                                  label = h5("Modo de Análise:", style = "color: black; margin-bottom: 8px;"),
+                                  choices = c("Análise de APLs" = "apl_only",
+                                              "Correspondência APL-Cursos" = "apl_course_match"),
+                                  selected = "apl_only",
+                                  inline = FALSE)
+                 ),
                  h4("Filtros Geográficos", style = "color: #1f5673;"),
                  
                  pickerInput(
@@ -3994,7 +4189,39 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
     ))
   })
   
-  # Map output
+  # Course data based on current aggregation level
+  rkt_course_data <- reactive({
+    req(input$apl_analysis_mode == "apl_course_match")
+    req(input$uf_apl)  # Don't process until UF is selected
+    
+    withProgress(message = 'Loading course data...', value = 0, {
+      incProgress(0.3, detail = "Determining aggregation level")
+      level <- rkt_apl_aggregation_level()
+      
+      incProgress(0.3, detail = "Loading appropriate dataset")
+      # Use appropriate course dataset based on aggregation level
+      if (level %in% c("municipal", "rgimed", "rgintm")) {
+        # For sub-state levels, aggregate from municipal course data
+        course_data <- apl_matri_MUN_geo
+      } else {
+        # For UF level, use UF course data
+        course_data <- apl_matri_UF
+      }
+      
+      incProgress(0.3, detail = "Applying geographic filters")
+      # Convert full UF names to codes for filtering (FIX THE MISMATCH)
+      if (!is.null(input$uf_apl) && length(input$uf_apl) > 0) {
+        uf_lookup <- unique(apl_geo[, c("NM_UF", "SG_UF")])
+        selected_codes <- uf_lookup[uf_lookup$NM_UF %in% input$uf_apl, "SG_UF"]
+        course_data <- course_data[course_data$SG_UF %in% selected_codes, ]
+      }
+      
+      incProgress(0.1, detail = "Complete")
+      return(course_data)
+    })
+  })
+  
+    # Map output
   output$apl_map <- renderLeaflet({
     map_data <- rkt_apl_map_data()
     
@@ -4044,28 +4271,56 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
   # Table output
   # Enhanced table with updated column names
   output$apl_table <- renderDT({
-    level <- rkt_apl_aggregation_level()
-    table_data <- rkt_apl_dynamic_data()
-    
-    req(nrow(table_data) > 0)
-    
-    # Dynamic column names and formatting based on aggregation level
-    if (level == "municipal") {
-      # Format individual APL data
-      table_data$LQ <- round(table_data$LQ, 2)
-      table_data$E_mun_cbo <- formatC(table_data$E_mun_cbo, format = "d", big.mark = ".")
-      colnames(table_data) <- c("UF", "Região Intermediária", "Região Imediata", "Município", "Ocupação (Família CBO)", "QL", "Emprego")
-    } else {
-      # Format aggregated data
-      table_data$total_emp <- formatC(table_data$total_emp, format = "d", big.mark = ".")
+    if (input$apl_analysis_mode == "apl_only") {
+      # APL Mode
+      level <- rkt_apl_aggregation_level()
+      table_data <- rkt_apl_dynamic_data()
+      req(nrow(table_data) > 0)
       
-      if (level == "rgimed") {
-        colnames(table_data) <- c("UF", "Região Intermediária", "Região Imediata", "APLs", "Municípios", "QL Médio", "Emprego Total", "Especialização")
-      } else if (level == "rgintm") {
-        colnames(table_data) <- c("UF", "Região Intermediária", "APLs", "Municípios", "QL Médio", "Emprego Total", "Especialização")
-      } else if (level == "uf") {
-        colnames(table_data) <- c("UF", "APLs", "Municípios", "QL Médio", "Emprego Total", "Especialização")
+      # Dynamic column names and formatting based on aggregation level
+      if (level == "municipal") {
+        table_data$LQ <- round(table_data$LQ, 2)
+        table_data$E_mun_cbo <- formatC(table_data$E_mun_cbo, format = "d", big.mark = ".")
+        colnames(table_data) <- c("UF", "Região Intermediária", "Região Imediata", "Município", "Ocupação (Família CBO)", "QL", "Emprego")
+      } else {
+        table_data$total_emp <- formatC(table_data$total_emp, format = "d", big.mark = ".")
+        if (level == "rgimed") {
+          colnames(table_data) <- c("UF", "Região Intermediária", "Região Imediata", "APLs", "Municípios", "QL Médio", "Emprego Total", "Especialização")
+        } else if (level == "rgintm") {
+          colnames(table_data) <- c("UF", "Região Intermediária", "APLs", "Municípios", "QL Médio", "Emprego Total", "Especialização")
+        } else if (level == "uf") {
+          colnames(table_data) <- c("UF", "APLs", "Municípios", "QL Médio", "Emprego Total", "Especialização")
+        }
       }
+      level_for_export <- level  # Store for export filename
+      
+    } else {
+      # Course Matching Mode - show APL vs Course alignment
+      course_data <- rkt_course_data()
+      apl_data <- rkt_filtered_apl_data()
+      
+      req(nrow(course_data) > 0)
+      req(nrow(apl_data) > 0)
+      
+      # Create matching analysis
+      matching_data <- merge(
+        apl_data[, .(cbo_4dig, cbo_familia, LQ, E_mun_cbo)],
+        course_data[, .(cbo_4dig, nome_curso_clean, QT_MAT_CURSO_TEC_TOT)],
+        by = "cbo_4dig",
+        all.x = TRUE  # Keep all APLs, show which have courses
+      )
+      
+      # Create match indicator
+      matching_data$tem_curso <- ifelse(is.na(matching_data$QT_MAT_CURSO_TEC_TOT), "Sem curso", "Com curso")
+      matching_data$QT_MAT_CURSO_TEC_TOT[is.na(matching_data$QT_MAT_CURSO_TEC_TOT)] <- 0
+      
+      table_data <- matching_data %>%
+        select(cbo_familia, LQ, E_mun_cbo, nome_curso_clean, QT_MAT_CURSO_TEC_TOT, tem_curso) %>%
+        arrange(desc(QT_MAT_CURSO_TEC_TOT)) %>%
+        head(30)
+      
+      colnames(table_data) <- c("Ocupação APL", "QL", "Emprego APL", "Curso Técnico", "Matrículas", "Status Match")
+      level_for_export <- "matching"
     }
     
     datatable(
@@ -4078,18 +4333,209 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
         dom = 'Bfrtip',
         buttons = list(
           list(extend = "copy", text = "Copiar"),
-          list(extend = "csv", filename = paste0("APL_", toupper(level)), text = "CSV"),
-          list(extend = "excel", filename = paste0("APL_", toupper(level)), text = "Excel")
+          list(extend = "csv", filename = paste0("APL_", toupper(level_for_export)), text = "CSV"),
+          list(extend = "excel", filename = paste0("APL_", toupper(level_for_export)), text = "Excel")
         )
       ),
       class = "stripe nowrap display"
     )
   })
   
+
+################################################################################################################
+## ECONOMIC DYNAMISM TAB REACTIVES AND OUTPUTS
+################################################################################################################
+
+
+# Initialize geographic choices for dynamism
+observe({
+  updatePickerInput(session, "uf_dyn", 
+                    choices = sort(unique(dynamism_geo$NM_UF[!is.na(dynamism_geo$NM_UF)])),
+                    selected = "São Paulo")
+})
+
+# Hierarchical geographic filtering (same pattern as APL)
+observeEvent(input$uf_dyn, {
+  if (is.null(input$uf_dyn) || length(input$uf_dyn) == 0) {
+    updatePickerInput(session, "rgintm_dyn", choices = character(0), selected = character(0))
+  } else {
+    uf_filtered <- dynamism_geo[dynamism_geo$NM_UF %in% input$uf_dyn & !is.na(dynamism_geo$NM_RGIINTM), ]
+    rgi_choices <- sort(unique(uf_filtered$NM_RGIINTM))
+    updatePickerInput(session, "rgintm_dyn", choices = rgi_choices, selected = rgi_choices)
+  }
+}, ignoreInit = FALSE)
+
+observeEvent(input$rgintm_dyn, {
+  if (is.null(input$rgintm_dyn) || length(input$rgintm_dyn) == 0) {
+    updatePickerInput(session, "rgimed_dyn", choices = character(0), selected = character(0))
+  } else {
+    rgi_filtered <- dynamism_geo[dynamism_geo$NM_RGIINTM %in% input$rgintm_dyn & !is.na(dynamism_geo$NM_RGIMED), ]
+    rgimed_choices <- sort(unique(rgi_filtered$NM_RGIMED))
+    updatePickerInput(session, "rgimed_dyn", choices = rgimed_choices, selected = rgimed_choices)
+  }
+}, ignoreInit = FALSE)
+
+observeEvent(input$rgimed_dyn, {
+  if (is.null(input$rgimed_dyn) || length(input$rgimed_dyn) == 0) {
+    updatePickerInput(session, "mun_dyn", choices = character(0), selected = character(0))
+  } else {
+    rgimed_filtered <- dynamism_geo[dynamism_geo$NM_RGIMED %in% input$rgimed_dyn & !is.na(dynamism_geo$NM_MUN), ]
+    mun_choices <- sort(unique(rgimed_filtered$NM_MUN))
+    updatePickerInput(session, "mun_dyn", choices = mun_choices, selected = character(0))
+  }
+}, ignoreInit = FALSE)
+
+# Filtered dynamism data reactive
+rkt_filtered_dynamism_data <- reactive({
+  data <- dynamism_geo
   
+  # Apply geographic filters
+  if (!is.null(input$uf_dyn) && length(input$uf_dyn) > 0) {
+    data <- data[data$NM_UF %in% input$uf_dyn, ]
+  }
+  if (!is.null(input$rgintm_dyn) && length(input$rgintm_dyn) > 0) {
+    data <- data[data$NM_RGIINTM %in% input$rgintm_dyn, ]
+  }
+  if (!is.null(input$rgimed_dyn) && length(input$rgimed_dyn) > 0) {
+    data <- data[data$NM_RGIMED %in% input$rgimed_dyn, ]
+  }
+  if (!is.null(input$mun_dyn) && length(input$mun_dyn) > 0) {
+    data <- data[data$NM_MUN %in% input$mun_dyn, ]
+  }
   
+  # Apply performance filters
+  data <- data[data$dynamism_decile >= input$min_decile_dyn & 
+               data$avg_population >= input$min_pop_dyn, ]
   
-    
+  return(data)
+})
+
+# Map data for choropleth
+# Map data for choropleth - SIMPLIFIED VERSION
+rkt_dynamism_map_data <- reactive({
+  req(nrow(rkt_filtered_dynamism_data()) > 0)
+  
+  # Get the filtered dynamism data
+  filtered_data <- rkt_filtered_dynamism_data()
+  
+  # Create a simple summary by municipality (avoiding column conflicts)
+  dyn_summary <- filtered_data[, .(
+    dynamism_index = first(dynamism_index),
+    dynamism_decile = first(dynamism_decile),
+    avg_population = first(avg_population)
+  ), by = .(CO_MUN, NM_MUN)]
+  
+  # Convert CO_MUN to character for joining
+  dyn_summary$CO_MUN <- as.character(dyn_summary$CO_MUN)
+  
+  # Filter sf_regioes to selected UFs
+  map_data <- sf_regioes
+  if (!is.null(input$uf_dyn) && length(input$uf_dyn) > 0) {
+    map_data <- map_data %>% filter(NM_UF %in% input$uf_dyn)
+  }
+  
+  # Simple left join - only add the dynamism variables
+  map_data <- map_data %>%
+    left_join(dyn_summary %>% select(CO_MUN, dynamism_index, dynamism_decile, avg_population), 
+              by = "CO_MUN")
+  
+  # Fill NAs for municipalities without dynamism data
+  map_data$dynamism_decile[is.na(map_data$dynamism_decile)] <- 0
+  map_data$dynamism_index[is.na(map_data$dynamism_index)] <- 0
+  
+  return(map_data)
+})
+
+# Summary output
+output$dyn_summary <- renderUI({
+  data <- rkt_filtered_dynamism_data()
+  
+  HTML(paste0(
+    "<strong>Municípios analisados:</strong> ", nrow(data), "<br>",
+    "<strong>Dinamismo médio:</strong> ", round(mean(data$dynamism_index, na.rm=TRUE), 2), "<br>", 
+    "<strong>Top decil (9-10):</strong> ", sum(data$dynamism_decile >= 9), "<br>",
+    "<strong>População total:</strong> ", formatC(sum(data$avg_population, na.rm=TRUE), format="d", big.mark=".")
+  ))
+})
+
+# Map output
+output$dyn_map <- renderLeaflet({
+  map_data <- rkt_dynamism_map_data()
+  
+  # Color palette for deciles
+  pal <- colorNumeric(
+    palette = "RdYlGn", # Red-Yellow-Green (low to high performance)
+    domain = 1:10,
+    na.color = "transparent"
+  )
+  
+  leaflet(map_data) %>%
+    addTiles() %>%
+    addPolygons(
+      fillColor = ~pal(dynamism_decile),
+      weight = 1, opacity = 1, color = "white", dashArray = "3", fillOpacity = 0.7,
+      popup = ~paste0(
+        "<strong>", NM_MUN, "</strong><br/>",
+        "UF: ", NM_UF, "<br/>",
+        "Dinamismo: ", round(dynamism_index, 2), "<br/>", 
+        "Decil: ", dynamism_decile, "<br/>",
+        "População: ", formatC(round(avg_population), format="d", big.mark=".")
+      )
+    ) %>%
+    addLegend(pal = pal, values = 1:10, opacity = 0.7, title = "Decil Dinamismo", position = "bottomright")
+})
+
+# Table output - WITH ALL 4 SECTORS (AGRO, INDUSTRY, SERVICES, ADMIN)
+output$dyn_table <- renderDT({
+  data <- rkt_filtered_dynamism_data()
+  req(nrow(data) > 0)
+  
+  # Complete table with all 4 sectors
+  table_data <- data[, .(
+    UF = SG_UF,
+    Município = NM_MUN, 
+    `Índice Dinamismo` = round(dynamism_index, 2),
+    Decil = dynamism_decile,
+    `População Média` = formatC(round(avg_population), format="d", big.mark="."),
+    `PIB per capita 2021 (R$)` = formatC(round(pib_per_capita_2021), format="d", big.mark="."),
+    `Agro (%)` = agro_pct,
+    `Indústria (%)` = industria_pct,
+    `Serviços (%)` = servicos_pct,
+    `Admin (%)` = admin_pct,  # Added missing admin sector
+    `Crescimento P1 (%)` = round(period1_avg_growth, 1),
+    `Crescimento P2 (%)` = round(period2_avg_growth, 1)
+  )]
+  
+  # Sort by dynamism index
+  table_data <- table_data[order(-`Índice Dinamismo`)]
+  
+  datatable(table_data, rownames = FALSE, extensions = 'Buttons',
+            options = list(
+              pageLength = 15, 
+              scrollX = TRUE, 
+              dom = 'Bfrtip',
+              buttons = list(
+                list(extend = "copy", text = "Copiar"),
+                list(extend = "csv", filename = "Dinamismo_Municipal_Completo", text = "CSV"),
+                list(extend = "excel", filename = "Dinamismo_Municipal_Completo", text = "Excel")
+              ),
+              columnDefs = list(
+                list(width = '30px', targets = 0),   # UF
+                list(width = '120px', targets = 1),  # Município
+                list(width = '70px', targets = c(2, 3)),  # Index, Decil
+                list(width = '90px', targets = c(4, 5)),  # População, PIB
+                list(width = '55px', targets = c(6, 7, 8, 9, 10, 11)),  # All 4 sectors + 2 growth percentages
+                list(className = 'dt-center', targets = c(2, 3, 6, 7, 8, 9, 10, 11))
+              )
+            ), 
+            class = "stripe nowrap display compact"
+  ) %>%
+    formatStyle("Índice Dinamismo", backgroundColor = styleInterval(c(15, 25), c("#8B0000", "#B8860B", "#006400"))) %>%
+    formatStyle("Agro (%)", backgroundColor = styleInterval(c(20, 40), c("#2F4F4F", "#4682B4", "#1E90FF"))) %>%  
+    formatStyle("Indústria (%)", backgroundColor = styleInterval(c(15, 30), c("#8B4513", "#CD853F", "#DEB887"))) %>%
+    formatStyle("Serviços (%)", backgroundColor = styleInterval(c(30, 50), c("#483D8B", "#6A5ACD", "#9370DB"))) %>%
+    formatStyle("Admin (%)", backgroundColor = styleInterval(c(20, 35), c("#8B008B", "#9932CC", "#BA55D3")))  # Dark magenta, dark orchid, medium orchid
+})
       
 }  
   

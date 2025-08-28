@@ -17,6 +17,8 @@ library(scales)
 #   rm(df_pib)
 # }
 
+load("D:/Country/Brazil/TechBrazil/working/ibge/df_pibmunis.rda")
+
 # Parameters (adjustable)
 PERIOD1_WEIGHT <- 1.0    # Weight for 2002-2011 period
 PERIOD2_WEIGHT <- 1.5    # Weight for 2012-2021 period
@@ -249,8 +251,53 @@ state_summary <- analysis_results$state_analysis
 head(dynamism_data, 20)
 
 # Export results if needed
-write.csv(dynamism_data, "municipality_dynamism_index.csv", row.names = FALSE)
-write.csv(state_summary, "state_dynamism_summary.csv", row.names = FALSE)
+
+MUN_dyna02_21 <- dynamism_data
+save(MUN_dyna02_21,file="working/ibge/MUN_dyna02_21.rda")
+
+write.csv(MUN_dyna02_21, file="working/ibge/MUN_dyna02_21.csv", row.names = FALSE)
+write.csv(df_pibmunis, file="working/ibge/df_pibmunis.csv", row.names = FALSE)
+openxlsx::write.xlsx(df_pibmunis, file="working/ibge/df_pibmunis.xlsx")
+
+write.csv(state_summary, "working/ibge/state_dynamism_summary.csv", row.names = FALSE)
 
 cat("Economic Dynamism Index Calculator loaded successfully!\n")
 cat("Run: analysis_results <- run_dynamism_analysis(df_pibmunis)\n")
+
+
+# Extract columns, add population, and simplify names
+# Extract columns by position and add population
+pib_subset <- df_pibmunis %>%
+  mutate(
+    # Calculate inferred population using column positions
+    population = ifelse(
+      is.na(df_pibmunis[[40]]) | df_pibmunis[[40]] == 0,
+      NA_real_,
+      (df_pibmunis[[39]] * 1000) / df_pibmunis[[40]]
+    )
+  ) %>%
+  select(
+    year = 1,           # Ano
+    mun_code = 7,       # Código.do.Município
+    mun_name = 8,       # Nome.do.Município
+    uf_name = 6,        # Nome.da.Unidade.da.Federação  
+    pib_total = 39,     # Produto.Interno.Bruto
+    pib_per_capita = 40, # PIB per capita
+    population,         # Calculated population
+    agro_va = 33,       # Agropecuária VA
+    industry_va = 34,   # Indústria VA
+    services_va = 35,   # Serviços VA
+    admin_va = 36,      # Administração VA
+    total_va = 37,      # Total VA
+    main_activity = 41, # Atividade principal
+    second_activity = 42, # Segunda atividade
+    third_activity = 43   # Terceira atividade
+  )
+
+# Check the structure
+head(pib_subset)
+dim(pib_subset)
+
+# Save with clean names
+write.csv(pib_subset, "working/ibge/pib_clean_subset.csv", row.names = FALSE)
+save(pib_subset, file = "working/ibge/pib_clean_subset.rda")

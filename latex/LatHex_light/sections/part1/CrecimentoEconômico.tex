@@ -112,7 +112,7 @@ empregos, são listados os setores e territórios como potenciais APLs.
 
 \begin{figure}[!htbp]
 	\centering
-	\includegraphics[width=0.9\textwidth]{images/2d_ObsEPTITAU.png}
+	\includegraphics[width=0.9\textwidth]{images/4a_ObsEPTITAU.png}
 	\caption{Painel interativo do Observatório EPT Fundação Itaú, 
 		com filtros por CNAE, mapa de distribuição e tabela de aglomerações produtivas locais.}
 	\label{fig:obs_ept}
@@ -214,3 +214,89 @@ Essa etapa produz, para cada ocupação com RCA ≥ 1, uma lista dos cursos téc
 \textbf{Integração com Dados de Matrícula do Censo Escolar}
 
 Os cursos técnicos identificados como relevantes para os APLs são cruzados com os dados de matrícula disponíveis no Censo Escolar de 2023 e 2024. A comparação é realizada por estado (UF) e, quando possível, desagregada por curso e por dependência administrativa da escola (rede federal, estadual, municipal ou privada). Essa integração permite evidenciar eventuais lacunas entre a demanda ocupacional (inferida a partir dos APLs) e a oferta educacional atual. Embora a correspondência entre denominações de cursos possa não ser exata, utilizamos normalizações de texto para aproximar os nomes de cursos técnicos do CNCT com os registrados no Censo.
+
+
+
+\textbf{Interface do Painel de APLs}
+
+A Figura~\ref{fig:apl_app} apresenta a interface principal do painel interativo que permite explorar os Arranjos Produtivos Locais (APLs) identificados com base na especialização ocupacional (CBO). O usuário pode navegar pelos níveis geográficos disponíveis — Unidade da Federação (UF), Regiões Intermediárias, Regiões Imediatas e Municípios — e ajustar os critérios de identificação dos APLs utilizando os filtros de especialização local: quociente locacional (QL) e número mínimo de vínculos empregatícios. À direita, o mapa dinâmico mostra a distribuição geográfica dos APLs conforme os filtros aplicados. Abaixo, uma tabela resume os APLs encontrados na região selecionada, indicando a ocupação identificada, o município correspondente e os valores de especialização e emprego. Accede o painel aqui: \href{https://datanalytics.worldbank.org/content/30860e91-45c8-4c91-b9f1-56355e723300}{https://datanalytics.worldbank.org/Plataforma-Aba-APL}.
+
+\begin{figure}[htbp!]
+	\centering
+	\includegraphics[width=\textwidth]{images/4b_APL.png}
+	\caption{Interface do painel interativo de APLs por CBO.}
+	\label{fig:apl_app}
+\end{figure}
+
+
+\section{Dinamismo Econômico Municipal} 
+
+O crescimento econômico regional constitui um indicador fundamental para orientar investimentos em Educação Profissional e Tecnológica (EPT), uma vez que a compreensão das dinâmicas territoriais de crescimento permite aos gestores avaliar diferentes estratégias de desenvolvimento. Para capturar essas dinâmicas de forma sistemática, desenvolveu-se um índice de dinamismo econômico municipal baseado na evolução do Produto Interno Bruto (PIB) per capita ao longo de duas décadas (2002-2021).
+
+\subsection{Metodologia}
+
+A metodologia adota uma abordagem de períodos ponderados, reconhecendo que o desempenho econômico recente possui maior relevância para decisões de investimento do que tendências históricas mais distantes. O índice combina as taxas médias de crescimento do PIB per capita em dois períodos: 2002-2011 (peso 1,0) e 2012-2021 (peso 1,5). A atribuição de maior peso ao período mais recente reflete a premissa de que tendências recentes oferecem melhor indicação das condições econômicas atuais dos territórios. Assim que o IBGE disponibilizar dados mais recentes, a análise pode incorporá-los
+
+
+O cálculo do índice de dinamismo (ID) para cada município segue a fórmula:
+
+$$ID_m = \frac{(G_{2002-2011} \times 1,0) + (G_{2012-2021} \times 1,5)}{2,5}$$
+
+onde $G_{período}$ representa a taxa média anual de crescimento do PIB per capita no período correspondente. Os municípios são posteriormente classificados em decis (1 a 10), permitindo comparação relativa do desempenho econômico.
+
+A fonte de dados é constituída pelos registros do PIB municipal do Instituto Brasileiro de Geografia e Estatística (IBGE), que cobrem o período 2002-2021 para 5.564 municípios brasileiros. Para garantir robustez estatística, são incluídos na análise apenas municípios com pelo menos três anos de dados válidos em cada período.
+
+Além da análise municipal, a ferramenta permite agregação dos indicadores nos níveis das Regiões Geográficas Imediatas e Intermediárias, conforme a divisão territorial do IBGE. Esta funcionalidade possibilita aos analistas estaduais comparar o desempenho econômico em diferentes escalas geográficas, identificando padrões regionais de crescimento e avaliando a adequação de estratégias de investimento em EPT tanto para territórios específicos quanto para aglomerações urbanas mais amplas.
+
+Esta abordagem quantitativa de dinamismo econômico oferece aos gestores estaduais informações objetivas para orientar decisões de investimento do PROPAG. O mapeamento permite identificar tanto territórios de maior dinamismo econômico, onde há potencial demanda por qualificação técnica, quanto regiões de menor crescimento, que podem constituir alvos de políticas de desenvolvimento regional através da qualificação da força de trabalho. A decisão sobre quais territórios priorizar - se aqueles já dinâmicos ou aqueles que necessitam de impulso ao crescimento - permanece como prerrogativa dos formuladores de política, sendo a ferramenta um instrumento de apoio à análise territorial.
+
+
+\subsection{Painel Interativo de Dinamismo Econômico}
+
+A Figura \ref{fig:painel_dinamismo} apresenta a interface principal do painel interativo para exploração do dinamismo econômico municipal. O painel integra visualização cartográfica, controles de filtragem hierárquica e análise tabular detalhada dos indicadores de crescimento econômico.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\textwidth]{4c_DIN.png}
+	\caption{Painel interativo de dinamismo econômico municipal}
+	\label{fig:painel_dinamismo}
+\end{figure}
+
+Os controles geográficos seguem a hierarquia territorial do IBGE, permitindo navegação sequencial por Unidade da Federação, Região Geográfica Intermediária, Região Geográfica Imediata e Município. Os filtros de performance possibilitam estabelecer critérios mínimos de decil de dinamismo e população municipal, refinando a seleção conforme os objetivos da análise.
+
+O mapa utiliza uma escala de cores de vermelho (decil 1, menor dinamismo) a verde (decil 10, maior dinamismo), permitindo identificação visual imediata dos padrões territoriais de crescimento econômico. A tabela complementar apresenta os indicadores detalhados para cada município na região selecionada, incluindo o índice de dinamismo, classificação por decil, dados populacionais, PIB per capita de 2021, composição setorial da economia (percentuais de agricultura, indústria, serviços e administração pública) e taxas de crescimento específicas para cada período analisado.
+
+A funcionalidade de exportação permite aos analistas extrair os dados filtrados em formatos CSV e Excel, facilitando análises complementares e a elaboração de relatórios técnicos para fundamentar as decisões de investimento em EPT nos Planos de Aplicação do PROPAG.
+
+
+\subsection{Como Aproveitar o Painel para o Plano de Aplicação PROPAG}
+
+A aplicação prática do painel de dinamismo econômico para o planejamento da EPT varia conforme as características territoriais de cada estado. Apresentam-se três cenários representativos que ilustram diferentes estratégias de análise territorial e suas implicações para os investimentos do PROPAG.
+
+\subsection{Como Aproveitar o Painel para o Plano de Aplicação PROPAG}
+
+A aplicação prática do painel de dinamismo econômico para o planejamento da EPT varia conforme as características territoriais de cada estado. Apresentam-se três cenários representativos que ilustram diferentes estratégias de análise territorial e suas implicações para os investimentos do PROPAG.
+
+\textbf{Cenário 1: Estados de Grande Porte - Análise por Composição Setorial (Minas Gerais)}
+
+Em Minas Gerais, com 853 municípios analisados e índice médio de 11,23, observam-se padrões diferenciados de crescimento conforme a estrutura econômica local. Municípios de pequeno porte como Catas Altas (índice 64,12, população 4.954) e Conceição do Mato Dentro (índice 55,01, população 18.143) apresentam crescimento elevado, enquanto centros urbanos consolidados como Belo Horizonte (índice 7,28, decil 1) e Juiz de Fora (índice 7,72, decil 1) registram crescimento modesto.
+
+A análise da composição setorial revela oportunidades estratégicas diferenciadas. Municípios com alta participação agroindustrial e de mineração tendem a apresentar maior dinamismo, sugerindo cursos técnicos em Mineração, Meio Ambiente ou Agronegócio para capitalizar essas vocações. Para centros urbanos com maior peso de serviços e indústria tradicional, a estratégia pode focar na renovação tecnológica através de cursos em Automação Industrial, Tecnologia da Informação ou Energias Renováveis.
+
+\textbf{Cenário 2: Estados de Porte Médio - Análise de Distribuição por Decis (Alagoas)}
+
+Alagoas, com 102 municípios e índice médio de 11,34, permite análise detalhada da distribuição do dinamismo econômico. Entre os municípios alagoanos, 15 encontram-se nos decis superiores (8-10), representando 14,7\% do total, enquanto 31 municípios (30,4\%) situam-se nos decis inferiores (1-3). Municípios como Branquinha (índice 26,52, população 11.386) lideram o crescimento, contrastando com São Miguel dos Campos (índice 3,98, população 54.795), que apresenta crescimento modesto apesar do maior porte.
+
+A análise por agregações geográficas revela padrões complementares essenciais para o planejamento regional. Ao examinar as Regiões Geográficas Intermediárias e Imediatas, emergem casos onde municípios individualmente classificados em decis baixos integram territórios de maior dinamismo regional. 
+
+Por exemplo, na Região Imediata de União dos Palmares, que apresenta dinamismo médio regional de 15,08, encontram-se simultaneamente Branquinha (índice 26,52, decil 10) e União dos Palmares (índice 9,94, decil 5), demonstrando como municípios de desempenho individual modesto podem beneficiar-se de transbordamentos de territórios vizinhos altamente dinâmicos. Similarmente, na Região Imediata de Porto Calvo - São Luís do Quitunde, com dinamismo médio de 11,70, coexistem Porto de Pedras (índice 19,73, decil 10) e Traipu (índice 9,20, decil 3), evidenciando potencial de crescimento induzido por economias de aglomeração.
+
+A Região Imediata de Arapiraca oferece exemplo ainda mais ilustrativo dessa heterogeneidade, com dinamismo médio de 12,44 abrangendo desde Limoeiro de Anadia (índice 17,13, decil 10) até Girau do Ponciano (índice 8,56, decil 2). Essa perspectiva regional identifica oportunidades de investimento em EPT que capitalizam complementaridades produtivas entre territórios próximos, sugerindo estratégias de formação técnica coordenadas regionalmente.
+
+\textbf{Cenário 3: Estados de Pequeno Porte - Análise de Vocação Produtiva (Acre)}
+
+Com apenas 22 municípios e índice médio de 10,72, o Acre permite análise territorializada exaustiva. A composição econômica estadual, predominantemente baseada em agropecuária e recursos florestais, reflete-se nos municípios de maior dinamismo: Capixaba (índice 19,35, decil 10) e Senador Guiomard (índice 15,01, decil 10). Mesmo a capital Rio Branco, com 345.946 habitantes, registra crescimento modesto (índice 7,38, decil 1), indicando oportunidades de diversificação econômica.
+
+A escala reduzida demanda abordagem integrada da rede estadual de EPT. Municípios com vocação agroflorestal podem receber cursos especializados em Florestal, Agropecuária ou Agroindústria, capitalizando as vantagens comparativas regionais. A capital requer estratégia de diversificação através de cursos urbanos como Administração, Turismo ou Tecnologia da Informação, criando alternativas econômicas para além do setor primário.
+
+Estes exemplos demonstram que o painel de dinamismo econômico oferece instrumentos analíticos multidimensionais - composição setorial, distribuição territorial e vocações produtivas - para fundamentar escolhas estratégicas contextualizadas às realidades específicas de cada unidade federativa.
