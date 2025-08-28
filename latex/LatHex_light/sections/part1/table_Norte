@@ -1,0 +1,18 @@
+\begin{table}[ht]
+\centering
+\caption{Cursos mais demandados e vagas estimadas — Norte}
+\label{tab:norte}
+\begin{tabular}{l l r l r l r}
+\toprule
+UF & Curso mais demandado & \# vagas & 2º curso & \# vagas & 3º curso & \# vagas \\
+\midrule
+Acre & Gestão e negócios - Serviços jurídicos & 77 & Infraestrutura - Portos & 59 & Ambiente e Saúde - Saúde bucal & 50 \\
+Amapá & Gestão e negócios - Serviços jurídicos & 138 & Informação e comuniação - Redes de computadores & 85 & Informação e comuniação - Informática & 71 \\
+Amazonas & Informação e comuniação - Informática & 388 & Controle e Processos Industriais - Mecânica de Precisão & 216 & Informação e comuniação - Informática para internet & 214 \\
+Pará & Desenvolvimento educacional e social - Brinquedoteca & 327 & Infraestrutura - Estradas & 231 & Gestão e negócios - Recursos humanos & 136 \\
+Rondônia & Desenvolvimento Educacional e  Social - Alimentação escolar & 74 & Infraestrutura - Transporte de cargas & 69 & Ambiente e Saúde - Radiologia & 52 \\
+Roraima & Controle e processos industriais - Eletroeletrônica & 31 & Informação e Comunicação - Desenvolvimento de sistemas & 25 & Controle e processo industriais - Eletrotécnica & 22 \\
+Tocantins & Controle e processos industriais - Eletroeletrônica & 108 & Controle e processos industriais - Eletrotécnica & 65 & Produção industrial - Química & 57 \\
+\bottomrule
+\end{tabular}
+\end{table}
