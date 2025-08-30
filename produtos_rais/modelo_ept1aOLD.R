@@ -245,7 +245,6 @@ cat("Economic share range:", round(range(economic_shares_long$econ_sect_va_prop,
 #############################################################################
 # STEP 1G: MERGE ALL DATA AND CREATE MODEL DATAFRAME (CORRECTED)
 #############################################################################
-# Merge enrollment with economic data
 model_df_base <- enrollment_shares %>%
   left_join(economic_shares_long, 
             by = c("ANO", "SG_UF", "economic_sector")) %>%
@@ -254,13 +253,13 @@ model_df_base <- enrollment_shares %>%
   left_join(pib_state_year %>% select(ANO = year, SG_UF, NM_UF, pib_pc_growth, pib_pc_growth_lag1, pib_per_capita),
             by = c("ANO", "SG_UF", "NM_UF")) %>%
   
-  # Create sector alignment variable using simple ratio
-  # Simple ratio with clear interpretation:
-  # - sector_alignment = 1: perfect alignment (enrollment share = economic share)  
-  # - sector_alignment > 1: EPT over-represented relative to economic structure
-  # - sector_alignment < 1: EPT under-represented relative to economic structure
+  # Create sector alignment variable using log ratio
+  # Log ratio handles division by zero and creates symmetric measure around 0:
+  # - sector_alignment = 0: perfect alignment (enrollment share = economic share)  
+  # - sector_alignment > 0: EPT over-represented relative to economic structure
+  # - sector_alignment < 0: EPT under-represented relative to economic structure
   mutate(
-    sector_alignment = QT_MAT_CURSO_TEC_share / econ_sect_va_prop,
+    sector_alignment = log(pmax(QT_MAT_CURSO_TEC_share, 0.001) / pmax(econ_sect_va_prop, 0.001)),
     log_QT_MAT_CURSO_TEC = log(QT_MAT_CURSO_TEC)
   ) %>%
   
@@ -276,7 +275,6 @@ cat("Final merged dimensions:", dim(model_df_base), "\n")
 cat("Key variable NAs - sector_alignment:", sum(is.na(model_df_base$sector_alignment)), "| log_QT_MAT_CURSO_TEC:", sum(is.na(model_df_base$log_QT_MAT_CURSO_TEC)), "\n\n")
 
 model_df_base2 <- model_df_base %>% filter(!is.na(NM_UF)) # 4780 becomes 3754
-
 
 #############################################################################
 # STEP 1H: CREATE LAGGED VARIABLES (DEPENDENT AND INDEPENDENT)

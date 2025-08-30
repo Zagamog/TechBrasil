@@ -1,67 +1,114 @@
-\section{Resultados} \label{sec:phasellus-tristique}
+----------------------------------------------------------
 
-Lacus ac turpis semper fringilla. Mauris fermentum varius neque, vel congue
-elit tempus quis. Aliquam a nunc in nunc consectetur hendrerit ut quis felis. 
+\section{Resultados}
 
-Quisque id dui magna. Curabitur posuere nisl at magna vehicula aliquam \ref{fig:duis}.
-Duis et suscipit felis. Mauris non justo quis diam gravida placerat condimentum
-ut sapien. Praesent imperdiet libero id est tincidunt ullamcorper.
+Esta seção apresenta, por Unidade da Federação (UF), os \textbf{três cursos técnicos mais demandados} e a \textbf{estimativa de novas vagas necessárias}, a partir do método descrito na Seção~\ref{sec:metodologia}. Para facilitar o uso pelos gestores, os resultados estão \textbf{tabulados por região}.
 
-\begin{figure}[ht]
-\hspace*{-1.6cm}
-\begin{tikzpicture}
+\subsection*{Principais achados gerais}
+\begin{itemize}
+	\item Predominam cursos ligados a \textbf{Controle e processos industriais}, \textbf{Informação e comunicação} e \textbf{Gestão e negócios}, com variações regionais coerentes com a estrutura produtiva.
+	\item A demanda por cursos voltados a \textbf{serviços} (ex.: administração, recursos humanos, secretariado) é relevante nos grandes centros, enquanto a agenda de \textbf{infraestrutura} (ex.: logística, transportes, estradas, desenho de construção civil) aparece de forma recorrente em estados de fronteira ou com investimentos logísticos.
+	\item Os números a seguir indicam \textbf{vagas adicionais estimadas}, úteis para pactuação entre redes (estadual, federal, municipal e privada) e planejamento financeiro (com/sem PROPAG).
+\end{itemize}
 
-\node (logs) [io] {Logs};
-\node (storage) [io, right=2cm of logs] {Storage};
-\node (log-topics) [io, below=1cm of logs] {Log: topics, data};
+\subsection{Região Norte}
+\begin{table}[ht]
+	\centering
+	\caption{Cursos mais demandados e vagas estimadas — Norte}
+	\label{tab:norte}
+	\scriptsize
+	\begin{tabular}{@{\extracolsep{3pt}} l p{2.75cm} r p{2.75cm} r p{2.75cm} r}
+		\toprule
+		UF & Curso mais demandado & \# vagas & 2º curso & \# vagas & 3º curso & \# vagas \\
+		\midrule
+		Acre & Gestão e negócios - Serviços jurídicos & 77 & Infraestrutura - Portos & 59 & Ambiente e Saúde - Saúde bucal & 50 \\
+		Amapá & Gestão e negócios - Serviços jurídicos & 138 & Informação e comunicação - Redes de computadores & 85 & Informação e comunicação - Informática & 71 \\
+		Amazonas & Informação e comunicação - Informática & 388 & Controle e processos industriais - Mecânica de precisão & 216 & Informação e comunicação - Informática para internet & 214 \\
+		Pará & Desenvolvimento educacional e social - Brinquedoteca & 327 & Infraestrutura - Estradas & 231 & Gestão e negócios - Recursos humanos & 136 \\
+		Rondônia & Desenvolvimento Educacional e Social - Alimentação escolar & 74 & Infraestrutura - Transporte de cargas & 69 & Ambiente e Saúde - Radiologia & 52 \\
+		Roraima & Controle e processos industriais - Eletroeletrônica & 31 & Informação e comunicação - Desenvolvimento de sistemas & 25 & Controle e processos industriais - Eletrotécnica & 22 \\
+		Tocantins & Controle e processos industriais - Eletroeletrônica & 108 & Controle e processos industriais - Eletrotécnica & 65 & Produção industrial - Química & 57 \\
+		\bottomrule
+	\end{tabular}
+\end{table}
 
-\node (parse-data) [block, below=1cm of log-topics] {Parse event arguments};
-\node (arguments) [io, below=2.7cm of parse-data] {Event arguments};
+\newpage
 
-\node (parse-selector) [block, left=2cm of parse-data] {Parse event selector};
-\node (reverse-selector) [block, below=1cm of parse-selector] {Reverse selector};
-\node (signature) [io, below=1cm of reverse-selector] {Event signature};
 
-\node (identify-standard) [block, below=1cm of signature] {Identify standard and event};
-\node (fetch-constraints) [block, below=1cm of identify-standard] {Fetch matching constraints};
-\node (check-constraints) [decision, below=4.3cm of arguments] {Constraints?};
+\subsection{Região Nordeste}
+\begin{table}[ht]
+	\centering
+	\caption{Cursos mais demandados e vagas estimadas — Nordeste}
+	\label{tab:nordeste}
+	\scriptsize
+	\begin{tabular}{@{\extracolsep{3pt}} l p{2.25cm} r p{2.25cm} r p{2.25cm} r}
+		\toprule
+		UF & Curso mais demandado & \# vagas & 2º curso & \# vagas & 3º curso & \# vagas \\
+		\midrule
+		Alagoas & Controle e processos industriais - Eletroeletrônica & 165 & Gestão e negócios - Qualidade & 111 & Controle e processos industriais - Eletrotécnica & 91 \\
+		Bahia & Gestão de negócios - Recursos humanos & 767 & Gestão de negócios - Administração & 756 & Gestão de negócios - Condomínio & 755 \\
+		Ceará & Ambiente e Saúde - Agente comunitário & 446 & Controle e processos industriais - Mecânica & 375 & Infraestrutura - Transporte rodoviário & 359 \\
+		Maranhão & Produção industrial - Química & 120 & Ambiente e Saúde - Controle ambiental & 66 & Ambiente e Saúde - Meio ambiente & 66 \\
+		Paraíba & Gestão e negócios - Qualidade & 168 & Produção industrial - Têxtil & 143 & Informação e comunicação - Telecomunicações & 82 \\
+		Pernambuco & Controle e processos industriais - Manutenção de sistemas metroviários & 231 & Ambiente e Saúde - Radiologia & 174 & Controle e processos industriais - Instrumentação industrial & 170 \\
+		Piauí & Controle e processos industriais - Eletroeletrônica & 192 & Controle e processos industriais - Mecânica & 54 & Controle e processos industriais - Manutenção de máquinas industriais & 53 \\
+		Rio Grande do Norte & Controle e processos industriais - Eletromecânica & 159 & Controle e processos industriais - Fabricação mecânica & 156 & Controle e processos industriais - Mecânica & 152 \\
+		Sergipe & Controle e processos industriais - Mecânica & 85 & Controle e processos industriais - Fabricação mecânica & 74 & Produção industrial - Petroquímica & 32 \\
+		\bottomrule
+	\end{tabular}
+\end{table}
 
-\node (references) [io, left=1.6cm of identify-standard] {References};
-\node (rules) [io, left=2cm of fetch-constraints] {Rules};
+\subsection{Centro-Oeste e Distrito Federal}
+\begin{table}[ht]
+	\centering
+	\caption{Cursos mais demandados e vagas estimadas — Centro-Oeste e DF}
+	\label{tab:centro_oeste_df}
+	\scriptsize
+	\begin{tabular}{@{\extracolsep{3pt}} l p{2.25cm} r p{2.25cm} r p{2.25cm} r}
+		\toprule
+		UF & Curso mais demandado & \# vagas & 2º curso & \# vagas & 3º curso & \# vagas \\
+		\midrule
+		Distrito Federal & Gestão e negócios - Seguros & 835 & Produção cultural e design - Produção de áudio e vídeo & 280 & Produção cultural e design - Design de interiores & 267 \\
+		Goiás & Controle e processos industriais - Manutenção de máquinas industriais & 430 & Controle e processos industriais - Mecânica & 403 & Ambiente e Saúde - Controle ambiental & 175 \\
+		Mato Grosso & Infraestrutura - Desenho de construção civil & 211 & Gestão e negócios - Logística & 203 & Controle e processos industriais - Eletrônica & 174 \\
+		Mato Grosso do Sul & Controle e processos industriais - Manutenção de máquinas industriais & 237 & Controle e processos industriais - Manutenção de sistemas metroferroviários & 81 & Infraestrutura - Agrimensura & 73 \\
+		\bottomrule
+	\end{tabular}
+\end{table}
 
-\node (negative) [io, below=2cm of check-constraints] {False};
-\node (positive) [io, right=2cm of negative] {True};
+\subsection{Região Sudeste}
+\begin{table}[ht]
+	\centering
+	\caption{Cursos mais demandados e vagas estimadas — Sudeste}
+	\label{tab:sudeste}
+	\scriptsize
+	\begin{tabular}{@{\extracolsep{3pt}} l p{2.75cm} r p{2.75cm} r p{2.75cm} r}
+		\toprule
+		UF & Curso mais demandado & \# vagas & 2º curso & \# vagas & 3º curso & \# vagas \\
+		\midrule
+		Espírito Santo & Informação e comunicação - Informática & 717 & Informação e comunicação - Desenvolvimento de sistemas & 544 & Informação e comunicação - Informática para internet & 335 \\
+		Minas Gerais & Produção industrial - Açúcar e álcool & 545 & Produção industrial - Plásticos & 442 & Produção industrial - Petroquímica & 425 \\
+		Rio de Janeiro & Gestão e negócios - Secretariado & 633 & Produção industrial - Petroquímica & 613 & Gestão e negócios - Administração & 406 \\
+		São Paulo & Desenvolvimento Educacional e Social - Brinquedoteca & 14.829 & Desenvolvimento Educacional e Social - Alimentação escolar & 12.409 & Desenvolvimento Educacional e Social - Desenvolvimento comunitário & 12.020 \\
+		\bottomrule
+	\end{tabular}
+\end{table}
 
-\node (c1) [container, fit=(parse-selector) (reverse-selector) (parse-data), draw=gray] {};
+\subsection{Região Sul}
+\begin{table}[ht]
+	\centering
+	\caption{Cursos mais demandados e vagas estimadas — Sul}
+	\label{tab:sul}
+	\scriptsize
+	\begin{tabular}{@{\extracolsep{3pt}} l p{2.25cm} r p{2.25cm} r p{2.25cm} r}
+		\toprule
+		UF & Curso mais demandado & \# vagas & 2º curso & \# vagas & 3º curso & \# vagas \\
+		\midrule
+		Paraná & Desenvolvimento Educacional e Social - Desenvolvimento comunitário & 1.420 & Controle e processos industriais - Mecânica de precisão & 606 & Gestão e negócios - Seguros & 584 \\
+		Rio Grande do Sul & Informação e comunicação - Informática & 3.255 & Informação e comunicação - Desenvolvimento de sistemas & 2.729 & Informação e comunicação - Informática para internet & 1.983 \\
+		Santa Catarina & Infraestrutura - Transporte aquaviário & 643 & Gestão e negócios - Recursos humanos & 408 & Gestão e negócios - Administração & 382 \\
+		\bottomrule
+	\end{tabular}
+\end{table}
 
-\node (c2) [container, fit=(identify-standard) (fetch-constraints), draw=gray] {};
-
-\node (c3) [container, fit=(positive) (negative)] {};
-
-\node (c4) [container, fit=(references) (rules)] {};
-
-\node (c0) [container, fit=(log-topics) (c1) (c2) (check-constraints), inner ysep=6mm, yshift=-2mm] {};
-\node (t0) [label, above=2mm of c0, xshift=-4cm] {Event poisoning?};
-
-\draw [arrow] (logs) -- (log-topics);
-\draw [arrow] (log-topics) -| (parse-selector);
-\draw [arrow] (log-topics) -- (parse-data);
-\draw [arrow] (parse-selector) -- (reverse-selector);
-\draw [arrow] (reverse-selector) -- (signature);
-\draw [arrow] (signature) -- (identify-standard);
-\draw [arrow] (parse-data) -- (arguments);
-% \draw [arrow] (arguments) |- (identify-standard);
-\draw [arrow] (arguments) -- (check-constraints);
-\draw [arrow] (identify-standard) -- (fetch-constraints);
-\draw [arrow] (fetch-constraints) |- (check-constraints);
-\draw [arrow] (references) -- (identify-standard);
-\draw [arrow] (rules) -- (fetch-constraints);
-\draw [arrow] (storage) -- +(0,-9cm) -| (check-constraints);
-\draw [arrow] (check-constraints) -| node[label, near start, above] {no} (positive);
-\draw [arrow] (check-constraints) -- node[label, near start, right] {yes} (negative);
-
-\draw [arrow] (logs) edge [loop above] node[label, above] {Iterate} ();
-
-\end{tikzpicture}
-\caption{Maecenas hendrerit congue faucibus} \label{fig:duis}
-\end{figure}
+\noindent\textit{Nota}: As estimativas de vagas refletem a necessidade adicional projetada para atender à demanda local por técnicos, servindo como base para a pactuação federativa e o planejamento das redes (estadual, federal, municipal e privada), inclusive para a simulação de cenários com e sem PROPAG.

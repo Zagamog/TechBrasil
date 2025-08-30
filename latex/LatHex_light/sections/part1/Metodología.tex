@@ -1,68 +1,107 @@
 \section{Metodología} 
 
-Lacus ac turpis semper fringilla. Mauris fermentum varius neque, vel congue
-elit tempus quis. Aliquam a nunc in nunc consectetur hendrerit ut quis felis. 
+Com o objetivo de buscar indícios de escassez de força de trabalho especializada, Nascimento (2011) utiliza dados do Caged e da Rais para verificar o comportamento mensal do mercado formal de trabalho para ocupações técnico-científicas. O autor se vale dos diferenciais salariais entre admitidos e desligados e da evolução das taxas de rotatividade como indicadores de escassez. Esse método foi replicado, com a mesma finalidade, por Sousa e Nascimento (2012), por Nascimento (2012) e por Lopes (2013).\footnote{Nascimento (2011) usa o método para identificar focos de escassez de pessoal técnico-científico no Brasil, enquanto que as três obras citadas na sequência o fazem para outros recortes. Sousa e Nascimento (2012) focam nas carreiras técnico-científicas no setor de telecomunicações no Brasil; Nascimento (2012) observam os postos de trabalho altamente demandantes de competências relacionadas à engenharia e ao design nas oito maiores regiões metropolitanas do país. Lopes (2013) estuda as profissões ligadas à engenharia e à arquitetura no estado do Mato Grosso.}
+ 
+Adaptações no método podem, além de aprimorá-lo como ferramenta de identificação de focos de escassez de trabalho especializado, torná-lo útil à tomada de decisões relativas ao Propag. Tendo esse objetivo como bússola, organizamos indicadores, a partir de dados de emprego formal, para identificar sinais recentes de escassez em ocupações de nível técnico e priorizar cursos técnicos por Unidade da Federação (UF). O foco é prático: entregar aos gestores uma lista de cursos/áreas com demanda aquecida, conectada às metas 11a, 11b e 11c do PNE 2026–2035 e utilizável nas pactuações e no planejamento anual.
 
-Quisque id dui magna. Curabitur posuere nisl at magna vehicula aliquam \ref{fig:duis}.
-Duis et suscipit felis. Mauris non justo quis diam gravida placerat condimentum
-ut sapien. Praesent imperdiet libero id est tincidunt ullamcorper.
+Para definir as ocupações de nível técnico a serem analisadas, recorremos à Classificação Brasileira de Ocupações (CBO). A CBO é o sistema de classificação que reconhece, nomeia e codifica os títulos e descreve as características das ocupações do mercado de trabalho brasileiro, sendo simultaneamente uma classificação enumerativa e descritiva. A versão em vigor (de 2002, mas periodicamente atualizada) contém as ocupações do mercado brasileiro, organizadas e descritas por grandes grupos (um dígito), subgrupos principais (dois dígitos), subgrupos (três dígitos), famílias (quatro dígitos) e as ocupações em si (cinco dígitos). Aquelas tomadas na análise são todas as do grande grupo 3, que corresponde aos técnicos de nível médio. A análise parte das ocupações com 3 ou 4 dígitos da CBO, a depender da densidade ocupacional observada.
 
-\begin{figure}[ht]
-\hspace*{-1.6cm}
-\begin{tikzpicture}
+A granularidade territorial das estimativas também precisa variar conforme a densidade populacional e econômica de cada UF. Nos estados com maior volume de admissões e desligamentos mensais, é possível desagregar a análise por região intermediária ou mesmo por região imediata, de acordo com classificação do IBGE. Já nos estados com menor dinamismo ocupacional, a análise se dará no âmbito estadual. Há, portanto, um trade-off entre desagregação territorial e desagregação ocupacional: é necessário haver variação suficiente nos fluxos mensais para que os indicadores gerados tenham validade estatística.
 
-\node (logs) [io] {Logs};
-\node (storage) [io, right=2cm of logs] {Storage};
-\node (log-topics) [io, below=1cm of logs] {Log: topics, data};
+Para este relatório, nossa decisão foi apresentar resultados agregados para estados e o Distrito Federal, tomando a CBO a três dígitos. Com esse procedimento, pudemos elaborar uma plataforma interativa que fornece informações úteis para todas as UFs. 
 
-\node (parse-data) [block, below=1cm of log-topics] {Parse event arguments};
-\node (arguments) [io, below=2.7cm of parse-data] {Event arguments};
+Os dados necessários para o cálculo dos indicadores usados na análise são gratuitos e de fácil acesso a gestores estaduais. Estão disponíveis via o Programa de Disseminação de Estatísticas do Trabalho (PDET), do Ministério do Trabalho e Emprego (MTE). São dois os registros administrativos a que recorremos para o método ora proposto: o Cadastro Geral de Empregados e Desempregados (Caged) e a Relação Anual de Informações Sociais (Rais). 
 
-\node (parse-selector) [block, left=2cm of parse-data] {Parse event selector};
-\node (reverse-selector) [block, below=1cm of parse-selector] {Reverse selector};
-\node (signature) [io, below=1cm of reverse-selector] {Event signature};
+O Caged registra, com periodicidade mensal, informações sobre admissão e desligamento nas firmas de todo o país. Permite observar os fluxos de geração e destruição de emprego ao longo do tempo. O Caged foi a principal fonte de dados utilizada, ao permitir calcular, mês a mês, os salários médios de admissão e de desligamento das variadas ocupações em um determinado recorte geográfico, bem como acompanhar a evolução do saldo líquido de horas contratadas. 
 
-\node (identify-standard) [block, below=1cm of signature] {Identify standard and event};
-\node (fetch-constraints) [block, below=1cm of identify-standard] {Fetch matching constraints};
-\node (check-constraints) [decision, below=4.3cm of arguments] {Constraints?};
+Já a Rais é um registro anual, no qual as firmas de todo o país prestam ao MTE informações detalhadas sobre cada um de seus colaboradores. Essas informações destinam-se a suprir as necessidades de controle da atividade trabalhista no país, prover dados para análises estatísticas acerca do mercado de trabalho e tornar disponível informações às entidades governamentais da área social. Por permitir observar os estoques de postos de trabalho ao final de cada ano, a Rais é a fonte de dados aqui utilizada para calcular os estoques de postos de trabalho. 
 
-\node (references) [io, left=1.6cm of identify-standard] {References};
-\node (rules) [io, left=2cm of fetch-constraints] {Rules};
+Valendo-se dessas duas fontes de dados (Caged e Rais), busca-se identificar os conjuntos de ocupações que apresentam maiores pressões de demanda. Para isso, recorre-se a um indicador da trajetória salarial. Este é o principal indicador utilizado na literatura para identificar desníveis entre oferta e demanda por trabalho especializado, embora informações assimétricas, seleções adversas e falhas de mercado decorrentes da rigidez dos salários, do poder dos sindicatos e de especificidades de cada nicho de mercado de trabalho acarretem limitações ao equilíbrio desses mercados pura e simplesmente pelo mecanismo de preços. 
 
-\node (negative) [io, below=2cm of check-constraints] {False};
-\node (positive) [io, right=2cm of negative] {True};
+A despeito dessas ressalvas, um indicador capaz de servir de proxy para pressão salarial é o mais útil como indicador de primeira ordem do aquecimento de uma ocupação. Observamos, então, o comportamento, ao longo do tempo, dos diferenciais salariais entre admitidos e desligados em cada ocupação. É de se esperar que o salário médio de desligados seja superior ao de admitidos para postos de trabalho que exijam as mesmas qualificações, pois entre os desligados há uma concentração maior de profissionais com mais tempo de carreira, enquanto que entre os admitidos a tendência é que haja uma concentração maior de profissionais mais jovens e menos experientes. Se esse diferencial apresenta uma tendência de diminuição ao longo do tempo (ou seja, se há um comportamento de catching up ao longo do tempo do salário médio de admissão em relação ao de desligamento), há uma sinalização de aquecimento do mercado por aquelas ocupações naquele recorte geográfico. 
 
-\node (c1) [container, fit=(parse-selector) (reverse-selector) (parse-data), draw=gray] {};
+Essa sinalização de aquecimento pode vir a indicar escassez relativa das ocupações analisadas, se os diferenciais salariais se tornarem favoráveis aos admitidos (contrariando a lógica geral de que tendem a ganhar menos do que quem foi desligado no mesmo período) ou se o comportamento de catching up vier acompanhado de taxas de rotatividade crescentes. A taxa de rotatividade entra aí como indicador complementar que, quando crescente em paralelo a uma trajetória salarial também crescente, reforça o indício de escassez relativa daquele subgrupo de ocupações na UF analisada. 
 
-\node (c2) [container, fit=(identify-standard) (fetch-constraints), draw=gray] {};
+Como o objetivo desse exercício é oferecer informação a gestores estaduais sobre os cursos de EPT nos quais investir, utilizamos uma matriz de correspondência CBO→CNCT construída pela equipe (KENCHIAN et al, REF UNKNOWN), que associa famílias ocupacionais a cursos técnicos do Catálogo Nacional de Cursos Técnicos (CNCT). Com isso, a plataforma desenvolvida já dá a informação da demanda potencial por curso, não por subgrupo ocupacional.
 
-\node (c3) [container, fit=(positive) (negative)] {};
+O procedimento descrito abaixo resume o método ora apresentado e como que ele dialoga com outras partes deste relatório.
 
-\node (c4) [container, fit=(references) (rules)] {};
+\textbf{(1) O que entra no modelo (fontes e recorte)}
 
-\node (c0) [container, fit=(log-topics) (c1) (c2) (check-constraints), inner ysep=6mm, yshift=-2mm] {};
-\node (t0) [label, above=2mm of c0, xshift=-4cm] {Event poisoning?};
+\begin{itemize}
+	\item Fontes: CAGED (fluxos mensais de admissões e desligamentos, com salários) e RAIS (estoque anual).
+	\item Unidade de análise: UF × curso técnico (CNCT) × mês, com mapeamento CBO→CNCT já incorporado às bases de trabalho.
+	\item Período: 2020–2024 (séries mensais).
+	\item Padronização de salários: ajuste para 44h semanais e uso de média móvel de 12 meses para suavizar oscilações.
+	\item Resultado: um painel mensal que permite comparar cursos/áreas dentro da UF e ao longo do tempo, com métricas homogêneas.
+\end{itemize}
 
-\draw [arrow] (logs) -- (log-topics);
-\draw [arrow] (log-topics) -| (parse-selector);
-\draw [arrow] (log-topics) -- (parse-data);
-\draw [arrow] (parse-selector) -- (reverse-selector);
-\draw [arrow] (reverse-selector) -- (signature);
-\draw [arrow] (signature) -- (identify-standard);
-\draw [arrow] (parse-data) -- (arguments);
-% \draw [arrow] (arguments) |- (identify-standard);
-\draw [arrow] (arguments) -- (check-constraints);
-\draw [arrow] (identify-standard) -- (fetch-constraints);
-\draw [arrow] (fetch-constraints) |- (check-constraints);
-\draw [arrow] (references) -- (identify-standard);
-\draw [arrow] (rules) -- (fetch-constraints);
-\draw [arrow] (storage) -- +(0,-9cm) -| (check-constraints);
-\draw [arrow] (check-constraints) -| node[label, near start, above] {no} (positive);
-\draw [arrow] (check-constraints) -- node[label, near start, right] {yes} (negative);
+\textbf{(2) Sinais de escassez utilizados}
 
-\draw [arrow] (logs) edge [loop above] node[label, above] {Iterate} ();
+O painel mostra, para cada UF × curso (CNCT) × mês, os seguintes dados:
 
-\end{tikzpicture}
-\caption{Maecenas hendrerit congue faucibus} \label{fig:duis}
-\end{figure}
+\begin{enumerate}
+	\item Valorização salarial relativa (sinal de aquecimento): diferença entre salários médios de admitidos e desligados, trabalhada em média móvel 12 meses.
+	\item Rotatividade: soma de admissões e desligamentos em relação ao estoque estimado, também em média móvel 12 meses.
+	\item Intensidade do curso na UF: participação do curso no estoque estadual (para distinguir áreas relevantes de nichos residuais).
+\end{enumerate}
 
+Filtro mínimo de fluxo: para evitar ``falsos positivos'' em séries muito rarefeitas, só são consideradas observações com mais de 30 admissões no mês.
+
+\textbf{(3) Classificação do ``grau de escassez''}
+
+Combinam-se os três sinais em uma tipologia simples (rótulos prontos para uso em painéis/relatórios):
+
+\begin{itemize}
+	\item 3 – Alerta de escassez: valorização alta e rotatividade ao menos mediana e intensidade relevante (acima de cortes pré-definidos), com fluxo > 30;
+	\item 2 – Tendência de escassez: combinações intermediárias dos três sinais, com fluxo > 30;
+	\item 1 – Estável: valorização moderada/baixa ou intensidade pequena, com fluxo > 30;
+	\item 0 – Sem indício: valorização baixa;
+	\item 99 – Sem fluxo suficiente: não passou no filtro > 30.
+\end{itemize}
+
+Essa rotulagem entrega ao gestor uma leitura rápida do ``onde priorizar'' dentro de cada UF.
+
+\textbf{(4) Do ``sinal'' à priorização de cursos (CNCT)}
+
+A leitura gerencial é direta: cursos/áreas classificados como 3 (alerta) ou 2 (tendência) formam a carteira prioritária para expansão e/ou readequação de oferta (por rede e tipo de curso). Essa carteira é o insumo para:
+
+\begin{itemize}
+	\item discutir metas anuais de vagas/matrículas por tipo de oferta (integrado, concomitante, subsequente e EJA-EM+EPT),
+	\item dialogar com outras redes atuantes na UF (federal, estadual/distrital, municipal, privada/Sistema S), com vistas a estabelecer parcerias que evitem sobreposição de esforços, e
+	\item dimensionar custos em dois cenários (com e sem Propag), conforme discussão em outros capítulos deste relatório.
+\end{itemize}
+
+\textbf{(5) Como isso conversa com as metas 11a, 11b e 11c}
+
+\begin{itemize}
+	\item 11a (razão EPT/EM = 50\%): a carteira priorizada indica onde expandir para elevar o numerador (EPT técnica + EJA-EM com EPT), respeitando as projeções do denominador (EM total projetado, sem dupla contagem).
+	\item 11b (subsequentes +50\%): as áreas com sinal ``adulto/ocupacional'' (muita movimentação e valorização) alimentam a trilha de cursos subsequentes, foco direto da meta.
+	\item 11c (≥25\% da EJA articulada à EPT): priorizam-se cursos com empregabilidade clara para públicos EJA, elevando a proporção articulada à EPT.
+\end{itemize}
+
+Em todos os casos, as projeções demográficas e a distribuição por rede (ecossistema da UF) são consideradas nos volumes/cronogramas, mas a identificação de prioridades nasce do sinal empírico descrito acima.
+
+Tal como já implementado na plataforma disponibilizada, o painel gerado a partir do método aqui descrito já é de grande valia para o gestor. Ele pode ser ainda customizado para as necessidades de cada UF. Pode ainda vir a ser aperfeiçoado com a inclusão de indicadores alternativos que podem ser úteis para enriquecer o diagnóstico — por exemplo, podemos usar o coeficiente locacional (CL) para levantar informações sobre especialização regional e usar o saldo líquido de horas contratadas como indicador complementar de aquecimento e substituto da taxa de rotatividade. Essas abordagens não estão ainda implementadas, portanto não compõem os cálculos da versão atualmente disponibilizada do painel. Podem, contudo, ser incorporadas como módulos opcionais em edições futuras, sem alterar a lógica central aqui descrita.\footnote{Bastante utilizado em estudos regionais e urbanos, o coeficiente locacional “ajuda a entender o grau relativo de concentração de um determinado fenômeno em cada região de um país” (Maciente, Pereira e Nascimento, 2013, p. 430). No caso ora em análise, o fenômeno seriam os postos de trabalho relacionados a um determinado grupo ocupacional.Tambem, veja o Capítulo 4 desse relatorio}
+
+Em resumo, o método aqui descrito vale-se da Rais e do Caged para, a partir da CBO e do CNCT, produzir três sinais simples (valorização, rotatividade e intensidade), um filtro mínimo de fluxo e uma classificação gerencial que aponta onde a UF ganha mais ao expandir a EPT — e como isso ajuda a cumprir as metas 11a, 11b e 11c do novo PNE. Extensões como coeficiente locacional e saldo de horas são opcionais para versões futuras, não alterando a entrega principal aos gestores.
+
+A despeito dessas vantagens, o método não pode e não deve ser usado como única fonte de informação no processo de tomada de decisões acerca das vagas a serem abertas. Suas limitações mais evidentes passam por:
+
+\begin{itemize}
+	\item os indicadores propostos olham para o passado. Por mais que o Caged forneça dados de fluxos mensais de emprego e o MTE consiga divulgar atualizações com relativa rapidez, os cursos e as vagas que vierem a ser abertos a partir dos indicadores daí gerados baseiam-se em fotografias tiradas do mercado formal de trabalho no passado – que não necessariamente se perpetuarão no futuro.
+	\item os indicadores propostos não alcançam o trabalho informal. Dados do Caged e da Rais referem-se exclusivamente a postos de trabalho ocupados por celetistas e estatutários. Vínculos não formais não são captados por esses registros administrativos, razão pela qual há que
+	\item os indicadores propostos perdem qualidade à medida que são desagregados.
+\end{itemize}
+
+O planejamento de metas de formação profissional técnica requer estimativas robustas sobre a demanda por ocupações técnicas no território. Para isso, este relatório propõe um método de estimação da demanda com base em dados históricos de mercado de trabalho, em uma abordagem retrospectiva (\textit{backward-looking}), centrada na identificação de sinais persistentes de escassez relativa de profissionais.
+
+A abordagem é considerada \textit{backward-looking} porque se ancora na observação de trajetórias passadas de dois indicadores derivados de microdados do Caged (fluxos) e da Rais (estoque): i) o diferencial salarial entre admitidos e desligados; e ii) a taxa de rotatividade. A convergência ou inversão do diferencial salarial, combinada a uma rotatividade elevada e persistente, sugere desequilíbrios entre oferta e demanda por determinada ocupação, os quais podem justificar intervenções formativas para suprimento dessa escassez. É recomendável, sem embargo, que, adicionalmente à plataforma viabilizada com este método, o gestor busque igualmente indicadores que incorporem mudanças prospectivas nos padrões de emprego.
+
+As limitações apontadas não invalidam as vantagens já enumeradas do painel disponibilizado. Com efeito, ele permite construir um retrato dinâmico da demanda por profissionais técnicos, ajustável às condições econômicas e institucionais locais. Trata-se de uma entrega concreta e objetiva para gestores estaduais, que compreende:
+
+\begin{enumerate}
+	\item Painel/planilha com a tipologia (0/1/2/3) por UF × curso × mês, já em percentis e com filtro de fluxo aplicado;
+	\item Lista priorizada de cursos/áreas por UF para pactuação (com indicação do tipo de oferta e redes preferenciais);
+	\item Insumos para metas anuais (vagas/matrículas) e para os dois cenários financeiros (com/sem Propag), a serem detalhados nos capítulos seguintes.
+\end{enumerate}

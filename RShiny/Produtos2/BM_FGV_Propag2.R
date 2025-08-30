@@ -15,7 +15,7 @@ library(shinycssloaders)
 library(sf)
 library(leaflet)
 library(data.table)
-
+library(plotly)
 
 options(warn=-1) # Too many pesky warnings, terrain, terrain, terrain, pull up, pull up 
 
@@ -33,7 +33,8 @@ sg_ufs <- sort(unique(na.omit(df_censo_UF$SG_UF)))
 
 # Load calculations of PNE meta11a in the script: # Censo_UF_garabed1b.R 
 load("meta11a_opcoes.rda")  
-
+load("df_pibmunis.rda") 
+load("df_residuals_ols.rda")
 # Get State names for display
 nome_ufs <- sort(unique(df_censo_UF$NM_UF))  # Ensure sorted and unique
 
@@ -428,6 +429,8 @@ dynamism_geo <- dynamism_geo[!is.na(NM_UF)]
 
 # Join with latest PIB data for additional economic context
 # Join with latest PIB data for additional economic context
+
+
 latest_pib_data <- df_pibmunis %>%
   filter(Ano == 2021) %>%  # Most recent year
   select(
@@ -468,6 +471,34 @@ dynamism_geo_enhanced <- dynamism_geo %>%
 
 # Replace the original dynamism_geo
 dynamism_geo <- dynamism_geo_enhanced
+
+
+# Dedicated geo keys for informality analysis  
+dft_informality_geo_codes <- as.data.table(df_codes_ibge)[
+  , .(CO_MUN6, CO_MUN, SG_UF, NM_UF, CO_UF, NM_MUN,
+      CO_RGIMED, NM_RGIMED, CO_RGINTM, NM_RGIINTM)
+]
+dft_informality_geo_codes <- unique(dft_informality_geo_codes, by = "CO_MUN6")
+
+######### EPT INFORMAL FORMAL INFORMAL FORMAL## EPT INFORMAL FORMAL INFORMAL FORMAL
+##### EPT INFORMAL FORMAL INFORMAL FORMAL## EPT INFORMAL FORMAL INFORMAL FORMAL
+# Load RAIS cubes (keep separate by year for flexibility)
+load("cubes_2023.rda") 
+load("cubes_2024.rda")
+load("df_pnad_occ.rda")
+
+
+
+
+####################
+
+
+
+
+
+
+
+
 ###UI  UI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UI
 ## UI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UI
 # UI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI U
@@ -667,8 +698,6 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
               div(class = "tab-explanation", "Diagnóstico da escassez de profissionais técnicos por curso e UF com base nos dados de mercado de trabalho (RAIS/CAGED).")
             ),
             
-            
-                
                 
            ### UI - TAB 1 : FINANCE ##################################################
                   tabPanel("Tema Financiero",
@@ -1502,7 +1531,98 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
              )
            )
   ),
-                tabPanel("Estatísticas Relevantes", DTOutput("P8_table"))
+  
+  #### INSERT TAB
+              #  tabPanel("Estatísticas Relevantes", DTOutput("P8_table"))
+  tabPanel("Análise de Desempenho EPT",
+           
+           h3("Análise de Residuais - Desempenho Institucional EPT", style = "color: #1f5673; font-weight: bold;"),
+           
+           div(class = "topbar-info",
+               style = "color: black !important;",
+               p("Este painel analiza o desempenho institucional em EPT através de residuais do modelo econométrico.", 
+                 style = "color: black !important;"),
+               p("Residuais positivos indicam desempenho acima do esperado; negativos indicam desempenho abaixo do esperado.", 
+                 style = "color: black !important;"),
+               p("Use os filtros para comparar estados em programas específicos e acompanhar evolução temporal.", 
+                 style = "color: black !important;")
+           ),
+           
+           sidebarLayout(
+             sidebarPanel(
+               width = 3,
+               
+               h4("Controles Temporais", style = "color: #1f5673;"),
+               
+               sliderInput(
+                 "tab_resi_year", "Ano:",
+                 min = 2011, max = 2021, value = 2016, step = 1
+               ),
+               
+               hr(),
+               h4("Filtros de Programa", style = "color: #1f5673;"),
+               
+               # Replace the selectInput widgets with pickerInput for multiple selection:
+               
+               pickerInput("tab_resi_dependency",
+                           label = h5("Dependência Administrativa:", style = "color: black;"),
+                           choices = c("Federal" = "Federal",
+                                       "Estadual" = "Estadual", 
+                                       "Municipal" = "Municipal",
+                                       "Privada" = "Privada"),
+                           selected = "Federal",
+                           multiple = TRUE,
+                           options = list(`actions-box` = TRUE)),
+               
+               pickerInput("tab_resi_sector",
+                           label = h5("Setor Econômico:", style = "color: black;"),
+                           choices = c("Agricultura" = "agriculture",
+                                       "Indústria" = "industry",
+                                       "Serviços" = "services", 
+                                       "Administração" = "administration"),
+                           selected = "industry",
+                           multiple = TRUE,
+                           options = list(`actions-box` = TRUE)),
+               hr(),
+               h4("Configuração do Gráfico", style = "color: #1f5673;"),
+               
+               selectInput("tab_resi_yaxis",
+                           label = h5("Eixo Y:", style = "color: black;"),
+                           choices = c("PIB per Capita" = "pib_per_capita",
+                                       "Alinhamento Setorial" = "sector_alignment"),
+                           selected = "pib_per_capita"),
+               
+               pickerInput(
+                 "tab_resi_states", "Estados Selecionados:",
+                 choices = NULL,
+                 selected = NULL,
+                 multiple = TRUE,
+                 options = list(`actions-box` = TRUE, `live-search` = TRUE)
+               ),
+               
+               hr(),
+               h5("Resumo da Seleção:", style = "color: #1f5673;"),
+               uiOutput("tab_resi_summary")
+             ),
+             
+             mainPanel(
+               width = 9,
+               h4("Desempenho Institucional vs Contexto Econômico", style = "color: #1f5673;"),
+               withSpinner(plotlyOutput("tab_resiPlot", height = "600px")),
+               
+               br(),
+               
+               h4("Dados dos Estados Selecionados", style = "color: #1f5673;"),
+               withSpinner(DTOutput("tab_resiTable"))
+             )
+           )
+  ),
+  
+  #### END TAB
+  # WE INSERT TAB HERE
+  tabPanel("EPT e Informalidae", DTOutput("tab_resiTable"))
+  
+  
     )
   )
 )
@@ -4536,6 +4656,126 @@ output$dyn_table <- renderDT({
     formatStyle("Serviços (%)", backgroundColor = styleInterval(c(30, 50), c("#483D8B", "#6A5ACD", "#9370DB"))) %>%
     formatStyle("Admin (%)", backgroundColor = styleInterval(c(20, 35), c("#8B008B", "#9932CC", "#BA55D3")))  # Dark magenta, dark orchid, medium orchid
 })
+
+### RESIDUALS TAB
+# Update state choices  
+observe({
+  updatePickerInput(session, "tab_resi_states",
+                    choices = setNames(sort(unique(df_residuals_ols$SG_UF)), 
+                                       sort(unique(df_residuals_ols$NM_UF))),
+                    selected = head(sort(unique(df_residuals_ols$SG_UF)), 10))
+})
+
+# Reactive filtered data
+# Update the filtered data reactive to handle multiple selections:
+rkt_residuals_filtered <- reactive({
+  req(input$tab_resi_year, input$tab_resi_dependency, input$tab_resi_sector)
+  
+  df_filtered <- df_residuals_ols %>%
+    filter(ANO == input$tab_resi_year,
+           TP_DEPENDENCIA %in% input$tab_resi_dependency,
+           economic_sector %in% input$tab_resi_sector)
+  
+  if (!is.null(input$tab_resi_states) && length(input$tab_resi_states) > 0) {
+    df_filtered <- df_filtered %>% filter(SG_UF %in% input$tab_resi_states)
+  }
+  
+  return(df_filtered)
+})
+
+
+# Plot output
+output$tab_resiPlot <- renderPlotly({
+  df_plot <- rkt_residuals_filtered()
+  req(nrow(df_plot) > 0)
+  
+  # Calculate fixed axis ranges
+  x_range <- range(df_residuals_ols$residual, na.rm = TRUE)
+  
+  if (input$tab_resi_yaxis == "pib_per_capita") {
+    y_var <- log(df_plot$pib_per_capita)
+    y_title <- "Log PIB per Capita"
+    y_range <- range(log(df_residuals_ols$pib_per_capita), na.rm = TRUE)
+  } else {
+    y_var <- df_plot$sector_alignment
+    y_title <- "Alinhamento Setorial (Ratio)"
+    y_range <- range(df_residuals_ols$sector_alignment, na.rm = TRUE)
+  }
+  
+  # Build title outside layout
+  dep_labels <- paste(input$tab_resi_dependency, collapse = ", ")
+  sector_labels <- c("agriculture" = "Agricultura", "industry" = "Indústria", 
+                     "services" = "Serviços", "administration" = "Administração")
+  selected_sectors <- sector_labels[input$tab_resi_sector]
+  sector_text <- paste(selected_sectors, collapse = ", ")
+  
+  plot_title <- paste0("Predição de Matrículas EPT por Dependência e Setor por UF - ",
+                       dep_labels, " / ", sector_text, " (", input$tab_resi_year, ")")
+  
+  # Map dependencies to shapes and sectors to borders
+  shape_map <- c("Federal" = "circle", "Estadual" = "square", 
+                 "Municipal" = "triangle-up", "Privada" = "diamond")
+  border_map <- c("agriculture" = "red", "industry" = "blue", 
+                  "services" = "green", "administration" = "pink")
+  
+  df_plot$border_color <- border_map[df_plot$economic_sector]
+  
+  p <- plot_ly(df_plot, 
+               x = ~residual, 
+               y = y_var,
+               size = ~QT_MAT_CURSO_TEC,
+               color = ~NM_UF,
+               symbol = ~TP_DEPENDENCIA,
+               symbols = shape_map,
+               type = "scatter",
+               mode = "markers",
+               sizes = c(40, 160),
+               marker = list(opacity = 1,
+                             line = list(width = 2, 
+                                         color = ~border_color))) %>%
+    layout(
+      xaxis = list(title = "Residual (Desempenho vs Predição)", 
+                   range = x_range, zeroline = TRUE),
+      yaxis = list(title = y_title, range = y_range),
+      title = plot_title
+    )
+  
+  return(p)
+})
+
+# Table output with Brazilian formatting
+output$tab_resiTable <- renderDT({
+  df_table <- rkt_residuals_filtered()
+  req(nrow(df_table) > 0)
+  
+  df_display <- df_table %>%
+    select(Estado = NM_UF, Residual = residual, `PIB per Capita` = pib_per_capita,
+           `Alinhamento Setorial` = sector_alignment, `Matrículas` = QT_MAT_CURSO_TEC) %>%
+    mutate(
+      Residual = format(round(Residual, 3), decimal.mark = ","),
+      `PIB per Capita` = format(round(`PIB per Capita`, 1), big.mark = ".", decimal.mark = ","),
+      `Alinhamento Setorial` = format(round(`Alinhamento Setorial`, 3), decimal.mark = ","),
+      `Matrículas` = format(`Matrículas`, big.mark = ".", decimal.mark = ",")
+    )
+  
+  datatable(df_display, options = list(pageLength = 15), rownames = FALSE)
+})
+
+# Summary output
+output$tab_resi_summary <- renderUI({
+  df_summary <- rkt_residuals_filtered()
+  n_states <- nrow(df_summary)
+  n_positive <- sum(df_summary$residual > 0, na.rm = TRUE)
+  
+  tagList(
+    tags$p(paste("Ano:", input$tab_resi_year)),
+    tags$p(paste("Estados selecionados:", n_states)),
+    tags$p(paste("Desempenho superior:", n_positive), style = "color: green;")
+  )
+})
+
+
+
       
 }  
   
