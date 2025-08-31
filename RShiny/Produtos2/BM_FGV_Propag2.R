@@ -492,11 +492,35 @@ default_uf <- "Alagoas"
 
 
 ####################
+##############################################################################################################
+# DETALHE DA OFERTA DATA LOADING (CLEAN VERSION)
+##############################################################################################################
 
+# Load all Censo Escolar technical education data
+load("df_censo_supl_tec23.rda") 
+load("df_censo_supl_tec24.rda")   
+load("df_censo_notin_cnct.rda")
 
+# ===== COMBINE DATASETS =====
+common_cols <- c(
+  "CO_MUN", "ANO", "TP_DEPENDENCIA",
+  "NO_AREA_CURSO_PROFISSIONAL", "NO_CURSO_EDUC_PROFISSIONAL", 
+  "QT_CURSO_TEC", "QT_MAT_CURSO_TEC",
+  "QT_MAT_CURSO_TEC_CT", "QT_MAT_CURSO_TEC_NM",
+  "QT_MAT_CURSO_TEC_CONC", "QT_MAT_TEC_SUBS", "QT_MAT_TEC_EJA"
+)
 
+df_censo_combined <- bind_rows(
+  df_censo_supl_tec23[, common_cols],
+  df_censo_supl_tec24[, common_cols], 
+  df_censo_notin_cnct[, common_cols]
+) %>%
+  left_join(dft_informality_geo_codes, by = "CO_MUN")
 
-
+# ===== DEFAULTS =====
+default_uf_censo <- "Rio Grande do Sul"
+default_year_censo <- 2024
+uf_choices_censo <- sort(unique(dft_informality_geo_codes$NM_UF))
 
 
 
@@ -1625,122 +1649,229 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
   
   
   # EPT e Informalidade Tab UI
-# EPT e Informalidade Tab UI (COMPLETE - Geographic + CBO Hierarchies)
 tabPanel("EPT e Informalidade",
-         # CSS for dark font
-         tags$style(HTML("
-    .well h4 { color: #333333; }
-    .control-label { color: #333333; }
-    .radio label, .checkbox label { color: #333333; }
-    .form-control { color: #333333; }
-  ")),
-         
-         fluidRow(
-           # Left Panel - Filters
-           column(4,
-                  wellPanel(
-                    h4("Filtros Temporais e Geográficos"),
-                    
-                    # Year selector
-                    radioButtons("informality_year", "Ano:",
-                                 choices = c("2023" = 2023, "2024" = 2024),
-                                 selected = 2023, inline = TRUE),
-                    
-                    radioButtons("map_employment_type", "Métrica do Mapa:",
-                                 choices = c("Vínculos Formais" = "formal", 
-                                             "Vínculos Totais" = "total"),
-                                 selected = "total", inline = TRUE),
-                    # Geographic hierarchy (4 levels)
-                    pickerInput("informality_uf", 
-                                label = "Selecionar Estado(s) (UF):",
-                                choices = uf_choices_all,  # Set directly, not NULL
-                                options = list(`actions-box` = TRUE, `live-search` = TRUE),
-                                multiple = TRUE,
-                                selected = default_uf),  # Set directly, not in server
-                    
-                    pickerInput("informality_reg_inter",
-                                label = "Selecionar Região(ões) Geográfica(s) Intermediária(s):",
-                                choices = character(0),
-                                options = list(`actions-box` = TRUE, `live-search` = TRUE),
-                                multiple = TRUE),
-                    
-                    pickerInput("informality_reg_imed",
-                                label = "Selecionar Região(ões) Geográfica(s) Imediata(s):",
-                                choices = character(0),
-                                options = list(`actions-box` = TRUE, `live-search` = TRUE),
-                                multiple = TRUE),
-                    
-                    pickerInput("informality_municipio",
-                                label = "Selecionar Município(s):",
-                                choices = character(0),
-                                options = list(`actions-box` = TRUE, `live-search` = TRUE),
-                                multiple = TRUE),
-                    
-                    hr(),
-                    h4("Filtros Ocupacionais"),
-                    
-                    # CBO hierarchy (4 levels - matching geographic pattern)
-                    pickerInput("cbo_grande_grupo",
-                                label = "Grande Grupo:",
-                                choices = NULL,
-                                options = list(`actions-box` = TRUE, `live-search` = TRUE),
-                                multiple = TRUE),
-                    
-                    pickerInput("cbo_grupo_primario", 
-                                label = "Grupo Primário:",
-                                choices = character(0),
-                                options = list(`actions-box` = TRUE, `live-search` = TRUE),
-                                multiple = TRUE),
-                    
-                    pickerInput("cbo_subgrupo",
-                                label = "Subgrupo:",
-                                choices = character(0),
-                                options = list(`actions-box` = TRUE, `live-search` = TRUE),
-                                multiple = TRUE),
-                    
-                    pickerInput("cbo_familia",
-                                label = "Família:",
-                                choices = character(0),
-                                options = list(`actions-box` = TRUE, `live-search` = TRUE),
-                                multiple = TRUE),
-                    
-                    # Occupation level selector
-                    pickerInput("nivel_ocupacao", 
-                                label = "Nível Ocupação:",
-                                choices = NULL,
-                                options = list(`actions-box` = TRUE, `live-search` = TRUE),
-                                multiple = TRUE)
-                  )
+         fluidPage(
+           h3("EPT e Informalidade - Análise de Oportunidades de Formalização", 
+              style = "color: #1f5673; font-weight: bold;"),
+           
+           div(class = "topbar-info",
+               style = "color: black !important;",
+               p("Este painel permite explorar oportunidades de formalização do emprego por meio da análise da educação profissional técnica.", 
+                 style = "color: black !important;"),
+               p("Emprego é classificado em decis (1 a 10) com base no volume de vínculos por município dentro do estado selecionado.", 
+                 style = "color: black !important;"),
+               p("Use os filtros hierárquicos para navegar entre níveis geográficos e identificar prioridades para investimento EPT.",
+                 style = "color: black !important;")
            ),
            
-           # Right Panel - Map and Table
-           column(8,
-                  fluidRow(
-                    column(12,
-                           wellPanel(
-                             h4("Resumo da Seleção", style = "color: #333333;"),
-                             verbatimTextOutput("informality_summary")
-                           )
-                    )
-                  ),
-                  
-                  leafletOutput("informality_map", height = "450px"),
-                  br(),
-                  
-                  fluidRow(
-                    column(6,
-                           h4("Detalhamento por Município/Região", style = "color: #333333;")
-                    ),
-                    column(6, style = "text-align: right;",
-                           downloadButton("download_informality_data", "Baixar Dados", 
-                                          class = "btn-primary btn-sm")
-                    )
-                  ),
-                  
-                  DTOutput("informality_table")
+           sidebarLayout(
+             sidebarPanel(
+               width = 3,
+               
+               h4("Filtros Temporais e Geográficos", style = "color: #1f5673;"),
+               
+               # Year selector
+               div(style = "margin-bottom: 15px;",
+                   tags$style(HTML("
+              .radio label { color: black !important; }
+              .radio input[type='radio'] + span { color: black !important; }
+            ")),
+                   radioButtons("informality_year", "Ano:",
+                                choices = c("2023" = 2023, "2024" = 2024),
+                                selected = 2023, inline = TRUE)
+               ),
+               
+               radioButtons("map_employment_type", 
+                            label = h5("Métrica do Mapa:", style = "color: black; margin-bottom: 8px;"),
+                            choices = c("Vínculos Formais" = "formal", 
+                                        "Vínculos Totais" = "total"),
+                            selected = "total", inline = FALSE),
+               
+               # Geographic hierarchy
+               pickerInput("informality_uf", 
+                           "UF(s):",
+                           choices = uf_choices_all,
+                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                           multiple = TRUE,
+                           selected = default_uf),
+               
+               pickerInput("informality_reg_inter",
+                           "Região(ões) Intermediária(s):",
+                           choices = character(0),
+                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                           multiple = TRUE),
+               
+               pickerInput("informality_reg_imed",
+                           "Região(ões) Imediata(s):",
+                           choices = character(0),
+                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                           multiple = TRUE),
+               
+               pickerInput("informality_municipio",
+                           "Município(s):",
+                           choices = character(0),
+                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                           multiple = TRUE),
+               
+               hr(),
+               h4("Filtros Ocupacionais", style = "color: #1f5673;"),
+               
+               pickerInput("cbo_grande_grupo",
+                           "Grande Grupo:",
+                           choices = NULL,
+                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                           multiple = TRUE),
+               
+               pickerInput("cbo_grupo_primario", 
+                           "Grupo Primário:",
+                           choices = character(0),
+                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                           multiple = TRUE),
+               
+               pickerInput("cbo_subgrupo",
+                           "Subgrupo:",
+                           choices = character(0),
+                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                           multiple = TRUE),
+               
+               pickerInput("cbo_familia",
+                           "Família:",
+                           choices = character(0),
+                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                           multiple = TRUE),
+               
+               pickerInput("nivel_ocupacao", 
+                           "Nível Ocupação:",
+                           choices = NULL,
+                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                           multiple = TRUE),
+               
+               hr(),
+               h5("Resumo da Seleção:", style = "color: #1f5673;"),
+               uiOutput("informality_summary")
+             ),
+             
+             mainPanel(
+               width = 9,
+               fluidRow(
+                 column(12,
+                        h4("Mapa de Emprego por Decil", style = "color: #1f5673;"),
+                        withSpinner(leafletOutput("informality_map", height = "500px"))
+                 )
+               ),
+               
+               br(),
+               
+               fluidRow(
+                 column(12,
+                        h4("Detalhamento por Município/Região", style = "color: #1f5673;"),
+                        withSpinner(DTOutput("informality_table"))
+                 )
+               )
+             )
+           )
+         )
+),
+
+tabPanel("Detalhe da Oferta",
+         fluidPage(
+           h3("Detalhe da Oferta - Censo Escolar EPT", 
+              style = "color: #1f5673; font-weight: bold;"),
+           
+           div(class = "topbar-info",
+               style = "color: black !important;",
+               p("Este painel apresenta dados detalhados de matrículas em educação profissional técnica por eixo tecnológico e curso.", 
+                 style = "color: black !important;"),
+               p("Dados do Censo Escolar 2023-2024 com informações por dependência administrativa e modalidades de ensino.", 
+                 style = "color: black !important;"),
+               p("Use os filtros hierárquicos para navegar entre níveis geográficos e dependências administrativas.",
+                 style = "color: black !important;")
+           ),
+           
+           sidebarLayout(
+             sidebarPanel(
+               width = 3,
+               
+               h4("Filtros Temporais", style = "color: #1f5673;"),
+               
+               # Year selector
+               div(style = "margin-bottom: 15px;",
+                   tags$style(HTML("
+              .radio label { color: black !important; }
+              .radio input[type='radio'] + span { color: black !important; }
+            ")),
+                   radioButtons("censo_year", "Ano:",
+                                choices = c("2023" = 2023, "2024" = 2024),
+                                selected = default_year_censo, inline = TRUE)
+               ),
+               
+               hr(),
+               h4("Filtros Geográficos", style = "color: #1f5673;"),
+               
+               # Geographic hierarchy
+               pickerInput("censo_uf", 
+                           "UF(s):",
+                           choices = uf_choices_censo,
+                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                           multiple = TRUE,
+                           selected = default_uf_censo),
+               
+               pickerInput("censo_reg_inter",
+                           "Região(ões) Intermediária(s):",
+                           choices = character(0),
+                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                           multiple = TRUE),
+               
+               pickerInput("censo_reg_imed",
+                           "Região(ões) Imediata(s):",
+                           choices = character(0),
+                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                           multiple = TRUE),
+               
+               pickerInput("censo_municipio",
+                           "Município(s):",
+                           choices = character(0),
+                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                           multiple = TRUE),
+               
+               hr(),
+               h4("Filtros Administrativos", style = "color: #1f5673;"),
+               
+               # In UI - update the dependency picker:
+               pickerInput("censo_dependencia",
+                           "Dependência Administrativa:",
+                           choices = c("Federal" = "1", "Estadual" = "2", "Municipal" = "3", "Privada" = "4"),  # Names shown, numbers as values
+                           options = list(`actions-box` = TRUE),
+                           multiple = TRUE,
+                           selected = c("1", "2", "3", "4"))
+               
+             ),
+             
+             mainPanel(
+               width = 9,
+               
+               # Table 1a - Eixo Level
+               fluidRow(
+                 column(12,
+                        h4("1a - Matrículas por Eixo Tecnológico", style = "color: #1f5673;"),
+                        withSpinner(DTOutput("censo_table_eixo"))
+                 )
+               ),
+               
+               br(),
+               
+               # Table 1b - Curso Level  
+               fluidRow(
+                 column(12,
+                        h4("1b - Matrículas por Curso", style = "color: #1f5673;"),
+                        withSpinner(DTOutput("censo_table_curso"))
+                 )
+               )
+             )
            )
          )
 )
+
   
   
   
@@ -5276,8 +5407,179 @@ output$informality_summary <- renderText({
 })
 
 
+# --- Geographic Hierarchy Updates for Censo Tab ---
+##############################################################################################################
+## CENSO TAB ####CENSO TAB ############################ CENSO TAB## CENSO TAB ####CENSO TAB ############################ CENSO TAB
+## CENSO TAB ####CENSO TAB ############################ CENSO TAB## CENSO TAB ####CENSO TAB ############################ CENSO TAB
+## CENSO TAB ####CENSO TAB ############################ CENSO TAB## CENSO TAB ####CENSO TAB ############################ CENSO TAB
+# Update Intermediate Region choices based on UF selection
+# --- Simplified Geographic Updates ---
+observeEvent(input$censo_uf, {
+  if (is.null(input$censo_uf) || length(input$censo_uf) == 0) {
+    choices <- character(0)
+  } else {
+    choices <- unique(dft_informality_geo_codes[NM_UF %in% input$censo_uf, NM_RGIMED])
+    choices <- sort(choices[!is.na(choices)])
+  }
+  updatePickerInput(session, "censo_reg_inter", choices = choices, selected = choices)
+})
 
-      
+observeEvent(input$censo_reg_inter, {
+  if (is.null(input$censo_reg_inter) || length(input$censo_reg_inter) == 0) {
+    choices <- character(0)  
+  } else {
+    choices <- unique(dft_informality_geo_codes[NM_RGIMED %in% input$censo_reg_inter, NM_RGIINTM])
+    choices <- sort(choices[!is.na(choices)])
+  }
+  updatePickerInput(session, "censo_reg_imed", choices = choices, selected = choices)
+})
+
+
+# Add missing observeEvent for municipality updates
+observeEvent(input$censo_reg_imed, {
+  if (is.null(input$censo_reg_imed) || length(input$censo_reg_imed) == 0) {
+    choices <- character(0)
+  } else {
+    choices <- unique(dft_informality_geo_codes[NM_RGIINTM %in% input$censo_reg_imed, NM_MUN])
+    choices <- sort(choices[!is.na(choices)])
+  }
+  updatePickerInput(session, "censo_municipio", choices = choices, selected = choices)
+})
+
+# --- Simplified Main Reactive ---
+# --- Main Reactive Data ---
+rkt_censo_filtered <- reactive({
+  req(input$censo_year)
+  
+  data <- df_censo_combined %>%
+    filter(ANO == input$censo_year)  # Use dplyr filter, not data.table syntax
+  
+  if (!is.null(input$censo_dependencia) && length(input$censo_dependencia) > 0) {
+    data <- data %>% filter(TP_DEPENDENCIA %in% input$censo_dependencia)
+  }
+  
+  if (!is.null(input$censo_uf) && length(input$censo_uf) > 0) {
+    data <- data %>% filter(NM_UF %in% input$censo_uf)
+  }
+  
+  return(data)
+})
+
+# --- Table 1a - Eixo Level ---
+output$censo_table_eixo <- renderDT({
+  data <- rkt_censo_filtered()
+  req(nrow(data) > 0)
+  
+  # Include ALL modality columns
+  eixo_summary <- data %>%
+    group_by(Eixo = NO_AREA_CURSO_PROFISSIONAL) %>%
+    summarise(
+      Cursos = sum(QT_CURSO_TEC, na.rm = TRUE),
+      `Matrículas Total` = sum(QT_MAT_CURSO_TEC, na.rm = TRUE),
+      Integrado = sum(QT_MAT_CURSO_TEC_CT, na.rm = TRUE),
+      `Normal/Magistério` = sum(QT_MAT_CURSO_TEC_NM, na.rm = TRUE),
+      Concomitante = sum(QT_MAT_CURSO_TEC_CONC, na.rm = TRUE),
+      Subsequente = sum(QT_MAT_TEC_SUBS, na.rm = TRUE),
+      `EJA Nível Médio` = sum(QT_MAT_TEC_EJA, na.rm = TRUE),
+      .groups = "drop"
+    ) %>%
+    arrange(desc(`Matrículas Total`))
+  
+  datatable(eixo_summary, rownames = FALSE, extensions = 'Buttons',
+            options = list(pageLength = 12, scrollX = TRUE, dom = 'Bfrtip',
+                           buttons = c('copy', 'csv', 'excel'),
+                           selection = 'multiple'))  # Enable row selection
+})
+
+output$censo_table_eixo <- renderDT({
+  data <- rkt_censo_filtered()
+  req(nrow(data) > 0)
+  
+  # Create dynamic title
+  title_parts <- c()
+  if (!is.null(input$censo_uf)) title_parts <- c(title_parts, paste(input$censo_uf, collapse = ", "))
+  if (!is.null(input$censo_reg_inter) && length(input$censo_reg_inter) > 0) {
+    title_parts <- c(title_parts, paste(input$censo_reg_inter, collapse = ", "))
+  }
+  dynamic_title <- if(length(title_parts) > 0) paste(title_parts, collapse = " - ") else "Brasil"
+  
+  eixo_data <- data %>%
+    group_by(Eixo = NO_AREA_CURSO_PROFISSIONAL) %>%
+    summarise(
+      Cursos = sum(QT_CURSO_TEC, na.rm = TRUE),
+      `Matrículas Total` = sum(QT_MAT_CURSO_TEC, na.rm = TRUE),
+      Integrado = sum(QT_MAT_CURSO_TEC_CT, na.rm = TRUE),
+      `Normal/Magistério` = sum(QT_MAT_CURSO_TEC_NM, na.rm = TRUE),
+      Concomitante = sum(QT_MAT_CURSO_TEC_CONC, na.rm = TRUE),
+      Subsequente = sum(QT_MAT_TEC_SUBS, na.rm = TRUE),
+      `EJA Nível Médio` = sum(QT_MAT_TEC_EJA, na.rm = TRUE),
+      .groups = "drop"
+    ) %>%
+    arrange(desc(`Matrículas Total`))
+  
+  # Add simple total row
+  total_row <- data.frame(
+    Eixo = "TOTAL",
+    Cursos = sum(eixo_data$Cursos),
+    `Matrículas Total` = sum(eixo_data$`Matrículas Total`),
+    Integrado = sum(eixo_data$Integrado),
+    `Normal/Magistério` = sum(eixo_data$`Normal/Magistério`),
+    Concomitante = sum(eixo_data$Concomitante),
+    Subsequente = sum(eixo_data$Subsequente),
+    `EJA Nível Médio` = sum(eixo_data$`EJA Nível Médio`)
+  )
+  
+  final_data <- bind_rows(total_row, eixo_data)
+  
+  # Find "Ambiente e saude" row for default selection
+  ambiente_row <- which(grepl("Ambiente e saude", final_data$Eixo, ignore.case = TRUE))
+  default_selection <- if(length(ambiente_row) > 0) ambiente_row else 2  # Default to row 2 if not found
+  
+  datatable(final_data, rownames = FALSE, extensions = 'Buttons',
+            caption = htmltools::tags$caption(
+              style = "caption-side: top; text-align: left; color: #ffd700; font-size: 16px; font-weight: bold; margin-bottom: 10px;",  # Yellow font
+              paste("Matrículas por Eixo Tecnológico -", dynamic_title)
+            ),
+            options = list(pageLength = 15, scrollX = TRUE, dom = 'Bfrtip',
+                           buttons = c('copy', 'csv', 'excel'),
+                           selection = list(mode = 'multiple', selected = default_selection - 1)  # -1 for 0-based indexing
+            )) 
+  # Remove special total row formatting - let it look normal
+})
+
+output$censo_table_curso <- renderDT({
+  data <- rkt_censo_filtered()
+  selected_rows <- input$censo_table_eixo_rows_selected
+  
+  req(nrow(data) > 0)
+  req(!is.null(selected_rows) && length(selected_rows) > 0)  # Require selection
+  
+  # Get eixo data to find selected eixos
+  eixo_list <- data %>%
+    group_by(Eixo = NO_AREA_CURSO_PROFISSIONAL) %>%
+    summarise(`Matrículas Total` = sum(QT_MAT_CURSO_TEC, na.rm = TRUE), .groups = "drop") %>%
+    arrange(desc(`Matrículas Total`))
+  
+  # Adjust for total row (subtract 1 from selection indices)
+  selected_eixos <- eixo_list$Eixo[selected_rows - 1]  # -1 because total row is first
+  selected_eixos <- selected_eixos[!is.na(selected_eixos)]
+  
+  if (length(selected_eixos) == 0) return(NULL)
+  
+  curso_data <- data %>%
+    filter(NO_AREA_CURSO_PROFISSIONAL %in% selected_eixos) %>%
+    group_by(Eixo = NO_AREA_CURSO_PROFISSIONAL, Curso = NO_CURSO_EDUC_PROFISSIONAL) %>%
+    summarise(`Matrículas Total` = sum(QT_MAT_CURSO_TEC, na.rm = TRUE), .groups = "drop") %>%
+    arrange(Eixo, desc(`Matrículas Total`))
+  
+  datatable(curso_data, rownames = FALSE, extensions = 'Buttons',
+            caption = htmltools::tags$caption(
+              style = "caption-side: top; text-align: left; color: #1f5673; font-size: 16px; font-weight: bold; margin-bottom: 10px;",
+              paste("Cursos para Eixos Selecionados:", paste(selected_eixos, collapse = ", "))
+            ),
+            options = list(pageLength = 15, scrollX = TRUE, dom = 'Bfrtip',
+                           buttons = c('copy', 'csv', 'excel')))
+})
 }  
   
 
