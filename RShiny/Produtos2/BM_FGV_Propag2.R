@@ -487,6 +487,8 @@ dft_informality_geo_codes <- unique(dft_informality_geo_codes, by = "CO_MUN6")
 load("df_cbocod_mun23.rda")  
 load("df_cbocod_mun24.rda")
 
+uf_choices_all <- sort(unique(dft_informality_geo_codes$NM_UF))
+default_uf <- "Alagoas"
 
 
 ####################
@@ -1619,7 +1621,127 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
   
   #### END TAB
   # WE INSERT TAB HERE
-  tabPanel("EPT e Informalidae", DTOutput("tab_resiTable"))
+#  tabPanel("EPT e Informalidae", DTOutput("tab_resiTable"))
+  
+  
+  # EPT e Informalidade Tab UI
+# EPT e Informalidade Tab UI (COMPLETE - Geographic + CBO Hierarchies)
+tabPanel("EPT e Informalidade",
+         # CSS for dark font
+         tags$style(HTML("
+    .well h4 { color: #333333; }
+    .control-label { color: #333333; }
+    .radio label, .checkbox label { color: #333333; }
+    .form-control { color: #333333; }
+  ")),
+         
+         fluidRow(
+           # Left Panel - Filters
+           column(4,
+                  wellPanel(
+                    h4("Filtros Temporais e Geográficos"),
+                    
+                    # Year selector
+                    radioButtons("informality_year", "Ano:",
+                                 choices = c("2023" = 2023, "2024" = 2024),
+                                 selected = 2023, inline = TRUE),
+                    
+                    radioButtons("map_employment_type", "Métrica do Mapa:",
+                                 choices = c("Vínculos Formais" = "formal", 
+                                             "Vínculos Totais" = "total"),
+                                 selected = "total", inline = TRUE),
+                    # Geographic hierarchy (4 levels)
+                    pickerInput("informality_uf", 
+                                label = "Selecionar Estado(s) (UF):",
+                                choices = uf_choices_all,  # Set directly, not NULL
+                                options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                                multiple = TRUE,
+                                selected = default_uf),  # Set directly, not in server
+                    
+                    pickerInput("informality_reg_inter",
+                                label = "Selecionar Região(ões) Geográfica(s) Intermediária(s):",
+                                choices = character(0),
+                                options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                                multiple = TRUE),
+                    
+                    pickerInput("informality_reg_imed",
+                                label = "Selecionar Região(ões) Geográfica(s) Imediata(s):",
+                                choices = character(0),
+                                options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                                multiple = TRUE),
+                    
+                    pickerInput("informality_municipio",
+                                label = "Selecionar Município(s):",
+                                choices = character(0),
+                                options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                                multiple = TRUE),
+                    
+                    hr(),
+                    h4("Filtros Ocupacionais"),
+                    
+                    # CBO hierarchy (4 levels - matching geographic pattern)
+                    pickerInput("cbo_grande_grupo",
+                                label = "Grande Grupo:",
+                                choices = NULL,
+                                options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                                multiple = TRUE),
+                    
+                    pickerInput("cbo_grupo_primario", 
+                                label = "Grupo Primário:",
+                                choices = character(0),
+                                options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                                multiple = TRUE),
+                    
+                    pickerInput("cbo_subgrupo",
+                                label = "Subgrupo:",
+                                choices = character(0),
+                                options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                                multiple = TRUE),
+                    
+                    pickerInput("cbo_familia",
+                                label = "Família:",
+                                choices = character(0),
+                                options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                                multiple = TRUE),
+                    
+                    # Occupation level selector
+                    pickerInput("nivel_ocupacao", 
+                                label = "Nível Ocupação:",
+                                choices = NULL,
+                                options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                                multiple = TRUE)
+                  )
+           ),
+           
+           # Right Panel - Map and Table
+           column(8,
+                  fluidRow(
+                    column(12,
+                           wellPanel(
+                             h4("Resumo da Seleção", style = "color: #333333;"),
+                             verbatimTextOutput("informality_summary")
+                           )
+                    )
+                  ),
+                  
+                  leafletOutput("informality_map", height = "450px"),
+                  br(),
+                  
+                  fluidRow(
+                    column(6,
+                           h4("Detalhamento por Município/Região", style = "color: #333333;")
+                    ),
+                    column(6, style = "text-align: right;",
+                           downloadButton("download_informality_data", "Baixar Dados", 
+                                          class = "btn-primary btn-sm")
+                    )
+                  ),
+                  
+                  DTOutput("informality_table")
+           )
+         )
+)
+  
   
   
     )
@@ -4120,7 +4242,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
       rgi_choices <- sort(unique(uf_filtered$NM_RGIINTM))
       updatePickerInput(session, "rgintm_apl", choices = rgi_choices, selected = rgi_choices)
     }
-  }, ignoreInit = FALSE)
+  }, ignoreInit = TRUE)
   
   # Update Região Imediata based on Região Intermediária
   observeEvent(input$rgintm_apl, {
@@ -4132,7 +4254,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
       rgimed_choices <- sort(unique(rgi_filtered$NM_RGIMED))
       updatePickerInput(session, "rgimed_apl", choices = rgimed_choices, selected = rgimed_choices)
     }
-  }, ignoreInit = FALSE)
+  }, ignoreInit = TRUE)
   
   # Update municipalities based on Região Imediata
   observeEvent(input$rgimed_apl, {
@@ -4143,7 +4265,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
       mun_choices <- sort(unique(rgimed_filtered$NM_MUN))
       updatePickerInput(session, "mun_apl", choices = mun_choices, selected = character(0))
     }
-  }, ignoreInit = FALSE)
+  }, ignoreInit = TRUE)
   
   # Filtered APL data reactive
   rkt_filtered_apl_data <- reactive({
@@ -4482,7 +4604,7 @@ observeEvent(input$uf_dyn, {
     rgi_choices <- sort(unique(uf_filtered$NM_RGIINTM))
     updatePickerInput(session, "rgintm_dyn", choices = rgi_choices, selected = rgi_choices)
   }
-}, ignoreInit = FALSE)
+}, ignoreInit = TRUE)
 
 observeEvent(input$rgintm_dyn, {
   if (is.null(input$rgintm_dyn) || length(input$rgintm_dyn) == 0) {
@@ -4492,7 +4614,7 @@ observeEvent(input$rgintm_dyn, {
     rgimed_choices <- sort(unique(rgi_filtered$NM_RGIMED))
     updatePickerInput(session, "rgimed_dyn", choices = rgimed_choices, selected = rgimed_choices)
   }
-}, ignoreInit = FALSE)
+}, ignoreInit = TRUE)
 
 observeEvent(input$rgimed_dyn, {
   if (is.null(input$rgimed_dyn) || length(input$rgimed_dyn) == 0) {
@@ -4502,7 +4624,7 @@ observeEvent(input$rgimed_dyn, {
     mun_choices <- sort(unique(rgimed_filtered$NM_MUN))
     updatePickerInput(session, "mun_dyn", choices = mun_choices, selected = character(0))
   }
-}, ignoreInit = FALSE)
+}, ignoreInit = TRUE)
 
 # Filtered dynamism data reactive
 rkt_filtered_dynamism_data <- reactive({
@@ -4771,6 +4893,386 @@ output$tab_resi_summary <- renderUI({
     tags$p(paste("Estados selecionados:", n_states)),
     tags$p(paste("Desempenho superior:", n_positive), style = "color: green;")
   )
+})
+
+# Server logic for EPT e Informalidade tab
+
+
+
+# Populate initial CBO Grande Grupo choices
+observe({
+  cbo_gragru_choices <- sort(unique(qbq_ocup_cmento1$cbo_gragru))
+  updatePickerInput(session, "cbo_grande_grupo", 
+                    choices = cbo_gragru_choices,
+                    selected = cbo_gragru_choices[3]) # Default: all selected
+})
+
+# Populate initial Nivel Ocupacao choices
+observe({
+  nivel_choices <- sort(unique(qbq_ocup_cmento1$NivelOcupacao))
+  updatePickerInput(session, "nivel_ocupacao", 
+                    choices = nivel_choices,
+                    selected = nivel_choices) # Default: all selected
+})
+
+# --- Geographic Hierarchy Updates ---
+# Update Intermediate Region choices based on UF selection
+observeEvent(input$informality_uf, {
+  current_uf_selection <- input$informality_uf
+  if (is.null(current_uf_selection) || length(current_uf_selection) == 0) {
+    updatePickerInput(session, "informality_reg_inter", 
+                      choices = character(0), selected = character(0))
+  } else {
+    choices <- dft_informality_geo_codes %>%
+      filter(NM_UF %in% current_uf_selection) %>%
+      pull(NM_RGIMED) %>%
+      unique() %>%
+      sort()
+    updatePickerInput(session, "informality_reg_inter", 
+                      choices = choices, selected = choices)
+  }
+})
+
+# Update Immediate Region choices based on Intermediate Region selection
+observeEvent(input$informality_reg_inter, {
+  current_inter_selection <- input$informality_reg_inter
+  if (is.null(current_inter_selection) || length(current_inter_selection) == 0) {
+    updatePickerInput(session, "informality_reg_imed", 
+                      choices = character(0), selected = character(0))
+  } else {
+    choices <- dft_informality_geo_codes %>%
+      filter(NM_RGIMED %in% current_inter_selection) %>%
+      pull(NM_RGIINTM) %>%
+      unique() %>%
+      sort()
+    updatePickerInput(session, "informality_reg_imed", 
+                      choices = choices, selected = choices)
+  }
+})
+
+# Update Municipality choices based on Immediate Region selection
+observeEvent(input$informality_reg_imed, {
+  current_imed_selection <- input$informality_reg_imed
+  if (is.null(current_imed_selection) || length(current_imed_selection) == 0) {
+    updatePickerInput(session, "informality_municipio", 
+                      choices = character(0), selected = character(0))
+  } else {
+    choices <- dft_informality_geo_codes %>%
+      filter(NM_RGIINTM %in% current_imed_selection) %>%
+      pull(NM_MUN) %>%
+      unique() %>%
+      sort()
+    updatePickerInput(session, "informality_municipio", 
+                      choices = choices, selected = choices)
+  }
+})
+
+# --- CBO Hierarchy Updates ---
+# Update Grupo Primário based on Grande Grupo selection
+observeEvent(input$cbo_grande_grupo, {
+  current_gragru_selection <- input$cbo_grande_grupo
+  if (is.null(current_gragru_selection) || length(current_gragru_selection) == 0) {
+    updatePickerInput(session, "cbo_grupo_primario", 
+                      choices = character(0), selected = character(0))
+  } else {
+    choices <- qbq_ocup_cmento1 %>%
+      filter(cbo_gragru %in% current_gragru_selection) %>%
+      pull(cbo_prigru) %>%
+      unique() %>%
+      sort()
+    updatePickerInput(session, "cbo_grupo_primario", 
+                      choices = choices, selected = choices)
+  }
+})
+
+# Update Subgrupo based on Grupo Primário selection
+observeEvent(input$cbo_grupo_primario, {
+  current_prigru_selection <- input$cbo_grupo_primario
+  if (is.null(current_prigru_selection) || length(current_prigru_selection) == 0) {
+    updatePickerInput(session, "cbo_subgrupo", 
+                      choices = character(0), selected = character(0))
+  } else {
+    choices <- qbq_ocup_cmento1 %>%
+      filter(cbo_prigru %in% current_prigru_selection) %>%
+      pull(cbo_subgru) %>%
+      unique() %>%
+      sort()
+    updatePickerInput(session, "cbo_subgrupo", 
+                      choices = choices, selected = choices)
+  }
+})
+
+# Update Família based on Subgrupo selection
+observeEvent(input$cbo_subgrupo, {
+  current_subgru_selection <- input$cbo_subgrupo
+  if (is.null(current_subgru_selection) || length(current_subgru_selection) == 0) {
+    updatePickerInput(session, "cbo_familia", 
+                      choices = character(0), selected = character(0))
+  } else {
+    choices <- qbq_ocup_cmento1 %>%
+      filter(cbo_subgru %in% current_subgru_selection) %>%
+      pull(cbo_familia) %>%
+      unique() %>%
+      sort()
+    updatePickerInput(session, "cbo_familia", 
+                      choices = choices, selected = choices)
+  }
+})
+
+# --- Main Reactive Data ---
+# Get selected year data
+rkt_year_data <- reactive({
+  if (input$informality_year == 2023) {
+    return(df_cbocod_mun23)
+  } else {
+    return(df_cbocod_mun24)
+  }
+})
+
+# Filter employment data by all selections
+rkt_filtered_employment <- reactive({
+  year_data <- rkt_year_data()
+  
+  # Get CBO codes for selected hierarchy level
+  selected_cbos <- NULL
+  
+  if (!is.null(input$cbo_familia) && length(input$cbo_familia) > 0) {
+    # Most specific level - use família selections
+    selected_cbos <- qbq_ocup_cmento1 %>%
+      filter(cbo_familia %in% input$cbo_familia) %>%
+      pull(cbo_4dig)
+  } else if (!is.null(input$cbo_subgrupo) && length(input$cbo_subgrupo) > 0) {
+    # Subgrupo level
+    selected_cbos <- qbq_ocup_cmento1 %>%
+      filter(cbo_subgru %in% input$cbo_subgrupo) %>%
+      pull(cbo_4dig)
+  } else if (!is.null(input$cbo_grupo_primario) && length(input$cbo_grupo_primario) > 0) {
+    # Grupo primário level
+    selected_cbos <- qbq_ocup_cmento1 %>%
+      filter(cbo_prigru %in% input$cbo_grupo_primario) %>%
+      pull(cbo_4dig)
+  } else if (!is.null(input$cbo_grande_grupo) && length(input$cbo_grande_grupo) > 0) {
+    # Grande grupo level
+    selected_cbos <- qbq_ocup_cmento1 %>%
+      filter(cbo_gragru %in% input$cbo_grande_grupo) %>%
+      pull(cbo_4dig)
+  }
+  
+  # Filter by CBO if selected
+  if (!is.null(selected_cbos)) {
+    year_data <- year_data %>%
+      filter(cbo_4dig %in% selected_cbos)
+  }
+  
+  # Filter by Nivel Ocupacao if selected
+  if (!is.null(input$nivel_ocupacao) && length(input$nivel_ocupacao) > 0) {
+    nivel_cbos <- qbq_ocup_cmento1 %>%
+      filter(NivelOcupacao %in% input$nivel_ocupacao) %>%
+      pull(cbo_4dig)
+    year_data <- year_data %>%
+      filter(cbo_4dig %in% nivel_cbos)
+  }
+  
+  # Aggregate by municipality - only the two columns we need
+  aggregated_data <- year_data %>%
+    group_by(CO_MUN6, NM_MUN, SG_UF, NM_UF) %>%
+    summarise(
+      vinculos_formais = sum(vinculos_formais, na.rm = TRUE),
+      vinculos_total = sum(vinculos_total, na.rm = TRUE),
+      .groups = "drop"
+    ) %>%
+    mutate(
+      Taxa_Formalidade = ifelse(vinculos_total > 0, 
+                                vinculos_formais / vinculos_total, 
+                                NA_real_)
+    )
+  
+  return(aggregated_data)
+})
+
+# Calculate deciles within UF
+rkt_muni_deciles <- reactive({
+  employment_data <- rkt_filtered_employment()
+  
+  # Determine employment metric for decile calculation
+  employment_metric <- if (input$map_employment_type == "formal") {
+    "vinculos_formais"
+  } else {
+    "vinculos_total"
+  }
+  
+  # Calculate deciles within each UF
+  decile_data <- employment_data %>%
+    filter(!!sym(employment_metric) > 0) %>%  # Exclude zero employment
+    group_by(NM_UF) %>%
+    mutate(
+      decile = ntile(!!sym(employment_metric), 10)
+    ) %>%
+    ungroup()
+  
+  return(decile_data)
+})
+
+# Geographic filtering for map display
+rkt_map_data <- reactive({
+  decile_data <- rkt_muni_deciles()
+  
+  # Apply geographic filters
+  if (!is.null(input$informality_uf) && length(input$informality_uf) > 0) {
+    decile_data <- decile_data %>%
+      filter(NM_UF %in% input$informality_uf)
+  }
+  
+  # Add geographic filtering via geo codes
+  if (!is.null(input$informality_reg_inter) && length(input$informality_reg_inter) > 0) {
+    mun_codes <- dft_informality_geo_codes %>%
+      filter(NM_RGIMED %in% input$informality_reg_inter) %>%
+      pull(CO_MUN6)
+    decile_data <- decile_data %>%
+      filter(CO_MUN6 %in% mun_codes)
+  }
+  
+  if (!is.null(input$informality_reg_imed) && length(input$informality_reg_imed) > 0) {
+    mun_codes <- dft_informality_geo_codes %>%
+      filter(NM_RGIINTM %in% input$informality_reg_imed) %>%
+      pull(CO_MUN6)
+    decile_data <- decile_data %>%
+      filter(CO_MUN6 %in% mun_codes)
+  }
+  
+  return(decile_data)
+})
+
+# DT filtered data (includes municipality filter)
+rkt_filtered_dt <- reactive({
+  map_data <- rkt_map_data()
+  
+  # Apply municipality filter for DT only
+  if (!is.null(input$informality_municipio) && length(input$informality_municipio) > 0) {
+    map_data <- map_data %>%
+      filter(NM_MUN %in% input$informality_municipio)
+  }
+  
+  return(map_data)
+})
+
+
+
+# Add this temporarily to debug
+
+# --- Outputs ---
+# Map rendering
+output$informality_map <- renderLeaflet({
+  map_data <- rkt_map_data()
+  
+  if (nrow(map_data) == 0) {
+    leaflet() %>% addTiles() %>% setView(lng = -54, lat = -15, zoom = 4)
+  } else {
+    # Get selected UFs for early filtering
+    selected_ufs <- unique(map_data$NM_UF)
+    
+    # CORRECT: Keep the bridge join but filter sf_regioes early
+    map_with_geom <- sf_regioes %>%
+      filter(NM_UF %in% selected_ufs) %>%  # Filter spatial data early (performance)
+      left_join(
+        dft_geo_keys %>% mutate(CO_MUN = as.character(CO_MUN)), 
+        by = "CO_MUN"  # sf_regioes has CO_MUN
+      ) %>%
+      left_join(map_data, by = "CO_MUN6") %>%  # dft_geo_keys provides CO_MUN6
+      filter(!is.na(decile))
+    
+    if (nrow(map_with_geom) == 0) {
+      leaflet() %>% addTiles() %>% setView(lng = -54, lat = -15, zoom = 4)
+    } else {
+      color_palette <- colorFactor(
+        palette = c("#5E4FA2", "#3288BD", "#66C2A5", "#ABDDA4", "#E6F598",
+                    "#FEE08B", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142"),
+        domain = 1:10, na.color = "#CCCCCC"
+      )
+      
+      leaflet(map_with_geom) %>%
+        addTiles() %>%
+        addPolygons(
+          fillColor = ~color_palette(decile),
+          fillOpacity = 0.7,
+          color = "white",
+          weight = 1,
+          popup = ~paste0("<strong>", NM_MUN, "</strong><br>",
+                          "Emprego Total: ", scales::comma(vinculos_total), "<br>",
+                          "Decil: ", decile)
+        ) %>%
+        addLegend("bottomright", pal = color_palette, values = ~decile,
+                  title = "Decil de Emprego", opacity = 1)
+      # Let leaflet auto-fit bounds for performance
+    }
+  }
+})
+
+
+# Data table rendering (FIXED - arrange before select)
+output$informality_table <- renderDT({
+  dt_data <- rkt_filtered_dt()
+  req(nrow(dt_data) > 0)
+  
+  # Fix: arrange BEFORE select, or use renamed columns
+  table_data <- dt_data %>%
+    arrange(desc(vinculos_total)) %>%  # Sort BEFORE renaming columns
+    mutate(
+      UF = NM_UF,
+      Município = NM_MUN,
+      `Vínculos Formais` = formatC(round(vinculos_formais), format="d", big.mark="."),
+      `Vínculos Totais` = formatC(round(vinculos_total), format="d", big.mark="."), 
+      `Taxa Formalidade (%)` = round(Taxa_Formalidade * 100, 1),
+      Decil = decile
+    ) %>%
+    select(UF, Município, `Vínculos Formais`, `Vínculos Totais`, 
+           `Taxa Formalidade (%)`, Decil)
+  
+  datatable(table_data, rownames = FALSE, extensions = 'Buttons',
+            options = list(
+              pageLength = 15, 
+              scrollX = TRUE, 
+              dom = 'Bfrtip',
+              buttons = list(
+                list(extend = "copy", text = "Copiar"),
+                list(extend = "csv", filename = "EPT_Informalidade", text = "CSV"),
+                list(extend = "excel", filename = "EPT_Informalidade", text = "Excel")
+              ),
+              columnDefs = list(
+                list(width = '40px', targets = 0),   # UF
+                list(width = '120px', targets = 1),  # Município  
+                list(width = '80px', targets = c(2, 3)),  # Employment numbers
+                list(width = '70px', targets = 4),   # Formality rate
+                list(width = '50px', targets = 5),   # Decil
+                list(className = 'dt-center', targets = c(2, 3, 4, 5))
+              )
+            ), 
+            class = "stripe nowrap display compact"
+  ) %>%
+    formatStyle("Taxa Formalidade (%)", 
+                backgroundColor = styleInterval(c(40, 70), c("#8B0000", "#B8860B", "#006400"))) %>%
+    formatStyle("Decil", 
+                backgroundColor = styleInterval(1:9, 
+                                                c("#5E4FA2", "#3288BD", "#66C2A5", "#ABDDA4", "#E6F598",
+                                                  "#FEE08B", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142")),
+                color = "white", fontWeight = "bold")
+})
+
+# Summary output
+output$informality_summary <- renderText({
+  map_data <- rkt_map_data()
+  
+  if (nrow(map_data) == 0) {
+    return("Nenhum dado selecionado")
+  }
+  
+  total_munis <- nrow(map_data)
+  total_employment <- sum(map_data$vinculos_total, na.rm = TRUE)
+  avg_formality <- mean(map_data$Taxa_Formalidade, na.rm = TRUE) * 100
+  
+  paste0("Municípios: ", total_munis, "\n",
+         "Emprego Total: ", scales::comma(total_employment), "\n",
+         "Taxa Formalidade Média: ", round(avg_formality, 1), "%")
 })
 
 
