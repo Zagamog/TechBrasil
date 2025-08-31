@@ -35,7 +35,8 @@ process_rais_year <- function(rais_data, year) {
   dt <- as.data.table(rais_data)[
     get("Vínculo Ativo 31/12") == 1 & 
       !is.na(get("CBO Ocupação 2002")) & 
-      get("CBO Ocupação 2002") != ""
+      get("CBO Ocupação 2002") != "" &
+      get("Escolaridade após 2005") %in% c(1:8, -1)  # Include up to superior incompleto
   ]
   
   # Add derived columns

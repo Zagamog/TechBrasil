@@ -473,6 +473,9 @@ dynamism_geo_enhanced <- dynamism_geo %>%
 dynamism_geo <- dynamism_geo_enhanced
 
 
+
+######### EPT INFORMAL FORMAL INFORMAL FORMAL## EPT INFORMAL FORMAL INFORMAL FORMAL
+##### EPT INFORMAL FORMAL INFORMAL FORMAL## EPT INFORMAL FORMAL INFORMAL FORMAL
 # Dedicated geo keys for informality analysis  
 dft_informality_geo_codes <- as.data.table(df_codes_ibge)[
   , .(CO_MUN6, CO_MUN, SG_UF, NM_UF, CO_UF, NM_MUN,
@@ -480,13 +483,9 @@ dft_informality_geo_codes <- as.data.table(df_codes_ibge)[
 ]
 dft_informality_geo_codes <- unique(dft_informality_geo_codes, by = "CO_MUN6")
 
-######### EPT INFORMAL FORMAL INFORMAL FORMAL## EPT INFORMAL FORMAL INFORMAL FORMAL
-##### EPT INFORMAL FORMAL INFORMAL FORMAL## EPT INFORMAL FORMAL INFORMAL FORMAL
-# Load RAIS cubes (keep separate by year for flexibility)
-load("cubes_2023.rda") 
-load("cubes_2024.rda")
-load("df_pnad_occ.rda")
-
+# Load pre-processed municipal employment data
+load("df_cbocod_mun23.rda")  
+load("df_cbocod_mun24.rda")
 
 
 

@@ -52,3 +52,8 @@ create_cbocod_mun <- function(target_year) {
 # Apply to both years
 df_cbocod_mun23 <- create_cbocod_mun(2023)
 df_cbocod_mun24 <- create_cbocod_mun(2024)
+
+
+sum(df_cbocod_mun23$vinculos_total)
+sum(df_cbocod_mun24$vinculos_formais)
+sum(df_cbocod_mun23$vinculos_informais)
