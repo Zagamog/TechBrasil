@@ -836,37 +836,46 @@ tags$div(
       color: #3E4A89;
     }
   ")),
-              
+              # 0
               div(class = "intro-heading",
                   "Introdução: Ferramenta customizada pela UF – Análise e Simulação sobre o PROPAG"
               ),
               
-              
+              # 1
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
                   actionLink("link_demo", "Transição Demográfica: Projeções Populacionais por Faixa Etária")
               ),
               div(class = "tab-explanation", "Análise das mudanças no perfil etário da população brasileira (2000-2070) por região e estado, identificando pontos de transição demográfica relevantes para o planejamento educacional."),
               
-              
+              # 2
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
                   actionLink("link_ept", "Análise EPT: População 15-19 anos e Matrículas EPT/Ensino Médio")
               ),
               div(class = "tab-explanation", "Análise comparativa entre população elegível (15-19 anos) e matrículas na Educação Profissional Técnica (EPT) e Ensino Médio (2007-2035), incluindo acompanhamento das metas do PNE Meta 11 por estado e região."),
               
-              
+              # 3
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
-                  actionLink("link_fin1", "Cenário Financeiro e Simulações de Investimento em EPT e Fundo FEF")
+                  actionLink("link_meta11", "Projeção da Oferta de EPT versus a Meta 11A do PNE Vigente (2014–2024)")
               ),
-              div(class = "tab-explanation", "Projeções de investimento e impacto fiscal no 1º e 5º ano, considerando os aportes à Educação Profissional Técnica (EPT) e ao Fundo de Equalização Fiscal (FEF)."),
+              div(class = "tab-explanation", "Comparação da oferta de educação técnica em relação à meta de triplicar as matrículas de EPTN."),
               
+              # 4
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
-                  actionLink("link_impacto", "Impacto Financeiro do PROPAG: Simulações com e sem Adesão")
+                  actionLink("link_expansao", "Projeções de Expansão de Matrículas de EPT em relação ao Novo PNE (2025–2035)")
               ),
-              div(class = "tab-explanation", "Comparativo da situação financeira e do endividamento do estado em cenários com e sem adesão ao PROPAG."),
+              div(class = "tab-explanation", "Projeção da expansão de matrículas na EPT, com oferta integrada para 50% dos estudantes do ensino médio."),
+              
+               #5  
+              div(class = "tab-link-line",
+                  span(class = "arrow", HTML("▸")),
+                  actionLink("link_oferta", "Detalhe da Oferta - Análise de Matrículas EPT por Eixo e Curso")
+              ),
+              div(class = "tab-explanation", "Dados detalhados do Censo Escolar 2023-2024 com matrículas em educação profissional técnica, segmentados por eixo tecnológico, curso e dependência administrativa, permitindo análise hierárquica por UF e município."),
+              
               
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
@@ -874,17 +883,20 @@ tags$div(
               ),
               div(class = "tab-explanation", "Simulação do valor da contribuição estadual ao FEF, dos aportes recebidos e do fluxo líquido estimado, com base nas decisões de adesão."),
               
-              div(class = "tab-link-line",
-                  span(class = "arrow", HTML("▸")),
-                  actionLink("link_meta11", "Projeção da Oferta de EPT versus a Meta 11A do PNE Vigente (2014–2024)")
-              ),
-              div(class = "tab-explanation", "Comparação da oferta de educação técnica em relação à meta de triplicar as matrículas de EPTN."),
               
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
-                  actionLink("link_expansao", "Projeções de Expansão de Matrículas de EPT em relação ao Novo PNE (2025–2035)")
+                  actionLink("link_impacto", "Impacto Financeiro do PROPAG: Simulações com e sem Adesão")
               ),
-              div(class = "tab-explanation", "Projeção da expansão de matrículas na EPT, com oferta integrada para 50% dos estudantes do ensino médio."),
+              div(class = "tab-explanation", "Comparativo da situação financeira e do endividamento do estado em cenários com e sem adesão ao PROPAG."),
+              
+
+              div(class = "tab-link-line",
+                  span(class = "arrow", HTML("▸")),
+                  actionLink("link_fin1", "Cenário Financeiro e Simulações de Investimento em EPT e Fundo FEF")
+              ),
+              div(class = "tab-explanation", "Projeções de investimento e impacto fiscal no 1º e 5º ano, considerando os aportes à Educação Profissional Técnica (EPT) e ao Fundo de Equalização Fiscal (FEF)."),
+              
               
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
@@ -1126,7 +1138,437 @@ tabPanel("Situação - Meta 11 (vigente)",
          )
 ),            
             
-            
+###############################################################################################################
+# TAB  4 META 11 NOVA $$$### # TAB  4 META 11 NOVA $$$### # TAB  4 META 11 NOVA $$$### # TAB  4 META 11 NOVA $$$###
+###############################################################################################################     
+
+
+tabPanel("Situação - Meta 11a",
+         fluidPage(
+           h3("Meta 11a – Comparação das Definições", style = "color: #1f5673; font-weight: bold;"),
+           
+           fluidRow(
+             column(3,
+                    # Top row: UF selector
+                    selectizeInput(
+                      inputId = "meta11a_nova_uf",
+                      label = "Selecionar UF or Brasil:",
+                      choices = sort(unique(meta11a_opcoes$NM_UF)),
+                      selected = "Rio de Janeiro"
+                    ),
+                    
+                    # Bottom row: Meta selection side by side
+                    fluidRow(
+                      column(6,
+                             selectizeInput(
+                               inputId = "meta11a_target_type",
+                               label = "Tipo de Meta:",
+                               choices = list("Meta PNE 11a (50%)" = "pne11a", 
+                                              "Meta Definida" = "custom"),
+                               selected = "pne11a"
+                             )
+                      ),
+                      column(6,
+                             conditionalPanel(
+                               condition = "input.meta11a_target_type == 'custom'",
+                               numericInput(
+                                 inputId = "meta11a_custom_target",
+                                 label = "Meta (alunos):",
+                                 value = 100000,
+                                 min = 0,
+                                 step = 1000
+                               )
+                             )
+                      )
+                    )
+             ),
+             column(3,
+                    checkboxGroupInput(
+                      inputId = "meta11a_nova_definicoes",
+                      label = "Escolher definições para comparar:",
+                      choices = c("Meta11a_opcao1", "Meta11a_opcao2", "Meta11a_opcao3"),
+                      selected = c("Meta11a_opcao1", "Meta11a_opcao2", "Meta11a_opcao3"),
+                      inline = TRUE
+                    )
+             ),
+             column(3,
+                    selectInput(
+                      inputId = "meta11a_target_year",
+                      label = "Ano Alvo para atingir meta:",
+                      choices = 2025:2035,
+                      selected = 2030
+                    )
+             ),
+             column(3,
+                    sliderInput(
+                      inputId = "ensino_slope_factor",
+                      label = "Ajuste no crescimento do EM:",
+                      min = 0.5, max = 1.5, step = 0.1, value = 1
+                    )
+             )
+           ),
+           
+           plotOutput("meta11a_nova_plot", height = "600px")
+         )
+),
+###############################################################################################################
+# TAB  5  ENRLMMENT TAB ENRLMMENT TAB ENRLMMENT TAB ENRLMMENT TAB  ENRLMMENT TAB ENRLMMENT TAB ENRLMMENT TAB  
+###############################################################################################################  
+
+tabPanel("Detalhe da Oferta",
+         fluidPage(
+           h3("Detalhe da Oferta - Censo Escolar EPT", 
+              style = "color: #1f5673; font-weight: bold;"),
+           
+           div(class = "topbar-info",
+               style = "color: black !important;",
+               p("Este painel apresenta dados detalhados de matrículas em educação profissional técnica por eixo tecnológico e curso.", 
+                 style = "color: black !important;"),
+               p("Dados do Censo Escolar 2023-2024 com informações por dependência administrativa e modalidades de ensino.", 
+                 style = "color: black !important;"),
+               p("Use os filtros hierárquicos para navegar entre níveis geográficos e dependências administrativas.",
+                 style = "color: black !important;")
+           ),
+           
+           sidebarLayout(
+             # UI - Remove intermediate/immediate region pickers
+             sidebarPanel(
+               width = 3,
+               
+               h4("Filtros Temporais", style = "color: #1f5673;"),
+               
+               div(style = "margin-bottom: 15px;",
+                   tags$style(HTML("
+        .radio label { color: black !important; }
+        .radio input[type='radio'] + span { color: black !important; }
+      ")),
+                   radioButtons("censo_year", "Ano:",
+                                choices = c("2023" = 2023, "2024" = 2024),
+                                selected = default_year_censo, inline = TRUE)
+               ),
+               
+               hr(),
+               h4("Filtros Geográficos", style = "color: #1f5673;"),
+               
+               pickerInput("censo_uf", 
+                           "UF(s):",
+                           choices = uf_choices_censo,
+                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                           multiple = TRUE,
+                           selected = default_uf_censo),
+               
+               pickerInput("censo_municipio",
+                           "Município(s):",
+                           choices = character(0),
+                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                           multiple = TRUE),
+               
+               hr(),
+               h4("Filtros Administrativos", style = "color: #1f5673;"),
+               
+               pickerInput("censo_dependencia",
+                           "Dependência Administrativa:",
+                           choices = c("Federal" = "1", "Estadual" = "2", "Municipal" = "3", "Privada" = "4"),
+                           options = list(`actions-box` = TRUE),
+                           multiple = TRUE,
+                           selected = c("1", "2", "3", "4"))
+             ),
+             
+             mainPanel(
+               width = 9,
+               
+               # Table 1a - Eixo Level
+               fluidRow(
+                 column(12,
+                        h4("1a - Matrículas por Eixo Tecnológico", style = "color: #1f5673;"),
+                        withSpinner(DTOutput("censo_table_eixo"))
+                 )
+               ),
+               
+               br(),
+               
+               # Table 1b - Curso Level  
+               fluidRow(
+                 column(12,
+                        h4("1b - Matrículas por Curso", style = "color: #1f5673;"),
+                        withSpinner(DTOutput("censo_table_curso"))
+                 )
+               )
+             )
+           )
+         )
+),
+
+
+###############################################################################################################
+# TAB  5  ### UI -FINANCE 1b  ############# UI -FINANCE 1b  ############# UI -FINANCE 1b  ############# UI -FINANCE 1b  
+###############################################################################################################  
+tabPanel(
+  "Finance 1b",
+  fluidPage(
+    h3("Conteúdo em desenvolvimento: Finance 1b",
+       style = "color: #1f5673; font-weight: bold;"),
+    
+    # JS: enforce single selection per group
+    tags$head(
+      tags$script(HTML("
+        $(document).on('shiny:connected', function () {
+          ['A','G','I','J'].forEach(function(dim){
+            $(document).on('click', '#choice_' + dim + ' input[type=checkbox]', function () {
+              var $grp = $('#choice_' + dim);
+              $grp.find('input[type=checkbox]').not(this).prop('checked', false);
+              $(this).trigger('change');
+            });
+          });
+        });
+      "))
+    ),
+    
+    
+    tags$head(
+      tags$script(HTML("
+    // lock/unlock A,G,I when 'Não Adere' is chosen
+    Shiny.addCustomMessageHandler('toggleAGI', function(lock){
+      ['A','G','I'].forEach(function(dim){
+        var $grp = $('#choice_' + dim);
+        $grp.find('input[type=checkbox]').prop('disabled', lock);
+        // optional visual dimming
+        $grp.css('opacity', lock ? 0.35 : 1);
+      });
+    });
+  "))
+    ),
+    
+    tags$head(tags$style(HTML("
+  .pretty input + label {
+    font-size: 16px !important;
+  }
+"))),
+    
+    
+    div(class = "checkbox-dark-panel",
+        # ---- ROW 1: UF + 4 groups + summary (all in one row) ----
+        fluidRow(
+          column(
+            width = 12,
+            div(
+              style = "margin-top: 5px; margin-bottom: 10px; color: #f5f5f5; text-align: justify; font-size: 20px;",
+              tagList(
+                tags$strong("Instruções: "),
+                "Por favor, primeiro, seleccione o seu Estado, e depois, marque as opções relevantes para o seu Estado. ",
+                "À medida que você clicar em uma escolha, o painel à direita mostrará ",
+                "apenas opções válidas que podem ser escolhidas. ",
+                "Você pode começar por qualquer uma das quatro escolhas: ",
+                tags$span(class = "highlighted-note", 
+                          "(i) Abatimento (0%, 10% ou 20%) ; (ii) Aporte ao FEF (1%, 1.5% ou 2%); (iii) Investimento Direto (cinco opções);
+                                     (iv) Taxa de juro (0%, 1% ou 2%)")
+              )
+            )
+          )
+        ),
+        
+        
+        fluidRow(
+          # UF selector
+          column(
+            width = 2,
+            tags$label("Selecione a UF:",
+                       style = "font-weight: bold; color: #f5f5f5; font-size: 16px;"),
+            selectizeInput("uf_select", label = NULL, choices = nome_ufs)
+          ),
+          
+          # Four groups
+          column(
+            width = 8,
+            fluidRow(
+              column(
+                width = 3,
+                tags$label("(iv) Taxa de Juros:",
+                           style = "font-weight: bold; display: block;"),
+                prettyCheckboxGroup(
+                  inputId  = "choice_J",
+                  label    = NULL,
+                  choices  = c("0%" = "J1",
+                               "1%" = "J2",
+                               "2%" = "J3",
+                               "4% (Não Adere)" = "J4"),
+                  selected = character(0),
+                  icon     = icon("check"),
+                  fill     = TRUE,
+                  status   = "danger",
+                  bigger   = TRUE,
+                  inline   = TRUE
+                )
+              ),
+              
+              column(
+                width = 3,
+                tags$label("(i) Amortização Inicial",
+                           style = "font-weight: bold; display: block;"),
+                prettyCheckboxGroup(
+                  inputId  = "choice_A",
+                  label    = NULL,
+                  choices  = c("Sem abatimento" = "A1",
+                               "10% abatimento" = "A2",
+                               "20% abatimento" = "A3"),
+                  selected = character(0),
+                  icon     = icon("check"),
+                  fill     = TRUE,
+                  status   = "info",
+                  bigger   = TRUE,
+                  inline   = TRUE
+                )
+              ),
+              column(
+                width = 2,
+                tags$label("(ii) Contribuição para FEF:",
+                           style = "font-weight: bold; display: block;"),
+                prettyCheckboxGroup(
+                  inputId  = "choice_G",
+                  label    = NULL,
+                  choices  = c("1%" = "G1",
+                               "1.5%" = "G2",
+                               "2%" = "G3"),
+                  selected = character(0),
+                  icon     = icon("check"),
+                  fill     = TRUE,
+                  status   = "primary",
+                  bigger   = TRUE,
+                  inline   = TRUE
+                )
+              ),
+              column(
+                width = 3,
+                tags$label("(iii) Investimento Direto:",
+                           style = "font-weight: bold; display: block;"),
+                # UI  (group III – Investimento Direto)
+                prettyCheckboxGroup(
+                  inputId  = "choice_I",
+                  label    = NULL,
+                  choices  = c("0%"   = "I1",
+                               "0,5%" = "I2",
+                               "1%"   = "I3",
+                               "1,5%" = "I4",
+                               "2%"   = "I5"),
+                  selected = character(0),
+                  icon     = icon("check"),
+                  fill     = TRUE,
+                  status   = "success",
+                  bigger   = TRUE,
+                  inline   = TRUE
+                )
+              )
+              
+            )
+          ),
+          
+          # Summary column (same row)
+          column(
+            width = 2,
+            div(
+              style = "color: #f5f5f5; font-style: italic; font-size: 16px; text-align: center;",
+              uiOutput("choice_summary")
+            )
+          )
+        )  # end fluidRow 2
+        
+        
+    )
+    
+    
+  ),
+  # Explanation text + selectizeInput with updated font
+  fluidRow(
+    # Full-width explanation text
+    column(
+      width = 12,
+      div(
+        style = "margin-top: 0px; margin-bottom: 5px; color: #1f5673; text-align: justify; font-size: 20px;",
+        HTML("<strong>Nota:</strong> Uma vez selecionada a opção arriba, você pode selecionar entre quatro variaveis para ver a evolução para 
+                        o period estimado do Propag: 2025 ate 2054")
+      )
+    ),
+    
+    # Select input with matching font style
+    column(
+      width = 2,
+      div(
+        style = "margin-bottom: 10px;",
+        tags$label("Selecionar a variavel:", style = "font-weight: bold; color: #1f5673; font-size: 18px;"),
+        selectizeInput("var_select", label = NULL,
+                       choices = c(
+                         "Saldo da Dívida"     = "Saldo",
+                         "Aporte para o FEF"   = "ApoFEF",
+                         "Investimento Direto" = "InvDir",
+                         "Juros Pagos"         = "JurPag"
+                       ), selected = "Saldo"
+        )
+      )
+    ),
+    column(
+      width = 2,
+      div(
+        style = "margin-bottom: 10px;",
+        tags$label("Comparar com outro cenário:", 
+                   style = "font-weight: bold; color: #1f5673; font-size: 18px; display: block;"),
+        selectizeInput(
+          inputId  = "compare_with",
+          label    = NULL,
+          choices  = c("Nenhum" = "", named_scenarios),
+          selected = "",
+          options  = list(
+            placeholder = "Escolha um cenário para comparar...",
+            allowEmptyOption = TRUE,
+            onInitialize = I('function() { this.clear(); }'),
+            persist = FALSE,
+            closeAfterSelect = TRUE
+          )
+        )
+        
+      )
+    ),
+    column(
+      width = 4,
+      div(
+        style = "margin-bottom: 10px; display: flex; align-items: flex-start; gap: 20px;",
+        
+        # Top-aligned label
+        tags$label("Selecionar intervalo de anos:",
+                   style = "font-weight: bold; color: #1f5673; font-size: 18px; margin-top: 5px; white-space: nowrap;"),
+        
+        # Slider takes remaining space
+        div(
+          style = "flex-grow: 1;",
+          sliderInput(
+            inputId = "year_range",
+            label   = NULL,
+            min     = 2025,
+            max     = 2054,
+            value   = c(2025, 2054),
+            step    = 1,
+            sep     = ""
+          )
+        )
+      )
+    )
+    
+    
+    
+    
+    
+  ),
+  
+  
+  fluidRow(
+    column(12,
+           plotOutput("PloTab1b",height = "600px", width = "100%")
+    )
+  )
+  
+  
+  
+),
+
             
                 
            ### UI - TAB 1 : FINANCE ##################################################
@@ -1163,275 +1605,7 @@ tabPanel("Situação - Meta 11 (vigente)",
                          )
                 ),
            
-           ### UI - TAB 1b : FINANCE 1b  ##################################################        
-           ### TAB 1B (UPDATED)
-           ### TAB 1B (UPDATED)
-           tabPanel(
-             "Finance 1b",
-             fluidPage(
-               h3("Conteúdo em desenvolvimento: Finance 1b",
-                  style = "color: #1f5673; font-weight: bold;"),
-               
-               # JS: enforce single selection per group
-               tags$head(
-                 tags$script(HTML("
-        $(document).on('shiny:connected', function () {
-          ['A','G','I','J'].forEach(function(dim){
-            $(document).on('click', '#choice_' + dim + ' input[type=checkbox]', function () {
-              var $grp = $('#choice_' + dim);
-              $grp.find('input[type=checkbox]').not(this).prop('checked', false);
-              $(this).trigger('change');
-            });
-          });
-        });
-      "))
-               ),
-               
-               
-               tags$head(
-                 tags$script(HTML("
-    // lock/unlock A,G,I when 'Não Adere' is chosen
-    Shiny.addCustomMessageHandler('toggleAGI', function(lock){
-      ['A','G','I'].forEach(function(dim){
-        var $grp = $('#choice_' + dim);
-        $grp.find('input[type=checkbox]').prop('disabled', lock);
-        // optional visual dimming
-        $grp.css('opacity', lock ? 0.35 : 1);
-      });
-    });
-  "))
-               ),
-  
-               tags$head(tags$style(HTML("
-  .pretty input + label {
-    font-size: 16px !important;
-  }
-"))),
-                            
-               
-               div(class = "checkbox-dark-panel",
-                   # ---- ROW 1: UF + 4 groups + summary (all in one row) ----
-                   fluidRow(
-                     column(
-                       width = 12,
-                       div(
-                         style = "margin-top: 5px; margin-bottom: 10px; color: #f5f5f5; text-align: justify; font-size: 20px;",
-                         tagList(
-                           tags$strong("Instruções: "),
-                           "Por favor, primeiro, seleccione o seu Estado, e depois, marque as opções relevantes para o seu Estado. ",
-                           "À medida que você clicar em uma escolha, o painel à direita mostrará ",
-                           "apenas opções válidas que podem ser escolhidas. ",
-                           "Você pode começar por qualquer uma das quatro escolhas: ",
-                           tags$span(class = "highlighted-note", 
-                                     "(i) Abatimento (0%, 10% ou 20%) ; (ii) Aporte ao FEF (1%, 1.5% ou 2%); (iii) Investimento Direto (cinco opções);
-                                     (iv) Taxa de juro (0%, 1% ou 2%)")
-                         )
-                       )
-                     )
-                   ),
-                   
-                   
-                   fluidRow(
-                     # UF selector
-                     column(
-                       width = 2,
-                       tags$label("Selecione a UF:",
-                                  style = "font-weight: bold; color: #f5f5f5; font-size: 16px;"),
-                       selectizeInput("uf_select", label = NULL, choices = nome_ufs)
-                     ),
-                     
-                     # Four groups
-                     column(
-                       width = 8,
-                       fluidRow(
-                         column(
-                           width = 3,
-                           tags$label("(iv) Taxa de Juros:",
-                                      style = "font-weight: bold; display: block;"),
-                           prettyCheckboxGroup(
-                             inputId  = "choice_J",
-                             label    = NULL,
-                             choices  = c("0%" = "J1",
-                                          "1%" = "J2",
-                                          "2%" = "J3",
-                                          "4% (Não Adere)" = "J4"),
-                             selected = character(0),
-                             icon     = icon("check"),
-                             fill     = TRUE,
-                             status   = "danger",
-                             bigger   = TRUE,
-                             inline   = TRUE
-                           )
-                         ),
-                         
-                         column(
-                           width = 3,
-                           tags$label("(i) Amortização Inicial",
-                                      style = "font-weight: bold; display: block;"),
-                           prettyCheckboxGroup(
-                             inputId  = "choice_A",
-                             label    = NULL,
-                             choices  = c("Sem abatimento" = "A1",
-                                          "10% abatimento" = "A2",
-                                          "20% abatimento" = "A3"),
-                             selected = character(0),
-                             icon     = icon("check"),
-                             fill     = TRUE,
-                             status   = "info",
-                             bigger   = TRUE,
-                             inline   = TRUE
-                           )
-                         ),
-                         column(
-                           width = 2,
-                           tags$label("(ii) Contribuição para FEF:",
-                                      style = "font-weight: bold; display: block;"),
-                           prettyCheckboxGroup(
-                             inputId  = "choice_G",
-                             label    = NULL,
-                             choices  = c("1%" = "G1",
-                                          "1.5%" = "G2",
-                                          "2%" = "G3"),
-                             selected = character(0),
-                             icon     = icon("check"),
-                             fill     = TRUE,
-                             status   = "primary",
-                             bigger   = TRUE,
-                             inline   = TRUE
-                           )
-                         ),
-                         column(
-                           width = 3,
-                           tags$label("(iii) Investimento Direto:",
-                                      style = "font-weight: bold; display: block;"),
-                           # UI  (group III – Investimento Direto)
-                           prettyCheckboxGroup(
-                             inputId  = "choice_I",
-                             label    = NULL,
-                             choices  = c("0%"   = "I1",
-                                          "0,5%" = "I2",
-                                          "1%"   = "I3",
-                                          "1,5%" = "I4",
-                                          "2%"   = "I5"),
-                             selected = character(0),
-                             icon     = icon("check"),
-                             fill     = TRUE,
-                             status   = "success",
-                             bigger   = TRUE,
-                             inline   = TRUE
-                           )
-                             )
           
-                       )
-                     ),
-                     
-                     # Summary column (same row)
-                     column(
-                       width = 2,
-                       div(
-                         style = "color: #f5f5f5; font-style: italic; font-size: 16px; text-align: center;",
-                         uiOutput("choice_summary")
-                       )
-                     )
-                   )  # end fluidRow 2
-                   
-
-               )
-               
-               
-             ),
-             # Explanation text + selectizeInput with updated font
-             fluidRow(
-               # Full-width explanation text
-               column(
-                 width = 12,
-                 div(
-                   style = "margin-top: 0px; margin-bottom: 5px; color: #1f5673; text-align: justify; font-size: 20px;",
-                   HTML("<strong>Nota:</strong> Uma vez selecionada a opção arriba, você pode selecionar entre quatro variaveis para ver a evolução para 
-                        o period estimado do Propag: 2025 ate 2054")
-                 )
-               ),
-               
-               # Select input with matching font style
-               column(
-                 width = 2,
-                 div(
-                   style = "margin-bottom: 10px;",
-                   tags$label("Selecionar a variavel:", style = "font-weight: bold; color: #1f5673; font-size: 18px;"),
-                   selectizeInput("var_select", label = NULL,
-                                  choices = c(
-                                    "Saldo da Dívida"     = "Saldo",
-                                    "Aporte para o FEF"   = "ApoFEF",
-                                    "Investimento Direto" = "InvDir",
-                                    "Juros Pagos"         = "JurPag"
-                                  ), selected = "Saldo"
-                   )
-                 )
-               ),
-               column(
-                 width = 2,
-                 div(
-                   style = "margin-bottom: 10px;",
-                   tags$label("Comparar com outro cenário:", 
-                              style = "font-weight: bold; color: #1f5673; font-size: 18px; display: block;"),
-                   selectizeInput(
-                     inputId  = "compare_with",
-                     label    = NULL,
-                     choices  = c("Nenhum" = "", named_scenarios),
-                     selected = "",
-                     options  = list(
-                       placeholder = "Escolha um cenário para comparar...",
-                       allowEmptyOption = TRUE,
-                       onInitialize = I('function() { this.clear(); }'),
-                       persist = FALSE,
-                       closeAfterSelect = TRUE
-                     )
-                   )
-                   
-                 )
-               ),
-               column(
-                 width = 4,
-                 div(
-                   style = "margin-bottom: 10px; display: flex; align-items: flex-start; gap: 20px;",
-                   
-                   # Top-aligned label
-                   tags$label("Selecionar intervalo de anos:",
-                              style = "font-weight: bold; color: #1f5673; font-size: 18px; margin-top: 5px; white-space: nowrap;"),
-                   
-                   # Slider takes remaining space
-                   div(
-                     style = "flex-grow: 1;",
-                     sliderInput(
-                       inputId = "year_range",
-                       label   = NULL,
-                       min     = 2025,
-                       max     = 2054,
-                       value   = c(2025, 2054),
-                       step    = 1,
-                       sep     = ""
-                     )
-                   )
-                 )
-               )
-               
-               
-               
-               
-               
-             ),
-             
-             
-             fluidRow(
-               column(12,
-                        plotOutput("PloTab1b",height = "600px", width = "100%")
-               )
-             )
-             
-             
-             
-           ),
-           
            
            ### UI - TAB 2 : FEF Opçoes  ##################################################      
            tabPanel("Retorno FEF por opções",
@@ -1574,51 +1748,10 @@ tabPanel("Situação - Meta 11 (vigente)",
               
 
                 
-           ### UI - TAB 4 : META 11a NOVA ##################################################
-           
-                tabPanel("Situação - Meta 11a",
-                         fluidPage(
-                           h3("Meta 11a – Comparação das Definições", style = "color: #1f5673; font-weight: bold;"),
-                           
-                           fluidRow(
-                             column(3,
-                                    selectizeInput(
-                                      inputId = "meta11a_nova_uf",
-                                      label = "Selecionar UF or Brasil:",
-                                      choices = sort(unique(meta11a_opcoes$NM_UF)),
-                                      selected = "Rio de Janeiro"
-                                    )
-                             ),
-                             column(3,
-                                    checkboxGroupInput(
-                                      inputId = "meta11a_nova_definicoes",
-                                      label = "Escolher definições para comparar:",
-                                      choices = c("Meta11a_opcao1", "Meta11a_opcao2", "Meta11a_opcao3"),
-                                      selected = c("Meta11a_opcao1", "Meta11a_opcao2", "Meta11a_opcao3"),
-                                      inline = TRUE
-                                    )
-                             ),
-                             column(3,  # New block for projection inputs
-                                    selectInput(
-                                      inputId = "meta11a_target_year",
-                                      label = "Ano alvo para atingir 50%:",
-                                      choices = 2025:2035,
-                                      selected = 2030
-                                    )),
-                             column(3,  # New block for projection inputs
-                                    sliderInput(
-                                      inputId = "ensino_slope_factor",
-                                      label = "Ajuste no crescimento do EM:",
-                                      min = 0.5, max = 1.5, step = 0.1, value = 1
-                                    )
-                             )
-                           ),
-                           
-                           plotOutput("meta11a_nova_plot", height = "600px")
-                         )
-                       
-                ),
-                
+
+
+          
+ 
            ### UI - TAB 5 : SITUAÇÃO - META 11a - PÚBLICO ##################################################    
            
            ## ONLY PROPAG VARIANT OF META11a APT
@@ -2148,91 +2281,8 @@ tabPanel("EPT e Informalidade",
              )
            )
          )
-),
-
-tabPanel("Detalhe da Oferta",
-         fluidPage(
-           h3("Detalhe da Oferta - Censo Escolar EPT", 
-              style = "color: #1f5673; font-weight: bold;"),
-           
-           div(class = "topbar-info",
-               style = "color: black !important;",
-               p("Este painel apresenta dados detalhados de matrículas em educação profissional técnica por eixo tecnológico e curso.", 
-                 style = "color: black !important;"),
-               p("Dados do Censo Escolar 2023-2024 com informações por dependência administrativa e modalidades de ensino.", 
-                 style = "color: black !important;"),
-               p("Use os filtros hierárquicos para navegar entre níveis geográficos e dependências administrativas.",
-                 style = "color: black !important;")
-           ),
-           
-           sidebarLayout(
-             # UI - Remove intermediate/immediate region pickers
-             sidebarPanel(
-               width = 3,
-               
-               h4("Filtros Temporais", style = "color: #1f5673;"),
-               
-               div(style = "margin-bottom: 15px;",
-                   tags$style(HTML("
-        .radio label { color: black !important; }
-        .radio input[type='radio'] + span { color: black !important; }
-      ")),
-                   radioButtons("censo_year", "Ano:",
-                                choices = c("2023" = 2023, "2024" = 2024),
-                                selected = default_year_censo, inline = TRUE)
-               ),
-               
-               hr(),
-               h4("Filtros Geográficos", style = "color: #1f5673;"),
-               
-               pickerInput("censo_uf", 
-                           "UF(s):",
-                           choices = uf_choices_censo,
-                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
-                           multiple = TRUE,
-                           selected = default_uf_censo),
-               
-               pickerInput("censo_municipio",
-                           "Município(s):",
-                           choices = character(0),
-                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
-                           multiple = TRUE),
-               
-               hr(),
-               h4("Filtros Administrativos", style = "color: #1f5673;"),
-               
-               pickerInput("censo_dependencia",
-                           "Dependência Administrativa:",
-                           choices = c("Federal" = "1", "Estadual" = "2", "Municipal" = "3", "Privada" = "4"),
-                           options = list(`actions-box` = TRUE),
-                           multiple = TRUE,
-                           selected = c("1", "2", "3", "4"))
-             ),
-             
-             mainPanel(
-               width = 9,
-               
-               # Table 1a - Eixo Level
-               fluidRow(
-                 column(12,
-                        h4("1a - Matrículas por Eixo Tecnológico", style = "color: #1f5673;"),
-                        withSpinner(DTOutput("censo_table_eixo"))
-                 )
-               ),
-               
-               br(),
-               
-               # Table 1b - Curso Level  
-               fluidRow(
-                 column(12,
-                        h4("1b - Matrículas por Curso", style = "color: #1f5673;"),
-                        withSpinner(DTOutput("censo_table_curso"))
-                 )
-               )
-             )
-           )
-         )
 )
+
 
   
   
@@ -2253,21 +2303,31 @@ tabPanel("Detalhe da Oferta",
 server <- function(input, output, session) {
 
 ## Tab choice
-  
+
+# 1  
   observeEvent(input$link_demo, {
     updateTabsetPanel(session, "tab_selection", selected = "Transição Demográfica")
   })
   
-  # Add this with your existing navigation handlers in the server function
+# 2  
   observeEvent(input$link_ept, {
     updateTabsetPanel(session, "tab_selection", selected = "Análise EPT")
   })
   
-  
-  observeEvent(input$link_fin1, {
-    updateTabsetPanel(session, "tab_selection", selected = "Tema Financiero")
+# 3  
+  observeEvent(input$link_meta11, {
+    updateTabsetPanel(session, "tab_selection", selected = "Situação - Meta 11 (vigente)")
   })
-  
+# 4  
+  observeEvent(input$link_expansao, {
+    updateTabsetPanel(session, "tab_selection", selected = "Situação - Meta 11a")
+  })
+
+  # 5  
+  observeEvent(input$link_oferta, {
+    updateTabsetPanel(session, "tab_selection", selected = "Detalhe da Oferta")
+  })    
+      
   observeEvent(input$link_impacto, {
     updateTabsetPanel(session, "tab_selection", selected = "Finance 1b")
   })
@@ -2276,12 +2336,8 @@ server <- function(input, output, session) {
     updateTabsetPanel(session, "tab_selection", selected = "Retorno FEF por opções")
   })
   
-  observeEvent(input$link_meta11, {
-    updateTabsetPanel(session, "tab_selection", selected = "Situação - Meta 11 (vigente)")
-  })
-  
-  observeEvent(input$link_expansao, {
-    updateTabsetPanel(session, "tab_selection", selected = "Situação - Meta 11a")
+  observeEvent(input$link_fin1, {
+    updateTabsetPanel(session, "tab_selection", selected = "Tema Financiero")
   })
   
   observeEvent(input$link_escassez, {
@@ -2974,20 +3030,7 @@ output$demo_variableInput <- renderUI({
     )
   })
   
-  
-  
-  
-  
-  
-  
-
-  
-  
-  
-  
-    
-  
-  # Reactive data for Meta 11a - input of UF and variable choice for computing second part
+    # Reactive data for Meta 11a - input of UF and variable choice for computing second part
   # Meta 11a second part
   
   # Share of Expansion of public can be greater than 100 because private enrollment might decline,
@@ -3022,17 +3065,329 @@ output$demo_variableInput <- renderUI({
   })  
   
   
+  ##############################################################################################################################
+  ### OUTPUT  PLOT  TAB 4  META11A  FIRST PART  META11A  FIRST PART  META11A  FIRST PART  META11A  FIRST PART
+  ##############################################################################################################################
+  output$meta11a_nova_plot <- renderPlot({
+    req(input$meta11a_nova_uf, input$meta11a_nova_definicoes, input$meta11a_target_year, input$meta11a_target_type)
+    
+    # Simple approach - just force dependency on the custom target
+    if (!is.null(input$meta11a_target_type) && input$meta11a_target_type == "custom") {
+      req(input$meta11a_custom_target)
+    }
+    
+    df <- meta11a_opcoes %>%
+      filter(NM_UF == input$meta11a_nova_uf) %>%
+      select(ANO, all_of(input$meta11a_nova_definicoes)) %>%
+      pivot_longer(
+        cols = -ANO,
+        names_to = "Definicao", 
+        values_to = "Meta11a"
+      )
+    
+    # Criar tooltip text com dados brutos
+    df_tooltip <- meta11a_opcoes %>%
+      filter(NM_UF == input$meta11a_nova_uf) %>%
+      select(ANO, SG_UF, NM_UF, QT_MAT_MED, QT_MAT_PROF_TEC_PROPAG, QT_MAT_CURSO_TEC_CT, QT_MAT_CURSO_TEC_CONC) %>%
+      mutate(across(where(is.numeric), ~format(round(.), big.mark = ".", decimal.mark = ","))) %>%
+      unite("tooltip_text",
+            QT_MAT_PROF_TEC_PROPAG, QT_MAT_CURSO_TEC_CT, QT_MAT_CURSO_TEC_CONC, QT_MAT_MED,
+            sep = " | ",
+            na.rm = TRUE
+      ) %>%
+      mutate(
+        tooltip_text = paste0("Matrículas: ", tooltip_text),
+        ANO = as.numeric(ANO)
+      )
+    
+    df <- df %>%
+      left_join(df_tooltip %>% select(ANO, tooltip_text), by = "ANO")
+    
+    # Definir cores para as opções
+    definicao_colors <- c(
+      "Meta11a_opcao1" = "blue",
+      "Meta11a_opcao2" = "red",
+      "Meta11a_opcao3" = "#9c6100"
+    )
+    
+    df <- df %>%
+      mutate(
+        color_label = definicao_colors[Definicao],
+        vjust_label = case_when(
+          Definicao == "Meta11a_opcao3" ~ 1.5,
+          TRUE ~ -0.8
+        )
+      )
+    
+    # PROJEÇÕES PARA CADA DEFINIÇÃO DE META 11a
+    target_year <- as.numeric(input$meta11a_target_year)
+    anos_proj <- 2024:target_year
+    years_left <- target_year - 2024
+    
+    # Extrair ponto de partida por definição (valores de 2024)
+    df_2024_pct <- df %>%
+      filter(ANO == 2024) %>%
+      select(Definicao, Meta11a)
+    
+    # === Ensino Médio projection logic ===
+    df_em <- meta11a_opcoes %>%
+      filter(NM_UF == input$meta11a_nova_uf) %>%
+      distinct(ANO, QT_MAT_MED) %>%
+      filter(ANO %in% 2020:2024) %>%
+      rename(MEDIO = QT_MAT_MED)
+    
+    lm_med <- lm(MEDIO ~ ANO, data = df_em)
+    base_slope <- coef(lm_med)["ANO"]
+    adjusted_slope <- if (base_slope < 0) {
+      base_slope * (2 - input$ensino_slope_factor)
+    } else {
+      base_slope * input$ensino_slope_factor
+    }
+    current_med <- df_em %>% filter(ANO == 2024) %>% pull(MEDIO)
+    projected_med <- current_med + adjusted_slope * years_left
+    
+    # === CONDITIONAL LOGIC FOR TARGET PERCENTAGE ===
+    if (is.null(input$meta11a_target_type) || input$meta11a_target_type == "pne11a") {
+      target_percentage <- 0.5
+      meta_label <- "Meta 11a: EPT forma 50% da matricula EM"
+      target_pct_text <- "50%"
+    } else {
+      custom_value <- input$meta11a_custom_target
+      if (is.null(custom_value) || is.na(custom_value) || custom_value <= 0) {
+        custom_value <- 100000
+      }
+      target_percentage <- custom_value / projected_med
+      target_pct_text <- paste0(round(target_percentage * 100, 1), "%")
+      meta_label <- paste0("Meta Definida: EPT forma ", target_pct_text, " da matricula EM")
+    }
+    #  y_top <- max(0.6, target_percentage + 0.2)
+    y_top <- target_percentage + 0.05
+    em_text <- paste0(
+      "<b>Projeção EM</b><br>",
+      format(round(projected_med), big.mark = ".", decimal.mark = ",")
+    )
+    
+    # === Raw EPT numeradores de 2024 por opção ===
+    df_2024_raw <- meta11a_opcoes %>%
+      filter(NM_UF == input$meta11a_nova_uf, ANO == 2024) %>%
+      select(QT_MAT_PROF_TEC_PROPAG, QT_MAT_CURSO_TEC_CT, QT_MAT_CURSO_TEC_CONC, QT_MAT_MED) %>%
+      summarise(
+        Meta11a_opcao1 = QT_MAT_PROF_TEC_PROPAG,
+        Meta11a_opcao2 = coalesce(QT_MAT_CURSO_TEC_CT, 0) + coalesce(QT_MAT_CURSO_TEC_CONC, 0),
+        Meta11a_opcao3 = QT_MAT_CURSO_TEC_CT,
+        MEDIO = QT_MAT_MED
+      )
+    
+    # Cálculo dos textos para cada definição (usando target_percentage dinâmico)
+    popup_info <- df_2024_pct %>%
+      mutate(
+        raw_EPT = map_dbl(Definicao, ~ df_2024_raw[[.x]]),
+        growth_abs = (target_percentage * projected_med - raw_EPT) / max(1, years_left),
+        growth_pct = (target_percentage * 100 - Meta11a * 100) / years_left,
+        label_text = paste0(
+          "<b>Para atingir ", target_pct_text, "</b><br>",
+          "em ", target_year, ":<br>",
+          "crescimento de<br>",
+          "<span style='color:", definicao_colors[Definicao], "'><b>",
+          round(growth_pct, 1), "%</b></span> ao ano<br>",
+          "(", formatC(round(growth_abs), format = "d", big.mark = "."), " alunos/ano)"
+        ),
+        label_x = target_year + c(-1.8, 0, 1.8)[match(Definicao, names(definicao_colors))],
+        #    label_y = 0.43 + c(0.08, 0, 0.08)[match(Definicao, names(definicao_colors))],
+        
+        label_y = if (is.null(input$meta11a_target_type) || input$meta11a_target_type == "pne11a") {
+          pmin(0.43 + c(0.08, 0, 0.08)[match(Definicao, names(definicao_colors))], y_top * 0.98)
+        } else {
+          pmin((target_percentage + 0.15) + c(0.08, 0, 0.08)[match(Definicao, names(definicao_colors))], y_top * 0.98)         
+        },
+        
+        
+        
+        label_col = definicao_colors[Definicao]
+      )
+    
+    # Criar linhas convergentes para target_percentage a partir de cada ponto de partida
+    proj_lines <- df_2024_pct %>%
+      mutate(
+        proj = map(Meta11a, ~ {
+          tibble(
+            ANO = anos_proj,
+            Meta11a = .x + ((target_percentage - .x) / years_left) * (anos_proj - 2024)
+          )
+        })
+      ) %>%
+      select(Definicao, proj) %>%
+      unnest(proj)
+    
+    # Target point at dynamic percentage
+    target_df <- data.frame(
+      ANO = target_year,
+      Meta11a = target_percentage
+    )
+    
+    # Gráfico
+    gg <- ggplot(df, aes(x = ANO, y = Meta11a, color = Definicao)) +
+      geom_line(size = 1.2) +
+      geom_point(size = 2.5) +
+      geom_hline(yintercept = target_percentage, color = "darkgreen", linetype = "dashed", linewidth = 1.1) +
+      annotate(
+        "text", x = 2025, y = target_percentage,
+        label = meta_label, size = 6,
+        color = "darkorange", vjust = -1, fontface = "bold"
+      ) +
+      ggtext::geom_richtext(
+        aes(label = paste0("<b>", scales::percent(Meta11a, accuracy = 0.1), "</b>"),
+            color = Definicao,
+            vjust = vjust_label),
+        label.color = df$color_label,
+        fill = "white",
+        size = 4,
+        label.size = 0.25,
+        label.r = unit(5, "pt"),
+        label.padding = unit(c(3, 5, 3, 5), "pt")
+      ) +
+      scale_color_manual(values = definicao_colors) +
+      scale_y_continuous(labels = scales::percent_format(scale = 1), limits = c(0, y_top)) +
+      scale_x_continuous(breaks = 2007:2035, limits = c(2007, 2035)) +
+      labs(
+        title = paste("Meta 11a – Comparação para:", input$meta11a_nova_uf),
+        x = "Ano",
+        y = "Atingimento PNE Meta 11a: Porcentagem Matricula de EPT sobre EM",
+        color = "Definição"
+      ) +
+      theme_minimal(base_size = 14) +
+      theme(legend.position = "none",
+            axis.text = element_text(size = 14),
+            axis.title = element_text(size = 14, colour = "blue", face = "bold"),
+            plot.title = element_text(size = 16, face = "bold", hjust = 0.5, color = "blue")
+      ) +
+      ggtext::geom_textbox(
+        data = data.frame(x = 2012.5, y = 0.9*(target_percentage)),
+        aes(x = x, y = y, label = paste(
+          "<b>META 11a (Parte 1): </b> DEFINIÇÕES do Numerador de Matrículas:",
+          " ",
+          "Opção 1: Técnico Médio (Integrado, Concomitante, Subsequente e EJA) (PROPAG)",
+          " ",
+          "Opção 2: Técnico Médio (Integrado e Concomitante)",
+          " ",
+          "Opção 3: Técnico Médio (Somente Integrado)",
+          " ",
+          "Definição Denominador (comum para as 3 opções): Matrículas no Ensino Médio <br> (Variavel: QT_MAT_MED do Censo Escolar do INEP)",
+          sep = "<br>"
+        )),
+        width = unit(0.4, "npc"),
+        fill = "#fdf6e3",
+        box.color = "gray40",
+        halign = 0,
+        color = "black",
+        size = 5,
+        fontface = "plain",
+        lineheight = 1.1,
+        box.padding = unit(c(5, 6, 5, 6), "pt"),
+        r = unit(6, "pt")
+      )
+    
+    # Adicionar linhas de projeção
+    if (nrow(proj_lines) > 0) {
+      gg <- gg +
+        geom_line(
+          data = proj_lines,
+          mapping = aes(x = ANO, y = Meta11a, color = Definicao),
+          linetype = "dashed",
+          linewidth = 1,
+          inherit.aes = FALSE
+        )
+    }
+    
+    # Add target point
+    gg <- gg +
+      geom_point(
+        data = target_df,
+        aes(x = ANO, y = Meta11a),
+        color = "red",
+        fill = "white",
+        size = 4,
+        shape = 21,
+        stroke = 1.5,
+        inherit.aes = FALSE
+      ) +
+      geom_point(
+        data = target_df,
+        aes(x = ANO, y = Meta11a),
+        color = "red",
+        size = 2,
+        shape = 16,
+        inherit.aes = FALSE
+      )
+    
+    # EM projected label
+    em_text <- paste0(
+      "<b>EM: Projetado</b><br>",
+      format(round(projected_med), big.mark = ".", decimal.mark = ","), " alunos<br>matriculados"
+    )
+    
+    gg <- gg +
+      ggtext::geom_richtext(
+        data = data.frame(x = target_year, y = max(0.61, target_percentage * 1.05)),
+        aes(x = x, y = y, label = em_text),
+        fill = "white",
+        label.color = "blue",
+        color = "blue",
+        size = 3.5,
+        label.size = 0.5,
+        label.r = unit(5, "pt"),
+        label.padding = unit(c(4, 6, 4, 6), "pt"),
+        vjust = 1,
+        hjust = 0.5,
+        inherit.aes = FALSE
+      )
+    
+    # POPUPS POR DEFINICAO SELECIONADA
+    for (i in 1:nrow(popup_info)) {
+      gg <- gg +
+        ggtext::geom_richtext(
+          data = popup_info[i, ],
+          aes(x = label_x, y = label_y, label = label_text),
+          fill = "white",
+          label.color = popup_info$label_col[i],
+          color = "black",
+          size = 3.5,
+          label.size = 0.5,
+          label.r = unit(6, "pt"),
+          label.padding = unit(c(4, 6, 4, 6), "pt"),
+          vjust = 1,
+          hjust = 0.5,
+          inherit.aes = FALSE
+        )
+    }
+    
+    # Add EM bubble
+    gg <- gg +
+      ggtext::geom_richtext(
+        data = data.frame(x = target_year, y = max(0.52, target_percentage * 0.9)),
+        aes(x = x, y = y, label = em_text),
+        fill = "#d0ebff",
+        label.color = "steelblue",
+        color = "black",
+        size = 4,
+        label.size = 0.5,
+        label.r = unit(5, "pt"),
+        label.padding = unit(c(4, 6, 4, 6), "pt"),
+        fontface = "plain",
+        hjust = 0.5,
+        vjust = 0,
+        inherit.aes = FALSE
+      )
+    
+    return(gg)
+  })
+  ##########################################################
+ 
   
     
-## OBSERVE EVENTS ETC. ACROSS TABS
-  
-##################
-  
-  
-    
-######### TAB1 TAB1 TAB1 TAB1  TAB1 TAB1 TAB1 TAB1  TAB1 TAB1 TAB1 TAB1  TAB1 TAB1 TAB1 TAB1  TAB1 TAB1 TAB1 TAB1  TAB1 TAB1 TAB1 TAB1  
+
 ##############################################################################################################################
-### OUTPUT  PLOT TAB 1  FINANCIALS TAB 1  FINANCIALS  TAB 1  FINANCIALS  TAB 1  FINANCIALS TAB 1  FINANCIALS  TAB 1  FINANCIALS  TAB 1  FINANCIALS 
+###  FINANCE 3 ###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3 
 ##############################################################################################################################
   
   output$tab1_fin_plot <- renderPlot({
@@ -3250,19 +3605,14 @@ output$demo_variableInput <- renderUI({
   
   
   
-  ######### TAB1b TAB1b TAB1b TAB1b  TAB1b TAB1b TAB1b TAB1b  TAB1b TAB1b TAB1b TAB1b  TAB1b TAB1b TAB1b TAB1b  TAB1b TAB1b TAB1b TAB1b  TAB1b TAB1b TAB1b TAB1b  
   ##############################################################################################################################
   ###  TAB 1b  FINANCIALS TAB 1b  FINANCIALS  TAB 1b  FINANCIALS  TAB 1b  FINANCIALS TAB 1b  FINANCIALS  TAB 1b  FINANCIALS  TAB 1b  FINANCIALS 
   ##############################################################################################################################
-  # 3) helper to pull valid codes for a single dimension, given the OTHER three
-
-  ## ---------- TAB 1b logic ----------
   
   
-  
-  # 2) Label → value maps (must match UI)
+  # Label → value maps (must match UI)
   # mappings used to rebuild widgets
-  ## 1. Choices exactly like the UI (add I5 if you now have 1.5%)
+  ##  Choices exactly like the UI (add I5 if you now have 1.5%)
   # exact maps as in the UI
   all_choices <- list(
     A = c("Sem abatimento"  = "A1",
@@ -3420,11 +3770,6 @@ make_table_html <- function(df){
 
 valid_html <- paste0(valid_css, make_table_html(valid_tbl))
 
-  
-  
-  
-  
-  
   ## ---- helpers -----------------------------------------------------------
   # helper for null/empty
   `%||%` <- function(x, y) if (is.null(x) || length(x) == 0) y else x
@@ -3545,8 +3890,8 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
         footer = actionButton("invalid_ok", "OK", class="btn-primary"),
         size = "l"
       ))
-      
-      
+    
+  
       session$onFlushed(function(){
         runjs("
         var dlg = $('#shiny-modal .modal-dialog');
@@ -3576,14 +3921,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
     
     # otherwise: still incomplete but not dead → do nothing (wait next pick)
   }, ignoreInit = TRUE)
-  
-  
-  
-  
-  
-  
-  
-  
+
   ## -------- user clicks OK on modal ----------------------------------------
   observeEvent(input$invalid_ok, {
     removeModal()
@@ -3601,10 +3939,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
     shinyjs::enable(selector = ".pcg")
   })
   
-  
-  ## (optional) summary
 
-  
   # (Optional) simple summary text
   ## ---- CSS once in UI (or put in your custom.css) ---------------------------
   tags$head(tags$style(HTML("
@@ -3622,8 +3957,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
 }
 .scenario-box .lbl {font-weight:600;}
 ")))
-  
-  
+
   ## helper to pull pretty name for a row in dfcen_val (assumes column 'valid')
   row_to_name <- function(r){
     # r is a 1-row data.frame
@@ -3647,34 +3981,10 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
     )
   })
   
- 
-  
-  ###################### REACTIVE TAB1b  REACTIVE Tab1b REACTIVE REACTIVE Tab1b REACTIVE REACTIVE Tab1b REACTIVE ############################
-  ###################### REACTIVE TAB1b  REACTIVE Tab1b REACTIVE REACTIVE Tab1b REACTIVE REACTIVE Tab1b REACTIVE ############################
-  
-  
-  # === DEBUG: print to R console ===
-  # observe({
-  #   # once ANY of the four checkboxes changes, this will run
-  #   sel <- RKT_picked()
-  #   cat(">>> picked()\n")
-  #   print(sel)
-  #   cat(">>> sel_row()\n")
-  #   sr <- RKT_sel_row()
-  #   if (is.null(sr)) {
-  #     cat("sel_row() is NULL\n\n")
-  #   } else {
-  #     # print the one‐row data.frame
-  #     print(sr)
-  #     cat("\n")
-  #   }
-  # })
+
   observe({
     session$sendCustomMessage("toggleAGI", "J4" %in% input$choice_J)
   })
-  
-  
-  
   
   # 1) what the user has chosen, NULL until valid:
   RKT_scenario_name <- reactive({
@@ -3689,7 +3999,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
     row_to_name(r)  # e.g. "II-A", "III-B", … or "ND"
   })
   
-  
+
   # 2) pull the right df from the list
   RKT_scenario_data <- reactive({
     nm <- RKT_scenario_name()
@@ -3722,8 +4032,6 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
   })
   
 
-  
-  
   RKT_plot_data_compare <- reactive({
     req(input$var_select, input$uf_select)
     
@@ -3774,8 +4082,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
     
     bind_rows(df_sel, df_cmp)
   })
-  
-  
+
   RKT_plot_title <- reactive({
     req(input$uf_select, RKT_scenario_name())
     
@@ -3812,19 +4119,9 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
     }
   })
   
-  
-  
-  
-  
-  ###################### OUTPUT TAB1b  OUTPUT Tab1b OUTPUT OUTPUT Tab1b OUTPUT OUTPUT Tab1b OUTPUT ############################
-  ###################### OUTPUT TAB1b  OUTPUT Tab1b OUTPUT OUTPUT Tab1b OUTPUT OUTPUT Tab1b OUTPUT ############################
-  
-  
   # render the bar chart
 
   output$PloTab1b <- renderPlot({
-    
-
     
     pd <- RKT_plot_data_compare()
     req(nrow(pd) > 0)
@@ -3885,9 +4182,6 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
       TRUE          ~ 4.5      # Default for full range
     )
 
-    
-    
-    
     gp2b <- gp2b +
       geom_text(
         aes(label = paste0(scales::comma(Valor / 1e6), " mi")),
@@ -3899,8 +4193,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
         vjust    = if (is_comparing) 1.2 else 1.2,  # same vertical reference point (but for rotated text, this pulls it downward)
         hjust    = if (is_comparing) 1.1 else 0.5   # shift right slightly so it doesn't clip left edge
       )
-    
- 
+
     legend_labels <- setNames(pd$fill_label, pd$fill_key)
     
     gp2b <- gp2b +
@@ -3917,98 +4210,85 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
     gp2b
   })
   
+  ##################################################################################################################################
+  #####  TAB FINANCE FEF #%&*&*& #####  TAB FINANCE FEF #%&*&*&#####  TAB FINANCE FEF #%&*&*&#####  TAB FINANCE FEF #%&*&*&#####  TAB 
+  ##################################################################################################################################
+
+  # Track current mode
+  current_mode <- reactiveVal("uniform")
+  
+  # Apply initial toggle states on startup
+  observe({
+    mode <- current_mode()
+    
+    for (op in opcoes) {
+      toggleState(id = paste0("chk_all_", op), condition = (mode == "uniform"))
+      for (uf in sg_ufs) {
+        toggleState(id = paste0("chk_", op, "_", uf), condition = (mode == "per_uf"))
+      }
+    }
+  })
   
   
+  # Watch for mode switch
+  observeEvent(input$selection_mode, {
+    isolate({
+      # Only show modal if we've already initialized current_mode once
+      if (!is.null(current_mode()) && input$selection_mode != current_mode()) {
+        showModal(modalDialog(
+          title = "Mudar Modo de Seleção?",
+          "Essa ação limpará as seleções atuais. Deseja continuar?",
+          easyClose = FALSE,
+          footer = tagList(
+            modalButton("Cancelar"),
+            actionButton("confirm_mode_change", "Sim, mudar", class = "btn-danger")
+          )
+        ))
+      } else {
+        # If first load or same selection — just set mode silently
+        current_mode(input$selection_mode)
+      }
+    })
+  })
+  
+  
+  # Confirmed switch
+  observeEvent(input$confirm_mode_change, {
+    removeModal()
+    new_mode <- isolate(input$selection_mode)
+    current_mode(new_mode)
+    
+    # 1. Clear all checkboxes
+    for (op in opcoes) {
+      updateCheckboxInput(session, paste0("chk_all_", op), value = FALSE)
+      for (uf in sg_ufs) {
+        updateCheckboxInput(session, paste0("chk_", op, "_", uf), value = FALSE)
+      }
+    }
+    
+    # 2. Disable/enable controls after DOM is flushed
+    session$onFlushed(function() {
+      if (new_mode == "uniform") {
+        # Enable 'Todos' checkboxes, disable individual ones
+        for (op in opcoes) {
+          shinyjs::enable(paste0("chk_all_", op))
+          for (uf in sg_ufs) {
+            shinyjs::disable(paste0("chk_", op, "_", uf))
+          }
+        }
+      } else {
+        # Disable 'Todos' checkboxes, enable individual ones
+        for (op in opcoes) {
+          shinyjs::disable(paste0("chk_all_", op))
+          for (uf in sg_ufs) {
+            shinyjs::enable(paste0("chk_", op, "_", uf))
+          }
+        }
+      }
+    }, once = TRUE)
+  })
   
 
-  
-  
-  
-  #################
-  # TAB 2 TAB2 TAB2 
-  #################
-  
-  # Track current mode
-  current_mode <- reactiveVal("uniform")
-  
-  # Apply initial toggle states on startup
-  observe({
-    mode <- current_mode()
-    
-    for (op in opcoes) {
-      toggleState(id = paste0("chk_all_", op), condition = (mode == "uniform"))
-      for (uf in sg_ufs) {
-        toggleState(id = paste0("chk_", op, "_", uf), condition = (mode == "per_uf"))
-      }
-    }
-  })
-  
-  
-  # Watch for mode switch
-  observeEvent(input$selection_mode, {
-    isolate({
-      # Only show modal if we've already initialized current_mode once
-      if (!is.null(current_mode()) && input$selection_mode != current_mode()) {
-        showModal(modalDialog(
-          title = "Mudar Modo de Seleção?",
-          "Essa ação limpará as seleções atuais. Deseja continuar?",
-          easyClose = FALSE,
-          footer = tagList(
-            modalButton("Cancelar"),
-            actionButton("confirm_mode_change", "Sim, mudar", class = "btn-danger")
-          )
-        ))
-      } else {
-        # If first load or same selection — just set mode silently
-        current_mode(input$selection_mode)
-      }
-    })
-  })
-  
-  
-  # Confirmed switch
-  observeEvent(input$confirm_mode_change, {
-    removeModal()
-    new_mode <- isolate(input$selection_mode)
-    current_mode(new_mode)
-    
-    # 1. Clear all checkboxes
-    for (op in opcoes) {
-      updateCheckboxInput(session, paste0("chk_all_", op), value = FALSE)
-      for (uf in sg_ufs) {
-        updateCheckboxInput(session, paste0("chk_", op, "_", uf), value = FALSE)
-      }
-    }
-    
-    # 2. Disable/enable controls after DOM is flushed
-    session$onFlushed(function() {
-      if (new_mode == "uniform") {
-        # Enable 'Todos' checkboxes, disable individual ones
-        for (op in opcoes) {
-          shinyjs::enable(paste0("chk_all_", op))
-          for (uf in sg_ufs) {
-            shinyjs::disable(paste0("chk_", op, "_", uf))
-          }
-        }
-      } else {
-        # Disable 'Todos' checkboxes, enable individual ones
-        for (op in opcoes) {
-          shinyjs::disable(paste0("chk_all_", op))
-          for (uf in sg_ufs) {
-            shinyjs::enable(paste0("chk_", op, "_", uf))
-          }
-        }
-      }
-    }, once = TRUE)
-  })
-  
-  
-  
-  
-  
-  
-  
-  
   # Uniform: handle “Todos” row selection
   observe({
     for (op in opcoes) {
@@ -4050,8 +4330,6 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
       }
     }
   })
-  
-  
   
   
   # Track current mode
@@ -4129,12 +4407,6 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
   })
   
   
-  
-  
-  
-  
-  
-  
   # Uniform: handle “Todos” row selection
   observe({
     for (op in opcoes) {
@@ -4176,9 +4448,6 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
       }
     }
   })
-  
-############################################  #####
-# REACTIVE TABE TAB2 TAB2
   
 
   # Create a reactive that returns a named vector: names = sg_uf, values = chosen option
@@ -4239,8 +4508,6 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
   })
   
   
-  
-
   RKT_fef_table <- reactive({
     choices <- RKT_fef_choices()
     all_df <- RKT_fef_all_options()
@@ -4272,8 +4539,6 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
   })
   
   
-  
-  
   RKT_fef_total_by_year <- reactive({
     df <- RKT_fef_table()
     req(df)
@@ -4290,8 +4555,6 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
     )
   })
 
-  
-  
   RKT_fef_liq_flow_by_uf <- reactive({
     df <- RKT_fef_table()
     total <- RKT_fef_total_by_year()
@@ -4318,7 +4581,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
     liq_df
   })
   
-  
+
   # Tab2: Prepare data for plotting
   RKT_fef_plot_data <- reactive({
     df <- RKT_fef_liq_flow_by_uf()
@@ -4368,52 +4631,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
            " — Aporte e Fluxo Líquido do FEF")
   })
   
-  
-  
-  
-  # # Print RKT_fef_choices to console
-  # observe({
-  #   cat("=== RKT_fef_choices() ===\n")
-  #   print(RKT_fef_choices())
-  # })
-  # 
-  # observe({
-  #   df <- RKT_fef_table()
-  #   if (!is.null(df)) {
-  #     cat("=== RKT_fef_choices() ===\n")
-  #     print(RKT_fef_choices())
-  # 
-  #     cat("=== RKT_fef_table() ===\n")
-  #     print(df, n = 100, na.print="NA")
-  # 
-  #     cat("=== Total aporte_fef across UFs ===\n")
-  #     cols <- grep("^ApoFEF", names(df), value = TRUE)
-  #     totals <- colSums(df[, cols, drop = FALSE], na.rm = TRUE)
-  #     print(round(totals, 2))
-  #   }
-  # })
-  # 
-  # observe({
-  #   total_df <- RKT_fef_total_by_year()
-  #   if (!is.null(total_df)) {
-  #     cat("=== Total FEF by Year ===\n")
-  #     print(total_df, n = nrow(total_df))
-  #   }
-  # })
-  
-  # observe({
-  #   liq_df <- RKT_fef_liq_flow_by_uf()
-  #   if (!is.null(liq_df)) {
-  #     cat("=== Net FEF Flow (LiqFEF) by UF ===\n")
-  #     print(liq_df, n = nrow(liq_df), na.print = "NA")
-  #   }
-  # })
-  # 
-  
-  
-  ###################### OUTPUT Tab2  OUTPUT Tab2 OUTPUT OUTPUT Tab2 OUTPUT OUTPUT Tab2 OUTPUT ############################
-  ###################### OUTPUT Tab2  OUTPUT Tab2 OUTPUT OUTPUT Tab2 OUTPUT OUTPUT Tab2 OUTPUT ############################
-  
+
   output$plotab2 <- renderPlot({
     df <- RKT_fef_plot_data()
     req(nrow(df) > 0)
@@ -4429,7 +4647,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
       df$value <  0 ~  -0.2   # slightly below the bar
     )
     
-    # Consistent horontal centering of rotated text
+    # Consistent horizontal centering of rotated text
     df$vjust <- 0.5 # center
     
     dodge_width <- 0.75
@@ -4442,7 +4660,6 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
       n_years <= 20 ~ 8,
       TRUE          ~ 6
     )
-
 
     # Main ggplot
     ggplot(df, aes(x = factor(year), y = value, fill = type)) +
@@ -4475,332 +4692,10 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
       )
   })
   
-  
-  
-  
-  
- 
-  
-    
-  ##############################################################################################################################
-  ### OUTPUT  PLOT  TAB 4  META11A  FIRST PART  META11A  FIRST PART  META11A  FIRST PART  META11A  FIRST PART
-  ##############################################################################################################################
-  
-  
-    output$meta11a_nova_plot <- renderPlot({
-      req(input$meta11a_nova_uf, input$meta11a_nova_definicoes)
-      
-      df <- meta11a_opcoes %>%
-        filter(NM_UF == input$meta11a_nova_uf) %>%
-        select(ANO, all_of(input$meta11a_nova_definicoes)) %>%
-        pivot_longer(
-          cols = -ANO,
-          names_to = "Definicao",
-          values_to = "Meta11a"
-        )
-      
-      # Criar tooltip text com dados brutos
-      df_tooltip <- meta11a_opcoes %>%
-        filter(NM_UF == input$meta11a_nova_uf) %>%
-        select(ANO, SG_UF, NM_UF, QT_MAT_MED, QT_MAT_PROF_TEC_PROPAG, QT_MAT_CURSO_TEC_CT, QT_MAT_CURSO_TEC_CONC) %>%
-        mutate(across(where(is.numeric), ~format(round(.), big.mark = ".", decimal.mark = ","))) %>%
-        unite("tooltip_text",
-              QT_MAT_PROF_TEC_PROPAG, QT_MAT_CURSO_TEC_CT, QT_MAT_CURSO_TEC_CONC, QT_MAT_MED,
-              sep = " | ",
-              na.rm = TRUE
-        ) %>%
-        mutate(
-          tooltip_text = paste0("Matrículas: ", tooltip_text),
-          ANO = as.numeric(ANO)  # <-- Corrige o tipo
-        )
-      
-      
-      df <- df %>%
-        left_join(df_tooltip %>% select(ANO, tooltip_text), by = "ANO")
-      
-      # Color labels
-      
-      # Definir cores para as opções
-      definicao_colors <- c(
-        "Meta11a_opcao1" = "blue",
-        "Meta11a_opcao2" = "red",
-        "Meta11a_opcao3" = "#9c6100"
-      )
-      
-      
-      df <- df %>%
-        mutate(
-          color_label = definicao_colors[Definicao]
-        )
- 
-      df <- df %>%
-        mutate(
-          color_label = definicao_colors[Definicao],
-          vjust_label = case_when(
-            Definicao == "Meta11a_opcao3" ~ 1.5,   # place below the line
-            TRUE ~ -0.8                            # default (above)
-          )
-        )
-      
-      
 
-      # Gráfico
-  gg <- ggplot(df, aes(x = ANO, y = Meta11a, color = Definicao)) +
-        geom_line(size = 1.2) +
-        geom_point(size = 2.5) +
-        geom_hline(yintercept = 0.5, color = "darkgreen", linetype = "dashed", linewidth = 1.1) +
-        annotate(
-          "text", x = 2025, y = 0.5,
-          label = "Meta 11a: EPT forma 50% da matricula EM",size=6,
-          color = "darkorange", vjust = -1, fontface = "bold"
-        ) +
-    ggtext::geom_richtext(
-      aes(label = paste0("<b>", scales::percent(Meta11a, accuracy = 0.1), "</b>"),
-          color = Definicao,
-          vjust = vjust_label),
-      label.color = df$color_label,
-      fill = "white",
-      size = 4,
-      label.size = 0.25,
-      label.r = unit(5, "pt"),
-      label.padding = unit(c(3, 5, 3, 5), "pt")
-    )+
-        scale_color_manual(values = definicao_colors) +
-        scale_y_continuous(labels = scales::percent_format(scale = 1), limits = c(0, 0.6)) +
-        scale_x_continuous(breaks = 2007:2035, limits=c(2007,2035)) +
-        labs(
-          title = paste("Meta 11a – Comparação para:", input$meta11a_nova_uf),
-          x = "Ano",
-          y = "Atingimento PNE Meta 11a: Porcentagem Matricula de EPT sobre EM",
-          color = "Definição"
-        ) +
-        theme_minimal(base_size = 14) +
-        theme(legend.position = "none",
-              axis.text = element_text(size = 14),
-              axis.title = element_text(size = 14, colour = "blue", face= "bold"),
-              plot.title = element_text(size = 16, face = "bold", hjust = 0.5, color = "blue")  
-                  ) +
-        
-        ggtext::geom_textbox(
-          data = data.frame(x = 2012.5, y = 0.5),  # posição mais ao centro e abaixo do topo
-          aes(x = x, y = y, label = paste(
-            "<b>META 11a (Parte 1): </b> DEFINIÇÕES do Numerador de Matrículas:",
-            " ",
-            "Opção 1: Técnico Médio (Integrado, Concomitante, Subsequente e EJA) (PROPAG)",
-            " ",
-            "Opção 2: Técnico Médio (Integrado e Concomitante)",
-            " ",
-            "Opção 3: Técnico Médio (Somente Integrado)",
-            " ",
-            "Definição Denominador (comum para as 3 opções): Matrículas no Ensino Médio <br> (Variavel: QT_MAT_MED do Censo Escolar do INEP)",
-            sep = "<br>"
-          )),
-          width = unit(0.4, "npc"),        # ajuste fino (50% da largura do gráfico)
-          fill = "#fdf6e3",                # bege claro
-          box.color = "gray40",            # borda discreta
-          halign = 0,                      # texto à esquerda
-          color = "black",
-          size = 5,
-          fontface = "plain",
-          lineheight = 1.1,
-          box.padding = unit(c(5, 6, 5, 6), "pt"),
-          r = unit(6, "pt")                # cantos arredondados
-        )
-      
-  # PROJEÇÕES PARA CADA DEFINIÇÃO DE META 11a
-  # ==== NOVAS PROJEÇÕES POR DEFINIÇÃO ====
-  target_year <- as.numeric(input$meta11a_target_year)
-  anos_proj <- 2024:target_year
-  years_left <- target_year - 2024
-  
-  # Extrair ponto de partida por definição (valores de 2024)
-  df_2024_pct <- df %>%
-    filter(ANO == 2024) %>%
-    select(Definicao, Meta11a)
   
   
-  # === Ensino Médio projection logic ===
-  df_em <- meta11a_opcoes %>%
-    filter(NM_UF == input$meta11a_nova_uf) %>%
-    distinct(ANO, QT_MAT_MED) %>%
-    filter(ANO %in% 2020:2024) %>%
-    rename(MEDIO = QT_MAT_MED)
   
-  lm_med <- lm(MEDIO ~ ANO, data = df_em)
-  base_slope <- coef(lm_med)["ANO"]
-  adjusted_slope <- if (base_slope < 0) {
-    base_slope * (2 - input$ensino_slope_factor)  # Invert factor when slope is negative
-  } else {
-    base_slope * input$ensino_slope_factor
-  }
-  current_med <- df_em %>% filter(ANO == 2024) %>% pull(MEDIO)
-  projected_med <- current_med + adjusted_slope * (target_year - 2024)
-  
-  em_text <- paste0(
-    "<b>Projeção EM</b><br>",
-    format(round(projected_med), big.mark = ".", decimal.mark = ",")
-  )
-  
-  # === Raw EPT numeradores de 2024 por opção ===
-  df_2024_raw <- meta11a_opcoes %>%
-    filter(NM_UF == input$meta11a_nova_uf, ANO == 2024) %>%
-    select(QT_MAT_PROF_TEC_PROPAG, QT_MAT_CURSO_TEC_CT, QT_MAT_CURSO_TEC_CONC, QT_MAT_MED) %>%
-    summarise(
-      Meta11a_opcao1 = QT_MAT_PROF_TEC_PROPAG,
-      Meta11a_opcao2 = coalesce(QT_MAT_CURSO_TEC_CT, 0) + coalesce(QT_MAT_CURSO_TEC_CONC, 0),
-      Meta11a_opcao3 = QT_MAT_CURSO_TEC_CT,
-      MEDIO = QT_MAT_MED
-    )
-  
-  
-  # pop up
-  # Cálculo dos textos para cada definição
-  popup_info <- df_2024_pct %>%
-    mutate(
-      raw_EPT = map_dbl(Definicao, ~ df_2024_raw[[.x]]),
-      growth_abs = (0.5 * projected_med - raw_EPT) / max(1, years_left),
-      growth_pct = (50 - Meta11a * 100) / years_left,
-      label_text = paste0(
-        "<b>Para atingir 50%</b><br>",
-        "em ", target_year, ":<br>",
-        "crescimento de<br>",
-        "<span style='color:", definicao_colors[Definicao], "'><b>",
-        round(growth_pct, 1), "%</b></span> ao ano<br>",
-        "(", formatC(round(growth_abs), format = "d", big.mark = "."), " alunos/ano)"
-      ),
-      label_x = target_year + c(-1.8, 0, 1.8)[match(Definicao, names(definicao_colors))],
-      label_y = 0.43 + c(0.08, 0, 0.08)[match(Definicao, names(definicao_colors))],
-      label_col = definicao_colors[Definicao]
-    )
-  
-  
-  # Criar linhas convergentes para 50% a partir de cada ponto de partida
-  proj_lines <- df_2024_pct %>%
-    mutate(
-      proj = map(Meta11a, ~ {
-        tibble(
-          ANO = anos_proj,
-          Meta11a = .x + ((0.5 - .x) / years_left) * (anos_proj - 2024)
-        )
-      })
-    ) %>%
-    select(Definicao, proj) %>%
-    unnest(proj)
-  
-  # Adicionar linhas de projeção
-  if (nrow(proj_lines) > 0) {
-    gg <- gg +
-      geom_line(
-        data = proj_lines,
-        mapping = aes(x = ANO, y = Meta11a, color = Definicao),
-        linetype = "dashed",
-        linewidth = 1,
-        inherit.aes = FALSE
-      )
-  }
-  
-  # target point
-  # Target point at 50%
-  target_df <- data.frame(
-    ANO = target_year,
-    Meta11a = 0.5
-  )
-  
-  gg <- gg +
-    geom_point(
-      data = target_df,
-      aes(x = ANO, y = Meta11a),
-      color = "red",
-      fill = "white",
-      size = 4,
-      shape = 21,
-      stroke = 1.5,
-      inherit.aes = FALSE
-    ) +
-    geom_point(
-      data = target_df,
-      aes(x = ANO, y = Meta11a),
-      color = "red",
-      size = 2,
-      shape = 16,
-      inherit.aes = FALSE
-    )
-  
-  ## Pop-up
-  # -- One EM projected label (common to all options) --
-  em_text <- paste0(
-    "<b>EM: Projetado</b><br>",
-    format(round(projected_med), big.mark = ".", decimal.mark = ","), " alunos<br>matriculados"
-  )
-  
-  gg <- gg +
-    ggtext::geom_richtext(
-      data = data.frame(x = target_year, y = 0.61),
-      aes(x = x, y = y, label = em_text),
-      fill = "white",
-      label.color = "blue",
-      color = "blue",
-      size = 3.5,
-      label.size = 0.5,
-      label.r = unit(5, "pt"),
-      label.padding = unit(c(4, 6, 4, 6), "pt"),
-      vjust = 1,
-      hjust = 0.5,
-      inherit.aes = FALSE
-    )
-  
-  # -- Multiple effort boxes (1 per selected definition) --
-  x_offsets <- c("Meta11a_opcao1" = -1.2,
-                 "Meta11a_opcao2" =  0,
-                 "Meta11a_opcao3" =  1.2)
-  
-  y_base <- 0.43
-  
-  # === POPUPS POR DEFINICAO SELECIONADA ===
-
-  for (i in 1:nrow(popup_info)) {
-    gg <- gg +
-      ggtext::geom_richtext(
-        data = popup_info[i, ],
-        aes(x = label_x, y = label_y, label = label_text),
-        fill = "white",
-        label.color = popup_info$label_col[i],
-        color = "black",
-        size = 3.5,
-        label.size = 0.5,
-        label.r = unit(6, "pt"),
-        label.padding = unit(c(4, 6, 4, 6), "pt"),
-        vjust = 1,
-        hjust = 0.5,
-        inherit.aes = FALSE
-      )
-  }
-  
-
-  # add EM bubble
-  gg <- gg +
-    ggtext::geom_richtext(
-      data = data.frame(x = target_year, y = 0.52),
-      aes(x = x, y = y, label = em_text),
-      fill = "#d0ebff",            # light sky blue
-      label.color = "steelblue",   # border
-      color = "black",
-      size = 4,
-      label.size = 0.5,
-      label.r = unit(5, "pt"),
-      label.padding = unit(c(4, 6, 4, 6), "pt"),
-      fontface = "plain",
-      hjust = 0.5,
-      vjust = 0,
-      inherit.aes = FALSE
-    )
-  
-    
-  
-    return(gg)
-    
-    })
-    
     
     ######### TAB5 TAB5 TAB5 TAB5  TAB5 TAB5 TAB5 TAB5  TAB5 TAB5 TAB5 TAB5  TAB5 TAB5 TAB5 TAB5  TAB5 TAB5 TAB5 TAB5  TAB5 TAB5 TAB5 TAB5  
     ##############################################################################################################################
