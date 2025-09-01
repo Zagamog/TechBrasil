@@ -23,6 +23,34 @@ options(warn=-1) # Too many pesky warnings, terrain, terrain, terrain, pull up, 
 # LOAD DATA AND ANY NEEDED DATA OPERATIONS
 #############################################################
 
+#############################################################
+# DATA FOR DEMOGAPHC TAB
+#############################################################
+
+# Load demographic data for the new tab
+load("pop01_70b.rda")
+
+# Define column groups for demographic data
+demo_number_columns <- c("POP_T", "0-14_T", "15-17_T", "18-21_T", "15-59_T", "60+_T")
+demo_proportion_columns <- c("P_0_14_T", "P_15_17_T", "P_18_21_T", "P_15_59_T", "P_60_plus_T")
+
+# Define predefined color palette for demographic locations
+demo_local_colors <- c(
+  "Brasil" = "#1f77b4", "Norte" = "#ff7f0e", "Nordeste" = "#2ca02c",
+  "Sudeste" = "#d62728", "Sul" = "#9467bd", "Centro-Oeste" = "#8c564b",
+  "Amazonia_Legal" = "#8c564b", "Nordeste_r" = "#e377c2", "Centro-Oeste_r" = "#7f7f7f",
+  "Acre" = "#1b9e77", "Amapá" = "#d95f02", "Amazonas" = "#7570b3",
+  "Pará" = "#e7298a", "Rondônia" = "#66a61e", "Roraima" = "#e6ab02",
+  "Tocantins" = "#a6761d", "Alagoas" = "#1f77b4", "Bahia" = "#ff7f0e",
+  "Ceará" = "#2ca02c", "Maranhão" = "#d62728", "Paraíba" = "#9467bd",
+  "Pernambuco" = "#8c564b", "Piauí" = "#e377c2", "Rio Grande do Norte" = "#7f7f7f",
+  "Sergipe" = "#bcbd22", "Espírito Santo" = "#17becf", "Minas Gerais" = "#ff9896",
+  "Rio de Janeiro" = "#c5b0d5", "São Paulo" = "#c49c94", "Paraná" = "#8c564b",
+  "Rio Grande do Sul" = "#e377c2", "Santa Catarina" = "#7f7f7f",
+  "Distrito Federal" = "#bcbd22", "Goiás" = "#17becf",
+  "Mato Grosso" = "#ff7f0e", "Mato Grosso do Sul" = "#2ca02c"
+)
+#############################################################
 
 # Load Propag scraped data
 propag_ept_financeiro <- readRDS("propag_ept_financeiro.rds")
@@ -531,17 +559,15 @@ uf_choices_censo <- sort(unique(dft_informality_geo_codes$NM_UF))
 ui <- dashboardPage(
 
 #  Using Shiny dashboard template but some modifications, here dispensing with sidebar and header
+dashboardHeader(disable = TRUE),
+dashboardSidebar(disable = TRUE),
   
-  dashboardHeader(disable = TRUE),
-  dashboardSidebar(disable = TRUE),
-  
-  dashboardBody(
+dashboardBody(
 ##############################################################################################################
 # CUSTOMIZATION OF CSS
 # Introducing custom CSS and styles, including www/custom.css for viridis panel tab colors
 # Need some css style elements here, because custom.css gets overriden by Bootstrap defaults
 ###############################################################################################################
-
 useShinyjs(),
 # jQuery‑UI (for draggable)
 tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js")),
@@ -594,7 +620,7 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
     }
   "))
     ),
-  tags$head(
+tags$head(
       tags$link(rel = "stylesheet", type = "text/css", href = "https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css"),
       tags$script(src = "https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"),
       tags$script(src = "https://cdn.datatables.net/buttons/2.4.1/js/buttons.flash.min.js"),
@@ -604,14 +630,17 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
       tags$script(src = "https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"),
       tags$script(src = "https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js")
     ),
-    # Header title area
-    tags$div(
+
+###############################################################################################################
+#      # Header title area    # Header title area    # Header title area    # Header title area    # Header title area
+###############################################################################################################
+
+tags$div(
       style = "padding: 10px 20px; font-size: 24px; font-weight: bold; color: #0000ff;",
       HTML('Faça adesão ao <span style="color: #FFD700; text-shadow: 1px 1px #333;">Propag</span> !')
     ),
   
-  
-  
+
     fluidRow(
       
       ## TITLE  LINE
@@ -632,7 +661,10 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
     ),
     
     tabsetPanel(id = "tab_selection", selected = "Introdução",
-            ### UI - TAB 0 : INTRO TAB ##################################################      
+
+###############################################################################################################
+# TAB  0  INTRODUCTION #### # TAB  0  INTRODUCTION ##### TAB  0  INTRODUCTION ##### TAB  0  INTRODUCTION ##### TAB  0 
+###############################################################################################################
             tabPanel(
               "Introdução",
               tags$style(HTML("
@@ -686,6 +718,14 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
                   "Introdução: Ferramenta customizada pela UF – Análise e Simulação sobre o PROPAG"
               ),
               
+              
+              div(class = "tab-link-line",
+                  span(class = "arrow", HTML("▸")),
+                  actionLink("link_demo", "Transição Demográfica: Projeções Populacionais por Faixa Etária")
+              ),
+              div(class = "tab-explanation", "Análise das mudanças no perfil etário da população brasileira (2000-2070) por região e estado, identificando pontos de transição demográfica relevantes para o planejamento educacional."),
+              
+              
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
                   actionLink("link_fin1", "Cenário Financeiro e Simulações de Investimento em EPT e Fundo FEF")
@@ -722,6 +762,121 @@ tags$head(tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
               ),
               div(class = "tab-explanation", "Diagnóstico da escassez de profissionais técnicos por curso e UF com base nos dados de mercado de trabalho (RAIS/CAGED).")
             ),
+            
+
+###############################################################################################################
+# TAB  1 DEMOGRAPHIC   ########## DEMOGRAPHIC # TAB  1 DEMOGRAPHIC   ########## DEMOGRAPHIC # TAB  1 DEMOGRAPHIC   ########## DEMOGRAPHIC 
+###############################################################################################################
+# Replace the demographic tab with this standardized version
+tabPanel(
+  "Transição Demográfica",
+  
+  fluidPage(
+    h3("Transição Demográfica: Brasil por Faixa Etária",
+       style = "color: #1f5673; font-weight: bold;"),
+    
+    div(class = "checkbox-dark-panel",
+        
+        # Instructions row
+        fluidRow(
+          column(
+            width = 12,
+            div(
+              style = "margin-top: 5px; margin-bottom: 10px; color: #f5f5f5; text-align: justify; font-size: 20px;",
+              tagList(
+                tags$strong("Instruções: "),
+                "Esta análise mostra as projeções populacionais do IBGE (2000-2070) por faixa etária. ",
+                "A 'Linha de Transição Demográfica' marca o ponto onde a população em declínio de 0-14 anos cruza com a população crescente de 60+ anos. ",
+                "Use os controles abaixo para explorar diferentes regiões e tipos de dados."
+              )
+            )
+          )
+        ),
+        
+        # Controls row
+        fluidRow(
+          column(
+            width = 3,
+            tags$label("Selecionar Localização(ões):",
+                       style = "font-weight: bold; color: #f5f5f5; font-size: 16px;"),
+            pickerInput(
+              "demo_localInput",
+              label = NULL,
+              choices = names(demo_local_colors),
+              options = list(`actions-box` = TRUE),
+              multiple = TRUE,
+              selected = "Brasil"
+            )
+          ),
+          
+          column(
+            width = 3,
+            tags$label("Escolher Tipo de Dados:",
+                       style = "font-weight: bold; color: #f5f5f5; font-size: 16px;"),
+            radioButtons(
+              "demo_dataType",
+              label = NULL,
+              choices = list("Números Populacionais" = "numbers", "Proporções Populacionais" = "proportions"),
+              selected = "numbers"
+            )
+          ),
+          
+          column(
+            width = 3,
+            tags$label("Selecionar Variável(eis):",
+                       style = "font-weight: bold; color: #f5f5f5; font-size: 16px;"),
+            uiOutput("demo_variableInput")
+          ),
+          
+          column(
+            width = 3,
+            tags$label("Opções de Visualização:",
+                       style = "font-weight: bold; color: #f5f5f5; font-size: 16px;"),
+            div(style = "margin-top: 10px;",
+                checkboxInput(
+                  "demo_showTransition",
+                  label = "Mostrar Linha de Transição Demográfica",
+                  value = FALSE
+                )
+            )
+          )
+        )
+    ),
+    
+    # Note section
+    fluidRow(
+      column(
+        width = 12,
+        div(
+          style = "margin-top: 0px; margin-bottom: 5px; color: #1f5673; text-align: justify; font-size: 20px;",
+          HTML("<strong>Nota:</strong> Os dados mostram a evolução demográfica brasileira de 2000 a 2070, 
+               permitindo identificar períodos críticos para planejamento educacional e políticas públicas.")
+        )
+      )
+    ),
+    
+    # Plot section
+    fluidRow(
+      column(12,
+             plotlyOutput("demo_linePlot", height = "600px", width = "100%")
+      )
+    )
+  )
+),
+########################################################################################################################            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
                 
            ### UI - TAB 1 : FINANCE ##################################################
@@ -1789,17 +1944,17 @@ tabPanel("Detalhe da Oferta",
            ),
            
            sidebarLayout(
+             # UI - Remove intermediate/immediate region pickers
              sidebarPanel(
                width = 3,
                
                h4("Filtros Temporais", style = "color: #1f5673;"),
                
-               # Year selector
                div(style = "margin-bottom: 15px;",
                    tags$style(HTML("
-              .radio label { color: black !important; }
-              .radio input[type='radio'] + span { color: black !important; }
-            ")),
+        .radio label { color: black !important; }
+        .radio input[type='radio'] + span { color: black !important; }
+      ")),
                    radioButtons("censo_year", "Ano:",
                                 choices = c("2023" = 2023, "2024" = 2024),
                                 selected = default_year_censo, inline = TRUE)
@@ -1808,25 +1963,12 @@ tabPanel("Detalhe da Oferta",
                hr(),
                h4("Filtros Geográficos", style = "color: #1f5673;"),
                
-               # Geographic hierarchy
                pickerInput("censo_uf", 
                            "UF(s):",
                            choices = uf_choices_censo,
                            options = list(`actions-box` = TRUE, `live-search` = TRUE),
                            multiple = TRUE,
                            selected = default_uf_censo),
-               
-               pickerInput("censo_reg_inter",
-                           "Região(ões) Intermediária(s):",
-                           choices = character(0),
-                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
-                           multiple = TRUE),
-               
-               pickerInput("censo_reg_imed",
-                           "Região(ões) Imediata(s):",
-                           choices = character(0),
-                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
-                           multiple = TRUE),
                
                pickerInput("censo_municipio",
                            "Município(s):",
@@ -1837,14 +1979,12 @@ tabPanel("Detalhe da Oferta",
                hr(),
                h4("Filtros Administrativos", style = "color: #1f5673;"),
                
-               # In UI - update the dependency picker:
                pickerInput("censo_dependencia",
                            "Dependência Administrativa:",
-                           choices = c("Federal" = "1", "Estadual" = "2", "Municipal" = "3", "Privada" = "4"),  # Names shown, numbers as values
+                           choices = c("Federal" = "1", "Estadual" = "2", "Municipal" = "3", "Privada" = "4"),
                            options = list(`actions-box` = TRUE),
                            multiple = TRUE,
                            selected = c("1", "2", "3", "4"))
-               
              ),
              
              mainPanel(
@@ -1879,13 +2019,23 @@ tabPanel("Detalhe da Oferta",
   )
 )
 
+################################################################################################################################################
+#  SERVER SERVER SERVER SERVER SERVER SERVER SERVER SERVER SERVER SERVER #  SERVER SERVER SERVER SERVER SERVER SERVER SERVER SERVER SERVER SERVER 
 ########################################################################
-#  SERVER SERVER SERVER SERVER SERVER SERVER SERVER SERVER SERVER SERVER 
+#  SERVER SERVER SERVER SERVER SERVER SERVER SERVER SERVER SERVER SERVER  #  SERVER SERVER SERVER SERVER SERVER SERVER SERVER SERVER SERVER SERVER 
+########################################################################
+########################################################################
+#  SERVER SERVER SERVER SERVER SERVER SERVER SERVER SERVER SERVER SERVER #  SERVER SERVER SERVER SERVER SERVER SERVER SERVER SERVER SERVER SERVER 
 ########################################################################
 
 server <- function(input, output, session) {
 
 ## Tab choice
+  
+  observeEvent(input$link_demo, {
+    updateTabsetPanel(session, "tab_selection", selected = "Transição Demográfica")
+  })
+  
   observeEvent(input$link_fin1, {
     updateTabsetPanel(session, "tab_selection", selected = "Tema Financiero")
   })
@@ -1909,6 +2059,166 @@ server <- function(input, output, session) {
   observeEvent(input$link_escassez, {
     updateTabsetPanel(session, "tab_selection", selected = "Escassez de Profissionais Técnicos")
   })
+  
+
+  ###############################################################################################################
+  #  SERVER TAB DEMOGRAPHIC TAB DEMOGRAPHIC #  SERVER TAB DEMOGRAPHIC TAB DEMOGRAPHIC #  SERVER TAB DEMOGRAPHIC TAB DEMOGRAPHIC 
+  ###############################################################################################################
+  
+  # Demographic Tab Server Logic
+  # Dynamically update the variable input based on selected data type
+  # Update the variable input to match standard styling
+# Update variable input with inline styling
+output$demo_variableInput <- renderUI({
+  if (input$demo_dataType == "numbers") {
+    div(style = "background-color: white; border-radius: 4px;",
+        pickerInput(
+          "demo_yVariables",
+          label = NULL,
+          choices = demo_number_columns,
+          options = list(`actions-box` = TRUE, style = "btn-default"),
+          multiple = TRUE,
+          selected = c("0-14_T", "60+_T")
+        )
+    )
+  } else {
+    div(style = "background-color: white; border-radius: 4px;",
+        pickerInput(
+          "demo_yVariables", 
+          label = NULL,
+          choices = demo_proportion_columns,
+          options = list(`actions-box` = TRUE, style = "btn-default"),
+          multiple = TRUE,
+          selected = c("P_0_14_T", "P_60_plus_T")
+        )
+    )
+  }
+})
+  
+  # Render the demographic transition plot
+  # Render the demographic transition plot - FIXED ANNOTATIONS
+  output$demo_linePlot <- renderPlotly({
+    req(input$demo_yVariables)
+    
+    # Filter data based on selected locations
+    filtered_data <- pop01_70b %>%
+      filter(LOCAL %in% input$demo_localInput)
+    
+    # Determine y-axis labels and limits
+    y_labels <- if (input$demo_dataType == "numbers") scales::comma else waiver()
+    y_min <- 0
+    y_max <- max(filtered_data[input$demo_yVariables], na.rm = TRUE)
+    
+    # Create the base ggplot object
+    p <- ggplot(filtered_data, aes(x = ANO, color = LOCAL)) +
+      labs(
+        x = "Ano",
+        y = ifelse(input$demo_dataType == "numbers", "Contagem Populacional", "Proporção"),
+        title = "Projeções Populacionais IBGE 2000-2070",
+        color = "Localização"
+      ) +
+      theme_minimal() +
+      theme(
+        text = element_text(size = 14),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 14),
+        axis.text.y = element_text(size = 14)
+      ) +
+      scale_y_continuous(limits = c(y_min, y_max), labels = y_labels) +
+      scale_x_continuous(breaks = seq(2000, 2070, by = 10)) +
+      scale_color_manual(values = demo_local_colors)
+    
+    # Line types and Plotly annotations
+    line_types <- c("solid", "dashed", "dotted", "dotdash", "longdash", "twodash")
+    annotations <- list()
+    
+    # Add lines and annotations for each selected y-variable
+    for (loc in unique(filtered_data$LOCAL)) {
+      loc_data <- filtered_data %>% filter(LOCAL == loc)
+      loc_color <- demo_local_colors[loc]
+      
+      for (i in seq_along(input$demo_yVariables)) {
+        y_var <- input$demo_yVariables[i]
+        y_sym <- sym(y_var)
+        line_type <- line_types[(i - 1) %% length(line_types) + 1]
+        
+        # Add the line for each y-variable and LOCAL
+        p <- p + geom_line(data = loc_data, aes(y = !!y_sym), 
+                           linetype = line_type, linewidth = 1, color = loc_color)
+        
+        # Get the last year and value for labeling
+        last_year <- max(loc_data$ANO)
+        last_value <- loc_data %>%
+          filter(ANO == last_year) %>%
+          pull(!!y_sym)
+        
+        # Construct the label text
+        label_text <- paste(y_var, "-", loc)
+        
+        # FIXED: Clean annotation like original - larger font, black color, straight arrow
+        annotations <- append(annotations, list(
+          list(
+            x = last_year,
+            y = last_value,
+            text = label_text,
+            showarrow = TRUE,
+            arrowhead = 2,
+            ax = 0,
+            ay = 40,
+            font = list(color = "black", size = 20, family = "Arial")
+          )
+        ))
+      }
+    }
+    
+    # FIXED: Add demographic transition line with clean styling
+    if (input$demo_showTransition) {
+      crossover_data <- filtered_data %>% filter(Crossover_Flag == 1)
+      if (nrow(crossover_data) > 0) {
+        for (loc in unique(crossover_data$LOCAL)) {
+          crossover_year <- crossover_data %>% filter(LOCAL == loc) %>% pull(ANO)
+          crossover_value <- if (input$demo_dataType == "numbers") {
+            crossover_data %>% filter(LOCAL == loc) %>% pull(Crossover_Value_Num)
+          } else {
+            crossover_data %>% filter(LOCAL == loc) %>% pull(Crossover_Value_Prop)
+          }
+          
+          # FIXED: Simple annotation - black color, larger font, straight arrow like original
+          annotations <- append(annotations, list(
+            list(
+              x = crossover_year,
+              y = crossover_value,
+              text = paste(crossover_year, loc),
+              showarrow = TRUE,
+              arrowhead = 2,
+              ax = 0,  # Straight arrow
+              ay = 40,
+              font = list(color = "black", size = 20, family = "Arial")  # Black, large font
+            )
+          ))
+        }
+      }
+    }
+    
+    # Convert to interactive Plotly plot and add annotations
+    plotly_obj <- ggplotly(p)
+    plotly_obj <- plotly_obj %>% layout(annotations = annotations)
+    
+    return(plotly_obj)
+  })
+  
+  # Add navigation link for demographic tab (add to existing link observers)
+  observeEvent(input$link_demo, {
+    updateTabsetPanel(session, "tab_selection", selected = "Transição Demográfica")
+  })
+  
+  ################################################################
+  
+  
+  
+  
+  
+  
+  
   
   
   
@@ -5413,138 +5723,127 @@ output$informality_summary <- renderText({
 ## CENSO TAB ####CENSO TAB ############################ CENSO TAB## CENSO TAB ####CENSO TAB ############################ CENSO TAB
 ## CENSO TAB ####CENSO TAB ############################ CENSO TAB## CENSO TAB ####CENSO TAB ############################ CENSO TAB
 # Update Intermediate Region choices based on UF selection
-# --- Simplified Geographic Updates ---
+# --- UF to Municipality cascade (populate all municipalities) ---
 observeEvent(input$censo_uf, {
   if (is.null(input$censo_uf) || length(input$censo_uf) == 0) {
-    choices <- character(0)
+    updatePickerInput(session, "censo_municipio", choices = character(0), selected = character(0))
   } else {
-    choices <- unique(dft_informality_geo_codes[NM_UF %in% input$censo_uf, NM_RGIMED])
+    choices <- unique(dft_informality_geo_codes[NM_UF %in% input$censo_uf, NM_MUN])
     choices <- sort(choices[!is.na(choices)])
+    updatePickerInput(session, "censo_municipio", choices = choices, selected = choices)  # AUTO-SELECT ALL
   }
-  updatePickerInput(session, "censo_reg_inter", choices = choices, selected = choices)
 })
 
-observeEvent(input$censo_reg_inter, {
-  if (is.null(input$censo_reg_inter) || length(input$censo_reg_inter) == 0) {
-    choices <- character(0)  
-  } else {
-    choices <- unique(dft_informality_geo_codes[NM_RGIMED %in% input$censo_reg_inter, NM_RGIINTM])
-    choices <- sort(choices[!is.na(choices)])
+# --- SINGLE Title Creation (simplified) ---
+create_censo_title <- reactive({
+  if (is.null(input$censo_uf) || length(input$censo_uf) == 0) {
+    return("Nenhuma seleção")
   }
-  updatePickerInput(session, "censo_reg_imed", choices = choices, selected = choices)
+  
+  uf_text <- paste(input$censo_uf, collapse = ", ")
+  
+  mun_count <- if (!is.null(input$censo_municipio) && length(input$censo_municipio) > 0) {
+    length(input$censo_municipio)
+  } else {
+    length(unique(dft_informality_geo_codes[NM_UF %in% input$censo_uf, NM_MUN]))
+  }
+  
+  return(paste(uf_text, "-", mun_count, "municípios"))
 })
 
-
-# Add missing observeEvent for municipality updates
-observeEvent(input$censo_reg_imed, {
-  if (is.null(input$censo_reg_imed) || length(input$censo_reg_imed) == 0) {
-    choices <- character(0)
-  } else {
-    choices <- unique(dft_informality_geo_codes[NM_RGIINTM %in% input$censo_reg_imed, NM_MUN])
-    choices <- sort(choices[!is.na(choices)])
-  }
-  updatePickerInput(session, "censo_municipio", choices = choices, selected = choices)
-})
-
-# --- Simplified Main Reactive ---
-# --- Main Reactive Data ---
+# --- Main Reactive (unchanged) ---
 rkt_censo_filtered <- reactive({
   req(input$censo_year)
+  req(input$censo_uf)
+  req(length(input$censo_uf) > 0)
+  req(input$censo_dependencia)
+  req(length(input$censo_dependencia) > 0)
   
   data <- df_censo_combined %>%
-    filter(ANO == input$censo_year)  # Use dplyr filter, not data.table syntax
+    filter(ANO == input$censo_year) %>%
+    filter(NM_UF %in% input$censo_uf) %>%
+    filter(TP_DEPENDENCIA %in% input$censo_dependencia)
   
-  if (!is.null(input$censo_dependencia) && length(input$censo_dependencia) > 0) {
-    data <- data %>% filter(TP_DEPENDENCIA %in% input$censo_dependencia)
-  }
-  
-  if (!is.null(input$censo_uf) && length(input$censo_uf) > 0) {
-    data <- data %>% filter(NM_UF %in% input$censo_uf)
+  if (!is.null(input$censo_municipio) && length(input$censo_municipio) > 0) {
+    data <- data %>% filter(NM_MUN %in% input$censo_municipio)
   }
   
   return(data)
 })
 
-# --- Table 1a - Eixo Level ---
+# --- Table 1a with responsive total row and user messaging ---
+# --- Table 1a - Fixed with unique column names ---
 output$censo_table_eixo <- renderDT({
-  data <- rkt_censo_filtered()
-  req(nrow(data) > 0)
-  
-  # Include ALL modality columns
-  eixo_summary <- data %>%
-    group_by(Eixo = NO_AREA_CURSO_PROFISSIONAL) %>%
-    summarise(
-      Cursos = sum(QT_CURSO_TEC, na.rm = TRUE),
-      `Matrículas Total` = sum(QT_MAT_CURSO_TEC, na.rm = TRUE),
-      Integrado = sum(QT_MAT_CURSO_TEC_CT, na.rm = TRUE),
-      `Normal/Magistério` = sum(QT_MAT_CURSO_TEC_NM, na.rm = TRUE),
-      Concomitante = sum(QT_MAT_CURSO_TEC_CONC, na.rm = TRUE),
-      Subsequente = sum(QT_MAT_TEC_SUBS, na.rm = TRUE),
-      `EJA Nível Médio` = sum(QT_MAT_TEC_EJA, na.rm = TRUE),
-      .groups = "drop"
-    ) %>%
-    arrange(desc(`Matrículas Total`))
-  
-  datatable(eixo_summary, rownames = FALSE, extensions = 'Buttons',
-            options = list(pageLength = 12, scrollX = TRUE, dom = 'Bfrtip',
-                           buttons = c('copy', 'csv', 'excel'),
-                           selection = 'multiple'))  # Enable row selection
-})
-
-output$censo_table_eixo <- renderDT({
-  data <- rkt_censo_filtered()
-  req(nrow(data) > 0)
-  
-  # Create dynamic title
-  title_parts <- c()
-  if (!is.null(input$censo_uf)) title_parts <- c(title_parts, paste(input$censo_uf, collapse = ", "))
-  if (!is.null(input$censo_reg_inter) && length(input$censo_reg_inter) > 0) {
-    title_parts <- c(title_parts, paste(input$censo_reg_inter, collapse = ", "))
+  # Simple validation
+  if (is.null(input$censo_uf) || length(input$censo_uf) == 0 ||
+      is.null(input$censo_dependencia) || length(input$censo_dependencia) == 0) {
+    empty_data <- data.frame(Mensagem = "Selecione UF e Dependência Administrativa")
+    return(datatable(empty_data, options = list(dom = 't'), rownames = FALSE))
   }
-  dynamic_title <- if(length(title_parts) > 0) paste(title_parts, collapse = " - ") else "Brasil"
   
+  # Get base filtered data
+  data <- df_censo_combined %>%
+    filter(ANO == input$censo_year) %>%
+    filter(NM_UF %in% input$censo_uf) %>%
+    filter(TP_DEPENDENCIA %in% input$censo_dependencia)
+  
+  # Apply municipality filter if selected
+  if (!is.null(input$censo_municipio) && length(input$censo_municipio) > 0) {
+    data <- data %>% filter(NM_MUN %in% input$censo_municipio)
+  }
+  
+  # Check if we have data
+  if (nrow(data) == 0) {
+    empty_data <- data.frame(Mensagem = "Nenhum dado encontrado para a seleção atual")
+    return(datatable(empty_data, options = list(dom = 't'), rownames = FALSE))
+  }
+  
+  # Create title
+  uf_text <- paste(input$censo_uf, collapse = ", ")
+  mun_count <- if (!is.null(input$censo_municipio) && length(input$censo_municipio) > 0) {
+    length(input$censo_municipio)
+  } else {
+    length(unique(data$NM_MUN))
+  }
+  title_content <- paste(uf_text, "-", mun_count, "municípios")
+  
+  # Aggregate by eixo with UNIQUE column names
   eixo_data <- data %>%
     group_by(Eixo = NO_AREA_CURSO_PROFISSIONAL) %>%
     summarise(
       Cursos = sum(QT_CURSO_TEC, na.rm = TRUE),
-      `Matrículas Total` = sum(QT_MAT_CURSO_TEC, na.rm = TRUE),
+      Matriculas_Total = sum(QT_MAT_CURSO_TEC, na.rm = TRUE),
       Integrado = sum(QT_MAT_CURSO_TEC_CT, na.rm = TRUE),
-      `Normal/Magistério` = sum(QT_MAT_CURSO_TEC_NM, na.rm = TRUE),
+      Normal_Magisterio = sum(QT_MAT_CURSO_TEC_NM, na.rm = TRUE),
       Concomitante = sum(QT_MAT_CURSO_TEC_CONC, na.rm = TRUE),
       Subsequente = sum(QT_MAT_TEC_SUBS, na.rm = TRUE),
-      `EJA Nível Médio` = sum(QT_MAT_TEC_EJA, na.rm = TRUE),
+      EJA_Nivel_Medio = sum(QT_MAT_TEC_EJA, na.rm = TRUE),
       .groups = "drop"
     ) %>%
-    arrange(desc(`Matrículas Total`))
+    arrange(desc(Matriculas_Total))
   
-  # Add simple total row
+  # Add total row with same column structure
   total_row <- data.frame(
-    Eixo = "TOTAL",
+    Eixo = paste("TOTAL -", title_content),
     Cursos = sum(eixo_data$Cursos),
-    `Matrículas Total` = sum(eixo_data$`Matrículas Total`),
+    Matriculas_Total = sum(eixo_data$Matriculas_Total),
     Integrado = sum(eixo_data$Integrado),
-    `Normal/Magistério` = sum(eixo_data$`Normal/Magistério`),
+    Normal_Magisterio = sum(eixo_data$Normal_Magisterio),
     Concomitante = sum(eixo_data$Concomitante),
     Subsequente = sum(eixo_data$Subsequente),
-    `EJA Nível Médio` = sum(eixo_data$`EJA Nível Médio`)
+    EJA_Nivel_Medio = sum(eixo_data$EJA_Nivel_Medio)
   )
   
   final_data <- bind_rows(total_row, eixo_data)
   
-  # Find "Ambiente e saude" row for default selection
-  ambiente_row <- which(grepl("Ambiente e saude", final_data$Eixo, ignore.case = TRUE))
-  default_selection <- if(length(ambiente_row) > 0) ambiente_row else 2  # Default to row 2 if not found
+  # Rename columns for display (after data creation to avoid conflicts)
+  names(final_data) <- c("Eixo", "Cursos", "Matrículas Total", "Integrado", 
+                         "Normal/Magistério", "Concomitante", "Subsequente", "EJA Nível Médio")
   
   datatable(final_data, rownames = FALSE, extensions = 'Buttons',
-            caption = htmltools::tags$caption(
-              style = "caption-side: top; text-align: left; color: #ffd700; font-size: 16px; font-weight: bold; margin-bottom: 10px;",  # Yellow font
-              paste("Matrículas por Eixo Tecnológico -", dynamic_title)
-            ),
             options = list(pageLength = 15, scrollX = TRUE, dom = 'Bfrtip',
                            buttons = c('copy', 'csv', 'excel'),
-                           selection = list(mode = 'multiple', selected = default_selection - 1)  # -1 for 0-based indexing
-            )) 
-  # Remove special total row formatting - let it look normal
+                           selection = 'multiple'))
 })
 
 output$censo_table_curso <- renderDT({
@@ -5580,6 +5879,8 @@ output$censo_table_curso <- renderDT({
             options = list(pageLength = 15, scrollX = TRUE, dom = 'Bfrtip',
                            buttons = c('copy', 'csv', 'excel')))
 })
+
+
 }  
   
 
