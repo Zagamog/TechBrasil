@@ -52,6 +52,129 @@ demo_local_colors <- c(
 )
 #############################################################
 
+
+#############################################################
+#################### DATA LOADING FOR POPU ENROLLMENT TAB ###
+#############################################################
+
+
+# Load additional data for EPT analysis
+load("meta11a_opcoes.rda")
+load("df_codes_ibge.rda")
+
+# Get regional mappings from geocodes
+geocodes <- df_codes_ibge %>% 
+  select(SG_UF, CO_5RGRANDE, NM_5RGRANDE) %>% 
+  distinct()
+
+# Define Amazonia Legal states
+amazonia_legal <- c("AC", "AP", "AM", "MA", "MT", "PA", "RO", "RR", "TO")
+
+# EPT Data preparation
+# Select needed columns from population data and create 15-19 age group
+ept_pop_data <- pop01_70b %>%
+  select(ANO, SIGLA, LOCAL, `15-17_T`, `18-21_T`) %>%
+  mutate(`15-19_T` = `15-17_T` + (`18-21_T` * 0.5)) %>%
+  filter(ANO >= 2007 & ANO <= 2035) %>%
+  # Drop the _r constructs  
+  filter(!LOCAL %in% c("Centro-Oeste_r", "Nordeste_r"))
+
+# Select needed columns from enrollment data
+enrollment_data_states <- meta11a_opcoes %>%
+  select(ANO, SG_UF, NM_UF, QT_MAT_PROF_TEC_PROPAG, QT_MAT_MED) %>%
+  filter(ANO >= 2007 & ANO <= 2035)
+
+# Create IBGE regional aggregates
+enrollment_data_regions <- enrollment_data_states %>%
+  left_join(geocodes, by = "SG_UF") %>%
+  filter(!is.na(NM_5RGRANDE)) %>%
+  group_by(ANO, NM_5RGRANDE) %>%
+  summarise(
+    QT_MAT_PROF_TEC_PROPAG = sum(QT_MAT_PROF_TEC_PROPAG, na.rm = TRUE),
+    QT_MAT_MED = sum(QT_MAT_MED, na.rm = TRUE),
+    .groups = 'drop'
+  ) %>%
+  mutate(
+    SG_UF = case_when(
+      NM_5RGRANDE == "Norte" ~ "NO",
+      NM_5RGRANDE == "Nordeste" ~ "ND", 
+      NM_5RGRANDE == "Sudeste" ~ "SD",
+      NM_5RGRANDE == "Sul" ~ "SU",
+      NM_5RGRANDE == "Centro-Oeste" ~ "CO",
+      TRUE ~ NM_5RGRANDE
+    ),
+    NM_UF = NM_5RGRANDE
+  ) %>%
+  select(-NM_5RGRANDE)
+
+# Create Amazonia Legal aggregate
+enrollment_data_amazonia <- enrollment_data_states %>%
+  filter(SG_UF %in% amazonia_legal) %>%
+  group_by(ANO) %>%
+  summarise(
+    QT_MAT_PROF_TEC_PROPAG = sum(QT_MAT_PROF_TEC_PROPAG, na.rm = TRUE),
+    QT_MAT_MED = sum(QT_MAT_MED, na.rm = TRUE),
+    .groups = 'drop'
+  ) %>%
+  mutate(
+    SG_UF = "AML",
+    NM_UF = "Amazonia_Legal"
+  )
+
+# Combine state, regional, and Amazonia Legal enrollment data
+enrollment_data <- enrollment_data_states %>%
+  bind_rows(enrollment_data_regions) %>%
+  bind_rows(enrollment_data_amazonia)
+
+# Join the datasets
+ept_combined_data <- ept_pop_data %>%
+  left_join(enrollment_data, by = c("SIGLA" = "SG_UF", "ANO" = "ANO")) %>%
+  mutate(LOCAL = ifelse(is.na(NM_UF), LOCAL, NM_UF)) %>%
+  mutate(
+    PCT_MAT_EPT = ifelse(`15-19_T` > 0, (QT_MAT_PROF_TEC_PROPAG / `15-19_T`) * 100, 0),
+    PCT_MAT_MED = ifelse(`15-19_T` > 0, (QT_MAT_MED / `15-19_T`) * 100, 0)
+  ) %>%
+  select(-NM_UF, -`15-17_T`, -`18-21_T`)
+
+# Define the variables available for plotting
+ept_number_variables <- c(
+  "Pop 15-19" = "15-19_T",
+  "Matrícula EPT" = "QT_MAT_PROF_TEC_PROPAG",
+  "Matrícula Ensino Médio" = "QT_MAT_MED"
+)
+
+ept_percentage_variables <- c(
+  "% Matrícula EPT" = "PCT_MAT_EPT",
+  "% Matrícula Ensino Médio" = "PCT_MAT_MED"
+)
+
+# Calculate Meta 11 targets
+ept_location_order <- c(
+  "Brasil",
+  "Norte", "Acre", "Amapá", "Amazonas", "Pará", "Rondônia", "Roraima", "Tocantins",
+  "Nordeste", "Alagoas", "Bahia", "Ceará", "Maranhão", "Paraíba", "Pernambuco", "Piauí", "Rio Grande do Norte", "Sergipe",
+  "Sudeste", "Espírito Santo", "Minas Gerais", "Rio de Janeiro", "São Paulo", 
+  "Sul", "Paraná", "Rio Grande do Sul", "Santa Catarina",
+  "Centro-Oeste", "Distrito Federal", "Goiás", "Mato Grosso", "Mato Grosso do Sul"
+)
+
+ept_meta11_df <- ept_combined_data %>%
+  filter(ANO == 2013) %>%
+  group_by(LOCAL) %>%
+  summarise(
+    meta11_absolute = sum(QT_MAT_PROF_TEC_PROPAG, na.rm = TRUE) * 3,
+    .groups = 'drop'
+  ) %>%
+  arrange(match(LOCAL, ept_location_order))
+
+# EPT local colors (reuse existing demo_local_colors with additions)
+ept_local_colors <- c(
+  demo_local_colors,
+  "Amazonia_Legal" = "#8B4513"
+)
+
+##################################################################
+
 # Load Propag scraped data
 propag_ept_financeiro <- readRDS("propag_ept_financeiro.rds")
 
@@ -728,6 +851,13 @@ tags$div(
               
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
+                  actionLink("link_ept", "Análise EPT: População 15-19 anos e Matrículas EPT/Ensino Médio")
+              ),
+              div(class = "tab-explanation", "Análise comparativa entre população elegível (15-19 anos) e matrículas na Educação Profissional Técnica (EPT) e Ensino Médio (2007-2035), incluindo acompanhamento das metas do PNE Meta 11 por estado e região."),
+              
+              
+              div(class = "tab-link-line",
+                  span(class = "arrow", HTML("▸")),
                   actionLink("link_fin1", "Cenário Financeiro e Simulações de Investimento em EPT e Fundo FEF")
               ),
               div(class = "tab-explanation", "Projeções de investimento e impacto fiscal no 1º e 5º ano, considerando os aportes à Educação Profissional Técnica (EPT) e ao Fundo de Equalização Fiscal (FEF)."),
@@ -772,7 +902,7 @@ tabPanel(
   "Transição Demográfica",
   
   fluidPage(
-    h3("Transição Demográfica: Brasil por Faixa Etária",
+    h3("Transição Demográfica: Projeções Populacionais por Faixa Etária",
        style = "color: #1f5673; font-weight: bold;"),
     
     div(class = "checkbox-dark-panel",
@@ -863,15 +993,99 @@ tabPanel(
     )
   )
 ),
-########################################################################################################################            
-            
-            
-            
-            
-            
-            
-            
-            
+
+###############################################################################################################
+# TAB  2 UI FOR EPT ENROLLMENT ANALYSIS TAB POP EPT # TAB  2 UI FOR EPT ENROLLMENT ANALYSIS TAB POP EPT 
+###############################################################################################################
+
+tabPanel("Análise EPT",
+         fluidPage(
+           h3("População 15-19 anos e Matrículas EPT/Ensino Médio", 
+              style = "color: #1f5673; font-weight: bold;"),
+           
+           div(class = "topbar-info",
+               style = "color: black !important;",
+               p("Esta análise compara a população elegível (15-19 anos) com as matrículas na Educação Profissional Técnica (EPT) e Ensino Médio (2007-2035).", 
+                 style = "color: black !important;"),
+               p("Inclui acompanhamento das metas do PNE Meta 11 por estado e região, permitindo configurar cenários alternativos.", 
+                 style = "color: black !important;"),
+               p("Use os controles abaixo para explorar diferentes localizações e configurar metas personalizadas para análise.", 
+                 style = "color: black !important;")
+           ),
+           
+           sidebarLayout(
+             sidebarPanel(
+               width = 3,
+               style = "color: black;",
+               
+               h4("Controles de Análise", style = "color: #1f5673;"),
+               
+               div(style = "color: black;",
+                   pickerInput(
+                     "ept_localInput",
+                     "Selecionar Localização(ões):",
+                     choices = sort(unique(ept_combined_data$LOCAL)),
+                     selected = "Piauí",
+                     multiple = TRUE,
+                     options = list(`actions-box` = TRUE, `live-search` = TRUE)
+                   )
+               ),
+               
+               div(style = "color: black;",
+                   radioButtons(
+                     "ept_dataType",
+                     "Escolher Tipo de Dados:",
+                     choices = list("Números Absolutos" = "numbers", "Percentagens" = "percentages"),
+                     selected = "numbers"
+                   )
+               ),
+               
+               div(style = "color: black;", uiOutput("ept_variableInput")),
+               
+               div(style = "color: black;",
+                   checkboxInput(
+                     "ept_showMeta",
+                     "Mostrar Linhas de Meta PNE 11",
+                     value = TRUE
+                   )
+               ),
+               
+               conditionalPanel(
+                 condition = "input.ept_showMeta",
+                 style = "color: black;",
+                 hr(),
+                 h4("Configuração de Metas", style = "color: #1f5673;"),
+                 p("Meta Targets (para localizações selecionadas):", 
+                   style = "font-weight: bold; color: black;"),
+                 div(style = "color: black;", uiOutput("ept_metaTargetsUI"))
+               ),
+               
+               hr(),
+               h5("Resumo da Seleção:", style = "color: #1f5673;"),
+               div(style = "color: black;", uiOutput("ept_summary"))
+             ),
+             
+             mainPanel(
+               width = 9,
+               h4("Evolução Populacional e de Matrículas EPT/EM", style = "color: #1f5673;"),
+               withSpinner(plotlyOutput("ept_linePlot", height = "600px")),
+               
+               br(),
+               
+               # Enhanced source attribution
+               div(style = "text-align: center; margin-top: 15px; padding: 10px; background-color: #f9f9f9; border-radius: 5px;",
+                   HTML("<p style='font-size: 12px; color: #666; margin: 0;'>
+                    <strong>Fontes:</strong> 
+                    <a href='https://www.ibge.gov.br/estatisticas/sociais/populacao/9109-projecao-da-populacao.html' 
+                    target='_blank' style='color: #1f5673;'>Projeções Populacionais IBGE</a> | 
+                    <a href='http://portal.inep.gov.br/web/guest/censo-escolar' 
+                    target='_blank' style='color: #1f5673;'>Censo Escolar INEP</a>
+                   </p>")
+               )
+             )
+           )
+         )
+),    
             
             
             
@@ -1324,33 +1538,39 @@ tabPanel(
               
            ### UI - TAB 3 : META 11 VIGENTE  ##################################################
            
-                tabPanel("Situação - Meta 11 (vigente)",
-                         fluidPage(
-                           h3("Evolução da Oferta de EPT por UF", style = "color: #1f5673; font-weight: bold;"),
-                           fluidRow(
-                             column(4,
-                              selectizeInput("oferta_uf", "Selecionar UF ou Brasil:",
-               choices = c("Brasil", sort(unique(meta11a_opcoes$NM_UF))),
-               selected = "Rio Grande do Norte")
-
-                             ),
-                             column(4,
-                                    selectizeInput("oferta_ept_var", "Variável EPT:",
-                                                   choices = ept_vars,
-                                                   selected = "QT_MAT_PROF_TEC_PROPAG")
-                             ),
-                             column(4,
-                                    selectizeInput("oferta_other_var", "Outra variável:",
-                                                   choices = other_vars,
-                                                   selected = "QT_MAT_MED")
-                             )
-                           ),
-                           plotOutput("oferta_ept_plot", height = "500px"),
-                           br(),
-                           h3("Tabela de Dados (2007–2024)", style = "color: #1f5673; font-weight: bold;"),
-                           DTOutput("oferta_ept_table")
-                         )
-                ),
+tabPanel("Situação - Meta 11 (vigente)",
+         fluidPage(
+           h3("Evolução da Oferta de EPT por UF", style = "color: #1f5673; font-weight: bold;"),
+           fluidRow(
+             column(4,
+                    selectizeInput("oferta_uf", "Selecionar UF ou Brasil:",
+                                   choices = c("Brasil", sort(unique(meta11a_opcoes$NM_UF))),
+                                   selected = "Rio Grande do Norte")
+             ),
+             column(4,
+                    selectizeInput("meta_target_type", "Tipo de Meta:",
+                                   choices = list("Meta PNE 11 (3x2013)" = "pne11", 
+                                                  "Meta Definida" = "custom"),
+                                   selected = "pne11"),
+                    conditionalPanel(
+                      condition = "input.meta_target_type == 'custom'",
+                      style = "margin-top: 10px;",
+                      numericInput("custom_meta_value", "Valor Meta:", 
+                                   value = NA, min = 0, step = 1000, width = "100%")
+                    )
+             ),
+             column(4,
+                    selectizeInput("oferta_ept_var", "Variável EPT:",
+                                   choices = ept_vars,
+                                   selected = "QT_MAT_PROF_TEC_PROPAG")
+             )
+           ),
+           plotOutput("oferta_ept_plot", height = "500px"),
+           br(),
+           h3("Tabela de Dados (2007–2024)", style = "color: #1f5673; font-weight: bold;"),
+           DTOutput("oferta_ept_table")
+         )
+),
                 
            ### UI - TAB 4 : META 11a NOVA ##################################################
            
@@ -2036,6 +2256,12 @@ server <- function(input, output, session) {
     updateTabsetPanel(session, "tab_selection", selected = "Transição Demográfica")
   })
   
+  # Add this with your existing navigation handlers in the server function
+  observeEvent(input$link_ept, {
+    updateTabsetPanel(session, "tab_selection", selected = "Análise EPT")
+  })
+  
+  
   observeEvent(input$link_fin1, {
     updateTabsetPanel(session, "tab_selection", selected = "Tema Financiero")
   })
@@ -2212,7 +2438,327 @@ output$demo_variableInput <- renderUI({
   })
   
   ################################################################
+  ###############################################################################################################
+  #  SERVER TAB EPT ##$$$  #  SERVER TAB EPT ##$$$ #  SERVER TAB EPT ##$$$ #  SERVER TAB EPT ##$$$ #  SERVER TAB EPT ##$$$ 
+  ###############################################################################################################
   
+  
+  
+  
+  # Dynamically update the variable input based on selected data type (existing)
+  output$ept_variableInput <- renderUI({
+    if (input$ept_dataType == "numbers") {
+      pickerInput(
+        "ept_yVariables",
+        label = "Selecionar Variável(eis) do Eixo Y:",
+        choices = ept_number_variables,
+        options = list(`actions-box` = TRUE),
+        multiple = TRUE,
+        selected = c("15-19_T", "QT_MAT_PROF_TEC_PROPAG")
+      )
+    } else {
+      pickerInput(
+        "ept_yVariables",
+        label = "Selecionar Variável(eis) do Eixo Y:",
+        choices = ept_percentage_variables,
+        options = list(`actions-box` = TRUE),
+        multiple = TRUE,
+        selected = c("PCT_MAT_EPT")
+      )
+    }
+  })
+  
+  output$ept_metaTargetsUI <- renderUI({
+    req(input$ept_localInput)
+    
+    # Create table header
+    table_header <- tags$thead(
+      tags$tr(
+        tags$th("UF/REG/BRASIL", style = "width: 30%;"),
+        tags$th("META 11 VIGENTE", style = "width: 35%;"),
+        tags$th("META DEFINIDO (preenche)", style = "width: 35%;")
+      )
+    )
+    
+    # Create table rows
+    table_rows <- map(input$ept_localInput, ~{
+      loc <- .x
+      safe_id <- str_replace_all(loc, "[^A-Za-z0-9]", "_")
+      
+      # Direct lookup from data frame
+      meta_value <- ept_meta11_df$meta11_absolute[ept_meta11_df$LOCAL == loc]
+      if(length(meta_value) == 0) meta_value <- 0
+      
+      tags$tr(
+        tags$td(strong(loc)),
+        tags$td(
+          checkboxInput(paste0("ept_use_meta11_", safe_id), 
+                        paste0("Meta 11: ", round(meta_value)), 
+                        value = TRUE)
+        ),
+        tags$td(
+          numericInput(paste0("ept_custom_meta_", safe_id), 
+                       "", 
+                       value = NA, 
+                       min = 0)
+        )
+      )
+    })
+    
+    # Complete table
+    tags$table(class = "table table-condensed",
+               table_header,
+               tags$tbody(table_rows)
+    )
+  })
+  
+  # New: Mutual exclusion logic for meta controls
+  observe({
+    req(input$ept_localInput)
+    
+    walk(input$ept_localInput, ~{
+      loc <- .x
+      safe_id <- str_replace_all(loc, "[^A-Za-z0-9]", "_")
+      meta11_id <- paste0("ept_use_meta11_", safe_id)
+      custom_id <- paste0("ept_custom_meta_", safe_id)
+      
+      # Check if inputs exist before using them
+      if(!is.null(input[[meta11_id]]) && !is.null(input[[custom_id]])) {
+        # If Meta 11 is checked, clear and disable custom input
+        if(isTruthy(input[[meta11_id]])) {
+          updateNumericInput(session, custom_id, value = NA)
+        }
+        
+        # If custom value is entered, uncheck Meta 11
+        if(!is.na(input[[custom_id]]) && input[[custom_id]] > 0) {
+          updateCheckboxInput(session, meta11_id, value = FALSE)
+        }
+      }
+    })
+  })
+  
+  # Updated plotting logic
+  output$ept_linePlot <- renderPlotly({
+    req(input$ept_yVariables, input$ept_localInput)
+    
+    # Filter data based on selected locations
+    filtered_data <- ept_combined_data %>%
+      filter(LOCAL %in% input$ept_localInput)
+    
+    # Get the current variable choices based on data type
+    current_variables <- if (input$ept_dataType == "numbers") ept_number_variables else ept_percentage_variables
+    
+    # Determine y-axis limits and labels based on data type
+    if (input$ept_dataType == "numbers") {
+      y_min <- 0
+      y_max <- max(filtered_data[input$ept_yVariables], na.rm = TRUE) * 1.1
+      y_labels <- scales::comma
+      y_axis_title <- "Contagem"
+      plot_title <- "População 15-19 anos e Matrículas EPT/Ensino Médio (2007-2035)"
+    } else {
+      # For percentage mode, set appropriate limits for percentages
+      y_min <- 0
+      y_max <- max(c(100, max(filtered_data[input$ept_yVariables], na.rm = TRUE) * 1.1))
+      y_labels <- function(x) paste0(x, "%")
+      y_axis_title <- "Percentagem (%)"
+      plot_title <- "Percentagem de Matrículas EPT/Ensino Médio (2007-2035)"
+    }
+    
+    # Create the base ggplot object
+    p <- ggplot(filtered_data, aes(x = ANO, color = LOCAL)) +
+      labs(
+        x = "Ano",
+        y = y_axis_title,
+        title = plot_title,
+        color = "Localização"
+      ) +
+      theme_minimal() +
+      theme(
+        text = element_text(size = 14),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 14),
+        axis.text.y = element_text(size = 14)
+      ) +
+      scale_y_continuous(limits = c(y_min, y_max), labels = y_labels) +
+      scale_x_continuous(breaks = c(2007, seq(2010, 2035, by = 5))) +
+      scale_color_manual(values = ept_local_colors)
+    
+    # Line types and Plotly annotations
+    line_types <- c("solid", "dashed", "dotted", "dotdash", "longdash", "twodash")
+    annotations <- list()
+    
+    # Updated meta targets calculation using user preferences
+    meta_targets <- tibble()
+    
+    for(loc in input$ept_localInput) {
+      safe_id <- str_replace_all(loc, "[^A-Za-z0-9]", "_")
+      meta11_id <- paste0("ept_use_meta11_", safe_id)
+      custom_id <- paste0("ept_custom_meta_", safe_id)
+      
+      # Default to Meta 11 if no inputs exist yet
+      if(is.null(input[[meta11_id]]) || is.null(input[[custom_id]])) {
+        # Use Meta 11 by default
+        meta_absolute <- ept_meta11_df$meta11_absolute[ept_meta11_df$LOCAL == loc]
+        if(length(meta_absolute) == 0) meta_absolute <- 0
+      } else if(isTruthy(input[[meta11_id]])) {
+        # Use Meta 11 target
+        meta_absolute <- ept_meta11_df$meta11_absolute[ept_meta11_df$LOCAL == loc]
+        if(length(meta_absolute) == 0) meta_absolute <- 0
+      } else if(!is.na(input[[custom_id]]) && input[[custom_id]] > 0) {
+        # Use custom target
+        meta_absolute <- input[[custom_id]]
+      } else {
+        meta_absolute <- NA
+      }
+      
+      if(!is.na(meta_absolute)) {
+        meta_targets <- bind_rows(meta_targets, 
+                                  tibble(LOCAL = loc, meta_target = meta_absolute))
+      }
+    }
+    
+    # Add meta lines for each location
+    for (loc in input$ept_localInput) {
+      loc_target <- meta_targets %>% filter(LOCAL == loc)
+      
+      if (nrow(loc_target) > 0 && !is.na(loc_target$meta_target)) {
+        target_absolute <- loc_target$meta_target
+        loc_color <- ept_local_colors[loc]
+        if(is.na(loc_color)) loc_color <- "darkorange"
+        
+        if (input$ept_dataType == "numbers") {
+          # In numbers mode, show the absolute target
+          target_line_value <- target_absolute
+          target_label <- paste0("Meta PNE 11 - ", loc, ": ", round(target_line_value))
+        } else {
+          # In percentage mode, calculate what % this represents of recent population for this location
+          recent_population <- ept_combined_data %>%
+            filter(LOCAL == loc, ANO >= 2020) %>%
+            summarise(avg_pop = mean(`15-19_T`, na.rm = TRUE)) %>%
+            pull(avg_pop)
+          
+          if (length(recent_population) > 0 && !is.na(recent_population) && recent_population > 0) {
+            target_line_value <- (target_absolute / recent_population) * 100
+            target_label <- paste0("Meta PNE 11 - ", loc, ": ", round(target_line_value, 1), "%")
+          } else {
+            target_line_value <- NULL
+            target_label <- NULL
+          }
+        }
+        
+        # Add horizontal line for this location's target
+        if (!is.null(target_line_value) && target_line_value <= y_max) {
+          p <- p + 
+            geom_hline(yintercept = target_line_value, 
+                       linetype = "dotdash", 
+                       color = loc_color, 
+                       linewidth = 1.0, 
+                       alpha = 0.7) +
+            annotate("text", 
+                     x = 2012, 
+                     y = target_line_value+(0.1*target_line_value), 
+                     label = paste0("Meta 11 vigente triplicar matricula EPT - ", loc),
+                     color = loc_color, 
+                     fontface = "bold",
+                     size = 4.0,
+                     alpha = 1)
+        }
+      }
+    }
+    
+    # Add lines and annotations for each selected y-variable
+    for (loc in unique(filtered_data$LOCAL)) {
+      loc_data <- filtered_data %>% filter(LOCAL == loc)
+      loc_color <- ept_local_colors[loc]
+      if(is.na(loc_color)) loc_color <- "#000000"
+      
+      for (i in seq_along(input$ept_yVariables)) {
+        y_var <- input$ept_yVariables[i]
+        y_sym <- sym(y_var)
+        line_type <- line_types[(i - 1) %% length(line_types) + 1]
+        
+        # Add tooltip text to the data
+        loc_data <- loc_data %>%
+          mutate(
+            tooltip_text = paste0(
+              names(current_variables)[current_variables == y_var], "<br>",
+              "Ano: ", ANO, "<br>",
+              "Valor: ", if (input$ept_dataType == "numbers") {
+                round(!!y_sym)
+              } else {
+                paste0(round(!!y_sym, 2), "%")
+              },
+              "<br>Estado: ", loc
+            )
+          )
+        
+        # Add the line for each y-variable and LOCAL
+        p <- p + geom_line(data = loc_data, 
+                           aes(y = !!y_sym), 
+                           linetype = line_type, linewidth = 1, color = loc_color)
+        
+        # Determine the last year for this variable
+        is_enrollment <- y_var %in% c("QT_MAT_PROF_TEC_PROPAG", "QT_MAT_MED", "PCT_MAT_EPT", "PCT_MAT_MED")
+        last_year <- if (is_enrollment) 2024 else 2035
+        
+        # Filter data to the appropriate end year for this variable
+        var_data <- loc_data %>% filter(ANO <= last_year)
+        
+        # Get the last value for labeling
+        if (nrow(var_data) > 0) {
+          final_year <- max(var_data$ANO, na.rm = TRUE)
+          last_value <- var_data %>%
+            filter(ANO == final_year) %>%
+            pull(!!y_sym)
+          
+          if(length(last_value) > 0 && !is.na(last_value)) {
+            # Get the display name for the variable
+            var_display_name <- names(current_variables)[current_variables == y_var]
+            
+            # Construct the label text
+            label_text <- paste(var_display_name, "-", loc)
+            
+            # Add Plotly annotation for the label
+            annotations <- append(annotations, list(
+              list(
+                x = final_year,
+                y = last_value,
+                text = label_text,
+                showarrow = TRUE,
+                arrowhead = 2,
+                ax = 0,
+                ay = 40,
+                font = list(color = "black", size = 12, family = "Arial")
+              )
+            ))
+          }
+        }
+      }
+    }
+    
+    # Convert to interactive Plotly plot and add annotations
+    plotly_obj <- ggplotly(p)
+    plotly_obj <- plotly_obj %>% layout(annotations = annotations)
+    
+    return(plotly_obj)
+  })
+  
+  # Summary reactive (add this if not already present)
+  output$ept_summary <- renderUI({
+    req(input$ept_localInput)
+    
+    locations_count <- length(input$ept_localInput)
+    data_type <- ifelse(input$ept_dataType == "numbers", "Números Absolutos", "Percentagens")
+    variables_selected <- length(if(is.null(input$ept_yVariables)) character(0) else input$ept_yVariables)
+    
+    HTML(paste0(
+      "<div style='color: black; font-size: 13px;'>",
+      "<strong>Localizações:</strong> ", locations_count, "<br>",
+      "<strong>Tipo de dados:</strong> ", data_type, "<br>",
+      "<strong>Variáveis:</strong> ", variables_selected, "<br>",
+      "<strong>Metas PNE:</strong> ", ifelse(input$ept_showMeta, "Ativas", "Inativas"),
+      "</div>"
+    ))
+  })
   
   
   

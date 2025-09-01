@@ -267,3 +267,21 @@ body {
 .checkbox-dark-panel .bootstrap-select * {
     color: #333 !important;  /* Force all picker content to dark */
 }
+
+
+/* ======= RADIO BUTTON & CHECKBOX FONT SIZE FIX ======= */
+.checkbox-dark-panel .radio label {
+    font-size:16px !important;
+    line-height: 1.2 !important;
+}
+
+.checkbox-dark-panel .checkbox label {
+    font-size: 16px !important;
+    line-height: 1.2 !important;
+}
+
+/* ======= PICKER INPUT WIDTH FIX - MORE AGGRESSIVE ======= */
+.checkbox-dark-panel .bootstrap-select {
+    max-width: 250px !important;  /* Even narrower */
+    width: 250px !important;      /* Force specific width */
+}
