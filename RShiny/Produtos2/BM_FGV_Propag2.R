@@ -1087,8 +1087,44 @@ tabPanel("Análise EPT",
          )
 ),    
             
-            
-            
+###############################################################################################################
+# TAB  3 META 11 VIGENTE ORIGINAL # TAB  3 META 11 VIGENTE ORIGINAL# TAB  3 META 11 VIGENTE ORIGINAL
+###############################################################################################################            
+
+
+tabPanel("Situação - Meta 11 (vigente)",
+         fluidPage(
+           h3("Evolução da Oferta de EPT por UF", style = "color: #1f5673; font-weight: bold;"),
+           fluidRow(
+             column(4,
+                    selectizeInput("oferta_uf", "Selecionar UF ou Brasil:",
+                                   choices = c("Brasil", sort(unique(meta11a_opcoes$NM_UF))),
+                                   selected = "Rio Grande do Norte")
+             ),
+             column(4,
+                    selectizeInput("meta_target_type", "Tipo de Meta:",
+                                   choices = list("Meta PNE 11 (3x2013)" = "pne11", 
+                                                  "Meta Definida" = "custom"),
+                                   selected = "pne11"),
+                    conditionalPanel(
+                      condition = "input.meta_target_type == 'custom'",
+                      style = "margin-top: 10px;",
+                      numericInput("custom_meta_value", "Valor Meta:", 
+                                   value = NA, min = 0, step = 1000, width = "100%")
+                    )
+             ),
+             column(4,
+                    selectizeInput("oferta_ept_var", "Variável EPT:",
+                                   choices = ept_vars,
+                                   selected = "QT_MAT_PROF_TEC_PROPAG")
+             )
+           ),
+           plotOutput("oferta_ept_plot", height = "500px"),
+           br(),
+           h3("Tabela de Dados (2007–2024)", style = "color: #1f5673; font-weight: bold;"),
+           DTOutput("oferta_ept_table")
+         )
+),            
             
             
             
@@ -1536,41 +1572,7 @@ tabPanel("Análise EPT",
            
            
               
-           ### UI - TAB 3 : META 11 VIGENTE  ##################################################
-           
-tabPanel("Situação - Meta 11 (vigente)",
-         fluidPage(
-           h3("Evolução da Oferta de EPT por UF", style = "color: #1f5673; font-weight: bold;"),
-           fluidRow(
-             column(4,
-                    selectizeInput("oferta_uf", "Selecionar UF ou Brasil:",
-                                   choices = c("Brasil", sort(unique(meta11a_opcoes$NM_UF))),
-                                   selected = "Rio Grande do Norte")
-             ),
-             column(4,
-                    selectizeInput("meta_target_type", "Tipo de Meta:",
-                                   choices = list("Meta PNE 11 (3x2013)" = "pne11", 
-                                                  "Meta Definida" = "custom"),
-                                   selected = "pne11"),
-                    conditionalPanel(
-                      condition = "input.meta_target_type == 'custom'",
-                      style = "margin-top: 10px;",
-                      numericInput("custom_meta_value", "Valor Meta:", 
-                                   value = NA, min = 0, step = 1000, width = "100%")
-                    )
-             ),
-             column(4,
-                    selectizeInput("oferta_ept_var", "Variável EPT:",
-                                   choices = ept_vars,
-                                   selected = "QT_MAT_PROF_TEC_PROPAG")
-             )
-           ),
-           plotOutput("oferta_ept_plot", height = "500px"),
-           br(),
-           h3("Tabela de Dados (2007–2024)", style = "color: #1f5673; font-weight: bold;"),
-           DTOutput("oferta_ept_table")
-         )
-),
+
                 
            ### UI - TAB 4 : META 11a NOVA ##################################################
            
@@ -2443,8 +2445,6 @@ output$demo_variableInput <- renderUI({
   ###############################################################################################################
   
   
-  
-  
   # Dynamically update the variable input based on selected data type (existing)
   output$ept_variableInput <- renderUI({
     if (input$ept_dataType == "numbers") {
@@ -2761,19 +2761,13 @@ output$demo_variableInput <- renderUI({
   })
   
   
-  
-  
-  
-  
-  
-  
-  
-  
-### REACTIVES OF USE ACROSS TABS
-##################  
 
-  
-  ######
+  ######### TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  
+  ##############################################################################################################################
+  ### OUTPUT PLOT TAB 3  META11 VIGENTE META11 VIGENTE META11 VIGENTE META11 VIGENTE META11 VIGENTE META11 VIGENTE META11 VIGENTE 
+  ##############################################################################################################################
+
+  #####################################################################################
   # Reactive data for Meta 11a - input of UF and variable choice for computing  first part
   
   RKT_meta11a_data <- reactive({
@@ -2791,6 +2785,202 @@ output$demo_variableInput <- renderUI({
     
     return(df)
   })
+  #####################################################################################
+    
+  # --- Line chart output with projection ---
+  output$oferta_ept_plot <- renderPlot({
+    req(input$oferta_uf, input$oferta_ept_var)
+    
+    # Step 1: Observed data (both EPT and ENSINO_MEDIO)
+    df_filtered <- meta11a_opcoes |>
+      filter(NM_UF == input$oferta_uf) |>
+      group_by(ANO) |>
+      summarise(
+        EPT = sum(.data[[input$oferta_ept_var]], na.rm = TRUE),
+        ENSINO_MEDIO = sum(QT_MAT_MED, na.rm = TRUE),  # Hardcoded to QT_MAT_MED
+        .groups = "drop"
+      )
+    
+    # Step 2: Determine meta target based on user selection
+    if (is.null(input$meta_target_type) || input$meta_target_type == "pne11") {
+      # Use PNE Meta 11 calculation (3x2013)
+      base_2013_val <- df_filtered |> filter(ANO == 2013) |> pull(EPT)
+      meta_target <- if (!is.na(base_2013_val)) 3 * base_2013_val else NA
+      meta_label <- "Meta PNE 11 (3x2013)"
+    } else {
+      # Use custom meta value
+      meta_target <- input$custom_meta_value
+      meta_label <- "Meta Definida"
+    }
+    
+    # Step 3: Linear projection from 2024-2035 for both variables
+    df_recent <- df_filtered |> filter(ANO %in% 2020:2024)
+    
+    # EPT projection
+    linear_model_ept <- lm(EPT ~ ANO, data = df_recent)
+    slope_ept <- coef(linear_model_ept)["ANO"]
+    start_val_ept <- df_filtered |> filter(ANO == 2024) |> pull(EPT) |> mean(na.rm = TRUE)
+    
+    # ENSINO_MEDIO projection  
+    linear_model_med <- lm(ENSINO_MEDIO ~ ANO, data = df_recent)
+    slope_med <- coef(linear_model_med)["ANO"]
+    start_val_med <- df_filtered |> filter(ANO == 2024) |> pull(ENSINO_MEDIO) |> mean(na.rm = TRUE)
+    
+    future_years <- 2024:2035
+    years_from_start <- future_years - 2024
+    
+    future_df <- data.frame(
+      ANO = rep(future_years, 2),
+      VALOR = c(start_val_ept + slope_ept * years_from_start,
+                start_val_med + slope_med * years_from_start),
+      TIPO = rep(c("EPT", "ENSINO_MEDIO"), each = length(future_years)),
+      GRUPO = "PROJECAO"
+    )
+    
+    # Step 4: Prepare observed data for plotting
+    observed_df <- data.frame(
+      ANO = rep(df_filtered$ANO, 2),
+      VALOR = c(df_filtered$EPT, df_filtered$ENSINO_MEDIO),
+      TIPO = rep(c("EPT", "ENSINO_MEDIO"), each = nrow(df_filtered)),
+      GRUPO = "OBSERVADO"
+    )
+    
+    plot_data <- rbind(observed_df, future_df)
+    
+    # Step 5: Create the plot
+    p <- ggplot(plot_data, aes(x = ANO, y = VALOR, color = GRUPO, linetype = TIPO)) +
+      geom_line(size = 1.2) +
+      geom_point(data = plot_data[plot_data$GRUPO == "OBSERVADO", ], size = 2) +
+      scale_color_manual(
+        values = c("OBSERVADO" = "steelblue", "PROJECAO" = "orange"),
+        labels = c("OBSERVADO" = "Observado", "PROJECAO" = "Projeção")
+      ) +
+      scale_linetype_manual(
+        values = c("EPT" = "solid", "ENSINO_MEDIO" = "dashed"),
+        labels = c("EPT" = "EPT", "ENSINO_MEDIO" = "Ensino Médio")
+      ) +
+      labs(
+        title = paste0("UF: ", input$oferta_uf),
+        subtitle = paste("Variável EPT:", names(ept_vars)[ept_vars == input$oferta_ept_var]),
+        x = "Ano",
+        y = "Total de Matrículas",
+        color = "Grupo",
+        linetype = "Variável"
+      ) +
+      theme_minimal() +
+      theme(
+        text = element_text(size = 14),
+        axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, size = 14),
+        axis.text.y = element_text(size = 14),
+        plot.title = element_text(size = 16, face = "bold", hjust = 0.5, color = "#1f5673"),
+        plot.subtitle = element_text(size = 12, hjust = 0.5),
+        legend.position = "bottom"
+      ) +
+      scale_y_continuous(labels = scales::comma_format(big.mark = ".", decimal.mark = ",")) +
+      scale_x_continuous(breaks = c(2007, seq(2010, 2035, by = 5)))
+    
+    # Step 6: Add meta target line if available
+    if (!is.na(meta_target) && meta_target > 0) {
+      p <- p + 
+        geom_hline(yintercept = meta_target, 
+                   linetype = "dashed", 
+                   color = "red", 
+                   size = 1, 
+                   alpha = 0.8) +
+        annotate("text", 
+                 x = 2030, 
+                 y = meta_target * 1.05, 
+                 label = paste0(meta_label, ": ", formatC(round(meta_target), format="d", big.mark=".")),
+                 color = "red", 
+                 fontface = "bold",
+                 size = 4)
+    }
+    
+    return(p)
+  })
+  
+  
+  output$oferta_ept_table <- DT::renderDT({
+    req(input$oferta_uf, input$oferta_ept_var)
+    
+    # Step 1: Observed data from meta11a_opcoes (both EPT and ENSINO_MEDIO)
+    df_obs <- meta11a_opcoes |>
+      filter(NM_UF == input$oferta_uf) |>
+      group_by(ANO) |>
+      summarise(
+        EPT = sum(.data[[input$oferta_ept_var]], na.rm = TRUE),
+        ENSINO_MEDIO = sum(QT_MAT_MED, na.rm = TRUE),  # Hardcoded to QT_MAT_MED
+        .groups = "drop"
+      ) |>
+      mutate(TIPO = "OBSERVADO")
+    
+    # Step 2: Projection (2024–2035) for both variables
+    years_future <- 2024:2035
+    slope_ept <- coef(lm(EPT ~ ANO, data = df_obs |> filter(ANO %in% 2020:2024)))["ANO"]
+    slope_med <- coef(lm(ENSINO_MEDIO ~ ANO, data = df_obs |> filter(ANO %in% 2020:2024)))["ANO"]
+    start_ept <- df_obs |> filter(ANO == 2024) |> pull(EPT) |> mean(na.rm = TRUE)
+    start_med <- df_obs |> filter(ANO == 2024) |> pull(ENSINO_MEDIO) |> mean(na.rm = TRUE)
+    
+    df_proj <- tibble(
+      ANO = years_future,
+      EPT = start_ept + slope_ept * (years_future - 2024),
+      ENSINO_MEDIO = start_med + slope_med * (years_future - 2024),
+      TIPO = "PROJECAO"
+    )
+    
+    # Step 3: Combine observed and projection
+    df_all <- bind_rows(df_obs, df_proj)
+    
+    # Step 4: Add PNE Meta 11 target (default for now)
+    base_2013_val <- df_all |> filter(ANO == 2013, TIPO == "OBSERVADO") |> pull(EPT)
+    triplo_2013 <- if (!is.na(base_2013_val)) 3 * base_2013_val else NA
+    df_all$PNE_META11 <- if (!is.na(triplo_2013)) round(triplo_2013) else NA
+    
+    # Step 5: Transpose format (include both EPT and ENSINO_MEDIO)
+    df_transposed <- df_all |>
+      select(ANO, TIPO, EPT, ENSINO_MEDIO) |>
+      pivot_longer(cols = c(EPT, ENSINO_MEDIO), names_to = "VAR", values_to = "VAL") |>
+      unite("ROW", VAR, TIPO, sep = "_") |>
+      pivot_wider(names_from = ANO, values_from = VAL)
+    
+    # Step 6: Format numerics with thousand separators
+    df_transposed <- df_transposed |>
+      mutate(across(where(is.numeric), ~ format(round(.), big.mark = ".", decimal.mark = ",")))
+    
+    # Step 7: Display DataTable
+    datatable(
+      df_transposed,
+      rownames = FALSE,
+      extensions = 'Buttons',
+      options = list(
+        pageLength = 50,
+        dom = 'Bfrtip',
+        buttons = list(
+          list(extend = "copy", text = "Copiar"),
+          list(extend = "csv", filename = "Tabela_EPT", text = "CSV"),
+          list(extend = "excel", filename = "Tabela_EPT", text = "Excel"),
+          list(
+            extend = "pdf",
+            filename = "Tabela_EPT",
+            text = "PDF",
+            orientation = "landscape",
+            pageSize = "A4",
+            messageTop = "Tabela Transposta de Matrículas"
+          )
+        ),
+        scrollX = TRUE
+      ),
+      class = "stripe nowrap display"
+    )
+  })
+  
+  
+  
+  
+  
+  
+  
+
   
   
   
@@ -4289,272 +4479,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
   
   
   
-  ######### TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  
-  ##############################################################################################################################
-  ### OUTPUT PLOT TAB 3  META11 VIGENTE META11 VIGENTE META11 VIGENTE META11 VIGENTE META11 VIGENTE META11 VIGENTE META11 VIGENTE 
-  ##############################################################################################################################
-  
-  # --- Line chart output with projection ---
-  output$oferta_ept_plot <- renderPlot({
-    req(input$oferta_uf, input$oferta_ept_var, input$oferta_other_var)
-    
-    # Filter and aggregate only "UF_TUDO"
-    # Step 1: Observed data
-    df_filtered <- meta11a_opcoes |>
-      filter(NM_UF == input$oferta_uf) |>
-      group_by(ANO) |>
-      summarise(
-        EPT = sum(.data[[input$oferta_ept_var]], na.rm = TRUE),
-        ENSINO_MEDIO = sum(.data[[input$oferta_other_var]], na.rm = TRUE),
-        .groups = "drop"
-      )
-    
-    # Compute triplo da base de 2013 como meta PNE
-    base_2013_val <- df_filtered |> filter(ANO == 2013) |> pull(EPT)
-    triplo_2013 <- if (!is.na(base_2013_val)) 3 * base_2013_val else NA
-    
-    # Linear model based on 2020–2024 data
-    ### BOTTOM
-    # Step 1: Fit model to recent trend (2020–2024)
-    df_recent <- df_filtered |> filter(ANO %in% 2020:2024)
-    linear_model <- lm(EPT ~ ANO, data = df_recent)
-    
-    # Step 2: Extract slope only
-    slope <- coef(linear_model)["ANO"]
-    
-    # Step 3: Anchor to actual 2024 observed value
-    start_val <- df_filtered |> filter(ANO == 2024) |> pull(EPT) |> mean(na.rm = TRUE)
-    
-    # Step 4: Build future projection using that slope and starting point
-    future_years <- 2024:2035
-    years_from_start <- future_years - 2024
-    
-    future_df <- data.frame(
-      ANO = future_years,
-      VALOR = start_val + slope * years_from_start,
-      TIPO = "EPT",
-      GRUPO = "PROJECAO"
-    )
-    ## TOP
-    # ---- OUTRA projection from 2024 to 2035 using slope-preserving shift ----
-    
-    # 1. Fit linear model to OUTRA from 2020 to 2024
-    lm_outra <- lm(ENSINO_MEDIO ~ ANO, data = df_filtered |> filter(ANO %in% 2020:2024))
-    
-    # 2. Extract only the slope (ignore intercept)
-    slope_outra <- coef(lm_outra)["ANO"]
-    
-    # 3. Get the actual observed value in 2024
-    start_val_outra <- df_filtered |> 
-      filter(ANO == 2024) |> 
-      pull(ENSINO_MEDIO) |> 
-      mean(na.rm = TRUE)
-    
-    # 4. Generate projected values for 2024–2035
-    future_years <- 2024:2035
-    years_from_start <- future_years - 2024
-    
-    future_outra_df <- data.frame(
-      ANO = future_years,
-      VALOR = start_val_outra + slope_outra * years_from_start,
-      TIPO = "ENSINO_MEDIO",
-      GRUPO = "PROJECAO"
-    )
-    
-    
-    # Long format for observed values
-    df_long <- df_filtered |>
-      mutate(GRUPO = "OBSERVADO") |>
-      pivot_longer(cols = c("EPT", "ENSINO_MEDIO"), names_to = "TIPO", values_to = "VALOR") |>
-      mutate(GRUPO = ifelse(TIPO == "ENSINO_MEDIO", "ENSINO_MEDIO", GRUPO))
-    
-    df_plot <- bind_rows(
-      df_long,          # OBSERVADO and OUTRA (observed)
-      future_df,        # EPT PROJECAO
-      future_outra_df   # OUTRA PROJECAO
-    )
-    
-    
-    # Value of EPT in 2013
-    ept_2013 <- df_plot |> 
-      filter(ANO == 2013, GRUPO == "OBSERVADO") |> 
-      summarise(val = sum(VALOR, na.rm = TRUE)) |> 
-      pull(val)
-    
-    x_label <- 2013
-    y_label <- ept_2013 + 5000  # Adjust vertical space as needed
-    
-    
-    # Plot
-    ggplot(df_plot, aes(x = ANO, y = VALOR, color = GRUPO)) +
-      
-      # All observed and projected lines except dotted OUTRA
-      geom_line(
-        data = df_plot |> filter(!(TIPO == "ENSINO_MEDIO" & GRUPO == "PROJECAO")),
-        size = 1.5
-      ) +
-      
-      # Dotted line for OUTRA projection only
-      geom_line(
-        data = df_plot |> filter(TIPO == "ENSINO_MEDIO" & GRUPO == "PROJECAO"),
-        aes(x = ANO, y = VALOR),
-        linetype = "longdash",
-        linewidth = 1.5,
-        color = "#00BFC4"  # consistent with ggplot default for OUTRA
-      ) +
-      
-      # Points for all
-      geom_point(size = 2, alpha = 0.8) +
-      
-      # Meta 11 horizontal line
-      geom_hline(yintercept = triplo_2013, linetype = "dashed", color = "darkorange", linewidth = 1.1) +
-      annotate(
-        "text", x = 2008, y = triplo_2013,
-        label = paste0("Meta 11 (Triplo 2013): ", format(triplo_2013, big.mark = ".")),
-        color = "darkorange", vjust = -1, fontface = "bold"
-      ) +
-      
-      # Dot on 2013 EPT point
-      geom_point(
-        data = data.frame(ANO = x_label, VALOR = ept_2013),
-        aes(x = ANO, y = VALOR),
-        color = "black", size = 3, shape = 21, fill = "white"
-      ) +
-      
-      # Arrow from label to point
-      geom_segment(
-        data = data.frame(
-          x = x_label + 0.6,
-          y = y_label,
-          xend = x_label,
-          yend = ept_2013
-        ),
-        aes(x = x, y = y, xend = xend, yend = yend),
-        inherit.aes = FALSE,
-        arrow = arrow(length = unit(0.02, "npc"), type = "closed"),
-        linewidth = 0.8,
-        color = "black"
-      ) +
-      
-      # Rich label
-      ggtext::geom_richtext(
-        data = data.frame(x = x_label + 1, y = y_label),
-        aes(x = x, y = y, label = paste0("<b>EPT 2013:</b><br>", format(ept_2013, big.mark = "."))),
-        fill = "white",
-        label.color = "#00bfc4",
-        color = "black",
-        size = 4,
-        label.size = 0.5,
-        label.padding = grid::unit(c(4, 6, 4, 6), "pt"),
-        label.r = unit(6, "pt"),
-        inherit.aes = FALSE
-      ) +
-      
-      # Axis and title formatting
-      scale_x_continuous(breaks = 2007:2035, limits = c(2007, 2035)) +
-      scale_y_continuous(labels = scales::comma) +
-      
-      labs(
-        
-        title = if (input$oferta_uf == "Brasil") {
-          "Brasil – Total Nacional"
-        } else {
-          paste("UF:", input$oferta_uf)
-        },
-        
-        
-        subtitle = paste(input$oferta_ept_var, "vs", input$oferta_other_var),
-        x = "Ano",
-        y = "Total de Matrículas"
-      ) +
-      
-      coord_cartesian(clip = "off") +
-      
-      theme_minimal(base_size = 14) +
-      theme(
-        plot.title = element_text(face = "bold"),
-        axis.text.x = element_text(angle = 45, hjust = 1)
-      )
-  })
-  
-
-  ##############################################################################################################################
-  ### OUTPUT  DATA TABLE TAB 3 META 11 VIGENTE DATA TABLE TAB 3 META 11 VIGENTE DATA TABLE TAB 3 META 11 VIGENTE DATA TABLE TAB 3 META 11 VIGENTE 
-  ##############################################################################################################################
-  
-  output$oferta_ept_table <- DT::renderDT({
-    req(input$oferta_uf, input$oferta_ept_var, input$oferta_other_var)
-    
-    # Step 1: Observed data from meta11a_opcoes
-    df_obs <- meta11a_opcoes |>
-      filter(NM_UF == input$oferta_uf) |>
-      group_by(ANO) |>
-      summarise(
-        EPT = sum(.data[[input$oferta_ept_var]], na.rm = TRUE),
-        ENSINO_MEDIO = sum(.data[[input$oferta_other_var]], na.rm = TRUE),
-        .groups = "drop"
-      ) |>
-      mutate(TIPO = "OBSERVADO")
-    
-    # Step 2: Projection (2024–2035)
-    years_future <- 2024:2035
-    slope_ept <- coef(lm(EPT ~ ANO, data = df_obs |> filter(ANO %in% 2020:2024)))["ANO"]
-    slope_med <- coef(lm(ENSINO_MEDIO ~ ANO, data = df_obs |> filter(ANO %in% 2020:2024)))["ANO"]
-    start_ept <- df_obs |> filter(ANO == 2024) |> pull(EPT) |> mean(na.rm = TRUE)
-    start_med <- df_obs |> filter(ANO == 2024) |> pull(ENSINO_MEDIO) |> mean(na.rm = TRUE)
-    
-    df_proj <- tibble(
-      ANO = years_future,
-      EPT = start_ept + slope_ept * (years_future - 2024),
-      ENSINO_MEDIO = start_med + slope_med * (years_future - 2024),
-      TIPO = "PROJECAO"
-    )
-    
-    # Step 3: Combine observed and projection
-    df_all <- bind_rows(df_obs, df_proj)
-    
-    # Step 4: Compute PNE Meta 11 target
-    base_2013_val <- df_all |> filter(ANO == 2013, TIPO == "OBSERVADO") |> pull(EPT)
-    triplo_2013 <- if (!is.na(base_2013_val)) 3 * base_2013_val else NA
-    df_all$PNE_META11 <- if (!is.na(triplo_2013)) round(triplo_2013) else NA
-    
-    # Step 5: Transpose format
-    df_transposed <- df_all |>
-      select(ANO, TIPO, EPT, ENSINO_MEDIO) |>
-      pivot_longer(cols = c(EPT, ENSINO_MEDIO), names_to = "VAR", values_to = "VAL") |>
-      unite("ROW", VAR, TIPO, sep = "_") |>
-      pivot_wider(names_from = ANO, values_from = VAL)
-    
-    # Step 6: Format numerics with thousand separators
-    df_transposed <- df_transposed |>
-      mutate(across(where(is.numeric), ~ format(round(.), big.mark = ".", decimal.mark = ",")))
-    
-    # Step 7: Display DataTable
-    datatable(
-      df_transposed,
-      rownames = FALSE,
-      extensions = 'Buttons',
-      options = list(
-        pageLength = 50,
-        dom = 'Bfrtip',
-        buttons = list(
-          list(extend = "copy", text = "Copiar"),
-          list(extend = "csv", filename = "Tabela_EPT", text = "CSV"),
-          list(extend = "excel", filename = "Tabela_EPT", text = "Excel"),
-          list(
-            extend = "pdf",
-            filename = "Tabela_EPT",
-            text = "PDF",
-            orientation = "landscape",
-            pageSize = "A4",
-            messageTop = "Tabela Transposta de Matrículas"
-          )
-        ),
-        scrollX = TRUE
-      ),
-      class = "stripe nowrap display"
-    )
-  })
+ 
   
     
   ##############################################################################################################################
