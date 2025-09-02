@@ -969,70 +969,119 @@ tags$div(
                   "Introdução: Ferramenta customizada pela UF – Análise e Simulação sobre o PROPAG"
               ),
               
+             
               # 1
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
                   actionLink("link_demo", "A1. Transição Demográfica: Projeções Populacionais por Faixa Etária")
               ),
-              div(class = "tab-explanation", "Análise das mudanças no perfil etário da população brasileira (2000-2070) por região e estado, identificando pontos de transição demográfica relevantes para o planejamento educacional."),
+              div(class = "tab-explanation", "Análise das mudanças no perfil etário da população brasileira (2000-2070) por região e estado, 
+                  identificando pontos de transição demográfica relevantes para o planejamento do EPT."),
               
               # 2
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
                   actionLink("link_ept", "A2. EPT e População: População 15-19 anos e Matrículas EPT/Ensino Médio")
               ),
-              div(class = "tab-explanation", "Análise comparativa entre população elegível (15-19 anos) e matrículas na Educação Profissional Técnica (EPT) e Ensino Médio (2007-2035), incluindo acompanhamento das metas do PNE Meta 11 por estado e região."),
+              div(class = "tab-explanation", "Análise comparativa entre população de 15-19 anos e matrículas na Educação Profissional Técnica (EPT) e 
+                  Ensino Médio (2007-2035), incluindo acompanhamento das metas do PNE Meta 11 por estado e região."),
               
-              # 3
+              # 3 (was C1)
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
-                  actionLink("link_meta11", "B1. Oferta EPT e Meta PNE Projeção:  Oferta de EPT versus a Meta 11 do PNE")
+                  actionLink("link_impacto", "B1. Impacto Financeiro do PROPAG: Simulações com e sem Adesão")
               ),
-              div(class = "tab-explanation", "Comparação da oferta de educação técnica em relação à meta de triplicar as matrículas de EPTN."),
+              div(class = "tab-explanation", "Situação do endividamento e do fluxos financieros relevantes do estado em cenários com e sem adesão ao PROPAG."),
               
-              # 4
+              # 4 (was C2)
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
-                  actionLink("link_expansao", "B2. Oferta EPT e Meta PNE Planificacão: Matriculas para atingir a Meta PNE")
+                  actionLink("link_fef", "B2. Cenário Financeiro e Simulações de Investimento em EPT e Fundo FEF")
               ),
-              div(class = "tab-explanation", "Projeção da expansão de matrículas na EPT, com oferta integrada para 50% dos estudantes do ensino médio."),
+              div(class = "tab-explanation", "Simulação do valor da contribuição estadual ao Fundo de Equalização Fiscal (FEF), dos aportes 
+                  recebidos e do fluxo líquido estimado, com base nas decisões de adesão."),
               
-               #5  
+              # 5 (was C3)
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
-                  actionLink("link_oferta", "B3. Detalhe da Oferta - Análise de Matrículas EPT por Eixo e Curso")
+                  actionLink("link_finuf", "B3. Contribuição, Aporte e Fluxo Líquido - Visualização Comparativa")
               ),
-              div(class = "tab-explanation", "Dados detalhados do Censo Escolar 2023-2024 com matrículas em educação profissional técnica, segmentados por eixo tecnológico, curso e dependência administrativa, permitindo análise hierárquica por UF e município."),
+              div(class = "tab-explanation", "Situação do endividamento e do fluxos financieros - visualiazação comparativa de conjunto de UFs"),
               
-              
+              # 6 (was B1)
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
-                  actionLink("link_impacto", "C1. Impacto Financeiro do PROPAG: Simulações com e sem Adesão")
+                  actionLink("link_meta11pro", "C1. Oferta EPT e Meta PNE Projeção: Oferta de EPT versus a Meta 11 do PNE")
               ),
-              div(class = "tab-explanation", "Comparativo da situação financeira e do endividamento do estado em cenários com e sem adesão ao PROPAG."),
+              div(class = "tab-explanation", "Comparação da oferta de educação técnica em relação à Meta 11 do PNE 
+                  vigente ou PNE aplicado para PROPAG (prenchido pelo usuario"),
               
-
+              # 7 (was B2)
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
-                  actionLink("link_fin1", "C2. Cenário Financeiro e Simulações de Investimento em EPT e Fundo FEF")
+                  actionLink("link_meta11pla", "C2. Oferta EPT e Meta PNE Planificação: Matrículas para atingir a Meta PNE")
               ),
-              div(class = "tab-explanation", "Projeções de investimento e impacto fiscal no 1º e 5º ano, considerando os aportes à Educação Profissional Técnica (EPT) e ao Fundo de Equalização Fiscal (FEF)."),
+              div(class = "tab-explanation", "Projeção da expansão de matrículas na EPT requerido por ano alvo de Meta (publicado p preenchido por usuario) 
+                  por simulações de ano"),
               
-              
+              # 8 (was B3)
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
-                  actionLink("link_fef", "C3. Contribuição, Aporte e Fluxo Líquido - Visualização Comparativa")
+                  actionLink("link_ofertadet", "C3. Detalhe da Oferta - Análise de Matrículas EPT por Eixo e Curso")
               ),
-              div(class = "tab-explanation", "Simulação do valor da contribuição estadual ao FEF, dos aportes recebidos e do fluxo líquido estimado, com base nas decisões de adesão."),
+              div(class = "tab-explanation", "Dados detalhados do Censo Escolar 2023-2024 com matrículas em EPT ,
+                  segmentados por eixo tecnológico, curso e dependência administrativa, permitindo análise hierárquica por UF e município."),
               
-              
+              # 9 (was B4)
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
-                  actionLink("link_escassez", "Demanda e Escassez de Profissionais Técnicos no Brasil")
+                  actionLink("link_modelo", "C4. Modelo Econometrico de Matrícula - Análise de Matrículas EPT por Rede e UF")
+              ),
+              div(class = "tab-explanation", "Modelo econométrico básico, segmentado por setor econômico e dependência administrativa, 
+                  permitindo análise de efectos por UF e rede."),
+             
+               # 10
+              div(class = "tab-link-line",
+                  span(class = "arrow", HTML("▸")),
+                  actionLink("link_dinamismo", "D1. Demanda EPT: Dinamismo Econômico")
+              ),
+              div(class = "tab-explanation", "Análise do dinamismo econômico municipal baseado no crescimento do PIB per capita, identificando 
+                  municípios em expansão ou queda econômica."),
+              
+              # 11
+              div(class = "tab-link-line",
+                  span(class = "arrow", HTML("▸")),
+                  actionLink("link_arranjo", "D2. Demanda EPT: Arranjos Produtivos Laborais")
+              ),
+              div(class = "tab-explanation", "Identificação de Arranjos Produtivos Laborais (APL) baseados em especialização ocupacional (CBO), 
+                              mapeando concentrações de emprego formal por ocupação."),
+              
+              # 12
+              div(class = "tab-link-line",
+                  span(class = "arrow", HTML("▸")),
+                  actionLink("link_informal", "D3. Demanda EPT: Mercado Formal e Informal")
+              ),
+              div(class = "tab-explanation", "Análise da distribuição de emprego formal e informal por município, classificando territórios em decis 
+                  baseado na proporção de vínculos formais em relação ao total de vínculos."),
+              
+              # 13
+              div(class = "tab-link-line",
+                  span(class = "arrow", HTML("▸")),
+                  actionLink("link_oferta_demanda", "E1. Oferta e Demanda EPT")
+              ),
+              div(class = "tab-explanation", "Conexão gerado por IA entre oferta educacional (matrículas EPT por eixo, área e curso) e demanda laboral 
+                  (vínculos por ocupação CBO), identificando correspondências entre cursos técnicos e ocupações."),
+              
+              # 14
+              div(class = "tab-link-line",
+                  span(class = "arrow", HTML("▸")),
+                  actionLink("link_escassez", "E2. Demanda e Escassez de Profissionais Técnicos no Brasil")
               ),
               div(class = "tab-explanation", "Diagnóstico da escassez de profissionais técnicos por curso e UF com base nos dados de mercado de trabalho (RAIS/CAGED).")
-            ),
-            
+              
+             ),
+			  
+			              
 
 ###############################################################################################################
 # TAB  1 DEMOGRAPHIC   ########## DEMOGRAPHIC # TAB  1 DEMOGRAPHIC   ########## DEMOGRAPHIC # TAB  1 DEMOGRAPHIC   ########## DEMOGRAPHIC 
@@ -1228,304 +1277,13 @@ tabPanel("A2. EPT e População",
            )
          )
 ),    
-            
-###############################################################################################################
-# TAB  3 META 11 VIGENTE ORIGINAL # TAB  3 META 11 VIGENTE ORIGINAL# TAB  3 META 11 VIGENTE ORIGINAL
-###############################################################################################################            
-
-
-tabPanel("B1. Oferta EPT (Futuro)",
-         fluidPage(
-           h3("Evolução da Oferta de EPT por UF", style = "color: #1f5673; font-weight: bold;"),
-           fluidRow(
-             column(4,
-                    selectizeInput("oferta_uf", "Selecionar UF ou Brasil:",
-                                   choices = c("Brasil", sort(unique(meta11a_opcoes$NM_UF))),
-                                   selected = "Rio Grande do Norte")
-             ),
-             column(4,
-                    selectizeInput("meta_target_type", "Tipo de Meta:",
-                                   choices = list("Meta PNE 11 (3x2013)" = "pne11", 
-                                                  "Meta Definida" = "custom"),
-                                   selected = "pne11"),
-                    conditionalPanel(
-                      condition = "input.meta_target_type == 'custom'",
-                      style = "margin-top: 10px;",
-                      numericInput("custom_meta_value", "Valor Meta:", 
-                                   value = NA, min = 0, step = 1000, width = "100%")
-                    )
-             ),
-             column(4,
-                    selectizeInput("oferta_ept_var", "Variável EPT:",
-                                   choices = ept_vars,
-                                   selected = "QT_MAT_PROF_TEC_PROPAG")
-             )
-           ),
-           plotOutput("oferta_ept_plot", height = "500px"),
-           br(),
-           h3("Tabela de Dados (2007–2024)", style = "color: #1f5673; font-weight: bold;"),
-           DTOutput("oferta_ept_table")
-         )
-),            
-            
-###############################################################################################################
-# TAB  4 META 11 NOVA $$$### # TAB  4 META 11 NOVA $$$### # TAB  4 META 11 NOVA $$$### # TAB  4 META 11 NOVA $$$###
-###############################################################################################################     
-
-
-tabPanel("B2. Oferta EPT (Planificação)",
-         fluidPage(
-           h3("Meta 11a – Comparação das Definições", style = "color: #1f5673; font-weight: bold;"),
-           
-           fluidRow(
-             column(3,
-                    # Top row: UF selector
-                    selectizeInput(
-                      inputId = "meta11a_nova_uf",
-                      label = "Selecionar UF or Brasil:",
-                      choices = sort(unique(meta11a_opcoes$NM_UF)),
-                      selected = "Rio de Janeiro"
-                    ),
-                    
-                    # Bottom row: Meta selection side by side
-                    fluidRow(
-                      column(6,
-                             selectizeInput(
-                               inputId = "meta11a_target_type",
-                               label = "Tipo de Meta:",
-                               choices = list("Meta PNE 11a (50%)" = "pne11a", 
-                                              "Meta Definida" = "custom"),
-                               selected = "pne11a"
-                             )
-                      ),
-                      column(6,
-                             conditionalPanel(
-                               condition = "input.meta11a_target_type == 'custom'",
-                               numericInput(
-                                 inputId = "meta11a_custom_target",
-                                 label = "Meta (alunos):",
-                                 value = 100000,
-                                 min = 0,
-                                 step = 1000
-                               )
-                             )
-                      )
-                    )
-             ),
-             column(3,
-                    checkboxGroupInput(
-                      inputId = "meta11a_nova_definicoes",
-                      label = "Escolher definições para comparar:",
-                      choices = c("Meta11a_opcao1", "Meta11a_opcao2", "Meta11a_opcao3"),
-                      selected = c("Meta11a_opcao1", "Meta11a_opcao2", "Meta11a_opcao3"),
-                      inline = TRUE
-                    )
-             ),
-             column(3,
-                    selectInput(
-                      inputId = "meta11a_target_year",
-                      label = "Ano Alvo para atingir meta:",
-                      choices = 2025:2035,
-                      selected = 2030
-                    )
-             ),
-             column(3,
-                    sliderInput(
-                      inputId = "ensino_slope_factor",
-                      label = "Ajuste no crescimento do EM:",
-                      min = 0.5, max = 1.5, step = 0.1, value = 1
-                    )
-             )
-           ),
-           
-           plotOutput("meta11a_nova_plot", height = "600px")
-         )
-),
-###############################################################################################################
-# TAB  5  ENRLMMENT TAB ENRLMMENT TAB ENRLMMENT TAB ENRLMMENT TAB  ENRLMMENT TAB ENRLMMENT TAB ENRLMMENT TAB  
-###############################################################################################################  
-
-tabPanel("B3. Oferta EPT (Redes)",
-         fluidPage(
-           h3("Detalhe da Oferta - Censo Escolar EPT", 
-              style = "color: #1f5673; font-weight: bold;"),
-           
-           div(class = "topbar-info",
-               style = "color: black !important;",
-               p("Este painel apresenta dados detalhados de matrículas em educação profissional técnica por eixo tecnológico e curso.", 
-                 style = "color: black !important;"),
-               p("Dados do Censo Escolar 2023-2024 com informações por dependência administrativa e modalidades de ensino.", 
-                 style = "color: black !important;"),
-               p("Use os filtros hierárquicos para navegar entre níveis geográficos e dependências administrativas.",
-                 style = "color: black !important;")
-           ),
-           
-           sidebarLayout(
-             # UI - Remove intermediate/immediate region pickers
-             sidebarPanel(
-               width = 3,
-               
-               h4("Filtros Temporais", style = "color: #1f5673;"),
-               
-               div(style = "margin-bottom: 15px;",
-                   tags$style(HTML("
-        .radio label { color: black !important; }
-        .radio input[type='radio'] + span { color: black !important; }
-      ")),
-                   radioButtons("censo_year", "Ano:",
-                                choices = c("2023" = 2023, "2024" = 2024),
-                                selected = default_year_censo, inline = TRUE)
-               ),
-               
-               hr(),
-               h4("Filtros Geográficos", style = "color: #1f5673;"),
-               
-               pickerInput("censo_uf", 
-                           "UF(s):",
-                           choices = uf_choices_censo,
-                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
-                           multiple = TRUE,
-                           selected = default_uf_censo),
-               
-               pickerInput("censo_municipio",
-                           "Município(s):",
-                           choices = character(0),
-                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
-                           multiple = TRUE),
-               
-               hr(),
-               h4("Filtros Administrativos", style = "color: #1f5673;"),
-               
-               pickerInput("censo_dependencia",
-                           "Dependência Administrativa:",
-                           choices = c("Federal" = "1", "Estadual" = "2", "Municipal" = "3", "Privada" = "4"),
-                           options = list(`actions-box` = TRUE),
-                           multiple = TRUE,
-                           selected = c("1", "2", "3", "4"))
-             ),
-             
-             mainPanel(
-               width = 9,
-               
-               # Table 1a - Eixo Level
-               fluidRow(
-                 column(12,
-                        h4("1a - Matrículas por Eixo Tecnológico", style = "color: #1f5673;"),
-                        withSpinner(DTOutput("censo_table_eixo"))
-                 )
-               ),
-               
-               br(),
-               
-               # Table 1b - Curso Level  
-               fluidRow(
-                 column(12,
-                        h4("1b - Matrículas por Curso", style = "color: #1f5673;"),
-                        withSpinner(DTOutput("censo_table_curso"))
-                 )
-               )
-             )
-           )
-         )
-),
-
-
-
-###############################################################################################################
-# TAB  6 with 0 start   RESIDUALS MODEL 
-###############################################################################################################  
-
-tabPanel("Análise de Desempenho EPT",
-         
-         h3("Análise de Residuais - Desempenho Institucional EPT", style = "color: #1f5673; font-weight: bold;"),
-         
-         div(class = "topbar-info",
-             style = "color: black !important;",
-             p("Este painel analiza o desempenho institucional em EPT através de residuais do modelo econométrico.", 
-               style = "color: black !important;"),
-             p("Residuais positivos indicam desempenho acima do esperado; negativos indicam desempenho abaixo do esperado.", 
-               style = "color: black !important;"),
-             p("Use os filtros para comparar estados em programas específicos e acompanhar evolução temporal.", 
-               style = "color: black !important;")
-         ),
-         
-         sidebarLayout(
-           sidebarPanel(
-             width = 3,
-             
-             h4("Controles Temporais", style = "color: #1f5673;"),
-             
-             sliderInput(
-               "tab_resi_year", "Ano:",
-               min = 2011, max = 2021, value = 2016, step = 1
-             ),
-             
-             hr(),
-             h4("Filtros de Programa", style = "color: #1f5673;"),
-             
-             # Replace the selectInput widgets with pickerInput for multiple selection:
-             
-             pickerInput("tab_resi_dependency",
-                         label = h5("Dependência Administrativa:", style = "color: black;"),
-                         choices = c("Federal" = "Federal",
-                                     "Estadual" = "Estadual", 
-                                     "Municipal" = "Municipal",
-                                     "Privada" = "Privada"),
-                         selected = "Federal",
-                         multiple = TRUE,
-                         options = list(`actions-box` = TRUE)),
-             
-             pickerInput("tab_resi_sector",
-                         label = h5("Setor Econômico:", style = "color: black;"),
-                         choices = c("Agricultura" = "agriculture",
-                                     "Indústria" = "industry",
-                                     "Serviços" = "services", 
-                                     "Administração" = "administration"),
-                         selected = "industry",
-                         multiple = TRUE,
-                         options = list(`actions-box` = TRUE)),
-             hr(),
-             h4("Configuração do Gráfico", style = "color: #1f5673;"),
-             
-             selectInput("tab_resi_yaxis",
-                         label = h5("Eixo Y:", style = "color: black;"),
-                         choices = c("PIB per Capita" = "pib_per_capita",
-                                     "Alinhamento Setorial" = "sector_alignment"),
-                         selected = "pib_per_capita"),
-             
-             pickerInput(
-               "tab_resi_states", "Estados Selecionados:",
-               choices = NULL,
-               selected = NULL,
-               multiple = TRUE,
-               options = list(`actions-box` = TRUE, `live-search` = TRUE)
-             ),
-             
-             hr(),
-             h5("Resumo da Seleção:", style = "color: #1f5673;"),
-             uiOutput("tab_resi_summary")
-           ),
-           
-           mainPanel(
-             width = 9,
-             h4("Desempenho Institucional vs Contexto Econômico", style = "color: #1f5673;"),
-             withSpinner(plotlyOutput("tab_resiPlot", height = "600px")),
-             
-             br(),
-             
-             h4("Dados dos Estados Selecionados", style = "color: #1f5673;"),
-             withSpinner(DTOutput("tab_resiTable"))
-           )
-         )
-),
-
 
 
 ###############################################################################################################
 # TAB  7 with 0 start  ### UI -FINANCE 1b  ############# UI -FINANCE 1b  ############# UI -FINANCE 1b  ############# UI -FINANCE 1b  
 ###############################################################################################################  
 tabPanel(
-  "Finance 1b",
+  "B1. Financiamento PROPAG (opções)",
   fluidPage(
     h3("Conteúdo em desenvolvimento: Finance 1b",
        style = "color: #1f5673; font-weight: bold;"),
@@ -1772,7 +1530,7 @@ tabPanel(
         )
       )
     )
-
+    
   ),
   
   
@@ -1781,130 +1539,130 @@ tabPanel(
            plotOutput("PloTab1b",height = "600px", width = "100%")
     )
   )
-
+  
 ),
 
 
 ###############################################################################################################
 # TAB  8 with 0 start  ### UI - FEF # TAB  7 with 0 start  ### UI - FE # TAB  7 with 0 start  ### UI - FE
 ###############################################################################################################  
-tabPanel("Retorno FEF por opções",
-                    fluidPage(
-                      useShinyjs(),
-                      div(class = "checkbox-dark-panel",
-                      # ---- Instruction block (inserted first) ----
-                      fluidRow(
-                        column(
-                          width = 12,
-                          div(
-                            style = "margin-top: 5px; margin-bottom: 10px; color: #f5f5f5; text-align: justify; font-size: 20px;",
-                            tagList(
-                              tags$strong("Instruções: "),
-                              "Nesta aba, você pode simular a escolha de opções pelas UFs no contexto do PROPAG, ",
-                              "especificamente para calcular a contribuição total ao Fundo de Equalização Fiscal (FEF). ",
-                              "Você pode trabalhar em dois modos distintos: ",
-                              tags$span(class = "highlighted-note",
-                                        "(i) Todos os Estados seguem uma mesma opção ; (ii) Cada Estado escolhe sua própria opção. "),
-                              "A seleção feita aqui impacta diretamente a projeção do tamanho do FEF e seu fluxo líquido ao longo dos anos.",
-                              
-                              # Inline radio buttons follow directly
-                              div(
-                                style = "margin-top: 5px; font-size: 18px;",
-                                radioButtons("selection_mode", label = NULL,
-                                             choices = c("Todos os Estados seguem uma Opção" = "uniform",
-                                                         "Cada Estado escolhe uma Opção"     = "per_uf"),
-                                             selected = "uniform", inline = TRUE
-                                )
-                              )
-                            )
-                          )
-                        )  # end of column
-                        
-                        
-                      ), # end of fluid rows
-                      
-
-                      
-                      div(class = "checkbox-dark-panel matrix-wrapper",
-                          
-                          # Header row
-                          div(class = "matrix-row", style = "display: flex; align-items: center; margin-bottom: 6px;",
-                              div(style = "width: 300px;", ""),  # Opção + description
-                              div(style = "width: 40px; text-align: center; color: #f5f5f5; font-weight: bold;", "Todos"),
-                              lapply(sg_ufs, function(uf) {
-                                div(style = "width: 24px; text-align: center; font-size: 14px; font-weight: 500; color: #f5f5f5;", uf)
-                              })
-                          ),
-                          
-                          # Matrix rows per Opção
-                          lapply(opcoes, function(op) {
-                            div(class = "matrix-row", style = "display: flex; align-items: center; margin-bottom: 2px; height: 22px;",
-                                div(style = "width: 300px; text-align: left; padding-right: 6px; font-size: 14px; color: #f5f5f5;",
-                                    op_labels[[op]]
-                                ),
-                                div(style = "width: 40px; text-align: center;",
-                                    checkboxInput(paste0("chk_all_", op), label = NULL, value = FALSE)
-                                ),
-                                lapply(sg_ufs, function(uf) {
-                                  div(style = "width: 24px; text-align: center; padding: 0; margin: 0;",
-                                      checkboxInput(inputId = paste0("chk_", op, "_", uf), label = NULL, value = FALSE)
-                                  )
-                                })
-                            )
-                          })
-                      ),
-                      div(style = "margin-top: -20px; margin-bottom: 10px; text-align: justify; font-size: 40px;"),
-                              fluidRow(
-                        column(4,
-                               selectInput(
-                                 "uf_select",
-                                 label = tags$span("Escolha uma UF para visualizar os fluxos do FEF:", style = "color: white;"),
-                                 choices = nome_ufs,
-                                 selected = "Alagoas"
-                               )
-                        ),
-                        column(
-                          width = 4,
-                          div(
-                            style = "margin-bottom: 10px; display: flex; align-items: flex-start; gap: 20px;",
-                            
-                            # Top-aligned label
-                            tags$label("Selecionar intervalo de anos:",
-                                       style = "font-weight: bold; color: #1f5673; font-size: 18px; margin-top: 5px; white-space: nowrap;"),
-                            
-                            # Slider takes remaining space
-                            div(
-                              style = "flex-grow: 1;",
-                              sliderInput(
-                                inputId = "year_range",
-                                label   = NULL,
-                                min     = 2025,
-                                max     = 2054,
-                                value   = c(2025, 2054),
-                                step    = 1,
-                                sep     = ""
-                              )
-                            )
-                          )
+tabPanel("B2. Retorno FEF por opções",
+         fluidPage(
+           useShinyjs(),
+           div(class = "checkbox-dark-panel",
+               # ---- Instruction block (inserted first) ----
+               fluidRow(
+                 column(
+                   width = 12,
+                   div(
+                     style = "margin-top: 5px; margin-bottom: 10px; color: #f5f5f5; text-align: justify; font-size: 20px;",
+                     tagList(
+                       tags$strong("Instruções: "),
+                       "Nesta aba, você pode simular a escolha de opções pelas UFs no contexto do PROPAG, ",
+                       "especificamente para calcular a contribuição total ao Fundo de Equalização Fiscal (FEF). ",
+                       "Você pode trabalhar em dois modos distintos: ",
+                       tags$span(class = "highlighted-note",
+                                 "(i) Todos os Estados seguem uma mesma opção ; (ii) Cada Estado escolhe sua própria opção. "),
+                       "A seleção feita aqui impacta diretamente a projeção do tamanho do FEF e seu fluxo líquido ao longo dos anos.",
+                       
+                       # Inline radio buttons follow directly
+                       div(
+                         style = "margin-top: 5px; font-size: 18px;",
+                         radioButtons("selection_mode", label = NULL,
+                                      choices = c("Todos os Estados seguem uma Opção" = "uniform",
+                                                  "Cada Estado escolhe uma Opção"     = "per_uf"),
+                                      selected = "uniform", inline = TRUE
+                         )
+                       )
+                     )
+                   )
+                 )  # end of column
+                 
+                 
+               ), # end of fluid rows
+               
+               
+               
+               div(class = "checkbox-dark-panel matrix-wrapper",
+                   
+                   # Header row
+                   div(class = "matrix-row", style = "display: flex; align-items: center; margin-bottom: 6px;",
+                       div(style = "width: 300px;", ""),  # Opção + description
+                       div(style = "width: 40px; text-align: center; color: #f5f5f5; font-weight: bold;", "Todos"),
+                       lapply(sg_ufs, function(uf) {
+                         div(style = "width: 24px; text-align: center; font-size: 14px; font-weight: 500; color: #f5f5f5;", uf)
+                       })
+                   ),
+                   
+                   # Matrix rows per Opção
+                   lapply(opcoes, function(op) {
+                     div(class = "matrix-row", style = "display: flex; align-items: center; margin-bottom: 2px; height: 22px;",
+                         div(style = "width: 300px; text-align: left; padding-right: 6px; font-size: 14px; color: #f5f5f5;",
+                             op_labels[[op]]
+                         ),
+                         div(style = "width: 40px; text-align: center;",
+                             checkboxInput(paste0("chk_all_", op), label = NULL, value = FALSE)
+                         ),
+                         lapply(sg_ufs, function(uf) {
+                           div(style = "width: 24px; text-align: center; padding: 0; margin: 0;",
+                               checkboxInput(inputId = paste0("chk_", op, "_", uf), label = NULL, value = FALSE)
+                           )
+                         })
+                     )
+                   })
+               ),
+               div(style = "margin-top: -20px; margin-bottom: 10px; text-align: justify; font-size: 40px;"),
+               fluidRow(
+                 column(4,
+                        selectInput(
+                          "uf_select",
+                          label = tags$span("Escolha uma UF para visualizar os fluxos do FEF:", style = "color: white;"),
+                          choices = nome_ufs,
+                          selected = "Alagoas"
                         )
+                 ),
+                 column(
+                   width = 4,
+                   div(
+                     style = "margin-bottom: 10px; display: flex; align-items: flex-start; gap: 20px;",
+                     
+                     # Top-aligned label
+                     tags$label("Selecionar intervalo de anos:",
+                                style = "font-weight: bold; color: #1f5673; font-size: 18px; margin-top: 5px; white-space: nowrap;"),
+                     
+                     # Slider takes remaining space
+                     div(
+                       style = "flex-grow: 1;",
+                       sliderInput(
+                         inputId = "year_range",
+                         label   = NULL,
+                         min     = 2025,
+                         max     = 2054,
+                         value   = c(2025, 2054),
+                         step    = 1,
+                         sep     = ""
+                       )
+                     )
+                   )
+                 )
+                 
+               )
+               
+           ),
+           
+           fluidRow(
+             column(12,
+                    plotOutput("plotab2", height = "450px")
+             )
+           )# end of div for checkbox-dark-panel
+         ) # end of fluidPage
+), # end of tabPanel for FEF options
 
-                      )
-    
-                    ),
-                    
-                    fluidRow(
-                      column(12,
-                             plotOutput("plotab2", height = "450px")
-                      )
-                    )# end of div for checkbox-dark-panel
-                    ) # end of fluidPage
-           ), # end of tabPanel for FEF options
- 
 
 ###############################################################################################################
 # TAB 9   Finance Multi-State Finance Multi-State Finance Multi-State Finance Multi-State Finance Multi-State
 ###############################################################################################################    
-tabPanel("Tema Financiero",
+tabPanel("B3. Financiamento (Comparativo)",
          fluidPage(
            h3("Visualização Financeira do PROPAG", style = "color: #1f5673; font-weight: bold;"),
            
@@ -1937,11 +1695,318 @@ tabPanel("Tema Financiero",
          )
 ),
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
+###############################################################################################################
+# TAB  3 META 11 VIGENTE ORIGINAL # TAB  3 META 11 VIGENTE ORIGINAL# TAB  3 META 11 VIGENTE ORIGINAL
+###############################################################################################################            
+
+
+tabPanel("C1. Oferta EPT (Futuro)",
+         fluidPage(
+           h3("Evolução da Oferta de EPT por UF", style = "color: #1f5673; font-weight: bold;"),
+           fluidRow(
+             column(4,
+                    selectizeInput("oferta_uf", "Selecionar UF ou Brasil:",
+                                   choices = c("Brasil", sort(unique(meta11a_opcoes$NM_UF))),
+                                   selected = "Rio Grande do Norte")
+             ),
+             column(4,
+                    selectizeInput("meta_target_type", "Tipo de Meta:",
+                                   choices = list("Meta PNE 11 (3x2013)" = "pne11", 
+                                                  "Meta Definida" = "custom"),
+                                   selected = "pne11"),
+                    conditionalPanel(
+                      condition = "input.meta_target_type == 'custom'",
+                      style = "margin-top: 10px;",
+                      numericInput("custom_meta_value", "Valor Meta:", 
+                                   value = NA, min = 0, step = 1000, width = "100%")
+                    )
+             ),
+             column(4,
+                    selectizeInput("oferta_ept_var", "Variável EPT:",
+                                   choices = ept_vars,
+                                   selected = "QT_MAT_PROF_TEC_PROPAG")
+             )
+           ),
+           plotOutput("oferta_ept_plot", height = "500px"),
+           br(),
+           h3("Tabela de Dados (2007–2024)", style = "color: #1f5673; font-weight: bold;"),
+           DTOutput("oferta_ept_table")
+         )
+),            
+            
+###############################################################################################################
+# TAB  4 META 11 NOVA $$$### # TAB  4 META 11 NOVA $$$### # TAB  4 META 11 NOVA $$$### # TAB  4 META 11 NOVA $$$###
+###############################################################################################################     
+
+
+tabPanel("C2. Oferta EPT (Planificação)",
+         fluidPage(
+           h3("Meta 11a – Comparação das Definições", style = "color: #1f5673; font-weight: bold;"),
+           
+           fluidRow(
+             column(3,
+                    # Top row: UF selector
+                    selectizeInput(
+                      inputId = "meta11a_nova_uf",
+                      label = "Selecionar UF or Brasil:",
+                      choices = sort(unique(meta11a_opcoes$NM_UF)),
+                      selected = "Rio de Janeiro"
+                    ),
+                    
+                    # Bottom row: Meta selection side by side
+                    fluidRow(
+                      column(6,
+                             selectizeInput(
+                               inputId = "meta11a_target_type",
+                               label = "Tipo de Meta:",
+                               choices = list("Meta PNE 11a (50%)" = "pne11a", 
+                                              "Meta Definida" = "custom"),
+                               selected = "pne11a"
+                             )
+                      ),
+                      column(6,
+                             conditionalPanel(
+                               condition = "input.meta11a_target_type == 'custom'",
+                               numericInput(
+                                 inputId = "meta11a_custom_target",
+                                 label = "Meta (alunos):",
+                                 value = 100000,
+                                 min = 0,
+                                 step = 1000
+                               )
+                             )
+                      )
+                    )
+             ),
+             column(3,
+                    checkboxGroupInput(
+                      inputId = "meta11a_nova_definicoes",
+                      label = "Escolher definições para comparar:",
+                      choices = c("Meta11a_opcao1", "Meta11a_opcao2", "Meta11a_opcao3"),
+                      selected = c("Meta11a_opcao1", "Meta11a_opcao2", "Meta11a_opcao3"),
+                      inline = TRUE
+                    )
+             ),
+             column(3,
+                    selectInput(
+                      inputId = "meta11a_target_year",
+                      label = "Ano Alvo para atingir meta:",
+                      choices = 2025:2035,
+                      selected = 2030
+                    )
+             ),
+             column(3,
+                    sliderInput(
+                      inputId = "ensino_slope_factor",
+                      label = "Ajuste no crescimento do EM:",
+                      min = 0.5, max = 1.5, step = 0.1, value = 1
+                    )
+             )
+           ),
+           
+           plotOutput("meta11a_nova_plot", height = "600px")
+         )
+),
+###############################################################################################################
+# TAB  5  ENRLMMENT TAB ENRLMMENT TAB ENRLMMENT TAB ENRLMMENT TAB  ENRLMMENT TAB ENRLMMENT TAB ENRLMMENT TAB  
+###############################################################################################################  
+
+tabPanel("C3. Oferta EPT (Redes)",
+         fluidPage(
+           h3("Detalhe da Oferta - Censo Escolar EPT", 
+              style = "color: #1f5673; font-weight: bold;"),
+           
+           div(class = "topbar-info",
+               style = "color: black !important;",
+               p("Este painel apresenta dados detalhados de matrículas em educação profissional técnica por eixo tecnológico e curso.", 
+                 style = "color: black !important;"),
+               p("Dados do Censo Escolar 2023-2024 com informações por dependência administrativa e modalidades de ensino.", 
+                 style = "color: black !important;"),
+               p("Use os filtros hierárquicos para navegar entre níveis geográficos e dependências administrativas.",
+                 style = "color: black !important;")
+           ),
+           
+           sidebarLayout(
+             # UI - Remove intermediate/immediate region pickers
+             sidebarPanel(
+               width = 3,
+               
+               h4("Filtros Temporais", style = "color: #1f5673;"),
+               
+               div(style = "margin-bottom: 15px;",
+                   tags$style(HTML("
+        .radio label { color: black !important; }
+        .radio input[type='radio'] + span { color: black !important; }
+      ")),
+                   radioButtons("censo_year", "Ano:",
+                                choices = c("2023" = 2023, "2024" = 2024),
+                                selected = default_year_censo, inline = TRUE)
+               ),
+               
+               hr(),
+               h4("Filtros Geográficos", style = "color: #1f5673;"),
+               
+               pickerInput("censo_uf", 
+                           "UF(s):",
+                           choices = uf_choices_censo,
+                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                           multiple = TRUE,
+                           selected = default_uf_censo),
+               
+               pickerInput("censo_municipio",
+                           "Município(s):",
+                           choices = character(0),
+                           options = list(`actions-box` = TRUE, `live-search` = TRUE),
+                           multiple = TRUE),
+               
+               hr(),
+               h4("Filtros Administrativos", style = "color: #1f5673;"),
+               
+               pickerInput("censo_dependencia",
+                           "Dependência Administrativa:",
+                           choices = c("Federal" = "1", "Estadual" = "2", "Municipal" = "3", "Privada" = "4"),
+                           options = list(`actions-box` = TRUE),
+                           multiple = TRUE,
+                           selected = c("1", "2", "3", "4"))
+             ),
+             
+             mainPanel(
+               width = 9,
+               
+               # Table 1a - Eixo Level
+               fluidRow(
+                 column(12,
+                        h4("1a - Matrículas por Eixo Tecnológico", style = "color: #1f5673;"),
+                        withSpinner(DTOutput("censo_table_eixo"))
+                 )
+               ),
+               
+               br(),
+               
+               # Table 1b - Curso Level  
+               fluidRow(
+                 column(12,
+                        h4("1b - Matrículas por Curso", style = "color: #1f5673;"),
+                        withSpinner(DTOutput("censo_table_curso"))
+                 )
+               )
+             )
+           )
+         )
+),
+
+
+
+###############################################################################################################
+# TAB  6 with 0 start   RESIDUALS MODEL 
+###############################################################################################################  
+
+tabPanel("C4. Oferta EPT: Modelo Matricula",
+         
+         h3("Análise de Residuais - Desempenho Institucional EPT", style = "color: #1f5673; font-weight: bold;"),
+         
+         div(class = "topbar-info",
+             style = "color: black !important;",
+             p("Este painel analiza o desempenho institucional em EPT através de residuais do modelo econométrico.", 
+               style = "color: black !important;"),
+             p("Residuais positivos indicam desempenho acima do esperado; negativos indicam desempenho abaixo do esperado.", 
+               style = "color: black !important;"),
+             p("Use os filtros para comparar estados em programas específicos e acompanhar evolução temporal.", 
+               style = "color: black !important;")
+         ),
+         
+         sidebarLayout(
+           sidebarPanel(
+             width = 3,
+             
+             h4("Controles Temporais", style = "color: #1f5673;"),
+             
+             sliderInput(
+               "tab_resi_year", "Ano:",
+               min = 2011, max = 2021, value = 2016, step = 1
+             ),
+             
+             hr(),
+             h4("Filtros de Programa", style = "color: #1f5673;"),
+             
+             # Replace the selectInput widgets with pickerInput for multiple selection:
+             
+             pickerInput("tab_resi_dependency",
+                         label = h5("Dependência Administrativa:", style = "color: black;"),
+                         choices = c("Federal" = "Federal",
+                                     "Estadual" = "Estadual", 
+                                     "Municipal" = "Municipal",
+                                     "Privada" = "Privada"),
+                         selected = "Federal",
+                         multiple = TRUE,
+                         options = list(`actions-box` = TRUE)),
+             
+             pickerInput("tab_resi_sector",
+                         label = h5("Setor Econômico:", style = "color: black;"),
+                         choices = c("Agricultura" = "agriculture",
+                                     "Indústria" = "industry",
+                                     "Serviços" = "services", 
+                                     "Administração" = "administration"),
+                         selected = "industry",
+                         multiple = TRUE,
+                         options = list(`actions-box` = TRUE)),
+             hr(),
+             h4("Configuração do Gráfico", style = "color: #1f5673;"),
+             
+             selectInput("tab_resi_yaxis",
+                         label = h5("Eixo Y:", style = "color: black;"),
+                         choices = c("PIB per Capita" = "pib_per_capita",
+                                     "Alinhamento Setorial" = "sector_alignment"),
+                         selected = "pib_per_capita"),
+             
+             pickerInput(
+               "tab_resi_states", "Estados Selecionados:",
+               choices = NULL,
+               selected = NULL,
+               multiple = TRUE,
+               options = list(`actions-box` = TRUE, `live-search` = TRUE)
+             ),
+             
+             hr(),
+             h5("Resumo da Seleção:", style = "color: #1f5673;"),
+             uiOutput("tab_resi_summary")
+           ),
+           
+           mainPanel(
+             width = 9,
+             h4("Desempenho Institucional vs Contexto Econômico", style = "color: #1f5673;"),
+             withSpinner(plotlyOutput("tab_resiPlot", height = "600px")),
+             
+             br(),
+             
+             h4("Dados dos Estados Selecionados", style = "color: #1f5673;"),
+             withSpinner(DTOutput("tab_resiTable"))
+           )
+         )
+),
+
+
+
 ###############################################################################################################
 # TAB 10   DYNAMISM  ECONOMIC DYNAMISM EXPLORER ##################################################
 ###############################################################################################################    
 
-  tabPanel("Dinamismo Econômico",
+  tabPanel("D1. Demanda EPT: Dinamismo Econômico",
            fluidPage(
              h3("Dinamismo Econômico Municipal - Índice de Crescimento", style = "color: #1f5673; font-weight: bold;"),
              
@@ -2030,7 +2095,7 @@ tabPanel("Tema Financiero",
 # TAB 11   APL EXPLORER ## APL EXPLORER # TAB 11   APL EXPLORER ## APL EXPLORER # TAB 11   APL EXPLORER ## APL EXPLORER 
 ###############################################################################################################    
 
-  tabPanel("APL Explorer",
+  tabPanel("D2. Demanda EPT: APLs",
            
            fluidPage(
              h3("Arranjos Produtivos Locais - Base CBO", style = "color: #1f5673; font-weight: bold;"),
@@ -2145,7 +2210,7 @@ tabPanel("Tema Financiero",
 ###############################################################################################################    
 
 
-tabPanel("EPT e Informalidade",
+tabPanel("D3. Demanda EPT (Informalidade)",
          fluidPage(
            h3("EPT e Informalidade - Análise de Oportunidades de Formalização", 
               style = "color: #1f5673; font-weight: bold;"),
@@ -2273,8 +2338,8 @@ tabPanel("EPT e Informalidade",
 # TAB 13   MATCHING CNCT CBO MATCHING CNCT CBOMATCHING CNCT CBOMATCHING CNCT CBOMATCHING CNCT CBO
 ############################################################################################################### 
 
-tabPanel("PLACEHOLDER",
-         h4("PLACEHOLDER", style = "color: #1f5673;"),
+tabPanel("E1. Oferta e Demanda EPT",
+         h4("Oferta e Demanda EPT", style = "color: #1f5673;"),
          fluidPage(
            useShinyjs(),
            tags$head(includeCSS("www/custom.css")),
@@ -2348,7 +2413,7 @@ tabPanel("PLACEHOLDER",
 # TAB 14   Escassez de Profissionais Técnicos #Escassez de Profissionais Técnicos #Escassez de Profissionais Técnicos #
 ############################################################################################################### 
 
-tabPanel("Escassez de Profissionais Técnicos", 
+tabPanel("E2. Escassez de Profissionais Técnicos", 
          fluidPage(h3("🔎 Explore a Demanda e Escassez de Profissionais Técnicos no Brasil"),
                    tags$head(
                      tags$style(HTML(
@@ -2509,34 +2574,64 @@ server <- function(input, output, session) {
     updateTabsetPanel(session, "tab_selection", selected = "A2. EPT e População")
   })
   
-# 3  
-  observeEvent(input$link_meta11, {
-    updateTabsetPanel(session, "tab_selection", selected = "B1. Oferta EPT (Futuro)")
-  })
-# 4  
-  observeEvent(input$link_expansao, {
-    updateTabsetPanel(session, "tab_selection", selected = "B2. Oferta EPT (Planificacão")
-  })
-
-  # 5  
-  observeEvent(input$link_oferta, {
-    updateTabsetPanel(session, "tab_selection", selected = "B3. Oferta EPT (Redes)")
-  })    
-      
+ # 3
   observeEvent(input$link_impacto, {
     updateTabsetPanel(session, "tab_selection", selected = "C1. Financiamento PROPAG (opções)")
   })
   
+  # 4
   observeEvent(input$link_fef, {
     updateTabsetPanel(session, "tab_selection", selected = "C2. Retorno FEF por opções")
   })
   
-  observeEvent(input$link_fin1, {
+  # 5
+  observeEvent(input$link_finuf, {
     updateTabsetPanel(session, "tab_selection", selected = "C3. Financiamento (Comparativa)")
   })
+
+# 6  
+  observeEvent(input$link_meta11pro1, {
+    updateTabsetPanel(session, "tab_selection", selected = "B1. Oferta EPT (Futuro)")
+  })
+# 7  
+  observeEvent(input$link_meta11pla, {
+    updateTabsetPanel(session, "tab_selection", selected = "B2. Oferta EPT (Planificacão")
+  })
+
+  # 8  
+  observeEvent(input$link_ofertadet, {
+    updateTabsetPanel(session, "tab_selection", selected = "B3. Oferta EPT (Redes)")
+  })    
+ 
+  # 9
+    observeEvent(input$link_modelo, {
+    updateTabsetPanel(session, "tab_selection", selected = "B4. Oferta EPT (Modelo)")
+  })    
+
   
+  # 10
+  observeEvent(input$link_dinamismo, {
+    updateTabsetPanel(session, "tab_selection", selected = "D1. Demanda EPT: Dinamismo Econômico")
+  })
+
+  # 11
+  observeEvent(input$link_arranjo, {
+    updateTabsetPanel(session, "tab_selection", selected = "D2. Demanda EPT: APLs")
+  })
+    
+    # 12
+  observeEvent(input$link_informal, {
+    updateTabsetPanel(session, "tab_selection", selected = "D3. Demanda EPT (Informalidade)")
+  })
+  
+  # 13
+  observeEvent(input$link_oferta_demanda, {
+    updateTabsetPanel(session, "tab_selection", selected = "E1. Oferta e Demanda EPT")
+  })
+  
+  # 14  
   observeEvent(input$link_escassez, {
-    updateTabsetPanel(session, "tab_selection", selected = "Escassez de Profissionais Técnicos")
+    updateTabsetPanel(session, "tab_selection", selected = "E2. Escassez de Profissionais Técnicos")
   })
   
 
