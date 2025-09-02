@@ -5,6 +5,8 @@ library(dplyr)
 library(tidyr)
 library(DT)
 
+
+## DATA 
 # Load required data files
 load("df_mat_uf.rda")       # Matricula in EPT by UF and ANO 
 load("df_mat_eixo.rda")     # Matriculas by Eixo Tecnológico

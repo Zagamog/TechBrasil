@@ -16,12 +16,11 @@ library(sf)
 library(leaflet)
 library(data.table)
 library(plotly)
+library(colorspace)
 
-options(warn=-1) # Too many pesky warnings, terrain, terrain, terrain, pull up, pull up 
 
-#############################################################
-# LOAD DATA AND ANY NEEDED DATA OPERATIONS
-#############################################################
+options(warn=-1, dplyr.summarise.inform = FALSE) # Too many pesky warnings, terrain, terrain, terrain, pull up, pull up 
+
 
 #############################################################
 # DATA FOR DEMOGAPHC TAB
@@ -50,11 +49,9 @@ demo_local_colors <- c(
   "Distrito Federal" = "#bcbd22", "Goiás" = "#17becf",
   "Mato Grosso" = "#ff7f0e", "Mato Grosso do Sul" = "#2ca02c"
 )
-#############################################################
-
 
 #############################################################
-#################### DATA LOADING FOR POPU ENROLLMENT TAB ###
+# DATA LOADING FOR POPU ENROLLMENT TAB ###
 #############################################################
 
 
@@ -174,6 +171,8 @@ ept_local_colors <- c(
 )
 
 ##################################################################
+## DATA FOR FINANCE 
+##################################################################
 
 # Load Propag scraped data
 propag_ept_financeiro <- readRDS("propag_ept_financeiro.rds")
@@ -257,7 +256,7 @@ op_labels <- setNames(
 # To assign fixed colors to UFs
 
 # prepare your UF‐color mapping up front
-library(RColorBrewer)
+
 uf_levels <- sort(unique(df_2a$NM_UF))  # or pull from any of them
 
 # Colors by NM_UF
@@ -276,9 +275,6 @@ uf_colors_bySG <- setNames(
   uf_colors[uf_name_map$Estado],
   uf_name_map$UF
 )
-
-
-library(colorspace)
 
 uf_colors_compare <- map_chr(uf_colors, ~ lighten(.x, amount = 0.4))
 
@@ -347,7 +343,7 @@ financeiro_dt_all <- {
   df_final
 }
 
-#Functions needed to manipulate dataframe in TAB6 - Escassez Profissionais Técnicos
+#Functions needed to manipulate dataframe - Escassez Profissionais Técnicos
 window_mean <- function(vec, lag = 6, lead = 5) {
   n <- length(vec)
   sapply(seq_along(vec), function(i) {
@@ -481,7 +477,7 @@ plot_caged_summary_double <- function(df, geo_value, curso_values, todos_no_eixo
 }
 
 ##############################################################################################################
-# TAB APL  DATA LOADING TAB APL  DATA LOADING  
+#   DATA LOADING TAB APL  DATA LOADING  
 ##############################################################################################################
 
 load("dft_apl_MUN_final.rda")
@@ -535,7 +531,6 @@ apl_matri_MUN_geo <- merge(
   all.x = TRUE
 )
 
-#############
 ##############################################################################################################
 # ECONOMIC DYNAMISM DATA LOADING
 ##############################################################################################################
@@ -623,8 +618,6 @@ dynamism_geo_enhanced <- dynamism_geo %>%
 # Replace the original dynamism_geo
 dynamism_geo <- dynamism_geo_enhanced
 
-
-
 ######### EPT INFORMAL FORMAL INFORMAL FORMAL## EPT INFORMAL FORMAL INFORMAL FORMAL
 ##### EPT INFORMAL FORMAL INFORMAL FORMAL## EPT INFORMAL FORMAL INFORMAL FORMAL
 # Dedicated geo keys for informality analysis  
@@ -642,7 +635,6 @@ uf_choices_all <- sort(unique(dft_informality_geo_codes$NM_UF))
 default_uf <- "Alagoas"
 
 
-####################
 ##############################################################################################################
 # DETALHE DA OFERTA DATA LOADING (CLEAN VERSION)
 ##############################################################################################################
@@ -673,6 +665,142 @@ default_uf_censo <- "Rio Grande do Sul"
 default_year_censo <- 2024
 uf_choices_censo <- sort(unique(dft_informality_geo_codes$NM_UF))
 
+###############################################################################
+# DATA  FOR MATCH OFERTA DEMANDA  OFERTA  DEMANDA 
+###############################################################################
+# Load required data files
+load("df_mat_uf.rda")       # Matricula in EPT by UF and ANO 
+load("df_mat_eixo.rda")     # Matriculas by Eixo Tecnológico
+load("df_mat_area.rda")     # Matriculas by Área Tecnológica
+load("df_mat_curso.rda")    # Matriculas by Course
+load("df_exarcu.rda")       # Course metadata (IDX_EIXCUR, Eixo, Area, Denominação)
+load("rais_cbo6_uf23.rda")  # RAIS employment data 2023
+load("rais_cbo6_uf24.rda")  # RAIS employment data 2024
+load("cnct_qbq_matches2.rda") # Course to occupation matches
+load("qbq_cnct_matches2.rda") # Occupation to course matches
+
+# Create wide format datasets for matriculas
+df_mat_uf_wide <- df_mat_uf %>%
+  select(CO_UF, NM_UF, SG_UF, ANO, QT_MAT_CURSO_TEC_UF) %>%
+  pivot_wider(
+    names_from  = ANO,
+    values_from = QT_MAT_CURSO_TEC_UF,
+    values_fill = list(QT_MAT_CURSO_TEC_UF = 0),
+    values_fn   = sum
+  ) %>%
+  rename(`Matrículas 2023` = `2023`, `Matrículas 2024` = `2024`)
+
+df_mat_eixo_wide <- df_mat_eixo %>%
+  select(CO_UF, NM_UF, SG_UF, `Eixo Tecnológico`, ANO, QT_MAT_CURSO_TEC_EIX) %>%
+  pivot_wider(
+    names_from  = ANO,
+    values_from = QT_MAT_CURSO_TEC_EIX,
+    values_fill = list(QT_MAT_CURSO_TEC_EIX = 0),
+    values_fn   = sum
+  ) %>%
+  rename(`Matrículas 2023` = `2023`, `Matrículas 2024` = `2024`)
+
+df_mat_area_wide <- df_mat_area %>%
+  select(CO_UF, NM_UF, SG_UF, `Área Tecnológica`, ANO, QT_MAT_CURSO_TEC_ARE) %>%
+  pivot_wider(
+    names_from  = ANO,
+    values_from = QT_MAT_CURSO_TEC_ARE,
+    values_fill = list(QT_MAT_CURSO_TEC_ARE = 0),
+    values_fn   = sum
+  ) %>%
+  rename(`Matrículas 2023` = `2023`, `Matrículas 2024` = `2024`)
+
+df_mat_curso_wide <- df_mat_curso %>%
+  select(CO_UF, NM_UF, SG_UF, IDX_EIXCUR, `Denominação do Curso`, ANO, QT_MAT_CURSO_TEC_CUR) %>%
+  pivot_wider(
+    names_from  = ANO,
+    values_from = QT_MAT_CURSO_TEC_CUR,
+    values_fill = list(QT_MAT_CURSO_TEC_CUR = 0),
+    values_fn   = sum
+  ) %>%
+  rename(`Matrículas 2023` = `2023`, `Matrículas 2024` = `2024`)
+
+# Combine RAIS data and create aggregations
+df_rais_all <- bind_rows(
+  rais_cbo6_uf23 %>% mutate(ANO = 2023),
+  rais_cbo6_uf24 %>% mutate(ANO = 2024)
+)
+
+# Create Brazil-level aggregations
+rais_br_cbo1 <- df_rais_all %>% 
+  filter(!is.na(cbo_gragru)) %>%
+  group_by(ANO, cbo_1dig, cbo_gragru) %>%
+  summarise(vinculos = sum(vinculos, na.rm = TRUE), .groups = "drop") %>%
+  mutate(NM_UF = "Brasil", SG_UF = "BR")
+
+rais_br_cbo4 <- df_rais_all %>% 
+  filter(!is.na(cbo_familia)) %>%
+  group_by(ANO, cbo_4dig, cbo_familia) %>%
+  summarise(vinculos = sum(vinculos, na.rm = TRUE), .groups = "drop") %>%
+  mutate(NM_UF = "Brasil", SG_UF = "BR")
+
+rais_br_codcbo <- df_rais_all %>% 
+  filter(!is.na(`Ocupação`)) %>%
+  group_by(ANO, CodCBO, `Ocupação`) %>%
+  summarise(vinculos = sum(vinculos, na.rm = TRUE), .groups = "drop") %>%
+  mutate(NM_UF = "Brasil", SG_UF = "BR")
+
+# Combine UF and Brazil level data
+df_rais1dig <- bind_rows(
+  df_rais_all %>% 
+    group_by(ANO, NM_UF, SG_UF, cbo_1dig, cbo_gragru) %>%
+    summarise(vinculos = sum(vinculos, na.rm = TRUE), .groups = "drop"),
+  rais_br_cbo1
+)
+
+df_rais4dig <- bind_rows(
+  df_rais_all %>% 
+    group_by(ANO, NM_UF, SG_UF, cbo_4dig, cbo_familia) %>%
+    summarise(vinculos = sum(vinculos, na.rm = TRUE), .groups = "drop"),
+  rais_br_cbo4
+)
+
+df_raisCodCBO <- bind_rows(
+  df_rais_all %>% 
+    group_by(ANO, NM_UF, SG_UF, CodCBO, `Ocupação`) %>%
+    summarise(vinculos = sum(vinculos, na.rm = TRUE), .groups = "drop"),
+  rais_br_codcbo
+)
+
+# Convert to wide format
+df_rais1dig_wide <- df_rais1dig %>%
+  pivot_wider(
+    names_from  = ANO,
+    values_from = vinculos,
+    values_fill = list(vinculos = 0),
+    values_fn   = sum
+  ) %>% 
+  filter(!is.na(cbo_gragru)) %>% 
+  rename(`Vínculos 2023` = `2023`, `Vínculos 2024` = `2024`)
+
+df_rais4dig_wide <- df_rais4dig %>%
+  pivot_wider(
+    names_from  = ANO,
+    values_from = vinculos,
+    values_fill = list(vinculos = 0),
+    values_fn   = sum
+  ) %>% 
+  filter(!is.na(cbo_familia)) %>% 
+  rename(`Vínculos 2023` = `2023`, `Vínculos 2024` = `2024`)
+
+df_raisCodCBO_wide <- df_raisCodCBO %>%
+  pivot_wider(
+    names_from  = ANO,
+    values_from = vinculos,
+    values_fill = list(vinculos = 0),
+    values_fn   = sum
+  ) %>%  
+  filter(!is.na(NM_UF), !is.na(`Ocupação`)) %>% 
+  rename(`Vínculos 2023` = `2023`, `Vínculos 2024` = `2024`) %>%
+  mutate(
+    CodCBO   = as.character(CodCBO),
+    cbo_1dig = substr(CodCBO, 1, 1)
+  )
 
 
 ###UI  UI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UI
@@ -844,14 +972,14 @@ tags$div(
               # 1
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
-                  actionLink("link_demo", "Transição Demográfica: Projeções Populacionais por Faixa Etária")
+                  actionLink("link_demo", "A1. Transição Demográfica: Projeções Populacionais por Faixa Etária")
               ),
               div(class = "tab-explanation", "Análise das mudanças no perfil etário da população brasileira (2000-2070) por região e estado, identificando pontos de transição demográfica relevantes para o planejamento educacional."),
               
               # 2
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
-                  actionLink("link_ept", "Análise EPT: População 15-19 anos e Matrículas EPT/Ensino Médio")
+                  actionLink("link_ept", "A2. EPT e População: População 15-19 anos e Matrículas EPT/Ensino Médio")
               ),
               div(class = "tab-explanation", "Análise comparativa entre população elegível (15-19 anos) e matrículas na Educação Profissional Técnica (EPT) e Ensino Médio (2007-2035), incluindo acompanhamento das metas do PNE Meta 11 por estado e região."),
               
@@ -911,20 +1039,20 @@ tags$div(
 ###############################################################################################################
 # Replace the demographic tab with this standardized version
 tabPanel(
-  "Transição Demográfica",
+  "A. Transição Demográfica",
   
   fluidPage(
     h3("Transição Demográfica: Projeções Populacionais por Faixa Etária",
        style = "color: #1f5673; font-weight: bold;"),
     
-    div(class = "checkbox-dark-panel",
+    div(class = "topbar-info",  # Changed from "checkbox-dark-panel"
         
         # Instructions row
         fluidRow(
           column(
             width = 12,
             div(
-              style = "margin-top: 5px; margin-bottom: 10px; color: #f5f5f5; text-align: justify; font-size: 20px;",
+              style = "margin-top: 5px; margin-bottom: 10px; color: #333; text-align: justify; font-size: 20px;",  # Changed color
               tagList(
                 tags$strong("Instruções: "),
                 "Esta análise mostra as projeções populacionais do IBGE (2000-2070) por faixa etária. ",
@@ -940,21 +1068,21 @@ tabPanel(
           column(
             width = 3,
             tags$label("Selecionar Localização(ões):",
-                       style = "font-weight: bold; color: #f5f5f5; font-size: 16px;"),
+                       style = "font-weight: bold; color: #333; font-size: 16px;"),  # Changed color
             pickerInput(
               "demo_localInput",
               label = NULL,
               choices = names(demo_local_colors),
               options = list(`actions-box` = TRUE),
               multiple = TRUE,
-              selected = "Brasil"
+              selected = "Amazonas"
             )
           ),
           
           column(
             width = 3,
             tags$label("Escolher Tipo de Dados:",
-                       style = "font-weight: bold; color: #f5f5f5; font-size: 16px;"),
+                       style = "font-weight: bold; color: #333; font-size: 16px;"),  # Changed color
             radioButtons(
               "demo_dataType",
               label = NULL,
@@ -966,24 +1094,26 @@ tabPanel(
           column(
             width = 3,
             tags$label("Selecionar Variável(eis):",
-                       style = "font-weight: bold; color: #f5f5f5; font-size: 16px;"),
+                       style = "font-weight: bold; color: #333; font-size: 16px;"),  # Changed color
             uiOutput("demo_variableInput")
           ),
           
           column(
             width = 3,
             tags$label("Opções de Visualização:",
-                       style = "font-weight: bold; color: #f5f5f5; font-size: 16px;"),
+                       style = "font-weight: bold; color: #333; font-size: 16px;"),  # Changed color
             div(style = "margin-top: 10px;",
                 checkboxInput(
                   "demo_showTransition",
                   label = "Mostrar Linha de Transição Demográfica",
-                  value = FALSE
+                  value = TRUE
                 )
             )
           )
         )
     ),
+    
+    # Rest of the code remains the same...
     
     # Note section
     fluidRow(
@@ -1010,7 +1140,7 @@ tabPanel(
 # TAB  2 UI FOR EPT ENROLLMENT ANALYSIS TAB POP EPT # TAB  2 UI FOR EPT ENROLLMENT ANALYSIS TAB POP EPT 
 ###############################################################################################################
 
-tabPanel("Análise EPT",
+tabPanel("A2. EPT e População",
          fluidPage(
            h3("População 15-19 anos e Matrículas EPT/Ensino Médio", 
               style = "color: #1f5673; font-weight: bold;"),
@@ -1300,8 +1430,99 @@ tabPanel("Detalhe da Oferta",
 ),
 
 
+
 ###############################################################################################################
-# TAB  5  ### UI -FINANCE 1b  ############# UI -FINANCE 1b  ############# UI -FINANCE 1b  ############# UI -FINANCE 1b  
+# TAB  6 with 0 start   RESIDUALS MODEL 
+###############################################################################################################  
+
+tabPanel("Análise de Desempenho EPT",
+         
+         h3("Análise de Residuais - Desempenho Institucional EPT", style = "color: #1f5673; font-weight: bold;"),
+         
+         div(class = "topbar-info",
+             style = "color: black !important;",
+             p("Este painel analiza o desempenho institucional em EPT através de residuais do modelo econométrico.", 
+               style = "color: black !important;"),
+             p("Residuais positivos indicam desempenho acima do esperado; negativos indicam desempenho abaixo do esperado.", 
+               style = "color: black !important;"),
+             p("Use os filtros para comparar estados em programas específicos e acompanhar evolução temporal.", 
+               style = "color: black !important;")
+         ),
+         
+         sidebarLayout(
+           sidebarPanel(
+             width = 3,
+             
+             h4("Controles Temporais", style = "color: #1f5673;"),
+             
+             sliderInput(
+               "tab_resi_year", "Ano:",
+               min = 2011, max = 2021, value = 2016, step = 1
+             ),
+             
+             hr(),
+             h4("Filtros de Programa", style = "color: #1f5673;"),
+             
+             # Replace the selectInput widgets with pickerInput for multiple selection:
+             
+             pickerInput("tab_resi_dependency",
+                         label = h5("Dependência Administrativa:", style = "color: black;"),
+                         choices = c("Federal" = "Federal",
+                                     "Estadual" = "Estadual", 
+                                     "Municipal" = "Municipal",
+                                     "Privada" = "Privada"),
+                         selected = "Federal",
+                         multiple = TRUE,
+                         options = list(`actions-box` = TRUE)),
+             
+             pickerInput("tab_resi_sector",
+                         label = h5("Setor Econômico:", style = "color: black;"),
+                         choices = c("Agricultura" = "agriculture",
+                                     "Indústria" = "industry",
+                                     "Serviços" = "services", 
+                                     "Administração" = "administration"),
+                         selected = "industry",
+                         multiple = TRUE,
+                         options = list(`actions-box` = TRUE)),
+             hr(),
+             h4("Configuração do Gráfico", style = "color: #1f5673;"),
+             
+             selectInput("tab_resi_yaxis",
+                         label = h5("Eixo Y:", style = "color: black;"),
+                         choices = c("PIB per Capita" = "pib_per_capita",
+                                     "Alinhamento Setorial" = "sector_alignment"),
+                         selected = "pib_per_capita"),
+             
+             pickerInput(
+               "tab_resi_states", "Estados Selecionados:",
+               choices = NULL,
+               selected = NULL,
+               multiple = TRUE,
+               options = list(`actions-box` = TRUE, `live-search` = TRUE)
+             ),
+             
+             hr(),
+             h5("Resumo da Seleção:", style = "color: #1f5673;"),
+             uiOutput("tab_resi_summary")
+           ),
+           
+           mainPanel(
+             width = 9,
+             h4("Desempenho Institucional vs Contexto Econômico", style = "color: #1f5673;"),
+             withSpinner(plotlyOutput("tab_resiPlot", height = "600px")),
+             
+             br(),
+             
+             h4("Dados dos Estados Selecionados", style = "color: #1f5673;"),
+             withSpinner(DTOutput("tab_resiTable"))
+           )
+         )
+),
+
+
+
+###############################################################################################################
+# TAB  7 with 0 start  ### UI -FINANCE 1b  ############# UI -FINANCE 1b  ############# UI -FINANCE 1b  ############# UI -FINANCE 1b  
 ###############################################################################################################  
 tabPanel(
   "Finance 1b",
@@ -1551,11 +1772,7 @@ tabPanel(
         )
       )
     )
-    
-    
-    
-    
-    
+
   ),
   
   
@@ -1564,51 +1781,14 @@ tabPanel(
            plotOutput("PloTab1b",height = "600px", width = "100%")
     )
   )
-  
-  
-  
+
 ),
 
-            
-                
-           ### UI - TAB 1 : FINANCE ##################################################
-                  tabPanel("Tema Financiero",
-                         fluidPage(
-                           h3("Visualização Financeira do PROPAG", style = "color: #1f5673; font-weight: bold;"),
-                           
-                           fluidRow(
-                             column(6,
-                                    selectizeInput(
-                                      "fin_variable",
-                                      "Selecionar variável financeira",
-                                      choices = fin_choices,
-                                      selected = "FEF_5ano_liq_cen01",
-                                      width = "100%"
-                                    )
-                             )
-                           ),
-                           
-                           plotOutput("tab1_fin_plot", height = "600px"),
-                           br(),
-                           h3("Tabela 1: Variáveis Financeiras", style = "color: #1f5673; font-weight: bold; margin-top: 30px;"),
-                           DT::dataTableOutput("tab1_fin_table"),
-                           br(), br(),
-                           div(
-                             style = "font-size: 12px; color: #999; text-align: center; padding: 10px;",
-                             HTML(
-                               "<strong>Para dúvidas ou consultas:</strong><br>
-               Envie mensagem para:<br>
-               <strong>Equipe FGV/DGPE:</strong> <a href='mailto:blix@fgv.br' style='color:#999;'>blix@fgv.br</a><br>
-               <strong>Equipe BM:</strong> <a href='mailto:blax@worldbank.org' style='color:#999;'>blax@worldbank.org</a>"
-                             )
-                           )
-                         )
-                ),
-           
-          
-           
-           ### UI - TAB 2 : FEF Opçoes  ##################################################      
-           tabPanel("Retorno FEF por opções",
+
+###############################################################################################################
+# TAB  8 with 0 start  ### UI - FEF # TAB  7 with 0 start  ### UI - FE # TAB  7 with 0 start  ### UI - FE
+###############################################################################################################  
+tabPanel("Retorno FEF por opções",
                     fluidPage(
                       useShinyjs(),
                       div(class = "checkbox-dark-panel",
@@ -1707,21 +1887,10 @@ tabPanel(
                             )
                           )
                         )
-                        
-                        
-                        
+
                       )
     
                     ),
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
                     
                     fluidRow(
                       column(12,
@@ -1731,143 +1900,47 @@ tabPanel(
                     ) # end of fluidPage
            ), # end of tabPanel for FEF options
  
-    
-           
-           
-           
-           
-           
-           
-           
-           
-           
-           
-           
-           
-           
-              
 
-                
+###############################################################################################################
+# TAB 9   Finance Multi-State Finance Multi-State Finance Multi-State Finance Multi-State Finance Multi-State
+###############################################################################################################    
+tabPanel("Tema Financiero",
+         fluidPage(
+           h3("Visualização Financeira do PROPAG", style = "color: #1f5673; font-weight: bold;"),
+           
+           fluidRow(
+             column(6,
+                    selectizeInput(
+                      "fin_variable",
+                      "Selecionar variável financeira",
+                      choices = fin_choices,
+                      selected = "FEF_5ano_liq_cen01",
+                      width = "100%"
+                    )
+             )
+           ),
+           
+           plotOutput("tab1_fin_plot", height = "600px"),
+           br(),
+           h3("Tabela 1: Variáveis Financeiras", style = "color: #1f5673; font-weight: bold; margin-top: 30px;"),
+           DT::dataTableOutput("tab1_fin_table"),
+           br(), br(),
+           div(
+             style = "font-size: 12px; color: #999; text-align: center; padding: 10px;",
+             HTML(
+               "<strong>Para dúvidas ou consultas:</strong><br>
+               Envie mensagem para:<br>
+               <strong>Equipe FGV/DGPE:</strong> <a href='mailto:blix@fgv.br' style='color:#999;'>blix@fgv.br</a><br>
+               <strong>Equipe BM:</strong> <a href='mailto:blax@worldbank.org' style='color:#999;'>blax@worldbank.org</a>"
+             )
+           )
+         )
+),
 
+###############################################################################################################
+# TAB 10   DYNAMISM  ECONOMIC DYNAMISM EXPLORER ##################################################
+###############################################################################################################    
 
-          
- 
-           ### UI - TAB 5 : SITUAÇÃO - META 11a - PÚBLICO ##################################################    
-           
-           ## ONLY PROPAG VARIANT OF META11a APT
-                
-                tabPanel("Situação - Meta 11a - Público",
-                         fluidPage(
-                           h3("Meta 11a: EPT como % do Ensino Médio", style = "color: #1f5673; font-weight: bold;"),
-                           
-                           fluidRow(
-                             column(2,
-                                    selectizeInput("meta11a_uf", "Selecionar UF:", choices = sort(unique(df_censo_UF$NM_UF)), selected = "Rio Grande do Norte")
-                             ),
-                             column(2,
-                                    selectizeInput("meta11a_ept_var2", "Variável EPT:", choices = c("QT_MAT_PROF_TEC_PROPAG"), selected = "QT_MAT_PROF_TEC_PROPAG")
-                             ),
-                             column(2,
-                                    selectizeInput("meta11a_med_var2", "Variável Ensino Médio:", choices = c("QT_MAT_MED"), selected = "QT_MAT_MED")
-                             )
-                             
-                           ),
-                           
-                           plotOutput("meta11a_plot2", height = "500px"),
-                           br()
-                           
-                         )
-                ),
-                
-                
-           ### UI - TAB 6 : Escassez de Profissionais Técnicos ##################################################       (CONTINUAR DAQUI)
-                tabPanel("Escassez de Profissionais Técnicos", 
-                         fluidPage(h3("🔎 Explore a Demanda e Escassez de Profissionais Técnicos no Brasil"),
-                           tags$head(
-                             tags$style(HTML(
-                               ".bigtext {font-size: 1.2em;}
-      .bullet-list {font-size: 1.1em; margin-top: 12px;}
-      .input-box {background: #F6F6F6; padding: 15px; border-radius: 12px; margin-bottom: 10px;}
-      .topbar-info {background: #F0F8FF; padding: 10px; border-radius: 10px; margin-bottom: 14px;}"
-                             ))
-                           ),
-                           
-                         #  titlePanel("🔎 Explore a Demanda e Escassez de Profissionais Técnicos no Brasil"),
-                           
-                           div(class = "topbar-info", #Suhas orientou usar checkbox-dark-panels, mas Fábio prefere "topbar-info"
-                               p("Este painel permite explorar a demanda e escassez de profissionais técnicos no Brasil, por estado, eixo e curso, com base nos dados do CAGED e da RAIS."),
-                               p("As ocupações são associadas aos cursos técnicos correspondentes, permitindo observar a movimentação do mercado de trabalho agregados no nível do curso técnico específico."),
-                               p("O indicador principal de escassez é o diferencial salarial entre admitidos e desligados. Valor alto sinaliza escassez e valores baixos sinalizam abundância de trabalhadores."),
-                               p("De forma complementar, a taxa de rotatividade e a participação da ocupação no total de vínculos na UF também são utilizadas: se o diferencial salarial se torna menor (indicando maior pressão salarial), a taxa de rotatividade é crescente e as ocupações para as quais o curso forma têm historicamente muitos vínculos, acende-se um alerta de escassez.")
-                           ),
-                           
-                           fluidRow(
-                             column(2, class = "input-box",
-                                    selectInput("ranking_criterio", "Critério de Ranking:",
-                                                choices = c(
-                                                  "Diferença Salarial Admitidos e Desligados (%)" = "dif_sal_adm_des_pc_m12",
-                                                  "Total Vínculos" = "estoque_liquido",
-                                                  "Diferença Salarial Ponderada pelo Total de Vínculos (escala 0 a 1000)" = "dif_sal_adm_des_pc_pond_m12"
-                                                ),
-                                                selected = "dif_sal_adm_des_pc_pond_m12"
-                                    ),
-                                    bsTooltip("ranking_criterio", "Escolha o indicador para ordenar o ranking dos Top 5 cursos.", placement = "right", trigger = "hover"),
-                                    selectInput("uf1", "Selecionar UF ou Brasil:", 
-                                                choices = sort(unique(caged_rais_curso$NM_UF)),
-                                                selected = "Brasil"
-                                    ),
-                                    bsTooltip("uf1", "Selecione uma unidade da federação para analisar os dados de mercado de trabalho técnico. A opção \"Brasil\" mostra o resultado agregando todas as UFs.", placement = "right", trigger = "hover")
-                             ),
-                             column(10,
-                                    uiOutput("ranking_uf_title"),
-                                    bsTooltip("ranking_uf_title", "Ranking dos 5 cursos técnicos com maior destaque segundo o critério selecionado.", placement = "top", trigger = "hover"),
-                                    withSpinner(tableOutput("ranking_uf"))
-                             )
-                           ),
-                           
-                           fluidRow(
-                             column(2, selectizeInput("eixos", "Selecionar Eixo(s) Tecnológico(s):", choices = NULL, multiple = TRUE)),
-                             column(2, checkboxInput("todos_no_eixo", "\U0001F4CC Considerar todos os Cursos nos Eixo(s) selecionados", value = FALSE)),
-                             column(2, selectizeInput("curso", "Selecionar Curso(s):", choices = NULL, multiple = TRUE)),
-                             column(2, checkboxInput("comparar_brasil", "🇧🇷 Adiciona comparação com Brasil no gráfico", value = FALSE)),
-                             bsTooltip("comparar_brasil", "Marque para comparar o gráfico da UF escolhida com o Brasil.", placement = "top", trigger = "hover")
-                           ),
-                           
-                           fluidRow(
-                             column(2, 
-                                    h5("Seleção atual:"),
-                                    uiOutput("selecao_atual"),
-                             ),
-                             column(2, actionButton("clear_filters", "Limpar Seleções", icon = icon("broom")))
-                           ),
-                           
-                           fluidRow(
-                             column(6,
-                                    h4("\U0001F4C8 Diferença Salarial Admitidos vs Desligados (%)", id = "plot_dif_salarial_title"),
-                                    bsTooltip("plot_dif_salarial_title", "Variação percentual entre salários dos admitidos e desligados. Valores altos sugerem escassez de mão de obra. É o indicador principal para a análise de escassez relativa.", placement = "top", trigger = "hover"),
-                                    withSpinner(plotOutput("plot_dif_salarial"))
-                             ),
-                             column(6,
-                                    h4("\U0001F501 Taxa de Rotatividade", id = "plot_rotatividade_title"),
-                                    bsTooltip("plot_rotatividade_title", "Mede o fluxo de admissões e desligamentos em relação ao estoque de vínculos ativos. Serve para complementar a análise de escassez relativa.", placement = "top", trigger = "hover"),
-                                    withSpinner(plotOutput("plot_rotatividade"))
-                             )
-                           ),
-                           
-                           fluidRow(
-                             column(12,
-                                    h4("\U0001F4AC Avaliação Escassez a Partir do Gráfico", id = "avaliacao_escassez_title"),
-                                    bsTooltip("avaliacao_escassez_title", "Classificação da situação de escassez laboral considerando conjuntamente percentis do indicador de diferença salarial, taxa de rotatividade e estoque. Verificar nota técnica xxxx para detalhamento da metodologia.", placement = "top", trigger = "hover"),
-                                    htmlOutput("texto_escassez")
-                             )
-                           )
-                         )),
-           
-           
-           
-  ################################################################################################################################         
-    
-  ### UI - TAB X : ECONOMIC DYNAMISM EXPLORER ##################################################
   tabPanel("Dinamismo Econômico",
            fluidPage(
              h3("Dinamismo Econômico Municipal - Índice de Crescimento", style = "color: #1f5673; font-weight: bold;"),
@@ -1952,12 +2025,12 @@ tabPanel(
            )
   ),
   
-  
-  
-  ### UI - TAB 7 : APL EXPLORER ##################################################
+
+###############################################################################################################
+# TAB 11   APL EXPLORER ## APL EXPLORER # TAB 11   APL EXPLORER ## APL EXPLORER # TAB 11   APL EXPLORER ## APL EXPLORER 
+###############################################################################################################    
+
   tabPanel("APL Explorer",
-           
-           
            
            fluidPage(
              h3("Arranjos Produtivos Locais - Base CBO", style = "color: #1f5673; font-weight: bold;"),
@@ -2066,99 +2139,12 @@ tabPanel(
              )
            )
   ),
-  
-  #### INSERT TAB
-              #  tabPanel("Estatísticas Relevantes", DTOutput("P8_table"))
-  tabPanel("Análise de Desempenho EPT",
-           
-           h3("Análise de Residuais - Desempenho Institucional EPT", style = "color: #1f5673; font-weight: bold;"),
-           
-           div(class = "topbar-info",
-               style = "color: black !important;",
-               p("Este painel analiza o desempenho institucional em EPT através de residuais do modelo econométrico.", 
-                 style = "color: black !important;"),
-               p("Residuais positivos indicam desempenho acima do esperado; negativos indicam desempenho abaixo do esperado.", 
-                 style = "color: black !important;"),
-               p("Use os filtros para comparar estados em programas específicos e acompanhar evolução temporal.", 
-                 style = "color: black !important;")
-           ),
-           
-           sidebarLayout(
-             sidebarPanel(
-               width = 3,
-               
-               h4("Controles Temporais", style = "color: #1f5673;"),
-               
-               sliderInput(
-                 "tab_resi_year", "Ano:",
-                 min = 2011, max = 2021, value = 2016, step = 1
-               ),
-               
-               hr(),
-               h4("Filtros de Programa", style = "color: #1f5673;"),
-               
-               # Replace the selectInput widgets with pickerInput for multiple selection:
-               
-               pickerInput("tab_resi_dependency",
-                           label = h5("Dependência Administrativa:", style = "color: black;"),
-                           choices = c("Federal" = "Federal",
-                                       "Estadual" = "Estadual", 
-                                       "Municipal" = "Municipal",
-                                       "Privada" = "Privada"),
-                           selected = "Federal",
-                           multiple = TRUE,
-                           options = list(`actions-box` = TRUE)),
-               
-               pickerInput("tab_resi_sector",
-                           label = h5("Setor Econômico:", style = "color: black;"),
-                           choices = c("Agricultura" = "agriculture",
-                                       "Indústria" = "industry",
-                                       "Serviços" = "services", 
-                                       "Administração" = "administration"),
-                           selected = "industry",
-                           multiple = TRUE,
-                           options = list(`actions-box` = TRUE)),
-               hr(),
-               h4("Configuração do Gráfico", style = "color: #1f5673;"),
-               
-               selectInput("tab_resi_yaxis",
-                           label = h5("Eixo Y:", style = "color: black;"),
-                           choices = c("PIB per Capita" = "pib_per_capita",
-                                       "Alinhamento Setorial" = "sector_alignment"),
-                           selected = "pib_per_capita"),
-               
-               pickerInput(
-                 "tab_resi_states", "Estados Selecionados:",
-                 choices = NULL,
-                 selected = NULL,
-                 multiple = TRUE,
-                 options = list(`actions-box` = TRUE, `live-search` = TRUE)
-               ),
-               
-               hr(),
-               h5("Resumo da Seleção:", style = "color: #1f5673;"),
-               uiOutput("tab_resi_summary")
-             ),
-             
-             mainPanel(
-               width = 9,
-               h4("Desempenho Institucional vs Contexto Econômico", style = "color: #1f5673;"),
-               withSpinner(plotlyOutput("tab_resiPlot", height = "600px")),
-               
-               br(),
-               
-               h4("Dados dos Estados Selecionados", style = "color: #1f5673;"),
-               withSpinner(DTOutput("tab_resiTable"))
-             )
-           )
-  ),
-  
-  #### END TAB
-  # WE INSERT TAB HERE
-#  tabPanel("EPT e Informalidae", DTOutput("tab_resiTable"))
-  
-  
-  # EPT e Informalidade Tab UI
+
+###############################################################################################################
+# TAB 12   EPT INFORMALIDADE ## EPT INFORMALIDADE ## EPT INFORMALIDADE ## EPT INFORMALIDADE ## 
+###############################################################################################################    
+
+
 tabPanel("EPT e Informalidade",
          fluidPage(
            h3("EPT e Informalidade - Análise de Oportunidades de Formalização", 
@@ -2281,12 +2267,221 @@ tabPanel("EPT e Informalidade",
              )
            )
          )
-)
+),
+
+###############################################################################################################
+# TAB 13   MATCHING CNCT CBO MATCHING CNCT CBOMATCHING CNCT CBOMATCHING CNCT CBOMATCHING CNCT CBO
+############################################################################################################### 
+
+tabPanel("PLACEHOLDER",
+         h4("PLACEHOLDER", style = "color: #1f5673;"),
+         fluidPage(
+           useShinyjs(),
+           tags$head(includeCSS("www/custom.css")),
+           
+           div(class = "checkbox-dark-panel",
+               fluidRow(
+                 column(
+                   width = 3,
+                   selectizeInput("uf_selectCOCN", "Selecionar UF ou Brasil:",
+                                  choices = NULL,
+                                  options = list(placeholder = "Brasil"))
+                 ),
+                 column(
+                   width = 3,
+                   radioButtons("match_direction", "Direção da Conexão:",
+                                choices = c("Oferta → Demanda", "Demanda → Oferta"),
+                                selected = "Oferta → Demanda",
+                                inline = TRUE)
+                 ),
+                 column(
+                   width = 2,
+                   sliderInput("score_thresh", "Limite de Proximidade:",
+                               min = 0, max = 1, value = 0.2, step = 0.01)
+                 ),
+                 column(
+                   width = 2,
+                   numericInput("top_n", "Melhores Correspondências:",
+                                value = 5, min = 1, max = 10, step = 1),
+                   helpText("Atualizado automaticamente com base no limite de proximidade.")
+                 )
+               ),
+               fluidRow(
+                 # OFERTA → DEMANDA
+                 conditionalPanel(
+                   condition = "input.match_direction == 'Oferta \u2192 Demanda'",
+                   column(width = 6,
+                          h4("1a - Matrículas por Eixo, Área e Curso"),
+                          DTOutput("agg_table"), hr(),
+                          h4("1b - Matrículas por Área"),
+                          DTOutput("area_table"), hr(),
+                          h4("1c - Matrículas por Curso"),
+                          DTOutput("curso_table")
+                   ),
+                   column(width = 6,
+                          h4("Melhores Ocupações e Vínculos"),
+                          DTOutput("course_occ_table")
+                   )
+                 ),
+                 # DEMANDA → OFERTA
+                 conditionalPanel(
+                   condition = "input.match_direction == 'Demanda \u2192 Oferta'",
+                   column(width = 6,
+                          h4("1a - Vínculos por Grande Grupo"),
+                          DTOutput("cbo1_table"), hr(),
+                          h4("1b - Vínculos por Família"),
+                          DTOutput("cbo4_table"), hr(),
+                          h4("1c - Vínculos por Ocupação"),
+                          DTOutput("cbo6b_table")
+                   ),
+                   column(width = 6,
+                          h4("Melhores Cursos e Matrículas"),
+                          DTOutput("course_agg_table_rev")
+                   )
+                 )
+               )
+           )
+         )
+),
+
+###############################################################################################################
+# TAB 14   Escassez de Profissionais Técnicos #Escassez de Profissionais Técnicos #Escassez de Profissionais Técnicos #
+############################################################################################################### 
+
+tabPanel("Escassez de Profissionais Técnicos", 
+         fluidPage(h3("🔎 Explore a Demanda e Escassez de Profissionais Técnicos no Brasil"),
+                   tags$head(
+                     tags$style(HTML(
+                       ".bigtext {font-size: 1.2em; color: #333 !important;}
+   .bullet-list {font-size: 1.1em; margin-top: 12px; color: #333 !important;}
+   .input-box {
+     background: #F6F6F6; 
+     padding: 15px; 
+     border-radius: 12px; 
+     margin-bottom: 10px;
+     color: #333 !important;
+   }
+   .input-box label {color: #333 !important;}
+   .input-box .form-control {color: #333 !important;}
+   .input-box .selectize-input {color: #333 !important;}
+   .topbar-info {
+     background: #F0F8FF; 
+     padding: 10px; 
+     border-radius: 10px; 
+     margin-bottom: 14px;
+     color: #333 !important;
+   }
+   .topbar-info p {color: #333 !important;}
+   
+   /* Fix for all text in this tab */
+   h3, h4, h5, p, label, .control-label {
+     color: #333 !important;
+   }
+   
+   /* Fix for selectize inputs */
+   .selectize-control .selectize-input {
+     color: #333 !important;
+   }
+   .selectize-dropdown {
+     color: #333 !important;
+   }
+
+   table {
+     color: #333 !important;
+   }
+   table th {
+     color: #333 !important;
+     background-color: #f5f5f5 !important;
+   }
+   table td {
+     color: #333 !important;
+   }
+   .table-striped > tbody > tr:nth-of-type(odd) {
+     background-color: #f9f9f9 !important;
+   }
+   .table-bordered {
+     border-color: #ddd !important;
+   }"
+                       
+                       
+                       
+                     ))
+                   ),
+                   
+                   #  titlePanel("🔎 Explore a Demanda e Escassez de Profissionais Técnicos no Brasil"),
+                   
+                   div(class = "topbar-info", #Suhas orientou usar checkbox-dark-panels, mas Fábio prefere "topbar-info"
+                       p("Este painel permite explorar a demanda e escassez de profissionais técnicos no Brasil, por estado, eixo e curso, com base nos dados do CAGED e da RAIS."),
+                       p("As ocupações são associadas aos cursos técnicos correspondentes, permitindo observar a movimentação do mercado de trabalho agregados no nível do curso técnico específico."),
+                       p("O indicador principal de escassez é o diferencial salarial entre admitidos e desligados. Valor alto sinaliza escassez e valores baixos sinalizam abundância de trabalhadores."),
+                       p("De forma complementar, a taxa de rotatividade e a participação da ocupação no total de vínculos na UF também são utilizadas: se o diferencial salarial se torna menor (indicando maior pressão salarial), a taxa de rotatividade é crescente e as ocupações para as quais o curso forma têm historicamente muitos vínculos, acende-se um alerta de escassez.")
+                   ),
+                   
+                   fluidRow(
+                     column(2, class = "input-box",
+                            selectInput("ranking_criterio", "Critério de Ranking:",
+                                        choices = c(
+                                          "Diferença Salarial Admitidos e Desligados (%)" = "dif_sal_adm_des_pc_m12",
+                                          "Total Vínculos" = "estoque_liquido",
+                                          "Diferença Salarial Ponderada pelo Total de Vínculos (escala 0 a 1000)" = "dif_sal_adm_des_pc_pond_m12"
+                                        ),
+                                        selected = "dif_sal_adm_des_pc_pond_m12"
+                            ),
+                            bsTooltip("ranking_criterio", "Escolha o indicador para ordenar o ranking dos Top 5 cursos.", placement = "right", trigger = "hover"),
+                            selectInput("uf1", "Selecionar UF ou Brasil:", 
+                                        choices = sort(unique(caged_rais_curso$NM_UF)),
+                                        selected = "Brasil"
+                            ),
+                            bsTooltip("uf1", "Selecione uma unidade da federação para analisar os dados de mercado de trabalho técnico. A opção \"Brasil\" mostra o resultado agregando todas as UFs.", placement = "right", trigger = "hover")
+                     ),
+                     column(10,
+                            uiOutput("ranking_uf_title"),
+                            bsTooltip("ranking_uf_title", "Ranking dos 5 cursos técnicos com maior destaque segundo o critério selecionado.", placement = "top", trigger = "hover"),
+                            withSpinner(tableOutput("ranking_uf"))
+                     )
+                   ),
+                   
+                   fluidRow(
+                     column(2, selectizeInput("eixos", "Selecionar Eixo(s) Tecnológico(s):", choices = NULL, multiple = TRUE)),
+                     column(2, checkboxInput("todos_no_eixo", "\U0001F4CC Considerar todos os Cursos nos Eixo(s) selecionados", value = FALSE)),
+                     column(2, selectizeInput("curso", "Selecionar Curso(s):", choices = NULL, multiple = TRUE)),
+                     column(2, checkboxInput("comparar_brasil", "🇧🇷 Adiciona comparação com Brasil no gráfico", value = FALSE)),
+                     bsTooltip("comparar_brasil", "Marque para comparar o gráfico da UF escolhida com o Brasil.", placement = "top", trigger = "hover")
+                   ),
+                   
+                   fluidRow(
+                     column(2, 
+                            h5("Seleção atual:"),
+                            uiOutput("selecao_atual"),
+                     ),
+                     column(2, actionButton("clear_filters", "Limpar Seleções", icon = icon("broom")))
+                   ),
+                   
+                   fluidRow(
+                     column(6,
+                            h4("\U0001F4C8 Diferença Salarial Admitidos vs Desligados (%)", id = "plot_dif_salarial_title"),
+                            bsTooltip("plot_dif_salarial_title", "Variação percentual entre salários dos admitidos e desligados. Valores altos sugerem escassez de mão de obra. É o indicador principal para a análise de escassez relativa.", placement = "top", trigger = "hover"),
+                            withSpinner(plotOutput("plot_dif_salarial"))
+                     ),
+                     column(6,
+                            h4("\U0001F501 Taxa de Rotatividade", id = "plot_rotatividade_title"),
+                            bsTooltip("plot_rotatividade_title", "Mede o fluxo de admissões e desligamentos em relação ao estoque de vínculos ativos. Serve para complementar a análise de escassez relativa.", placement = "top", trigger = "hover"),
+                            withSpinner(plotOutput("plot_rotatividade"))
+                     )
+                   ),
+                   
+                   fluidRow(
+                     column(12,
+                            h4("\U0001F4AC Avaliação Escassez a Partir do Gráfico", id = "avaliacao_escassez_title"),
+                            bsTooltip("avaliacao_escassez_title", "Classificação da situação de escassez laboral considerando conjuntamente percentis do indicador de diferença salarial, taxa de rotatividade e estoque. Verificar nota técnica xxxx para detalhamento da metodologia.", placement = "top", trigger = "hover"),
+                            htmlOutput("texto_escassez")
+                     )
+                   )
+                   
+         
+         )) ## END OF TAB
 
 
-  
-  
-  
     )
   )
 )
@@ -2306,12 +2501,12 @@ server <- function(input, output, session) {
 
 # 1  
   observeEvent(input$link_demo, {
-    updateTabsetPanel(session, "tab_selection", selected = "Transição Demográfica")
+    updateTabsetPanel(session, "tab_selection", selected = "A1. Transição Demográfica")
   })
   
 # 2  
   observeEvent(input$link_ept, {
-    updateTabsetPanel(session, "tab_selection", selected = "Análise EPT")
+    updateTabsetPanel(session, "tab_selection", selected = "A2. EPT e População")
   })
   
 # 3  
@@ -2497,7 +2692,7 @@ output$demo_variableInput <- renderUI({
   
   ################################################################
   ###############################################################################################################
-  #  SERVER TAB EPT ##$$$  #  SERVER TAB EPT ##$$$ #  SERVER TAB EPT ##$$$ #  SERVER TAB EPT ##$$$ #  SERVER TAB EPT ##$$$ 
+  #  TAB 2 of 0 COUNT SERVER TAB EPT ##$$$  #  SERVER TAB EPT ##$$$ #  SERVER TAB EPT ##$$$ #  SERVER TAB EPT ##$$$ #  SERVER TAB EPT ##$$$ 
   ###############################################################################################################
   
   
@@ -2818,30 +3013,11 @@ output$demo_variableInput <- renderUI({
   
   
 
-  ######### TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  
+  ######### TAB3 T OF 0 COUNT AB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  TAB3 TAB3 TAB3 TAB3  
   ##############################################################################################################################
   ### OUTPUT PLOT TAB 3  META11 VIGENTE META11 VIGENTE META11 VIGENTE META11 VIGENTE META11 VIGENTE META11 VIGENTE META11 VIGENTE 
   ##############################################################################################################################
 
-  #####################################################################################
-  # Reactive data for Meta 11a - input of UF and variable choice for computing  first part
-  
-  RKT_meta11a_data <- reactive({
-    req(input$meta11a_uf, input$meta11a_ept_var2, input$meta11a_med_var2)
-    
-    df <- df_censo_UF |>
-      filter(NM_UF == input$meta11a_uf, AGREG == "UF_TUDO") |>
-      group_by(ANO) |>
-      summarise(
-        EPT = sum(.data[[input$meta11a_ept_var2]], na.rm = TRUE),
-        MEDIO = sum(.data[[input$meta11a_med_var2]], na.rm = TRUE),
-        .groups = "drop"
-      ) |>
-      mutate(PCT_EPT = ifelse(MEDIO > 0, 100 * EPT / MEDIO, NA))
-    
-    return(df)
-  })
-  #####################################################################################
     
   # --- Line chart output with projection ---
   output$oferta_ept_plot <- renderPlot({
@@ -3030,43 +3206,9 @@ output$demo_variableInput <- renderUI({
     )
   })
   
-    # Reactive data for Meta 11a - input of UF and variable choice for computing second part
-  # Meta 11a second part
-  
-  # Share of Expansion of public can be greater than 100 because private enrollment might decline,
-  # so public enrollment increase can exceed the total enrollment increase.
-  
-  
-  RKT_meta11a_expansao_publica_hist <- reactive({
-    req(input$meta11a_uf)
-    req(input$meta11a_ept_var2 == "QT_MAT_PROF_TEC_PROPAG")
-    req(input$meta11a_med_var2 == "QT_MAT_MED")  
-    
-    df_total <- df_censo_UF |>
-      filter(NM_UF == input$meta11a_uf, AGREG == "UF_TUDO") |>
-      group_by(ANO) |>
-      summarise(EPT_TOTAL = sum(.data[[input$meta11a_ept_var2]], na.rm = TRUE), .groups = "drop")
-    
-    df_pub <- df_censo_UF |>
-      filter(NM_UF == input$meta11a_uf, AGREG == "UF_PUB") |>
-      group_by(ANO) |>
-      summarise(EPT_PUB = sum(.data[[input$meta11a_ept_var2]], na.rm = TRUE), .groups = "drop")
-    
-    df_joined <- full_join(df_total, df_pub, by = "ANO") |>
-      arrange(ANO) |>
-      mutate(
-        DELTA_TOTAL = pmax(EPT_TOTAL - lag(EPT_TOTAL), 0),
-        DELTA_PUB = pmax(EPT_PUB - lag(EPT_PUB), 0),
-        SHARE_PUB = ifelse(DELTA_TOTAL > 0, DELTA_PUB / DELTA_TOTAL, NA)
-      ) |>
-      filter(!is.na(ANO), ANO >= 2008, ANO <= 2035)  # include up to 2035
-    
-    return(df_joined)
-  })  
-  
   
   ##############################################################################################################################
-  ### OUTPUT  PLOT  TAB 4  META11A  FIRST PART  META11A  FIRST PART  META11A  FIRST PART  META11A  FIRST PART
+  #  TAB 4  OF 0 COUNT META11A  FIRST PART  META11A  FIRST PART  META11A  FIRST PART  META11A  FIRST PART
   ##############################################################################################################################
   output$meta11a_nova_plot <- renderPlot({
     req(input$meta11a_nova_uf, input$meta11a_nova_definicoes, input$meta11a_target_year, input$meta11a_target_type)
@@ -3381,234 +3523,293 @@ output$demo_variableInput <- renderUI({
     
     return(gg)
   })
-  ##########################################################
- 
   
-    
-
-##############################################################################################################################
-###  FINANCE 3 ###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3 
-##############################################################################################################################
+  ##############################################################################################################
+  ## TAB 5 OF 0 COUNT ## TAB 5  0 COUNT ## TAB 5 
+  ##############################################################################################################
   
-  output$tab1_fin_plot <- renderPlot({
-    library(patchwork)
-    
-    req(input$fin_variable)
-    
-    `%||%` <- function(a, b) if (!is.null(a)) a else b
-    
-    df <- propag_ept_financeiro
-    df$valor <- suppressWarnings(as.numeric(gsub(",", "", df[[input$fin_variable]])))
-    
-    uf_endividado <- c("MG", "SP", "RJ", "RS")
-    
-    df_endividado <- df[df$UF %in% uf_endividado, ]
-    df_geral <- df[!df$UF %in% uf_endividado, ]
-    
-    df_geral <- df_geral[order(df_geral$Estado), ]
-    df_endividado <- df_endividado[order(df_endividado$Estado), ]
-    
-    plot_label <- var_labels[[input$fin_variable]] %||% input$fin_variable
-    
-    # ----- CONDITIONAL Y-AXIS SETTINGS -----
-    if (input$fin_variable == "saldo_mar25") {
-      y_limits_geral <- c(0, 22e9)
-      y_breaks_geral <- seq(0, 22e9, by = 1e9)
-      
-      y_limits_divida <- c(0, 375e9)
-      y_breaks_divida <- seq(0, 375e9, by = 100e9)
-      
-    } else if (input$fin_variable == "amort_extr") {
-      y_limits_geral <- c(0, 5e9)
-      y_breaks_geral <- seq(0, 5e9, by = 0.5e9)
-      
-      y_limits_divida <- c(0, 75e9)
-      y_breaks_divida <- seq(0, 75e9, by = 5e9)
-      
-    }  else if (input$fin_variable == "EPT_1ano_cen01") {
-      y_limits_geral <- c(0, 120e6)
-      y_breaks_geral <- seq(0, 120e6, by = 20e6)
-      
-      y_limits_divida <- c(0, 1.75e9)
-      y_breaks_divida <- seq(0, 1.75e9, by = 250e6)
-    }  
-    
-    else if (input$fin_variable == "EPT_1ano_cen02") {
-      y_limits_geral <- c(0, 200e6)
-      y_breaks_geral <- seq(0, 200e6, by = 25e6)
-      
-      y_limits_divida <- c(0, 3.5e9)
-      y_breaks_divida <- seq(0, 3.5e9, by = 500e6)
+  observeEvent(input$censo_uf, {
+    if (is.null(input$censo_uf) || length(input$censo_uf) == 0) {
+      updatePickerInput(session, "censo_municipio", choices = character(0), selected = character(0))
+    } else {
+      choices <- unique(dft_informality_geo_codes[NM_UF %in% input$censo_uf, NM_MUN])
+      choices <- sort(choices[!is.na(choices)])
+      updatePickerInput(session, "censo_municipio", choices = choices, selected = choices)  # AUTO-SELECT ALL
     }
-    
-    
-    else if (input$fin_variable == "EPT_5ano_cen01") {
-      y_limits_geral <- c(0, 600e6)
-      y_breaks_geral <- seq(0, 600e6, by = 100e6)
-      
-      y_limits_divida <- c(0, 85e8)
-      y_breaks_divida <- seq(0, 85e8, by = 1e9)
-    }
-    
-    else if (input$fin_variable == "EPT_5ano_cen02") {
-      y_limits_geral <- c(0, 1000e6)
-      y_breaks_geral <- seq(0, 1000e6, by = 100e6)
-      
-      y_limits_divida <- c(0, 175e8)
-      y_breaks_divida <- seq(0, 175e8, by = 1e9)
-    }
-    
-    else if (input$fin_variable == "FEF_1ano_liq_cen01") {
-      y_limits_geral <- c(-2.5e9, 800e6)
-      y_breaks_geral <- seq(-2.5e9, 800e6, by = 500e6)
-      
-      y_limits_divida <- y_limits_geral
-      y_breaks_divida <- y_breaks_geral
-      
-    } 
-    
-    else if (input$fin_variable == "FEF_1ano_liq_cen02") {
-      y_limits_geral <- c(-5e9, 1200e6)
-      y_breaks_geral <- seq(-5e9, 1200e6, by = 500e6)
-      
-      y_limits_divida <- y_limits_geral
-      y_breaks_divida <- y_breaks_geral
-      
-    } 
-    
-    else if (input$fin_variable == "FEF_5ano_liq_cen01") {
-      y_limits_geral <- c(-11.37e9, 3800e6)
-      y_breaks_geral <- seq(-11.37e9, 3800e6, by = 1000e6)
-      
-      y_limits_divida <- y_limits_geral
-      y_breaks_divida <- y_breaks_geral
-      
-    } 
-    
-    else if (input$fin_variable == "FEF_5ano_liq_cen02") {
-      y_limits_geral <- c(-22.8e9, 7500e6)
-      y_breaks_geral <- seq(-22.8e9, 7500e6, by = 1000e6)
-      
-      y_limits_divida <- y_limits_geral
-      y_breaks_divida <- y_breaks_geral
-      
-    } 
-    
-    
-    else {
-      y_min <- min(df$valor, na.rm = TRUE)
-      y_max <- max(df$valor, na.rm = TRUE)
-      y_limits_geral <- c(y_min, y_max)
-      y_breaks_geral <- waiver()
-      y_limits_divida <- c(y_min, y_max)
-      y_breaks_divida <- waiver()
-    }
-    
-    # ----- PLOTS -----
-    # Plot for general states (in millions)
-    p_geral <- ggplot(df_geral, aes(x = factor(Estado, levels = df_geral$Estado), y = valor, fill = UF)) +
-      geom_col() +
-      geom_text(
-        aes(label = paste0(format(round(valor / 1e6), big.mark = ".", decimal.mark = ",", scientific = FALSE), " M")),
-        angle = 90, vjust = 0.2, hjust=-0.1, size = 5, color = "blue",fontface = "bold"
-      ) +
-      scale_y_continuous(
-        limits = y_limits_geral,
-        breaks = y_breaks_geral,
-        labels = scales::label_number(scale_cut = scales::cut_short_scale())
-      ) +
-      scale_fill_manual(values = uf_colors_bySG)+
-      labs(title = paste("Demais Estados –", plot_label), x = "Estado", y = "Valor (R$)") +
-      theme_minimal(base_size = 14) +
-      theme(
-        plot.title = element_text(face = "bold", color = "#1f5673"),
-        axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = "none"
-      )
-    
-    # Plot for indebted states (in billions)
-    p_divida <- ggplot(df_endividado, aes(x = factor(Estado, levels = df_endividado$Estado), y = valor, fill = UF)) +
-      geom_col() +
-      geom_text(
-        aes(label = paste0(format(round(valor / 1e6), big.mark = ".", decimal.mark = ",", scientific = FALSE), " M")),
-        angle = 90, vjust = 0.2, hjust=-0.1, size = 7, color = "blue",fontface = "bold"
-      ) +
-      scale_y_continuous(
-        limits = y_limits_divida,
-        breaks = y_breaks_divida,
-        labels = scales::label_number(scale_cut = scales::cut_short_scale())
-      ) +
-      scale_fill_manual(values = uf_colors_bySG)+
-      labs(title = "Estados com Alta Dívida", x = "Estado", y = "Valor (R$)") +
-      theme_minimal(base_size = 14) +
-      theme(
-        plot.title = element_text(face = "bold", color = "#1f5673"),
-        axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = "none",
-        panel.background = element_rect(fill = "antiquewhite", color = NA)
-      )
-    
-    
-    p_geral + p_divida + plot_layout(ncol = 2, widths = c(2, 1))
   })
   
+  # --- SINGLE Title Creation (simplified) ---
+  create_censo_title <- reactive({
+    if (is.null(input$censo_uf) || length(input$censo_uf) == 0) {
+      return("Nenhuma seleção")
+    }
+    
+    uf_text <- paste(input$censo_uf, collapse = ", ")
+    
+    mun_count <- if (!is.null(input$censo_municipio) && length(input$censo_municipio) > 0) {
+      length(input$censo_municipio)
+    } else {
+      length(unique(dft_informality_geo_codes[NM_UF %in% input$censo_uf, NM_MUN]))
+    }
+    
+    return(paste(uf_text, "-", mun_count, "municípios"))
+  })
+  
+  # --- Main Reactive (unchanged) ---
+  rkt_censo_filtered <- reactive({
+    req(input$censo_year)
+    req(input$censo_uf)
+    req(length(input$censo_uf) > 0)
+    req(input$censo_dependencia)
+    req(length(input$censo_dependencia) > 0)
+    
+    data <- df_censo_combined %>%
+      filter(ANO == input$censo_year) %>%
+      filter(NM_UF %in% input$censo_uf) %>%
+      filter(TP_DEPENDENCIA %in% input$censo_dependencia)
+    
+    if (!is.null(input$censo_municipio) && length(input$censo_municipio) > 0) {
+      data <- data %>% filter(NM_MUN %in% input$censo_municipio)
+    }
+    
+    return(data)
+  })
+  
+  # --- Table 1a with responsive total row and user messaging ---
+  # --- Table 1a - Fixed with unique column names ---
+  output$censo_table_eixo <- renderDT({
+    # Simple validation
+    if (is.null(input$censo_uf) || length(input$censo_uf) == 0 ||
+        is.null(input$censo_dependencia) || length(input$censo_dependencia) == 0) {
+      empty_data <- data.frame(Mensagem = "Selecione UF e Dependência Administrativa")
+      return(datatable(empty_data, options = list(dom = 't'), rownames = FALSE))
+    }
+    
+    # Get base filtered data
+    data <- df_censo_combined %>%
+      filter(ANO == input$censo_year) %>%
+      filter(NM_UF %in% input$censo_uf) %>%
+      filter(TP_DEPENDENCIA %in% input$censo_dependencia)
+    
+    # Apply municipality filter if selected
+    if (!is.null(input$censo_municipio) && length(input$censo_municipio) > 0) {
+      data <- data %>% filter(NM_MUN %in% input$censo_municipio)
+    }
+    
+    # Check if we have data
+    if (nrow(data) == 0) {
+      empty_data <- data.frame(Mensagem = "Nenhum dado encontrado para a seleção atual")
+      return(datatable(empty_data, options = list(dom = 't'), rownames = FALSE))
+    }
+    
+    # Create title
+    uf_text <- paste(input$censo_uf, collapse = ", ")
+    mun_count <- if (!is.null(input$censo_municipio) && length(input$censo_municipio) > 0) {
+      length(input$censo_municipio)
+    } else {
+      length(unique(data$NM_MUN))
+    }
+    title_content <- paste(uf_text, "-", mun_count, "municípios")
+    
+    # Aggregate by eixo with UNIQUE column names
+    eixo_data <- data %>%
+      group_by(Eixo = NO_AREA_CURSO_PROFISSIONAL) %>%
+      summarise(
+        Cursos = sum(QT_CURSO_TEC, na.rm = TRUE),
+        Matriculas_Total = sum(QT_MAT_CURSO_TEC, na.rm = TRUE),
+        Integrado = sum(QT_MAT_CURSO_TEC_CT, na.rm = TRUE),
+        Normal_Magisterio = sum(QT_MAT_CURSO_TEC_NM, na.rm = TRUE),
+        Concomitante = sum(QT_MAT_CURSO_TEC_CONC, na.rm = TRUE),
+        Subsequente = sum(QT_MAT_TEC_SUBS, na.rm = TRUE),
+        EJA_Nivel_Medio = sum(QT_MAT_TEC_EJA, na.rm = TRUE),
+        .groups = "drop"
+      ) %>%
+      arrange(desc(Matriculas_Total))
+    
+    # Add total row with same column structure
+    total_row <- data.frame(
+      Eixo = paste("TOTAL -", title_content),
+      Cursos = sum(eixo_data$Cursos),
+      Matriculas_Total = sum(eixo_data$Matriculas_Total),
+      Integrado = sum(eixo_data$Integrado),
+      Normal_Magisterio = sum(eixo_data$Normal_Magisterio),
+      Concomitante = sum(eixo_data$Concomitante),
+      Subsequente = sum(eixo_data$Subsequente),
+      EJA_Nivel_Medio = sum(eixo_data$EJA_Nivel_Medio)
+    )
+    
+    final_data <- bind_rows(total_row, eixo_data)
+    
+    # Rename columns for display (after data creation to avoid conflicts)
+    names(final_data) <- c("Eixo", "Cursos", "Matrículas Total", "Integrado", 
+                           "Normal/Magistério", "Concomitante", "Subsequente", "EJA Nível Médio")
+    
+    datatable(final_data, rownames = FALSE, extensions = 'Buttons',
+              options = list(pageLength = 15, scrollX = TRUE, dom = 'Bfrtip',
+                             buttons = c('copy', 'csv', 'excel'),
+                             selection = 'multiple'))
+  })
+  
+  output$censo_table_curso <- renderDT({
+    data <- rkt_censo_filtered()
+    selected_rows <- input$censo_table_eixo_rows_selected
+    
+    req(nrow(data) > 0)
+    req(!is.null(selected_rows) && length(selected_rows) > 0)  # Require selection
+    
+    # Get eixo data to find selected eixos
+    eixo_list <- data %>%
+      group_by(Eixo = NO_AREA_CURSO_PROFISSIONAL) %>%
+      summarise(`Matrículas Total` = sum(QT_MAT_CURSO_TEC, na.rm = TRUE), .groups = "drop") %>%
+      arrange(desc(`Matrículas Total`))
+    
+    # Adjust for total row (subtract 1 from selection indices)
+    selected_eixos <- eixo_list$Eixo[selected_rows - 1]  # -1 because total row is first
+    selected_eixos <- selected_eixos[!is.na(selected_eixos)]
+    
+    if (length(selected_eixos) == 0) return(NULL)
+    
+    curso_data <- data %>%
+      filter(NO_AREA_CURSO_PROFISSIONAL %in% selected_eixos) %>%
+      group_by(Eixo = NO_AREA_CURSO_PROFISSIONAL, Curso = NO_CURSO_EDUC_PROFISSIONAL) %>%
+      summarise(`Matrículas Total` = sum(QT_MAT_CURSO_TEC, na.rm = TRUE), .groups = "drop") %>%
+      arrange(Eixo, desc(`Matrículas Total`))
+    
+    datatable(curso_data, rownames = FALSE, extensions = 'Buttons',
+              caption = htmltools::tags$caption(
+                style = "caption-side: top; text-align: left; color: #1f5673; font-size: 16px; font-weight: bold; margin-bottom: 10px;",
+                paste("Cursos para Eixos Selecionados:", paste(selected_eixos, collapse = ", "))
+              ),
+              options = list(pageLength = 15, scrollX = TRUE, dom = 'Bfrtip',
+                             buttons = c('copy', 'csv', 'excel')))
+  })
+  
+  
+  
   ##############################################################################################################################
-  ### OUTPUT  DATA TABLE TAB 1  FINANCIALS TAB 1  FINANCIALS  TAB 1  FINANCIALS  TAB 1  FINANCIALS TAB 1  FINANCIALS  TAB 1  FINANCIALS  TAB 1  FINANCIALS 
+  ###  TAB 6 of 0 COUNT   RESIDUALS ENROLLMENT PREDICTION LINEAR OLS RESIDUALS
   ##############################################################################################################################
   
   
-  h3("Tabela 1: Variáveis Financeiras", style = "color: #1f5673; font-weight: bold; margin-top: 30px;")
-  output$tab1_fin_table <- DT::renderDataTable({
-    df <- financeiro_dt_all
-    # Drop unused column
-    df <- df[, !(names(df) %in% c("fef_share_pct"))]
+  observe({
+    updatePickerInput(session, "tab_resi_states",
+                      choices = setNames(sort(unique(df_residuals_ols$SG_UF)), 
+                                         sort(unique(df_residuals_ols$NM_UF))),
+                      selected = head(sort(unique(df_residuals_ols$SG_UF)), 10))
+  })
+  
+  # Reactive filtered data
+  # Update the filtered data reactive to handle multiple selections:
+  rkt_residuals_filtered <- reactive({
+    req(input$tab_resi_year, input$tab_resi_dependency, input$tab_resi_sector)
     
-    # Identifica colunas numéricas (exceto UF/Estado)
-    data_cols <- setdiff(names(df), c("UF", "Estado"))
+    df_filtered <- df_residuals_ols %>%
+      filter(ANO == input$tab_resi_year,
+             TP_DEPENDENCIA %in% input$tab_resi_dependency,
+             economic_sector %in% input$tab_resi_sector)
     
-    # Formata para exibição: números com separador de milhar
-    df[data_cols] <- lapply(df[data_cols], function(x) {
-      if (is.numeric(x)) format(round(x, 0), big.mark = ".", decimal.mark = ",") else x
-    })
+    if (!is.null(input$tab_resi_states) && length(input$tab_resi_states) > 0) {
+      df_filtered <- df_filtered %>% filter(SG_UF %in% input$tab_resi_states)
+    }
     
-    DT::datatable(
-      df,
-      extensions = 'Buttons',
-      options = list(
-        pageLength = 30,
-        scrollX = TRUE,
-        scrollY = "600px",
-        autoWidth = FALSE,
-        dom = 'Bfrtip',
-        buttons = list(
-          list(extend = "copy", text = "Copiar"),
-          list(extend = "csv", filename = "Tabela_Financeira_PROPAG", text = "CSV"),
-          list(extend = "excel", filename = "Tabela_Financeira_PROPAG", text = "Excel"),
-          list(
-            extend = "pdf",
-            filename = "Tabela_Financeira_PROPAG",
-            text = "PDF",
-            orientation = "landscape",
-            pageSize = "A4",
-            messageTop = "Tabela 1: Variáveis Financeiras"
-          )
-        ),
-        columnDefs = list(
-          list(className = 'dt-nowrap', targets = "_all")
-        )
-      ),
-      rownames = FALSE,
-      class = "stripe nowrap display"
+    return(df_filtered)
+  })
+  
+  
+  # Plot output
+  output$tab_resiPlot <- renderPlotly({
+    df_plot <- rkt_residuals_filtered()
+    req(nrow(df_plot) > 0)
+    
+    # Calculate fixed axis ranges
+    x_range <- range(df_residuals_ols$residual, na.rm = TRUE)
+    
+    if (input$tab_resi_yaxis == "pib_per_capita") {
+      y_var <- log(df_plot$pib_per_capita)
+      y_title <- "Log PIB per Capita"
+      y_range <- range(log(df_residuals_ols$pib_per_capita), na.rm = TRUE)
+    } else {
+      y_var <- df_plot$sector_alignment
+      y_title <- "Alinhamento Setorial (Ratio)"
+      y_range <- range(df_residuals_ols$sector_alignment, na.rm = TRUE)
+    }
+    
+    # Build title outside layout
+    dep_labels <- paste(input$tab_resi_dependency, collapse = ", ")
+    sector_labels <- c("agriculture" = "Agricultura", "industry" = "Indústria", 
+                       "services" = "Serviços", "administration" = "Administração")
+    selected_sectors <- sector_labels[input$tab_resi_sector]
+    sector_text <- paste(selected_sectors, collapse = ", ")
+    
+    plot_title <- paste0("Predição de Matrículas EPT por Dependência e Setor por UF - ",
+                         dep_labels, " / ", sector_text, " (", input$tab_resi_year, ")")
+    
+    # Map dependencies to shapes and sectors to borders
+    shape_map <- c("Federal" = "circle", "Estadual" = "square", 
+                   "Municipal" = "triangle-up", "Privada" = "diamond")
+    border_map <- c("agriculture" = "red", "industry" = "blue", 
+                    "services" = "green", "administration" = "pink")
+    
+    df_plot$border_color <- border_map[df_plot$economic_sector]
+    
+    p <- plot_ly(df_plot, 
+                 x = ~residual, 
+                 y = y_var,
+                 size = ~QT_MAT_CURSO_TEC,
+                 color = ~NM_UF,
+                 symbol = ~TP_DEPENDENCIA,
+                 symbols = shape_map,
+                 type = "scatter",
+                 mode = "markers",
+                 sizes = c(40, 160),
+                 marker = list(opacity = 1,
+                               line = list(width = 2, 
+                                           color = ~border_color))) %>%
+      layout(
+        xaxis = list(title = "Residual (Desempenho vs Predição)", 
+                     range = x_range, zeroline = TRUE),
+        yaxis = list(title = y_title, range = y_range),
+        title = plot_title
+      )
+    
+    return(p)
+  })
+  
+  # Table output with Brazilian formatting
+  output$tab_resiTable <- renderDT({
+    df_table <- rkt_residuals_filtered()
+    req(nrow(df_table) > 0)
+    
+    df_display <- df_table %>%
+      select(Estado = NM_UF, Residual = residual, `PIB per Capita` = pib_per_capita,
+             `Alinhamento Setorial` = sector_alignment, `Matrículas` = QT_MAT_CURSO_TEC) %>%
+      mutate(
+        Residual = format(round(Residual, 3), decimal.mark = ","),
+        `PIB per Capita` = format(round(`PIB per Capita`, 1), big.mark = ".", decimal.mark = ","),
+        `Alinhamento Setorial` = format(round(`Alinhamento Setorial`, 3), decimal.mark = ","),
+        `Matrículas` = format(`Matrículas`, big.mark = ".", decimal.mark = ",")
+      )
+    
+    datatable(df_display, options = list(pageLength = 15), rownames = FALSE)
+  })
+  
+  # Summary output
+  output$tab_resi_summary <- renderUI({
+    df_summary <- rkt_residuals_filtered()
+    n_states <- nrow(df_summary)
+    n_positive <- sum(df_summary$residual > 0, na.rm = TRUE)
+    
+    tagList(
+      tags$p(paste("Ano:", input$tab_resi_year)),
+      tags$p(paste("Estados selecionados:", n_states)),
+      tags$p(paste("Desempenho superior:", n_positive), style = "color: green;")
     )
   })
-
-  
   
   
   ##############################################################################################################################
-  ###  TAB 1b  FINANCIALS TAB 1b  FINANCIALS  TAB 1b  FINANCIALS  TAB 1b  FINANCIALS TAB 1b  FINANCIALS  TAB 1b  FINANCIALS  TAB 1b  FINANCIALS 
+  ###  TAB 7 of 0 COUNT  FINANCIALS TAB 1b  FINANCIALS  TAB 1b  FINANCIALS  TAB 1b  FINANCIALS TAB 1b  FINANCIALS  TAB 1b  FINANCIALS  TAB 1b  FINANCIALS 
   ##############################################################################################################################
-  
   
   # Label → value maps (must match UI)
   # mappings used to rebuild widgets
@@ -4211,7 +4412,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
   })
   
   ##################################################################################################################################
-  #####  TAB FINANCE FEF #%&*&*& #####  TAB FINANCE FEF #%&*&*&#####  TAB FINANCE FEF #%&*&*&#####  TAB FINANCE FEF #%&*&*&#####  TAB 
+  #####  TAB 8 OF 0 COUNT FINANCE FEF #%&*&*& #####  TAB 8INANCE FEF #%&*&*&#####  TAB FINANCE FEF #%&*&*&#####  TAB FINANCE FEF #%&*&*&#####  TAB 
   ##################################################################################################################################
 
   # Track current mode
@@ -4692,706 +4893,220 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
       )
   })
   
-
-  
-  
-  
-    
-    ######### TAB5 TAB5 TAB5 TAB5  TAB5 TAB5 TAB5 TAB5  TAB5 TAB5 TAB5 TAB5  TAB5 TAB5 TAB5 TAB5  TAB5 TAB5 TAB5 TAB5  TAB5 TAB5 TAB5 TAB5  
-    ##############################################################################################################################
-    ### OUTPUT PLOT TAB 5  META11 VIGENTE META11 VIGENTE META11 VIGENTE META11 VIGENTE META11 VIGENTE META11 VIGENTE META11 VIGENTE 
-    #####################################
-    #########################################################################################
-    
-    output$meta11a_plot2 <- renderPlot({
-      df <- RKT_meta11a_data() 
-      
-      # Define anos de base para tendência histórica
-      years_trend <- 2020:2024
-      
-      # Último ano observado
-      latest_year <- max(df$ANO, na.rm = TRUE)
-      
-      # Ano-alvo definido pelo usuário
-      target_year <- as.numeric(input$meta11a_target_year)
-      
-      # Quantos anos faltam até o ano-alvo
-      years_left <- target_year - 2024
-      
-      # Valores de 2024
-      current_row <- df |> filter(ANO == 2024)
-      current_pct <- current_row$PCT_EPT
-      current_ept <- current_row$EPT
-      current_med <- current_row$MEDIO
-      
-      latest_pct <- df |> filter(ANO == latest_year) |> pull(PCT_EPT)
-      
-      # Estimar tendência linear para o Ensino Médio
-      lm_med <- lm(MEDIO ~ ANO, data = df |> filter(ANO %in% years_trend))
-      base_slope <- coef(lm_med)["ANO"]
-      
-      # Aplicar ajuste com o fator do slider
-      slope_factor <- input$ensino_slope_factor  # entre 0.5 e 1.5
-      adjusted_slope <- base_slope * slope_factor
-      
-      # Projeção do Ensino Médio no ano-alvo
-      projected_med <- current_med + adjusted_slope * years_left
-      
-      # Quantidade de estudantes necessária para atingir 50% da meta
-      target_students <- 0.5 * projected_med
-      
-      # Crescimento absoluto necessário (em matrículas EPT)
-      growth_abs <- if (!is.na(current_ept) && years_left > 0) {
-        (target_students - current_ept) / years_left
-      } else {
-        NA_real_
-      }
-      
-      # Crescimento percentual anual necessário (em pontos percentuais)
-      required_growth <- if (!is.na(current_pct) && years_left > 0) {
-        (50 - current_pct) / years_left
-      } else {
-        NA_real_
-      }
-      
-      # Texto da projeção do Ensino Médio
-      em_text <- paste0(
-        "<b>EM: Projetado</b><br>",
-        format(round(projected_med), big.mark = ".", decimal.mark = ","), " alunos<br>matriculados"
-      )
-      
-      # Prepare the label
-      growth_text <- paste0(
-        "<b>Para atingir 50%</b><br>",
-        "em ", input$meta11a_target_year, ":<br>",
-        "crescimento de<br>",
-        "<span style='color:#1f5673'><b>", round(required_growth, 1), "%</b></span> ao ano<br>",
-        "(", formatC(growth_abs, format = "d", big.mark = "."), " alunos/ano)"
-      )
-      
-      # with checkbox
-      
-      # Base plot: line and points
-      ggpub <- ggplot(df, aes(x = ANO, y = PCT_EPT)) +
-        
-      # Meta 11a fixed line
-        geom_hline(yintercept = 45, color = "darkgreen", linetype = "dashed", linewidth = 1.1) +
-        annotate("text", x = 2008, y = 45, label = "Meta 11a público: 45%", color = "darkgreen", vjust = -1, fontface = "bold")
-      
-      ggpub <- ggpub +
-        scale_x_continuous(breaks = 2007:2026, limits = c(2007, 2026)) +
-        scale_y_continuous(limits = c(0, 130), labels = scales::percent_format(scale = 1)) +
-        labs(
-          title = paste("UF:", input$meta11a_uf),
-          subtitle = "Expansão no EPT na rede Pública como % da expansão no EPT",
-          x = "Ano",
-          y = "% de Matrículas em EPT"
-        ) +
-        theme_minimal(base_size = 14) +
-        theme(plot.title = element_text(face = "bold"))
-      
-      df_pub_share <- RKT_meta11a_expansao_publica_hist()
-      
-      ggpub <- ggpub +
-        geom_point(
-          data = df_pub_share,
-          aes(x = ANO, y = 100*SHARE_PUB),
-          color = "#FF6600",
-          size = 5,
-          inherit.aes = FALSE
-        )+ 
-        ggtext::geom_richtext(
-          data = df_pub_share |> filter(!is.na(SHARE_PUB)),
-          aes(
-            x = ANO,
-            y = 100 * SHARE_PUB,
-            label = paste0(
-              "<b>Expansão ", ANO - 1, "–", ANO, "</b><br>",
-              "EPT total: ", format(round(DELTA_TOTAL), big.mark = "."), "<br>",
-              "EPT pública: ", format(round(DELTA_PUB), big.mark = "."), "<br>",
-              "Público: ", round(100 * SHARE_PUB, 1), "%"
-            )
-          ),
-          fill = "white",
-          label.color = "#FF6600",
-          color = "black",
-          size = 3,
-          label.size = 0.4,
-          label.r = unit(6, "pt"),
-          label.padding = unit(c(3, 5, 3, 5), "pt"),
-          vjust = -0.5,
-          inherit.aes = FALSE
-        )
-      
-      return(ggpub)
-      
-    })
-    
-  
-  ######### TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 TAB6 
   ##############################################################################################################################
-  ### OUTPUT TABLE AND PLOT TAB 6  ESCASSEZ PROFISSIONAIS TÉCNICOS
-  #####################################
-  #########################################################################################
-  observe({
-    updateSelectizeInput(session, "eixos",
-                         choices = sort(unique(caged_rais_curso$Eixo_Tecnologico)), server = TRUE)
-  })
+  ### TAB 9  OF 0 COUNT TAB 9 TAB * FINANCE 3 ###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3 
+  ##############################################################################################################################
   
-  # Atualiza a lista de cursos quando eixos são selecionados
-  observeEvent(input$eixos, {
-    cursos <- caged_rais_curso %>%
-      filter(Eixo_Tecnologico %in% input$eixos) %>%
-      distinct(Curso) %>%
-      arrange(Curso) %>%
-      pull()
-    updateSelectizeInput(session, "curso", choices = cursos, server = TRUE)
-  })
-  
-  # Botão de limpar filtros retorna seleção ao estado inicial
-  observeEvent(input$clear_filters, {
-    updateSelectInput(session, "uf1", selected = sort(unique(caged_rais_curso$NM_UF))[1])
-    updateSelectizeInput(session, "eixos", selected = character(0))
-    updateSelectizeInput(session, "curso", selected = character(0))
-    updateCheckboxInput(session, "todos_no_eixo", value = TRUE)
-    updateCheckboxInput(session, "comparar_brasil", value = TRUE)
-  })
-  
-  # Reativo: gera os dados e gráficos com base nos filtros
-  plots_reactive <- reactive({
-    geo_value <- input$uf1
-    if (input$comparar_brasil && input$uf1 != "Brasil") {
-      geo_value <- c(input$uf1, "Brasil")
+  output$tab1_fin_plot <- renderPlot({
+    library(patchwork)
+    
+    req(input$fin_variable)
+    
+    `%||%` <- function(a, b) if (!is.null(a)) a else b
+    
+    df <- propag_ept_financeiro
+    df$valor <- suppressWarnings(as.numeric(gsub(",", "", df[[input$fin_variable]])))
+    
+    uf_endividado <- c("MG", "SP", "RJ", "RS")
+    
+    df_endividado <- df[df$UF %in% uf_endividado, ]
+    df_geral <- df[!df$UF %in% uf_endividado, ]
+    
+    df_geral <- df_geral[order(df_geral$Estado), ]
+    df_endividado <- df_endividado[order(df_endividado$Estado), ]
+    
+    plot_label <- var_labels[[input$fin_variable]] %||% input$fin_variable
+    
+    # ----- CONDITIONAL Y-AXIS SETTINGS -----
+    if (input$fin_variable == "saldo_mar25") {
+      y_limits_geral <- c(0, 22e9)
+      y_breaks_geral <- seq(0, 22e9, by = 1e9)
+      
+      y_limits_divida <- c(0, 375e9)
+      y_breaks_divida <- seq(0, 375e9, by = 100e9)
+      
+    } else if (input$fin_variable == "amort_extr") {
+      y_limits_geral <- c(0, 5e9)
+      y_breaks_geral <- seq(0, 5e9, by = 0.5e9)
+      
+      y_limits_divida <- c(0, 75e9)
+      y_breaks_divida <- seq(0, 75e9, by = 5e9)
+      
+    }  else if (input$fin_variable == "EPT_1ano_cen01") {
+      y_limits_geral <- c(0, 120e6)
+      y_breaks_geral <- seq(0, 120e6, by = 20e6)
+      
+      y_limits_divida <- c(0, 1.75e9)
+      y_breaks_divida <- seq(0, 1.75e9, by = 250e6)
+    }  
+    
+    else if (input$fin_variable == "EPT_1ano_cen02") {
+      y_limits_geral <- c(0, 200e6)
+      y_breaks_geral <- seq(0, 200e6, by = 25e6)
+      
+      y_limits_divida <- c(0, 3.5e9)
+      y_breaks_divida <- seq(0, 3.5e9, by = 500e6)
     }
     
-    curso_input <- if (input$todos_no_eixo) {
-      caged_rais_curso %>%
-        filter(Eixo_Tecnologico %in% input$eixos) %>%
-        distinct(Curso) %>%
-        pull()
-    } else input$curso
     
-    plot_caged_summary_double(
-      df = caged_rais_curso,
-      geo_value = geo_value,
-      curso_values = curso_input,
-      todos_no_eixo = input$todos_no_eixo,
-      eixo_values = input$eixos
-    )
-  })
-  ###################################
-  # Renderiza o gráfico de diferença salarial
-  output$plot_dif_salarial <- renderPlot({
-    req(plots_reactive()$dif_sal_pc_plot)
-    plots_reactive()$dif_sal_pc_plot
-  })
-  
-  # Renderiza o gráfico de rotatividade
-  output$plot_rotatividade <- renderPlot({
-    req(plots_reactive()$rotatividade_plot)
-    plots_reactive()$rotatividade_plot
-  })
-  
-  # Renderiza o título do ranking
-  output$ranking_uf_title <- renderUI({
-    req(input$uf1)
-    h4(paste("⚠️ Relação de Cursos com Maior Escassez -", input$uf1), id = "ranking_uf_title")
-  })
-  
-#################################
-  output$ranking_uf <- renderTable({
-    req(input$uf1)
-
-    tabela <- caged_rais_curso %>%
-      group_by(ANO, MES, Eixo_Tecnologico, Curso) %>%
-      mutate(
-        estoque_liquido_br = sum(if_else(NM_UF == "Brasil", NA, estoque_liquido), na.rm = TRUE)
-      ) %>%
-      filter(NM_UF == input$uf1) %>%
-      group_by(ANO, MES) %>%
-      mutate(
-        across(.cols = c(dif_sal_adm_des_pc_m12, tx_rotatividade_m12, estoque_liquido),
-               .fns = ~ percent_rank(.x)*100,
-               .names = 'p_{.col}')
-      ) %>%
-      group_by(Curso) %>%
-      mutate(
-        dif_sal_adm_des_pc = if_else(is.infinite(dif_sal_adm_des_pc), NA, dif_sal_adm_des_pc),
-        dif_sal_adm_des_pc_m12 = window_mean(dif_sal_adm_des_pc, lag = 11, lead = 0),
-
-        soma_mov_adm_media_ano = window_mean(soma_mov_adm, lag = 11, lead = 0),
-        `Estimativa Demanda Vagas` = window_mean(estoque_liquido, lag = 11, lead = 0)*0.15,
-
-        `Demanda de vagas em relação ao total Brasil` = `Estimativa Demanda Vagas`/(window_mean(estoque_liquido_br, lag = 11, lead = 0)*0.15),
-
-        tipologia_escassez = case_when(
-          p_dif_sal_adm_des_pc_m12 >= 75 & p_tx_rotatividade_m12 >= 50 & p_estoque_liquido >= 60 ~ "Alerta de Escassez",
-          (p_dif_sal_adm_des_pc_m12 >= 75 & p_tx_rotatividade_m12 >= 50 & p_estoque_liquido < 60) |
-            (between(p_dif_sal_adm_des_pc_m12, 74.9999, 50) & p_tx_rotatividade_m12 >= 50 & p_estoque_liquido >= 50) ~ "Tendência de Escassez",
-          (between(p_dif_sal_adm_des_pc_m12, 49.999, 25) | p_estoque_liquido >= 50) ~ "Situação Estável",
-          p_dif_sal_adm_des_pc_m12 < 25 ~ "Sinal de Excesso",
-          soma_mov_adm_media_ano < 30 ~ "Sem fluxo suficiente - INDICADORES DEIXAM DE SER INFORMATIVOS",
-          TRUE ~ "Indisponível/Indeterminado"
-        )
-      ) %>%
-      ungroup() %>%
-      filter(ANO == max(ANO, na.rm = TRUE)) %>%
-      filter(MES == max(MES, na.rm = TRUE)) %>%
-      mutate(dif_sal_adm_des_pc_pond_m12 = scales::rescale(dif_sal_adm_des_pc_m12*estoque_liquido,  to = c(0, 1000))) %>%
-      arrange(desc(dif_sal_adm_des_pc_pond_m12)) %>%
-      filter(tipologia_escassez %in% c("Alerta de Escassez", "Tendência de Escassez")) %>%
-      slice_head(n = 10) %>%
-      transmute(
-        `Eixo - Curso` = paste(Eixo_Tecnologico, Curso, sep = " - "),
-        `Situação da Escassez` = tipologia_escassez,
-        `Estimativa Demanda Vagas` = round(`Estimativa Demanda Vagas`),
-        `Demanda de vagas em relação ao total Brasil (%)` = `Demanda de vagas em relação ao total Brasil`*100,
-        #    `Demanda de vagas em relação ao total Brasil (%)` = `Demanda de vagas em relação ao total Brasil`*100,
-        #  `Dif. Salarial adm e des (%)` = round(dif_sal_adm_des_pc_m12, 2),
-        #  `Total Vínculos (milhares)` = round(estoque_liquido)/1000,
-        `Indicador de Escassez (Dif. Salarial*Total Vínculos (escala 0 a 1000))` = round(dif_sal_adm_des_pc_pond_m12)
+    else if (input$fin_variable == "EPT_5ano_cen01") {
+      y_limits_geral <- c(0, 600e6)
+      y_breaks_geral <- seq(0, 600e6, by = 100e6)
+      
+      y_limits_divida <- c(0, 85e8)
+      y_breaks_divida <- seq(0, 85e8, by = 1e9)
+    }
+    
+    else if (input$fin_variable == "EPT_5ano_cen02") {
+      y_limits_geral <- c(0, 1000e6)
+      y_breaks_geral <- seq(0, 1000e6, by = 100e6)
+      
+      y_limits_divida <- c(0, 175e8)
+      y_breaks_divida <- seq(0, 175e8, by = 1e9)
+    }
+    
+    else if (input$fin_variable == "FEF_1ano_liq_cen01") {
+      y_limits_geral <- c(-2.5e9, 800e6)
+      y_breaks_geral <- seq(-2.5e9, 800e6, by = 500e6)
+      
+      y_limits_divida <- y_limits_geral
+      y_breaks_divida <- y_breaks_geral
+      
+    } 
+    
+    else if (input$fin_variable == "FEF_1ano_liq_cen02") {
+      y_limits_geral <- c(-5e9, 1200e6)
+      y_breaks_geral <- seq(-5e9, 1200e6, by = 500e6)
+      
+      y_limits_divida <- y_limits_geral
+      y_breaks_divida <- y_breaks_geral
+      
+    } 
+    
+    else if (input$fin_variable == "FEF_5ano_liq_cen01") {
+      y_limits_geral <- c(-11.37e9, 3800e6)
+      y_breaks_geral <- seq(-11.37e9, 3800e6, by = 1000e6)
+      
+      y_limits_divida <- y_limits_geral
+      y_breaks_divida <- y_breaks_geral
+      
+    } 
+    
+    else if (input$fin_variable == "FEF_5ano_liq_cen02") {
+      y_limits_geral <- c(-22.8e9, 7500e6)
+      y_breaks_geral <- seq(-22.8e9, 7500e6, by = 1000e6)
+      
+      y_limits_divida <- y_limits_geral
+      y_breaks_divida <- y_breaks_geral
+      
+    } 
+    
+    
+    else {
+      y_min <- min(df$valor, na.rm = TRUE)
+      y_max <- max(df$valor, na.rm = TRUE)
+      y_limits_geral <- c(y_min, y_max)
+      y_breaks_geral <- waiver()
+      y_limits_divida <- c(y_min, y_max)
+      y_breaks_divida <- waiver()
+    }
+    
+    # ----- PLOTS -----
+    # Plot for general states (in millions)
+    p_geral <- ggplot(df_geral, aes(x = factor(Estado, levels = df_geral$Estado), y = valor, fill = UF)) +
+      geom_col() +
+      geom_text(
+        aes(label = paste0(format(round(valor / 1e6), big.mark = ".", decimal.mark = ",", scientific = FALSE), " M")),
+        angle = 90, vjust = 0.2, hjust=-0.1, size = 5, color = "blue",fontface = "bold"
+      ) +
+      scale_y_continuous(
+        limits = y_limits_geral,
+        breaks = y_breaks_geral,
+        labels = scales::label_number(scale_cut = scales::cut_short_scale())
+      ) +
+      scale_fill_manual(values = uf_colors_bySG)+
+      labs(title = paste("Demais Estados –", plot_label), x = "Estado", y = "Valor (R$)") +
+      theme_minimal(base_size = 14) +
+      theme(
+        plot.title = element_text(face = "bold", color = "#1f5673"),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none"
       )
-
-    if (nrow(tabela) == 0) return(data.frame("Mensagem" = "Sem dados para este filtro."))
-    tabela
-  }, striped = TRUE, bordered = TRUE, spacing = "xs", digits = 1)
-
-  ## ABOVE 50 LINE CODE REPLACED BY FABIO in BM_FGV_Propag3.R
-  ## calls tabela_ranking_cursos which is never defined 
-  # output$ranking_uf <- renderTable({
-  #   req(input$uf1)
-  #   
-  #   tabela <- tabela_ranking_cursos %>%
-  #     filter(NM_UF == input$uf1) 
-  #   
-  #   if (nrow(tabela) == 0) return(data.frame("Mensagem" = "Sem dados para este filtro."))
-  #   tabela
-  # }, striped = TRUE, bordered = TRUE, spacing = "xs", digits = 1)
-  # 
-  ##########
-  # Gera o texto da avaliação de escassez com base na seleção
-  output$texto_escassez <- renderUI({
-    df_escassez <- plots_reactive()$tipologia_escassez
-    req(df_escassez)
     
-    if (input$todos_no_eixo) {
-      grupo_nome <- "Eixo Tecnológico"
-      valores <- input$eixos
-      col_grupo <- "Eixo_Tecnologico"
-    } else {
-      grupo_nome <- "Curso"
-      valores <- input$curso
-      col_grupo <- "Curso"
-    }
+    # Plot for indebted states (in billions)
+    p_divida <- ggplot(df_endividado, aes(x = factor(Estado, levels = df_endividado$Estado), y = valor, fill = UF)) +
+      geom_col() +
+      geom_text(
+        aes(label = paste0(format(round(valor / 1e6), big.mark = ".", decimal.mark = ",", scientific = FALSE), " M")),
+        angle = 90, vjust = 0.2, hjust=-0.1, size = 7, color = "blue",fontface = "bold"
+      ) +
+      scale_y_continuous(
+        limits = y_limits_divida,
+        breaks = y_breaks_divida,
+        labels = scales::label_number(scale_cut = scales::cut_short_scale())
+      ) +
+      scale_fill_manual(values = uf_colors_bySG)+
+      labs(title = "Estados com Alta Dívida", x = "Estado", y = "Valor (R$)") +
+      theme_minimal(base_size = 14) +
+      theme(
+        plot.title = element_text(face = "bold", color = "#1f5673"),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none",
+        panel.background = element_rect(fill = "antiquewhite", color = NA)
+      )
     
-    df_resumo <- df_escassez %>%
-      filter(NM_UF == input$uf1) %>%
-      filter(.data[[col_grupo]] %in% valores) %>%
-      filter(ANO == max(ANO, na.rm = TRUE), MES == max(MES, na.rm = TRUE)) %>%
-      select(!!col_grupo, tipologia_escassez) %>%
-      distinct()
     
-    if (nrow(df_resumo) == 0) {
-      return(HTML("<b>Sem resultados para a seleção atual.</b>"))
-    }
-    
-    resumos <- df_resumo %>%
-      mutate(txt = paste0("<b>", grupo_nome, ":</b> ", .data[[col_grupo]], " — <b>", tipologia_escassez, "</b>")) %>%
-      pull(txt)
-    
-    HTML(sprintf(
-      "<div style='font-size:1.2em;line-height:1.5'>
-<b>Resultado da tipologia de escassez para %s:</b><br>%s
-</div>",
-      input$uf1,
-      paste(resumos, collapse = "<br>")
-    ))
+    p_geral + p_divida + plot_layout(ncol = 2, widths = c(2, 1))
   })
   
-  #############
-  # Renderiza lista de filtros atualmente selecionados
-  output$selecao_atual <- renderUI({
-    eixos <- if (is.null(input$eixos) || length(input$eixos) == 0) "Nenhum" else paste(input$eixos, collapse = ", ")
-    cursos <- if (is.null(input$curso) || length(input$curso) == 0) "Nenhum" else paste(input$curso, collapse = ", ")
-    HTML(sprintf(
-      "<ul class='bullet-list'><li><b>UF:</b> %s</li>
-      <li><b>Eixo(s):</b> %s</li>
-      <li><b>Curso(s):</b> %s</li></ul>",
-      input$uf1, eixos, cursos
-    ))
-  })
-
-################################################################################################################
-## TAB 9 REACTIVES OBSERVE OUTPUT TAB 7 REACTIVES OBSERVE OUTPUT  TAB 7 REACTIVES OBSERVE OUTPUT   
-################################################################################################################
-
-  # ===== APL EXPLORER SERVER LOGIC (CORRECTED) =====
   
-  # ===== APL EXPLORER SERVER LOGIC (add to server function) =====
-  
-  # Initialize geographic choices
-  
-  
-  observe({
-    updatePickerInput(session, "uf_apl", 
-                      choices = sort(unique(apl_geo$NM_UF[!is.na(apl_geo$NM_UF)])),
-                      selected = "Ceará")
-  })
-  
-  # Update Região Intermediária based on UF selection
-  observeEvent(input$uf_apl, {
-    if (is.null(input$uf_apl) || length(input$uf_apl) == 0) {
-      updatePickerInput(session, "rgintm_apl", choices = character(0), selected = character(0))
-      updatePickerInput(session, "rgimed_apl", choices = character(0), selected = character(0))
-      updatePickerInput(session, "mun_apl", choices = character(0), selected = character(0))
-    } else {
-      uf_filtered <- apl_geo[apl_geo$NM_UF %in% input$uf_apl & !is.na(apl_geo$NM_RGIINTM), ]
-      rgi_choices <- sort(unique(uf_filtered$NM_RGIINTM))
-      updatePickerInput(session, "rgintm_apl", choices = rgi_choices, selected = rgi_choices)
-    }
-  }, ignoreInit = TRUE)
-  
-  # Update Região Imediata based on Região Intermediária
-  observeEvent(input$rgintm_apl, {
-    if (is.null(input$rgintm_apl) || length(input$rgintm_apl) == 0) {
-      updatePickerInput(session, "rgimed_apl", choices = character(0), selected = character(0))
-      updatePickerInput(session, "mun_apl", choices = character(0), selected = character(0))
-    } else {
-      rgi_filtered <- apl_geo[apl_geo$NM_RGIINTM %in% input$rgintm_apl & !is.na(apl_geo$NM_RGIMED), ]
-      rgimed_choices <- sort(unique(rgi_filtered$NM_RGIMED))
-      updatePickerInput(session, "rgimed_apl", choices = rgimed_choices, selected = rgimed_choices)
-    }
-  }, ignoreInit = TRUE)
-  
-  # Update municipalities based on Região Imediata
-  observeEvent(input$rgimed_apl, {
-    if (is.null(input$rgimed_apl) || length(input$rgimed_apl) == 0) {
-      updatePickerInput(session, "mun_apl", choices = character(0), selected = character(0))
-    } else {
-      rgimed_filtered <- apl_geo[apl_geo$NM_RGIMED %in% input$rgimed_apl & !is.na(apl_geo$NM_MUN), ]
-      mun_choices <- sort(unique(rgimed_filtered$NM_MUN))
-      updatePickerInput(session, "mun_apl", choices = mun_choices, selected = character(0))
-    }
-  }, ignoreInit = TRUE)
-  
-  # Filtered APL data reactive
-  rkt_filtered_apl_data <- reactive({
-    data <- apl_geo
+  h3("Tabela 1: Variáveis Financeiras", style = "color: #1f5673; font-weight: bold; margin-top: 30px;")
+  output$tab1_fin_table <- DT::renderDataTable({
+    df <- financeiro_dt_all
+    # Drop unused column
+    df <- df[, !(names(df) %in% c("fef_share_pct"))]
     
-    # Apply geographic filters
-    if (!is.null(input$uf_apl) && length(input$uf_apl) > 0) {
-      data <- data[data$NM_UF %in% input$uf_apl, ]
-    }
-    if (!is.null(input$rgintm_apl) && length(input$rgintm_apl) > 0) {
-      data <- data[data$NM_RGIINTM %in% input$rgintm_apl, ]
-    }
-    if (!is.null(input$rgimed_apl) && length(input$rgimed_apl) > 0) {
-      data <- data[data$NM_RGIMED %in% input$rgimed_apl, ]
-    }
-    if (!is.null(input$mun_apl) && length(input$mun_apl) > 0) {
-      data <- data[data$NM_MUN %in% input$mun_apl, ]
-    }
+    # Identifica colunas numéricas (exceto UF/Estado)
+    data_cols <- setdiff(names(df), c("UF", "Estado"))
     
-    # Apply specialization filters
-    data <- data[data$LQ >= input$min_lq_apl & data$E_mun_cbo >= input$min_emp_apl, ]
-    
-    return(data)
-  })
-  
-  # Determine current aggregation level
-  rkt_apl_aggregation_level <- reactive({
-    if (!is.null(input$mun_apl) && length(input$mun_apl) > 0) {
-      return("municipal")
-    } else if (!is.null(input$rgimed_apl) && length(input$rgimed_apl) > 0) {
-      return("rgimed") 
-    } else if (!is.null(input$rgintm_apl) && length(input$rgintm_apl) > 0) {
-      return("rgintm")
-    } else if (!is.null(input$uf_apl) && length(input$uf_apl) > 0) {
-      return("uf")
-    } else {
-      return("brasil")
-    }
-  })
-  
-  # Dynamic aggregated data based on level
-  # Dynamic aggregated data with improved occupation display
-  rkt_apl_dynamic_data <- reactive({
-    level <- rkt_apl_aggregation_level()
-    data <- rkt_filtered_apl_data()
-    
-    req(nrow(data) > 0)
-    
-    switch(level,
-           "municipal" = {
-             # Individual APLs - keep current format
-             data %>% select(SG_UF, NM_RGIINTM, NM_RGIMED, NM_MUN, cbo_familia, LQ, E_mun_cbo) %>%
-               arrange(desc(LQ))
-           },
-           "rgimed" = {
-             # Aggregate by Região Imediata with specialization distribution
-             data %>% 
-               group_by(SG_UF, NM_RGIINTM, NM_RGIMED) %>%
-               summarise(
-                 n_apls = n(),
-                 n_municipios = n_distinct(CO_MUN6),
-                 avg_lq = round(mean(LQ, na.rm = TRUE), 2),
-                 total_emp = sum(E_mun_cbo, na.rm = TRUE),
-                 especializacao = paste0(
-                   sum(LQ >= 5), " muito alta, ", 
-                   sum(LQ >= 2.5 & LQ < 5), " alta, ", 
-                   sum(LQ >= 1.25 & LQ < 2.5), " moderada"
-                 ),
-                 .groups = 'drop'
-               ) %>%
-               arrange(desc(avg_lq))
-           },
-           "rgintm" = {
-             # Aggregate by Região Intermediária with specialization distribution  
-             data %>%
-               group_by(SG_UF, NM_RGIINTM) %>%
-               summarise(
-                 n_apls = n(),
-                 n_municipios = n_distinct(CO_MUN6),
-                 avg_lq = round(mean(LQ, na.rm = TRUE), 2), 
-                 total_emp = sum(E_mun_cbo, na.rm = TRUE),
-                 especializacao = paste0(
-                   sum(LQ >= 5), " muito alta, ", 
-                   sum(LQ >= 2.5 & LQ < 5), " alta, ", 
-                   sum(LQ >= 1.25 & LQ < 2.5), " moderada"
-                 ),
-                 .groups = 'drop'
-               ) %>%
-               arrange(desc(avg_lq))
-           },
-           "uf" = {
-             # Aggregate by UF with specialization distribution
-             data %>%
-               group_by(SG_UF) %>%
-               summarise(
-                 n_apls = n(),
-                 n_municipios = n_distinct(CO_MUN6),
-                 avg_lq = round(mean(LQ, na.rm = TRUE), 2),
-                 total_emp = sum(E_mun_cbo, na.rm = TRUE), 
-                 especializacao = paste0(
-                   sum(LQ >= 5), " muito alta, ", 
-                   sum(LQ >= 2.5 & LQ < 5), " alta, ", 
-                   sum(LQ >= 1.25 & LQ < 2.5), " moderada"
-                 ),
-                 .groups = 'drop'
-               ) %>%
-               arrange(desc(avg_lq))
-           }
-    )
-  })
-  
-  # Map data reactive
-  rkt_apl_map_data <- reactive({
-    req(nrow(rkt_filtered_apl_data()) > 0)
-    
-    # Aggregate APL data by municipality for mapping
-    # Aggregate APL data by municipality for mapping - convert CO_MUN to character
-    apl_summary <- rkt_filtered_apl_data() %>%
-      group_by(CO_MUN6, CO_MUN, NM_MUN, SG_UF) %>%
-      summarise(
-        n_apls = n(),
-        avg_lq = mean(LQ, na.rm = TRUE),
-        total_emp = sum(E_mun_cbo, na.rm = TRUE),
-        .groups = 'drop'
-      ) %>%
-      mutate(CO_MUN = as.character(CO_MUN))  # Convert to match sf_regioes
-    
-    # Filter sf_regioes to selected geography
-    map_data <- sf_regioes
-    if (!is.null(input$uf_apl) && length(input$uf_apl) > 0) {
-      map_data <- map_data %>% filter(NM_UF %in% input$uf_apl)
-    }
-    
-    # Join with APL summary
-    # Join with APL summary - now use CO_MUN
-    map_data <- map_data %>%
-      left_join(apl_summary, by = c("CO_MUN", "NM_MUN"))
-    # Replace NA with 0 for municipalities without APLs
-    map_data$n_apls[is.na(map_data$n_apls)] <- 0
-    
-    return(map_data)
-  })
-  
-  # Summary reactive
-  output$apl_summary <- renderUI({
-    level <- rkt_apl_aggregation_level()
-    data <- rkt_filtered_apl_data()
-    
-    level_names <- c(
-      "municipal" = "Municipal",
-      "rgimed" = "Região Imediata", 
-      "rgintm" = "Região Intermediária",
-      "uf" = "UF",
-      "brasil" = "Brasil"
-    )
-    
-    HTML(paste0(
-      "<strong>Nível de Agregação:</strong> ", level_names[level], "<br>",
-      "<strong>APLs encontrados:</strong> ", nrow(data), "<br>",
-      "<strong>Municípios:</strong> ", length(unique(data$CO_MUN6)), "<br>",
-      "<strong>Ocupações (4-dig):</strong> ", length(unique(data$cbo_4dig))
-    ))
-  })
-  
-  # Course data based on current aggregation level
-  rkt_course_data <- reactive({
-    req(input$apl_analysis_mode == "apl_course_match")
-    req(input$uf_apl)  # Don't process until UF is selected
-    
-    withProgress(message = 'Loading course data...', value = 0, {
-      incProgress(0.3, detail = "Determining aggregation level")
-      level <- rkt_apl_aggregation_level()
-      
-      incProgress(0.3, detail = "Loading appropriate dataset")
-      # Use appropriate course dataset based on aggregation level
-      if (level %in% c("municipal", "rgimed", "rgintm")) {
-        # For sub-state levels, aggregate from municipal course data
-        course_data <- apl_matri_MUN_geo
-      } else {
-        # For UF level, use UF course data
-        course_data <- apl_matri_UF
-      }
-      
-      incProgress(0.3, detail = "Applying geographic filters")
-      # Convert full UF names to codes for filtering (FIX THE MISMATCH)
-      if (!is.null(input$uf_apl) && length(input$uf_apl) > 0) {
-        uf_lookup <- unique(apl_geo[, c("NM_UF", "SG_UF")])
-        selected_codes <- uf_lookup[uf_lookup$NM_UF %in% input$uf_apl, "SG_UF"]
-        course_data <- course_data[course_data$SG_UF %in% selected_codes, ]
-      }
-      
-      incProgress(0.1, detail = "Complete")
-      return(course_data)
+    # Formata para exibição: números com separador de milhar
+    df[data_cols] <- lapply(df[data_cols], function(x) {
+      if (is.numeric(x)) format(round(x, 0), big.mark = ".", decimal.mark = ",") else x
     })
-  })
-  
-    # Map output
-  output$apl_map <- renderLeaflet({
-    map_data <- rkt_apl_map_data()
     
-    # Create color palette
-    pal <- colorNumeric(
-      palette = "viridis",
-      domain = map_data$n_apls,
-      na.color = "transparent"
-    )
-    
-    leaflet(map_data) %>%
-      addTiles() %>%
-      addPolygons(
-        fillColor = ~pal(n_apls),
-        weight = 1,
-        opacity = 1,
-        color = "white",
-        dashArray = "3",
-        fillOpacity = 0.7,
-        highlight = highlightOptions(
-          weight = 2,
-          color = "#666",
-          dashArray = "",
-          fillOpacity = 0.7,
-          bringToFront = TRUE
-        ),
-        label = ~paste0(NM_MUN, ": ", n_apls, " APLs"),
-        popup = ~paste0(
-          "<strong>", NM_MUN, "</strong><br/>",
-          "UF: ", NM_UF, "<br/>",
-          "APLs: ", n_apls, "<br/>",
-          "QL Médio: ", round(avg_lq, 2), "<br/>",
-          "Emprego Total: ", formatC(total_emp, format="d", big.mark=".")
-        )
-      ) %>%
-      addLegend(
-        pal = pal,
-        values = ~n_apls,
-        opacity = 0.7,
-        title = "Número de APLs",
-        position = "bottomright"
-      )
-  })
-  
-  
-  
-  # Table output
-  # Enhanced table with updated column names
-  output$apl_table <- renderDT({
-    if (input$apl_analysis_mode == "apl_only") {
-      # APL Mode
-      level <- rkt_apl_aggregation_level()
-      table_data <- rkt_apl_dynamic_data()
-      req(nrow(table_data) > 0)
-      
-      # Dynamic column names and formatting based on aggregation level
-      if (level == "municipal") {
-        table_data$LQ <- round(table_data$LQ, 2)
-        table_data$E_mun_cbo <- formatC(table_data$E_mun_cbo, format = "d", big.mark = ".")
-        colnames(table_data) <- c("UF", "Região Intermediária", "Região Imediata", "Município", "Ocupação (Família CBO)", "QL", "Emprego")
-      } else {
-        table_data$total_emp <- formatC(table_data$total_emp, format = "d", big.mark = ".")
-        if (level == "rgimed") {
-          colnames(table_data) <- c("UF", "Região Intermediária", "Região Imediata", "APLs", "Municípios", "QL Médio", "Emprego Total", "Especialização")
-        } else if (level == "rgintm") {
-          colnames(table_data) <- c("UF", "Região Intermediária", "APLs", "Municípios", "QL Médio", "Emprego Total", "Especialização")
-        } else if (level == "uf") {
-          colnames(table_data) <- c("UF", "APLs", "Municípios", "QL Médio", "Emprego Total", "Especialização")
-        }
-      }
-      level_for_export <- level  # Store for export filename
-      
-    } else {
-      # Course Matching Mode - show APL vs Course alignment
-      course_data <- rkt_course_data()
-      apl_data <- rkt_filtered_apl_data()
-      
-      req(nrow(course_data) > 0)
-      req(nrow(apl_data) > 0)
-      
-      # Create matching analysis
-      matching_data <- merge(
-        apl_data[, .(cbo_4dig, cbo_familia, LQ, E_mun_cbo)],
-        course_data[, .(cbo_4dig, nome_curso_clean, QT_MAT_CURSO_TEC_TOT)],
-        by = "cbo_4dig",
-        all.x = TRUE  # Keep all APLs, show which have courses
-      )
-      
-      # Create match indicator
-      matching_data$tem_curso <- ifelse(is.na(matching_data$QT_MAT_CURSO_TEC_TOT), "Sem curso", "Com curso")
-      matching_data$QT_MAT_CURSO_TEC_TOT[is.na(matching_data$QT_MAT_CURSO_TEC_TOT)] <- 0
-      
-      table_data <- matching_data %>%
-        select(cbo_familia, LQ, E_mun_cbo, nome_curso_clean, QT_MAT_CURSO_TEC_TOT, tem_curso) %>%
-        arrange(desc(QT_MAT_CURSO_TEC_TOT)) %>%
-        head(30)
-      
-      colnames(table_data) <- c("Ocupação APL", "QL", "Emprego APL", "Curso Técnico", "Matrículas", "Status Match")
-      level_for_export <- "matching"
-    }
-    
-    datatable(
-      table_data,
-      rownames = FALSE,
+    DT::datatable(
+      df,
       extensions = 'Buttons',
       options = list(
-        pageLength = 15,
+        pageLength = 30,
         scrollX = TRUE,
+        scrollY = "600px",
+        autoWidth = FALSE,
         dom = 'Bfrtip',
         buttons = list(
           list(extend = "copy", text = "Copiar"),
-          list(extend = "csv", filename = paste0("APL_", toupper(level_for_export)), text = "CSV"),
-          list(extend = "excel", filename = paste0("APL_", toupper(level_for_export)), text = "Excel")
+          list(extend = "csv", filename = "Tabela_Financeira_PROPAG", text = "CSV"),
+          list(extend = "excel", filename = "Tabela_Financeira_PROPAG", text = "Excel"),
+          list(
+            extend = "pdf",
+            filename = "Tabela_Financeira_PROPAG",
+            text = "PDF",
+            orientation = "landscape",
+            pageSize = "A4",
+            messageTop = "Tabela 1: Variáveis Financeiras"
+          )
+        ),
+        columnDefs = list(
+          list(className = 'dt-nowrap', targets = "_all")
         )
       ),
+      rownames = FALSE,
       class = "stripe nowrap display"
     )
   })
   
-
 ################################################################################################################
-## ECONOMIC DYNAMISM TAB REACTIVES AND OUTPUTS
+## TAB 10   ECONOMIC DYNAMISM TAB REACTIVES AND OUTPUTS
 ################################################################################################################
 
 
@@ -5585,125 +5300,373 @@ output$dyn_table <- renderDT({
     formatStyle("Admin (%)", backgroundColor = styleInterval(c(20, 35), c("#8B008B", "#9932CC", "#BA55D3")))  # Dark magenta, dark orchid, medium orchid
 })
 
-### RESIDUALS TAB
-# Update state choices  
+################################################################################################################
+## TAB 11  APL EXPLORER
+################################################################################################################
+
+
 observe({
-  updatePickerInput(session, "tab_resi_states",
-                    choices = setNames(sort(unique(df_residuals_ols$SG_UF)), 
-                                       sort(unique(df_residuals_ols$NM_UF))),
-                    selected = head(sort(unique(df_residuals_ols$SG_UF)), 10))
+  updatePickerInput(session, "uf_apl", 
+                    choices = sort(unique(apl_geo$NM_UF[!is.na(apl_geo$NM_UF)])),
+                    selected = "Ceará")
 })
 
-# Reactive filtered data
-# Update the filtered data reactive to handle multiple selections:
-rkt_residuals_filtered <- reactive({
-  req(input$tab_resi_year, input$tab_resi_dependency, input$tab_resi_sector)
-  
-  df_filtered <- df_residuals_ols %>%
-    filter(ANO == input$tab_resi_year,
-           TP_DEPENDENCIA %in% input$tab_resi_dependency,
-           economic_sector %in% input$tab_resi_sector)
-  
-  if (!is.null(input$tab_resi_states) && length(input$tab_resi_states) > 0) {
-    df_filtered <- df_filtered %>% filter(SG_UF %in% input$tab_resi_states)
-  }
-  
-  return(df_filtered)
-})
-
-
-# Plot output
-output$tab_resiPlot <- renderPlotly({
-  df_plot <- rkt_residuals_filtered()
-  req(nrow(df_plot) > 0)
-  
-  # Calculate fixed axis ranges
-  x_range <- range(df_residuals_ols$residual, na.rm = TRUE)
-  
-  if (input$tab_resi_yaxis == "pib_per_capita") {
-    y_var <- log(df_plot$pib_per_capita)
-    y_title <- "Log PIB per Capita"
-    y_range <- range(log(df_residuals_ols$pib_per_capita), na.rm = TRUE)
+# Update Região Intermediária based on UF selection
+observeEvent(input$uf_apl, {
+  if (is.null(input$uf_apl) || length(input$uf_apl) == 0) {
+    updatePickerInput(session, "rgintm_apl", choices = character(0), selected = character(0))
+    updatePickerInput(session, "rgimed_apl", choices = character(0), selected = character(0))
+    updatePickerInput(session, "mun_apl", choices = character(0), selected = character(0))
   } else {
-    y_var <- df_plot$sector_alignment
-    y_title <- "Alinhamento Setorial (Ratio)"
-    y_range <- range(df_residuals_ols$sector_alignment, na.rm = TRUE)
+    uf_filtered <- apl_geo[apl_geo$NM_UF %in% input$uf_apl & !is.na(apl_geo$NM_RGIINTM), ]
+    rgi_choices <- sort(unique(uf_filtered$NM_RGIINTM))
+    updatePickerInput(session, "rgintm_apl", choices = rgi_choices, selected = rgi_choices)
+  }
+}, ignoreInit = TRUE)
+
+# Update Região Imediata based on Região Intermediária
+observeEvent(input$rgintm_apl, {
+  if (is.null(input$rgintm_apl) || length(input$rgintm_apl) == 0) {
+    updatePickerInput(session, "rgimed_apl", choices = character(0), selected = character(0))
+    updatePickerInput(session, "mun_apl", choices = character(0), selected = character(0))
+  } else {
+    rgi_filtered <- apl_geo[apl_geo$NM_RGIINTM %in% input$rgintm_apl & !is.na(apl_geo$NM_RGIMED), ]
+    rgimed_choices <- sort(unique(rgi_filtered$NM_RGIMED))
+    updatePickerInput(session, "rgimed_apl", choices = rgimed_choices, selected = rgimed_choices)
+  }
+}, ignoreInit = TRUE)
+
+# Update municipalities based on Região Imediata
+observeEvent(input$rgimed_apl, {
+  if (is.null(input$rgimed_apl) || length(input$rgimed_apl) == 0) {
+    updatePickerInput(session, "mun_apl", choices = character(0), selected = character(0))
+  } else {
+    rgimed_filtered <- apl_geo[apl_geo$NM_RGIMED %in% input$rgimed_apl & !is.na(apl_geo$NM_MUN), ]
+    mun_choices <- sort(unique(rgimed_filtered$NM_MUN))
+    updatePickerInput(session, "mun_apl", choices = mun_choices, selected = character(0))
+  }
+}, ignoreInit = TRUE)
+
+# Filtered APL data reactive
+rkt_filtered_apl_data <- reactive({
+  data <- apl_geo
+  
+  # Apply geographic filters
+  if (!is.null(input$uf_apl) && length(input$uf_apl) > 0) {
+    data <- data[data$NM_UF %in% input$uf_apl, ]
+  }
+  if (!is.null(input$rgintm_apl) && length(input$rgintm_apl) > 0) {
+    data <- data[data$NM_RGIINTM %in% input$rgintm_apl, ]
+  }
+  if (!is.null(input$rgimed_apl) && length(input$rgimed_apl) > 0) {
+    data <- data[data$NM_RGIMED %in% input$rgimed_apl, ]
+  }
+  if (!is.null(input$mun_apl) && length(input$mun_apl) > 0) {
+    data <- data[data$NM_MUN %in% input$mun_apl, ]
   }
   
-  # Build title outside layout
-  dep_labels <- paste(input$tab_resi_dependency, collapse = ", ")
-  sector_labels <- c("agriculture" = "Agricultura", "industry" = "Indústria", 
-                     "services" = "Serviços", "administration" = "Administração")
-  selected_sectors <- sector_labels[input$tab_resi_sector]
-  sector_text <- paste(selected_sectors, collapse = ", ")
+  # Apply specialization filters
+  data <- data[data$LQ >= input$min_lq_apl & data$E_mun_cbo >= input$min_emp_apl, ]
   
-  plot_title <- paste0("Predição de Matrículas EPT por Dependência e Setor por UF - ",
-                       dep_labels, " / ", sector_text, " (", input$tab_resi_year, ")")
-  
-  # Map dependencies to shapes and sectors to borders
-  shape_map <- c("Federal" = "circle", "Estadual" = "square", 
-                 "Municipal" = "triangle-up", "Privada" = "diamond")
-  border_map <- c("agriculture" = "red", "industry" = "blue", 
-                  "services" = "green", "administration" = "pink")
-  
-  df_plot$border_color <- border_map[df_plot$economic_sector]
-  
-  p <- plot_ly(df_plot, 
-               x = ~residual, 
-               y = y_var,
-               size = ~QT_MAT_CURSO_TEC,
-               color = ~NM_UF,
-               symbol = ~TP_DEPENDENCIA,
-               symbols = shape_map,
-               type = "scatter",
-               mode = "markers",
-               sizes = c(40, 160),
-               marker = list(opacity = 1,
-                             line = list(width = 2, 
-                                         color = ~border_color))) %>%
-    layout(
-      xaxis = list(title = "Residual (Desempenho vs Predição)", 
-                   range = x_range, zeroline = TRUE),
-      yaxis = list(title = y_title, range = y_range),
-      title = plot_title
-    )
-  
-  return(p)
+  return(data)
 })
 
-# Table output with Brazilian formatting
-output$tab_resiTable <- renderDT({
-  df_table <- rkt_residuals_filtered()
-  req(nrow(df_table) > 0)
-  
-  df_display <- df_table %>%
-    select(Estado = NM_UF, Residual = residual, `PIB per Capita` = pib_per_capita,
-           `Alinhamento Setorial` = sector_alignment, `Matrículas` = QT_MAT_CURSO_TEC) %>%
-    mutate(
-      Residual = format(round(Residual, 3), decimal.mark = ","),
-      `PIB per Capita` = format(round(`PIB per Capita`, 1), big.mark = ".", decimal.mark = ","),
-      `Alinhamento Setorial` = format(round(`Alinhamento Setorial`, 3), decimal.mark = ","),
-      `Matrículas` = format(`Matrículas`, big.mark = ".", decimal.mark = ",")
-    )
-  
-  datatable(df_display, options = list(pageLength = 15), rownames = FALSE)
+# Determine current aggregation level
+rkt_apl_aggregation_level <- reactive({
+  if (!is.null(input$mun_apl) && length(input$mun_apl) > 0) {
+    return("municipal")
+  } else if (!is.null(input$rgimed_apl) && length(input$rgimed_apl) > 0) {
+    return("rgimed") 
+  } else if (!is.null(input$rgintm_apl) && length(input$rgintm_apl) > 0) {
+    return("rgintm")
+  } else if (!is.null(input$uf_apl) && length(input$uf_apl) > 0) {
+    return("uf")
+  } else {
+    return("brasil")
+  }
 })
 
-# Summary output
-output$tab_resi_summary <- renderUI({
-  df_summary <- rkt_residuals_filtered()
-  n_states <- nrow(df_summary)
-  n_positive <- sum(df_summary$residual > 0, na.rm = TRUE)
+# Dynamic aggregated data based on level
+# Dynamic aggregated data with improved occupation display
+rkt_apl_dynamic_data <- reactive({
+  level <- rkt_apl_aggregation_level()
+  data <- rkt_filtered_apl_data()
   
-  tagList(
-    tags$p(paste("Ano:", input$tab_resi_year)),
-    tags$p(paste("Estados selecionados:", n_states)),
-    tags$p(paste("Desempenho superior:", n_positive), style = "color: green;")
+  req(nrow(data) > 0)
+  
+  switch(level,
+         "municipal" = {
+           # Individual APLs - keep current format
+           data %>% select(SG_UF, NM_RGIINTM, NM_RGIMED, NM_MUN, cbo_familia, LQ, E_mun_cbo) %>%
+             arrange(desc(LQ))
+         },
+         "rgimed" = {
+           # Aggregate by Região Imediata with specialization distribution
+           data %>% 
+             group_by(SG_UF, NM_RGIINTM, NM_RGIMED) %>%
+             summarise(
+               n_apls = n(),
+               n_municipios = n_distinct(CO_MUN6),
+               avg_lq = round(mean(LQ, na.rm = TRUE), 2),
+               total_emp = sum(E_mun_cbo, na.rm = TRUE),
+               especializacao = paste0(
+                 sum(LQ >= 5), " muito alta, ", 
+                 sum(LQ >= 2.5 & LQ < 5), " alta, ", 
+                 sum(LQ >= 1.25 & LQ < 2.5), " moderada"
+               ),
+               .groups = 'drop'
+             ) %>%
+             arrange(desc(avg_lq))
+         },
+         "rgintm" = {
+           # Aggregate by Região Intermediária with specialization distribution  
+           data %>%
+             group_by(SG_UF, NM_RGIINTM) %>%
+             summarise(
+               n_apls = n(),
+               n_municipios = n_distinct(CO_MUN6),
+               avg_lq = round(mean(LQ, na.rm = TRUE), 2), 
+               total_emp = sum(E_mun_cbo, na.rm = TRUE),
+               especializacao = paste0(
+                 sum(LQ >= 5), " muito alta, ", 
+                 sum(LQ >= 2.5 & LQ < 5), " alta, ", 
+                 sum(LQ >= 1.25 & LQ < 2.5), " moderada"
+               ),
+               .groups = 'drop'
+             ) %>%
+             arrange(desc(avg_lq))
+         },
+         "uf" = {
+           # Aggregate by UF with specialization distribution
+           data %>%
+             group_by(SG_UF) %>%
+             summarise(
+               n_apls = n(),
+               n_municipios = n_distinct(CO_MUN6),
+               avg_lq = round(mean(LQ, na.rm = TRUE), 2),
+               total_emp = sum(E_mun_cbo, na.rm = TRUE), 
+               especializacao = paste0(
+                 sum(LQ >= 5), " muito alta, ", 
+                 sum(LQ >= 2.5 & LQ < 5), " alta, ", 
+                 sum(LQ >= 1.25 & LQ < 2.5), " moderada"
+               ),
+               .groups = 'drop'
+             ) %>%
+             arrange(desc(avg_lq))
+         }
   )
 })
 
-# Server logic for EPT e Informalidade tab
+# Map data reactive
+rkt_apl_map_data <- reactive({
+  req(nrow(rkt_filtered_apl_data()) > 0)
+  
+  # Aggregate APL data by municipality for mapping
+  # Aggregate APL data by municipality for mapping - convert CO_MUN to character
+  apl_summary <- rkt_filtered_apl_data() %>%
+    group_by(CO_MUN6, CO_MUN, NM_MUN, SG_UF) %>%
+    summarise(
+      n_apls = n(),
+      avg_lq = mean(LQ, na.rm = TRUE),
+      total_emp = sum(E_mun_cbo, na.rm = TRUE),
+      .groups = 'drop'
+    ) %>%
+    mutate(CO_MUN = as.character(CO_MUN))  # Convert to match sf_regioes
+  
+  # Filter sf_regioes to selected geography
+  map_data <- sf_regioes
+  if (!is.null(input$uf_apl) && length(input$uf_apl) > 0) {
+    map_data <- map_data %>% filter(NM_UF %in% input$uf_apl)
+  }
+  
+  # Join with APL summary
+  # Join with APL summary - now use CO_MUN
+  map_data <- map_data %>%
+    left_join(apl_summary, by = c("CO_MUN", "NM_MUN"))
+  # Replace NA with 0 for municipalities without APLs
+  map_data$n_apls[is.na(map_data$n_apls)] <- 0
+  
+  return(map_data)
+})
 
+# Summary reactive
+output$apl_summary <- renderUI({
+  level <- rkt_apl_aggregation_level()
+  data <- rkt_filtered_apl_data()
+  
+  level_names <- c(
+    "municipal" = "Municipal",
+    "rgimed" = "Região Imediata", 
+    "rgintm" = "Região Intermediária",
+    "uf" = "UF",
+    "brasil" = "Brasil"
+  )
+  
+  HTML(paste0(
+    "<strong>Nível de Agregação:</strong> ", level_names[level], "<br>",
+    "<strong>APLs encontrados:</strong> ", nrow(data), "<br>",
+    "<strong>Municípios:</strong> ", length(unique(data$CO_MUN6)), "<br>",
+    "<strong>Ocupações (4-dig):</strong> ", length(unique(data$cbo_4dig))
+  ))
+})
+
+# Course data based on current aggregation level
+rkt_course_data <- reactive({
+  req(input$apl_analysis_mode == "apl_course_match")
+  req(input$uf_apl)  # Don't process until UF is selected
+  
+  withProgress(message = 'Loading course data...', value = 0, {
+    incProgress(0.3, detail = "Determining aggregation level")
+    level <- rkt_apl_aggregation_level()
+    
+    incProgress(0.3, detail = "Loading appropriate dataset")
+    # Use appropriate course dataset based on aggregation level
+    if (level %in% c("municipal", "rgimed", "rgintm")) {
+      # For sub-state levels, aggregate from municipal course data
+      course_data <- apl_matri_MUN_geo
+    } else {
+      # For UF level, use UF course data
+      course_data <- apl_matri_UF
+    }
+    
+    incProgress(0.3, detail = "Applying geographic filters")
+    # Convert full UF names to codes for filtering (FIX THE MISMATCH)
+    if (!is.null(input$uf_apl) && length(input$uf_apl) > 0) {
+      uf_lookup <- unique(apl_geo[, c("NM_UF", "SG_UF")])
+      selected_codes <- uf_lookup[uf_lookup$NM_UF %in% input$uf_apl, "SG_UF"]
+      course_data <- course_data[course_data$SG_UF %in% selected_codes, ]
+    }
+    
+    incProgress(0.1, detail = "Complete")
+    return(course_data)
+  })
+})
+
+# Map output
+output$apl_map <- renderLeaflet({
+  map_data <- rkt_apl_map_data()
+  
+  # Create color palette
+  pal <- colorNumeric(
+    palette = "viridis",
+    domain = map_data$n_apls,
+    na.color = "transparent"
+  )
+  
+  leaflet(map_data) %>%
+    addTiles() %>%
+    addPolygons(
+      fillColor = ~pal(n_apls),
+      weight = 1,
+      opacity = 1,
+      color = "white",
+      dashArray = "3",
+      fillOpacity = 0.7,
+      highlight = highlightOptions(
+        weight = 2,
+        color = "#666",
+        dashArray = "",
+        fillOpacity = 0.7,
+        bringToFront = TRUE
+      ),
+      label = ~paste0(NM_MUN, ": ", n_apls, " APLs"),
+      popup = ~paste0(
+        "<strong>", NM_MUN, "</strong><br/>",
+        "UF: ", NM_UF, "<br/>",
+        "APLs: ", n_apls, "<br/>",
+        "QL Médio: ", round(avg_lq, 2), "<br/>",
+        "Emprego Total: ", formatC(total_emp, format="d", big.mark=".")
+      )
+    ) %>%
+    addLegend(
+      pal = pal,
+      values = ~n_apls,
+      opacity = 0.7,
+      title = "Número de APLs",
+      position = "bottomright"
+    )
+})
+
+
+
+# Table output
+# Enhanced table with updated column names
+output$apl_table <- renderDT({
+  if (input$apl_analysis_mode == "apl_only") {
+    # APL Mode
+    level <- rkt_apl_aggregation_level()
+    table_data <- rkt_apl_dynamic_data()
+    req(nrow(table_data) > 0)
+    
+    # Dynamic column names and formatting based on aggregation level
+    if (level == "municipal") {
+      table_data$LQ <- round(table_data$LQ, 2)
+      table_data$E_mun_cbo <- formatC(table_data$E_mun_cbo, format = "d", big.mark = ".")
+      colnames(table_data) <- c("UF", "Região Intermediária", "Região Imediata", "Município", "Ocupação (Família CBO)", "QL", "Emprego")
+    } else {
+      table_data$total_emp <- formatC(table_data$total_emp, format = "d", big.mark = ".")
+      if (level == "rgimed") {
+        colnames(table_data) <- c("UF", "Região Intermediária", "Região Imediata", "APLs", "Municípios", "QL Médio", "Emprego Total", "Especialização")
+      } else if (level == "rgintm") {
+        colnames(table_data) <- c("UF", "Região Intermediária", "APLs", "Municípios", "QL Médio", "Emprego Total", "Especialização")
+      } else if (level == "uf") {
+        colnames(table_data) <- c("UF", "APLs", "Municípios", "QL Médio", "Emprego Total", "Especialização")
+      }
+    }
+    level_for_export <- level  # Store for export filename
+    
+  } else {
+    # Course Matching Mode - show APL vs Course alignment
+    course_data <- rkt_course_data()
+    apl_data <- rkt_filtered_apl_data()
+    
+    req(nrow(course_data) > 0)
+    req(nrow(apl_data) > 0)
+    
+    # Create matching analysis
+    matching_data <- merge(
+      apl_data[, .(cbo_4dig, cbo_familia, LQ, E_mun_cbo)],
+      course_data[, .(cbo_4dig, nome_curso_clean, QT_MAT_CURSO_TEC_TOT)],
+      by = "cbo_4dig",
+      all.x = TRUE  # Keep all APLs, show which have courses
+    )
+    
+    # Create match indicator
+    matching_data$tem_curso <- ifelse(is.na(matching_data$QT_MAT_CURSO_TEC_TOT), "Sem curso", "Com curso")
+    matching_data$QT_MAT_CURSO_TEC_TOT[is.na(matching_data$QT_MAT_CURSO_TEC_TOT)] <- 0
+    
+    table_data <- matching_data %>%
+      select(cbo_familia, LQ, E_mun_cbo, nome_curso_clean, QT_MAT_CURSO_TEC_TOT, tem_curso) %>%
+      arrange(desc(QT_MAT_CURSO_TEC_TOT)) %>%
+      head(30)
+    
+    colnames(table_data) <- c("Ocupação APL", "QL", "Emprego APL", "Curso Técnico", "Matrículas", "Status Match")
+    level_for_export <- "matching"
+  }
+  
+  datatable(
+    table_data,
+    rownames = FALSE,
+    extensions = 'Buttons',
+    options = list(
+      pageLength = 15,
+      scrollX = TRUE,
+      dom = 'Bfrtip',
+      buttons = list(
+        list(extend = "copy", text = "Copiar"),
+        list(extend = "csv", filename = paste0("APL_", toupper(level_for_export)), text = "CSV"),
+        list(extend = "excel", filename = paste0("APL_", toupper(level_for_export)), text = "Excel")
+      )
+    ),
+    class = "stripe nowrap display"
+  )
+})
+
+
+
+################################################################################################################
+## TAB 12   EPT INFORMALIDADE 
+################################################################################################################
 
 
 # Populate initial CBO Grande Grupo choices
@@ -6082,169 +6045,807 @@ output$informality_summary <- renderText({
          "Taxa Formalidade Média: ", round(avg_formality, 1), "%")
 })
 
-
-# --- Geographic Hierarchy Updates for Censo Tab ---
-##############################################################################################################
-## CENSO TAB ####CENSO TAB ############################ CENSO TAB## CENSO TAB ####CENSO TAB ############################ CENSO TAB
-## CENSO TAB ####CENSO TAB ############################ CENSO TAB## CENSO TAB ####CENSO TAB ############################ CENSO TAB
-## CENSO TAB ####CENSO TAB ############################ CENSO TAB## CENSO TAB ####CENSO TAB ############################ CENSO TAB
-# Update Intermediate Region choices based on UF selection
-# --- UF to Municipality cascade (populate all municipalities) ---
-observeEvent(input$censo_uf, {
-  if (is.null(input$censo_uf) || length(input$censo_uf) == 0) {
-    updatePickerInput(session, "censo_municipio", choices = character(0), selected = character(0))
-  } else {
-    choices <- unique(dft_informality_geo_codes[NM_UF %in% input$censo_uf, NM_MUN])
-    choices <- sort(choices[!is.na(choices)])
-    updatePickerInput(session, "censo_municipio", choices = choices, selected = choices)  # AUTO-SELECT ALL
-  }
-})
-
-# --- SINGLE Title Creation (simplified) ---
-create_censo_title <- reactive({
-  if (is.null(input$censo_uf) || length(input$censo_uf) == 0) {
-    return("Nenhuma seleção")
-  }
-  
-  uf_text <- paste(input$censo_uf, collapse = ", ")
-  
-  mun_count <- if (!is.null(input$censo_municipio) && length(input$censo_municipio) > 0) {
-    length(input$censo_municipio)
-  } else {
-    length(unique(dft_informality_geo_codes[NM_UF %in% input$censo_uf, NM_MUN]))
-  }
-  
-  return(paste(uf_text, "-", mun_count, "municípios"))
-})
-
-# --- Main Reactive (unchanged) ---
-rkt_censo_filtered <- reactive({
-  req(input$censo_year)
-  req(input$censo_uf)
-  req(length(input$censo_uf) > 0)
-  req(input$censo_dependencia)
-  req(length(input$censo_dependencia) > 0)
-  
-  data <- df_censo_combined %>%
-    filter(ANO == input$censo_year) %>%
-    filter(NM_UF %in% input$censo_uf) %>%
-    filter(TP_DEPENDENCIA %in% input$censo_dependencia)
-  
-  if (!is.null(input$censo_municipio) && length(input$censo_municipio) > 0) {
-    data <- data %>% filter(NM_MUN %in% input$censo_municipio)
-  }
-  
-  return(data)
-})
-
-# --- Table 1a with responsive total row and user messaging ---
-# --- Table 1a - Fixed with unique column names ---
-output$censo_table_eixo <- renderDT({
-  # Simple validation
-  if (is.null(input$censo_uf) || length(input$censo_uf) == 0 ||
-      is.null(input$censo_dependencia) || length(input$censo_dependencia) == 0) {
-    empty_data <- data.frame(Mensagem = "Selecione UF e Dependência Administrativa")
-    return(datatable(empty_data, options = list(dom = 't'), rownames = FALSE))
-  }
-  
-  # Get base filtered data
-  data <- df_censo_combined %>%
-    filter(ANO == input$censo_year) %>%
-    filter(NM_UF %in% input$censo_uf) %>%
-    filter(TP_DEPENDENCIA %in% input$censo_dependencia)
-  
-  # Apply municipality filter if selected
-  if (!is.null(input$censo_municipio) && length(input$censo_municipio) > 0) {
-    data <- data %>% filter(NM_MUN %in% input$censo_municipio)
-  }
-  
-  # Check if we have data
-  if (nrow(data) == 0) {
-    empty_data <- data.frame(Mensagem = "Nenhum dado encontrado para a seleção atual")
-    return(datatable(empty_data, options = list(dom = 't'), rownames = FALSE))
-  }
-  
-  # Create title
-  uf_text <- paste(input$censo_uf, collapse = ", ")
-  mun_count <- if (!is.null(input$censo_municipio) && length(input$censo_municipio) > 0) {
-    length(input$censo_municipio)
-  } else {
-    length(unique(data$NM_MUN))
-  }
-  title_content <- paste(uf_text, "-", mun_count, "municípios")
-  
-  # Aggregate by eixo with UNIQUE column names
-  eixo_data <- data %>%
-    group_by(Eixo = NO_AREA_CURSO_PROFISSIONAL) %>%
-    summarise(
-      Cursos = sum(QT_CURSO_TEC, na.rm = TRUE),
-      Matriculas_Total = sum(QT_MAT_CURSO_TEC, na.rm = TRUE),
-      Integrado = sum(QT_MAT_CURSO_TEC_CT, na.rm = TRUE),
-      Normal_Magisterio = sum(QT_MAT_CURSO_TEC_NM, na.rm = TRUE),
-      Concomitante = sum(QT_MAT_CURSO_TEC_CONC, na.rm = TRUE),
-      Subsequente = sum(QT_MAT_TEC_SUBS, na.rm = TRUE),
-      EJA_Nivel_Medio = sum(QT_MAT_TEC_EJA, na.rm = TRUE),
-      .groups = "drop"
-    ) %>%
-    arrange(desc(Matriculas_Total))
-  
-  # Add total row with same column structure
-  total_row <- data.frame(
-    Eixo = paste("TOTAL -", title_content),
-    Cursos = sum(eixo_data$Cursos),
-    Matriculas_Total = sum(eixo_data$Matriculas_Total),
-    Integrado = sum(eixo_data$Integrado),
-    Normal_Magisterio = sum(eixo_data$Normal_Magisterio),
-    Concomitante = sum(eixo_data$Concomitante),
-    Subsequente = sum(eixo_data$Subsequente),
-    EJA_Nivel_Medio = sum(eixo_data$EJA_Nivel_Medio)
+#####################################################################################
+### TAB 13  CBO CNCT CBO  CNCT CBO CNCT  CBO CNCT CBO  CNCT CBO CNCT  CBO CNCT CBO  CNC
+#####################################################################################
+# Initialize UF choices
+observe({
+  all_ufs <- sort(unique(df_mat_eixo_wide$NM_UF))
+  updateSelectizeInput(
+    session, "uf_selectCOCN",
+    choices = c("Brasil", setdiff(all_ufs, "Brasil")),
+    selected = "Brasil"
   )
-  
-  final_data <- bind_rows(total_row, eixo_data)
-  
-  # Rename columns for display (after data creation to avoid conflicts)
-  names(final_data) <- c("Eixo", "Cursos", "Matrículas Total", "Integrado", 
-                         "Normal/Magistério", "Concomitante", "Subsequente", "EJA Nível Médio")
-  
-  datatable(final_data, rownames = FALSE, extensions = 'Buttons',
-            options = list(pageLength = 15, scrollX = TRUE, dom = 'Bfrtip',
-                           buttons = c('copy', 'csv', 'excel'),
-                           selection = 'multiple'))
 })
 
-output$censo_table_curso <- renderDT({
-  data <- rkt_censo_filtered()
-  selected_rows <- input$censo_table_eixo_rows_selected
+
+
+#### OFERTA → DEMANDA ####
+
+# Table 1a - Matrículas por Eixo
+RKT_agg_df <- reactive({
+  req(input$match_direction == "Oferta \u2192 Demanda")
+  req(input$uf_select)
   
-  req(nrow(data) > 0)
-  req(!is.null(selected_rows) && length(selected_rows) > 0)  # Require selection
-  
-  # Get eixo data to find selected eixos
-  eixo_list <- data %>%
-    group_by(Eixo = NO_AREA_CURSO_PROFISSIONAL) %>%
-    summarise(`Matrículas Total` = sum(QT_MAT_CURSO_TEC, na.rm = TRUE), .groups = "drop") %>%
-    arrange(desc(`Matrículas Total`))
-  
-  # Adjust for total row (subtract 1 from selection indices)
-  selected_eixos <- eixo_list$Eixo[selected_rows - 1]  # -1 because total row is first
-  selected_eixos <- selected_eixos[!is.na(selected_eixos)]
-  
-  if (length(selected_eixos) == 0) return(NULL)
-  
-  curso_data <- data %>%
-    filter(NO_AREA_CURSO_PROFISSIONAL %in% selected_eixos) %>%
-    group_by(Eixo = NO_AREA_CURSO_PROFISSIONAL, Curso = NO_CURSO_EDUC_PROFISSIONAL) %>%
-    summarise(`Matrículas Total` = sum(QT_MAT_CURSO_TEC, na.rm = TRUE), .groups = "drop") %>%
-    arrange(Eixo, desc(`Matrículas Total`))
-  
-  datatable(curso_data, rownames = FALSE, extensions = 'Buttons',
-            caption = htmltools::tags$caption(
-              style = "caption-side: top; text-align: left; color: #1f5673; font-size: 16px; font-weight: bold; margin-bottom: 10px;",
-              paste("Cursos para Eixos Selecionados:", paste(selected_eixos, collapse = ", "))
-            ),
-            options = list(pageLength = 15, scrollX = TRUE, dom = 'Bfrtip',
-                           buttons = c('copy', 'csv', 'excel')))
+  df_mat_eixo_wide %>%
+    filter(NM_UF == input$uf_select) %>%
+    select(
+      NM_UF,
+      `Eixo Tecnológico`,
+      `Matrículas 2023`,
+      `Matrículas 2024`
+    ) %>%
+    arrange(desc(`Matrículas 2024`))
 })
+
+RKT_selected_eixo <- reactive({
+  req(input$agg_table_rows_selected)
+  df <- RKT_agg_df()
+  df$`Eixo Tecnológico`[input$agg_table_rows_selected]
+})
+
+output$agg_table <- renderDT({
+  datatable(
+    RKT_agg_df(),
+    selection = "single",
+    rownames  = FALSE,
+    class     = "compact stripe",
+    options   = list(
+      pageLength = nrow(RKT_agg_df()),
+      autoWidth  = TRUE,
+      language   = list(
+        url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json"
+      )
+    )
+  ) %>%
+    formatCurrency(
+      c("Matrículas 2023","Matrículas 2024"),
+      currency = "", interval = 3, mark = ".", dec.mark = ","
+    ) %>%
+    formatStyle(
+      c("Matrículas 2023","Matrículas 2024"),
+      `text-align` = "right"
+    )
+})
+
+# Reset selections when eixo changes
+observeEvent(input$agg_table_rows_selected, {
+  DT::dataTableProxy("curso_table") %>% 
+    DT::selectRows(NULL)
+}, ignoreNULL = FALSE)
+
+# Table 1b - Matrículas por Área
+RKT_area_df <- reactive({
+  req(input$match_direction == "Oferta → Demanda", input$agg_table_rows_selected)
+  sel_eixo <- RKT_selected_eixo()
+  df_exarcu %>%
+    filter(`Eixo Tecnológico` == sel_eixo) %>%
+    distinct(`Área Tecnológica`) %>%
+    left_join(
+      df_mat_area_wide %>% filter(NM_UF == input$uf_select),
+      by = "Área Tecnológica"
+    ) %>%
+    select(
+      `Área Tecnológica`,
+      `Matrículas 2023`,
+      `Matrículas 2024`
+    ) %>%
+    arrange(desc(`Matrículas 2024`))
+})
+
+output$area_table <- renderDT({
+  datatable(
+    RKT_area_df(),
+    selection = "single",
+    rownames  = FALSE,
+    class     = "compact stripe",
+    options   = list(
+      pageLength = nrow(RKT_area_df()),
+      autoWidth  = TRUE,
+      language   = list(
+        url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json"
+      )
+    )
+  ) %>%
+    formatCurrency(
+      c("Matrículas 2023","Matrículas 2024"),
+      currency = "", interval = 3, mark = ".", dec.mark = ","
+    ) %>%
+    formatStyle(
+      c("Matrículas 2023","Matrículas 2024"),
+      `text-align` = "right"
+    )
+})
+
+observeEvent(input$area_table_rows_selected, {
+  DT::dataTableProxy("curso_table") %>% 
+    DT::selectRows(NULL)
+}, ignoreNULL = FALSE)
+
+# Table 1c - Matrículas por Curso
+RKT_selected_area <- reactive({
+  req(input$area_table_rows_selected)
+  RKT_area_df()$`Área Tecnológica`[input$area_table_rows_selected]
+})
+
+RKT_curso_df <- reactive({
+  req(input$area_table_rows_selected)
+  uf <- input$uf_select
+  eixo <- RKT_selected_eixo()
+  area <- RKT_selected_area()
+  df_exarcu %>%
+    filter(
+      `Eixo Tecnológico` == eixo,
+      `Área Tecnológica` == area
+    ) %>%
+    distinct(IDX_EIXCUR, `Denominação do Curso`) %>%
+    left_join(
+      df_mat_curso_wide %>% filter(NM_UF == uf),
+      by = c("IDX_EIXCUR", "Denominação do Curso")
+    ) %>%
+    select(
+      IDX_EIXCUR,
+      `Denominação do Curso`,
+      `Matrículas 2023`,
+      `Matrículas 2024`
+    ) %>%
+    arrange(desc(`Matrículas 2024`))
+})
+
+output$curso_table <- renderDT({
+  datatable(
+    RKT_curso_df(),
+    selection = "single",
+    rownames  = FALSE,
+    class     = "compact stripe",
+    options   = list(
+      pageLength = nrow(RKT_curso_df()),
+      autoWidth  = TRUE,
+      language   = list(url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json")
+    )
+  ) %>%
+    formatCurrency(
+      c("Matrículas 2023","Matrículas 2024"),
+      currency = "", interval = 3, mark = ".", dec.mark = ","
+    ) %>%
+    formatStyle(
+      c("Matrículas 2023","Matrículas 2024"),
+      `text-align` = "right"
+    )
+})
+
+RKT_selected_course <- reactive({
+  req(input$curso_table_rows_selected)
+  df <- RKT_curso_df()
+  df$IDX_EIXCUR[input$curso_table_rows_selected]
+})
+
+# Auto-update top_n based on available matches within threshold
+observeEvent(list(RKT_selected_course(), input$score_thresh), {
+  req(input$match_direction == "Oferta \u2192 Demanda")
+  req(input$curso_table_rows_selected)
+  req(input$score_thresh)
+  
+  selected_course_id <- RKT_selected_course()
+  
+  # Count matches above the current threshold
+  n_matches <- cnct_qbq_matches2 %>%
+    filter(
+      IDX_EIXCUR == selected_course_id,
+      final_score >= input$score_thresh
+    ) %>%
+    nrow()
+  
+  # Set top_n to the number of available matches
+  new_top_n <- min(n_matches, 50)
+  new_max <- max(n_matches, 50)
+  
+  updateNumericInput(
+    session,
+    "top_n",
+    value = new_top_n,
+    min = 1,
+    max = new_max
+  )
+})
+
+# Table 2a - Course to Occupation matches
+RKT_course_occ_df <- reactive({
+  req(input$match_direction == "Oferta \u2192 Demanda")
+  req(input$curso_table_rows_selected)
+  req(input$score_thresh, input$top_n)
+  
+  selected_course_id <- RKT_selected_course()
+  
+  # Filter by score threshold and apply top_n limit
+  matches_final <- cnct_qbq_matches2 %>%
+    filter(
+      IDX_EIXCUR == selected_course_id,
+      final_score >= input$score_thresh
+    ) %>%
+    arrange(desc(final_score)) %>%
+    slice_head(n = input$top_n)
+  
+  if (nrow(matches_final) == 0) {
+    return(data.frame(
+      CodCBO = character(0),
+      Ocupação = character(0),
+      `Vínculos 2023` = integer(0),
+      `Vínculos 2024` = integer(0),
+      final_score = numeric(0),
+      semantic = numeric(0),
+      tfidf = numeric(0),
+      check.names = FALSE
+    ))
+  }
+  
+  # Bring in RAIS info
+  rais_filtered <- df_raisCodCBO_wide %>%
+    filter(NM_UF == input$uf_select) %>%
+    select(CodCBO, `Ocupação`, `Vínculos 2023`, `Vínculos 2024`)
+  
+  # Merge and return
+  result <- left_join(matches_final, rais_filtered, by = "CodCBO") %>%
+    select(CodCBO, `Ocupação`, `Vínculos 2023`, `Vínculos 2024`, final_score, semantic, tfidf) %>%
+    arrange(desc(final_score))
+  
+  return(result)
+})
+
+output$course_occ_table <- renderDT({
+  df <- RKT_course_occ_df()
+  
+  validate(need(nrow(df) > 0, "Nenhuma correspondência encontrada."))
+  
+  # Format the score columns for better display
+  df_display <- df %>%
+    mutate(
+      final_score = round(final_score, 3),
+      semantic = round(semantic, 3),
+      tfidf = round(tfidf, 3)
+    )
+  
+  datatable(
+    df_display,
+    rownames = FALSE,
+    selection = "single",
+    class = "compact stripe",
+    options = list(
+      pageLength = nrow(df_display),
+      autoWidth = TRUE,
+      language = list(
+        url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json"
+      )
+    )
+  ) %>%
+    formatCurrency(
+      c("Vínculos 2023", "Vínculos 2024"),
+      currency = "", interval = 3, mark = ".", dec.mark = ","
+    ) %>%
+    formatStyle(
+      c("Vínculos 2023", "Vínculos 2024"),
+      `text-align` = "right"
+    ) %>%
+    formatStyle(
+      c("final_score", "semantic", "tfidf"),
+      `text-align` = "center"
+    )
+})
+
+#### DEMANDA → OFERTA ####
+
+# Table 1a - Vínculos por Grande Grupo (1-digit)
+RKT_cbo1_df <- reactive({
+  req(input$match_direction == "Demanda \u2192 Oferta", input$uf_select)
+  df <- df_rais1dig_wide %>%
+    dplyr::filter(NM_UF == input$uf_select) %>%
+    dplyr::select(
+      cbo_1dig,
+      `Grande Grupo` = cbo_gragru,
+      `Vínculos 2023`,
+      `Vínculos 2024`
+    )
+  
+  # Ensure numeric columns
+  vcols <- c("Vínculos 2023", "Vínculos 2024")
+  df[vcols] <- lapply(df[vcols], function(x) suppressWarnings(as.numeric(x)))
+  
+  df %>% dplyr::arrange(dplyr::desc(`Vínculos 2024`))
+})
+
+output$cbo1_table <- DT::renderDT({
+  DT::datatable(
+    RKT_cbo1_df(),
+    selection = "single",
+    rownames  = FALSE,
+    class     = "compact stripe",
+    options   = list(
+      pageLength = 10,
+      autoWidth  = TRUE,
+      columnDefs = list(list(visible = FALSE, targets = 0))
+    )
+  ) %>%
+    DT::formatCurrency(
+      columns  = c("Vínculos 2023","Vínculos 2024"),
+      currency = "",
+      digits   = 0,
+      interval = 3,
+      mark     = ".",
+      dec.mark = ","
+    ) %>%
+    DT::formatStyle(
+      c("Vínculos 2023","Vínculos 2024"),
+      `text-align` = "right"
+    )
+})
+
+# Clear lower level selections when Grande Grupo changes
+observeEvent(input$cbo1_table_rows_selected, {
+  DT::dataTableProxy("cbo4_table")  %>% DT::selectRows(NULL)
+  DT::dataTableProxy("cbo6b_table") %>% DT::selectRows(NULL)
+}, ignoreInit = TRUE)
+
+RKT_selected_cbo1_code <- reactive({
+  req(input$match_direction == "Demanda \u2192 Oferta")
+  idx <- input$cbo1_table_rows_selected
+  req(length(idx) == 1)
+  as.character(RKT_cbo1_df()$cbo_1dig[idx])
+})
+
+# Table 1b - Família (CBO 4 dígitos)
+RKT_cbo4_df <- reactive({
+  req(input$match_direction == "Demanda \u2192 Oferta",
+      input$uf_select, input$cbo1_table_rows_selected)
+  sel1 <- RKT_selected_cbo1_code()
+  df <- df_rais4dig_wide %>%
+    dplyr::filter(
+      NM_UF == input$uf_select,
+      substr(cbo_4dig, 1, 1) == sel1
+    ) %>%
+    dplyr::select(
+      cbo_4dig,
+      `Família (CBO 4d)` = cbo_familia,
+      `Vínculos 2023`,
+      `Vínculos 2024`
+    )
+  
+  vcols <- c("Vínculos 2023", "Vínculos 2024")
+  df[vcols] <- lapply(df[vcols], function(x) suppressWarnings(as.numeric(x)))
+  
+  df %>% dplyr::arrange(dplyr::desc(`Vínculos 2024`))
+})
+
+output$cbo4_table <- DT::renderDT({
+  DT::datatable(
+    RKT_cbo4_df(),
+    selection = "single",
+    rownames  = FALSE,
+    class     = "compact stripe",
+    options   = list(
+      pageLength = 10,
+      autoWidth  = TRUE,
+      columnDefs = list(list(visible = FALSE, targets = 0))
+    )
+  ) %>%
+    DT::formatCurrency(
+      columns  = c("Vínculos 2023","Vínculos 2024"),
+      currency = "",
+      digits   = 0,
+      interval = 3,
+      mark     = ".",
+      dec.mark = ","
+    ) %>%
+    DT::formatStyle(
+      c("Vínculos 2023","Vínculos 2024"),
+      `text-align` = "right"
+    )
+})
+
+RKT_selected_cbo4_code <- reactive({
+  req(input$match_direction == "Demanda \u2192 Oferta")
+  idx <- input$cbo4_table_rows_selected
+  req(length(idx) == 1)
+  as.character(RKT_cbo4_df()$cbo_4dig[idx])
+})
+
+# Table 1c - Ocupações (CBO 6 dígitos)
+RKT_cbo6_df <- reactive({
+  req(input$match_direction == "Demanda \u2192 Oferta",
+      input$uf_select,
+      input$cbo4_table_rows_selected)
+  
+  sel4 <- RKT_selected_cbo4_code()
+  
+  df <- df_raisCodCBO_wide %>%
+    dplyr::filter(
+      NM_UF == input$uf_select,
+      substr(CodCBO, 1, 4) == sel4
+    ) %>%
+    dplyr::select(
+      CodCBO,
+      Ocupação = `Ocupação`,
+      `Vínculos 2023`,
+      `Vínculos 2024`
+    )
+  
+  vcols <- c("Vínculos 2023", "Vínculos 2024")
+  df[vcols] <- lapply(df[vcols], function(x) suppressWarnings(as.numeric(x)))
+  
+  df %>% dplyr::arrange(dplyr::desc(`Vínculos 2024`))
+})
+
+output$cbo6b_table <- DT::renderDT({
+  df <- RKT_cbo6_df()
+  
+  DT::datatable(
+    df %>% dplyr::select(CodCBO, Ocupação, `Vínculos 2023`, `Vínculos 2024`),
+    selection = "single",
+    rownames  = FALSE,
+    class     = "compact stripe",
+    options   = list(
+      pageLength = 10,
+      autoWidth  = TRUE,
+      columnDefs = list(list(visible = FALSE, targets = 0)),
+      language   = list(
+        url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json"
+      )
+    )
+  ) %>%
+    DT::formatCurrency(
+      columns  = c("Vínculos 2023", "Vínculos 2024"),
+      currency = "",
+      digits   = 0,
+      interval = 3,
+      mark     = ".",
+      dec.mark = ","
+    ) %>%
+    DT::formatStyle(
+      c("Vínculos 2023","Vínculos 2024"),
+      `text-align` = "right"
+    )
+})
+
+# Table 2a - Occupation to Course matches
+RKT_selected_cbo_code <- reactive({
+  req(input$cbo6b_table_rows_selected)
+  RKT_cbo6_df()$CodCBO[input$cbo6b_table_rows_selected]
+})
+
+RKT_course_matches_df <- reactive({
+  req(input$match_direction == "Demanda → Oferta")
+  req(input$cbo6b_table_rows_selected)
+  req(input$score_thresh)
+  req(input$top_n)
+  
+  cbo_code <- RKT_selected_cbo_code()
+  
+  # Get matches
+  matches <- qbq_cnct_matches2 %>%
+    filter(
+      CodCBO == cbo_code,
+      final_score >= input$score_thresh
+    ) %>%
+    arrange(desc(final_score)) %>%
+    slice_head(n = input$top_n)
+  
+  if (nrow(matches) == 0) {
+    return(data.frame(
+      `Denominação do Curso` = character(0),
+      `Matrículas 2023` = integer(0),
+      `Matrículas 2024` = integer(0),
+      final_score = numeric(0),
+      check.names = FALSE
+    ))
+  }
+  
+  # Get enrollment data for the selected UF
+  enrollments <- df_mat_curso_wide %>%
+    filter(NM_UF == input$uf_select) %>%
+    select(IDX_EIXCUR, `Matrículas 2023`, `Matrículas 2024`)
+  
+  # Join and combine
+  result <- matches %>%
+    left_join(enrollments, by = "IDX_EIXCUR") %>%
+    select(
+      `Denominação do Curso`,
+      `Matrículas 2023`, 
+      `Matrículas 2024`, 
+      final_score
+    ) %>%
+    mutate(
+      `Matrículas 2023` = ifelse(is.na(`Matrículas 2023`), 0, `Matrículas 2023`),
+      `Matrículas 2024` = ifelse(is.na(`Matrículas 2024`), 0, `Matrículas 2024`)
+    ) %>%
+    arrange(desc(final_score))
+  
+  return(result)
+})
+
+# Render the occupation to course matches table
+output$course_agg_table_rev <- renderDT({
+  df <- RKT_course_matches_df()
+  
+  if (nrow(df) == 0) {
+    return(datatable(
+      data.frame(`Denominação do Curso` = "Nenhuma correspondência encontrada",
+                 `Matrículas 2023` = 0,
+                 `Matrículas 2024` = 0,
+                 final_score = 0,
+                 check.names = FALSE),
+      options = list(dom = 't'),
+      rownames = FALSE
+    ))
+  }
+  
+  # Format scores for display
+  df_display <- df %>%
+    mutate(final_score = round(final_score, 3))
+  
+  datatable(
+    df_display,
+    selection = "single",
+    rownames = FALSE,
+    class = "compact stripe",
+    options = list(
+      pageLength = nrow(df_display),
+      autoWidth = TRUE,
+      language = list(
+        url = "//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json"
+      )
+    )
+  ) %>%
+    formatCurrency(
+      c("Matrículas 2023", "Matrículas 2024"),
+      currency = "", interval = 3, mark = ".", dec.mark = ","
+    ) %>%
+    formatStyle(
+      c("Matrículas 2023", "Matrículas 2024"),
+      `text-align` = "right"
+    ) %>%
+    formatStyle(
+      "final_score",
+      `text-align` = "center"
+    )
+})
+
+# Auto-update top_n based on available matches for occupation to course
+observeEvent(list(RKT_selected_cbo_code(), input$score_thresh), {
+  req(input$match_direction == "Demanda → Oferta")
+  req(input$cbo6b_table_rows_selected)
+  
+  cbo_code <- RKT_selected_cbo_code()
+  
+  # Count available matches
+  n_matches <- qbq_cnct_matches2 %>%
+    filter(CodCBO == cbo_code, final_score >= input$score_thresh) %>%
+    nrow()
+  
+  # Update top_n input
+  if (n_matches > 0) {
+    updateNumericInput(session, "top_n", 
+                       value = min(n_matches, 10), 
+                       max = min(n_matches, 50))
+  }
+}, ignoreInit = TRUE)
+
+
+#####################################################################################
+### TAB 14 TAB 1  ESCASSSEZ  ### TAB 14 TAB 1  ESCASSSEZ  ### TAB 14 TAB 1  ESCASSSEZ  
+####################################################################################
+observe({
+  eixos_choices <- sort(unique(caged_rais_curso$Eixo_Tecnologico))
+  
+  # Find which Eixo contains Enfermagem
+  eixo_with_enfermagem <- caged_rais_curso %>%
+    filter(Curso == "Enfermagem") %>%
+    pull(Eixo_Tecnologico) %>%
+    unique() %>%
+    first()
+  
+  # Set that Eixo as default
+  updateSelectizeInput(session, "eixos",
+                       choices = eixos_choices, 
+                       selected = eixo_with_enfermagem,
+                       server = TRUE)
+})
+
+# Atualiza a lista de cursos quando eixos são selecionados
+observeEvent(input$eixos, {
+  cursos <- caged_rais_curso %>%
+    filter(Eixo_Tecnologico %in% input$eixos) %>%
+    distinct(Curso) %>%
+    arrange(Curso) %>%
+    pull()
+  
+  # Check if Enfermagem is available, use it as default
+  default_curso <- if("Enfermagem" %in% cursos) {
+    "Enfermagem"
+  } else if(length(cursos) > 0) {
+    cursos[1]
+  } else {
+    NULL
+  }
+  
+  updateSelectizeInput(session, "curso", 
+                       choices = cursos, 
+                       selected = default_curso,
+                       server = TRUE)
+}, ignoreNULL = FALSE)
+
+# Botão de limpar filtros retorna seleção ao estado inicial
+observeEvent(input$clear_filters, {
+  updateSelectInput(session, "uf1", selected = sort(unique(caged_rais_curso$NM_UF))[1])
+  updateSelectizeInput(session, "eixos", selected = character(0))
+  updateSelectizeInput(session, "curso", selected = character(0))
+  updateCheckboxInput(session, "todos_no_eixo", value = TRUE)
+  updateCheckboxInput(session, "comparar_brasil", value = TRUE)
+})
+
+# Reativo: gera os dados e gráficos com base nos filtros
+plots_reactive <- reactive({
+  geo_value <- input$uf1
+  if (input$comparar_brasil && input$uf1 != "Brasil") {
+    geo_value <- c(input$uf1, "Brasil")
+  }
+  
+  curso_input <- if (input$todos_no_eixo) {
+    caged_rais_curso %>%
+      filter(Eixo_Tecnologico %in% input$eixos) %>%
+      distinct(Curso) %>%
+      pull()
+  } else input$curso
+  
+  plot_caged_summary_double(
+    df = caged_rais_curso,
+    geo_value = geo_value,
+    curso_values = curso_input,
+    todos_no_eixo = input$todos_no_eixo,
+    eixo_values = input$eixos
+  )
+})
+###################################
+# Renderiza o gráfico de diferença salarial
+output$plot_dif_salarial <- renderPlot({
+  req(plots_reactive()$dif_sal_pc_plot)
+  plots_reactive()$dif_sal_pc_plot
+})
+
+# Renderiza o gráfico de rotatividade
+output$plot_rotatividade <- renderPlot({
+  req(plots_reactive()$rotatividade_plot)
+  plots_reactive()$rotatividade_plot
+})
+
+# Renderiza o título do ranking
+output$ranking_uf_title <- renderUI({
+  req(input$uf1)
+  h4(paste("⚠️ Relação de Cursos com Maior Escassez -", input$uf1), id = "ranking_uf_title")
+})
+
+#################################
+output$ranking_uf <- renderTable({
+  req(input$uf1)
+  
+  tabela <- caged_rais_curso %>%
+    group_by(ANO, MES, Eixo_Tecnologico, Curso) %>%
+    mutate(
+      estoque_liquido_br = sum(if_else(NM_UF == "Brasil", NA, estoque_liquido), na.rm = TRUE)
+    ) %>%
+    filter(NM_UF == input$uf1) %>%
+    group_by(ANO, MES) %>%
+    mutate(
+      across(.cols = c(dif_sal_adm_des_pc_m12, tx_rotatividade_m12, estoque_liquido),
+             .fns = ~ percent_rank(.x)*100,
+             .names = 'p_{.col}')
+    ) %>%
+    group_by(Curso) %>%
+    mutate(
+      dif_sal_adm_des_pc = if_else(is.infinite(dif_sal_adm_des_pc), NA, dif_sal_adm_des_pc),
+      dif_sal_adm_des_pc_m12 = window_mean(dif_sal_adm_des_pc, lag = 11, lead = 0),
+      
+      soma_mov_adm_media_ano = window_mean(soma_mov_adm, lag = 11, lead = 0),
+      `Estimativa Demanda Vagas` = window_mean(estoque_liquido, lag = 11, lead = 0)*0.15,
+      
+      `Demanda de vagas em relação ao total Brasil` = `Estimativa Demanda Vagas`/(window_mean(estoque_liquido_br, lag = 11, lead = 0)*0.15),
+      
+      tipologia_escassez = case_when(
+        p_dif_sal_adm_des_pc_m12 >= 75 & p_tx_rotatividade_m12 >= 50 & p_estoque_liquido >= 60 ~ "Alerta de Escassez",
+        (p_dif_sal_adm_des_pc_m12 >= 75 & p_tx_rotatividade_m12 >= 50 & p_estoque_liquido < 60) |
+          (between(p_dif_sal_adm_des_pc_m12, 74.9999, 50) & p_tx_rotatividade_m12 >= 50 & p_estoque_liquido >= 50) ~ "Tendência de Escassez",
+        (between(p_dif_sal_adm_des_pc_m12, 49.999, 25) | p_estoque_liquido >= 50) ~ "Situação Estável",
+        p_dif_sal_adm_des_pc_m12 < 25 ~ "Sinal de Excesso",
+        soma_mov_adm_media_ano < 30 ~ "Sem fluxo suficiente - INDICADORES DEIXAM DE SER INFORMATIVOS",
+        TRUE ~ "Indisponível/Indeterminado"
+      )
+    ) %>%
+    ungroup() %>%
+    filter(ANO == max(ANO, na.rm = TRUE)) %>%
+    filter(MES == max(MES, na.rm = TRUE)) %>%
+    mutate(dif_sal_adm_des_pc_pond_m12 = scales::rescale(dif_sal_adm_des_pc_m12*estoque_liquido,  to = c(0, 1000))) %>%
+    arrange(desc(dif_sal_adm_des_pc_pond_m12)) %>%
+    filter(tipologia_escassez %in% c("Alerta de Escassez", "Tendência de Escassez")) %>%
+    slice_head(n = 10) %>%
+    transmute(
+      `Eixo - Curso` = paste(Eixo_Tecnologico, Curso, sep = " - "),
+      `Situação da Escassez` = tipologia_escassez,
+      `Estimativa Demanda Vagas` = round(`Estimativa Demanda Vagas`),
+      `Demanda de vagas em relação ao total Brasil (%)` = `Demanda de vagas em relação ao total Brasil`*100,
+      #    `Demanda de vagas em relação ao total Brasil (%)` = `Demanda de vagas em relação ao total Brasil`*100,
+      #  `Dif. Salarial adm e des (%)` = round(dif_sal_adm_des_pc_m12, 2),
+      #  `Total Vínculos (milhares)` = round(estoque_liquido)/1000,
+      `Indicador de Escassez (Dif. Salarial*Total Vínculos (escala 0 a 1000))` = round(dif_sal_adm_des_pc_pond_m12)
+    )
+  
+  if (nrow(tabela) == 0) return(data.frame("Mensagem" = "Sem dados para este filtro."))
+  tabela
+}, striped = TRUE, bordered = TRUE, spacing = "xs", digits = 1)
+
+## ABOVE 50 LINE CODE REPLACED BY FABIO in BM_FGV_Propag3.R
+## calls tabela_ranking_cursos which is never defined 
+# output$ranking_uf <- renderTable({
+#   req(input$uf1)
+#   
+#   tabela <- tabela_ranking_cursos %>%
+#     filter(NM_UF == input$uf1) 
+#   
+#   if (nrow(tabela) == 0) return(data.frame("Mensagem" = "Sem dados para este filtro."))
+#   tabela
+# }, striped = TRUE, bordered = TRUE, spacing = "xs", digits = 1)
+# 
+##########
+# Gera o texto da avaliação de escassez com base na seleção
+output$texto_escassez <- renderUI({
+  df_escassez <- plots_reactive()$tipologia_escassez
+  req(df_escassez)
+  
+  if (input$todos_no_eixo) {
+    grupo_nome <- "Eixo Tecnológico"
+    valores <- input$eixos
+    col_grupo <- "Eixo_Tecnologico"
+  } else {
+    grupo_nome <- "Curso"
+    valores <- input$curso
+    col_grupo <- "Curso"
+  }
+  
+  df_resumo <- df_escassez %>%
+    filter(NM_UF == input$uf1) %>%
+    filter(.data[[col_grupo]] %in% valores) %>%
+    filter(ANO == max(ANO, na.rm = TRUE), MES == max(MES, na.rm = TRUE)) %>%
+    select(!!col_grupo, tipologia_escassez) %>%
+    distinct()
+  
+  if (nrow(df_resumo) == 0) {
+    return(HTML("<b style='color: #333;'>Sem resultados para a seleção atual.</b>"))
+  }
+  
+  resumos <- df_resumo %>%
+    mutate(txt = paste0("<b>", grupo_nome, ":</b> ", .data[[col_grupo]], " — <b>", tipologia_escassez, "</b>")) %>%
+    pull(txt)
+  
+  HTML(sprintf(
+    "<div style='font-size:1.2em; line-height:1.5; color: #333 !important;'>
+<b>Resultado da tipologia de escassez para %s:</b><br>%s
+</div>",
+    input$uf1,
+    paste(resumos, collapse = "<br>")
+  ))
+})
+#############
+# Renderiza lista de filtros atualmente selecionados
+output$selecao_atual <- renderUI({
+  eixos <- if (is.null(input$eixos) || length(input$eixos) == 0) "Nenhum" else paste(input$eixos, collapse = ", ")
+  cursos <- if (is.null(input$curso) || length(input$curso) == 0) "Nenhum" else paste(input$curso, collapse = ", ")
+  HTML(sprintf(
+    "<ul class='bullet-list'><li><b>UF:</b> %s</li>
+      <li><b>Eixo(s):</b> %s</li>
+      <li><b>Curso(s):</b> %s</li></ul>",
+    input$uf1, eixos, cursos
+  ))
+})
+
+
+
 
 
 }  
