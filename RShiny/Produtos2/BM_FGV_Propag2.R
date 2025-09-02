@@ -986,44 +986,44 @@ tags$div(
               # 3
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
-                  actionLink("link_meta11", "Projeção da Oferta de EPT versus a Meta 11A do PNE Vigente (2014–2024)")
+                  actionLink("link_meta11", "B1. Oferta EPT e Meta PNE Projeção:  Oferta de EPT versus a Meta 11 do PNE")
               ),
               div(class = "tab-explanation", "Comparação da oferta de educação técnica em relação à meta de triplicar as matrículas de EPTN."),
               
               # 4
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
-                  actionLink("link_expansao", "Projeções de Expansão de Matrículas de EPT em relação ao Novo PNE (2025–2035)")
+                  actionLink("link_expansao", "B2. Oferta EPT e Meta PNE Planificacão: Matriculas para atingir a Meta PNE")
               ),
               div(class = "tab-explanation", "Projeção da expansão de matrículas na EPT, com oferta integrada para 50% dos estudantes do ensino médio."),
               
                #5  
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
-                  actionLink("link_oferta", "Detalhe da Oferta - Análise de Matrículas EPT por Eixo e Curso")
+                  actionLink("link_oferta", "B3. Detalhe da Oferta - Análise de Matrículas EPT por Eixo e Curso")
               ),
               div(class = "tab-explanation", "Dados detalhados do Censo Escolar 2023-2024 com matrículas em educação profissional técnica, segmentados por eixo tecnológico, curso e dependência administrativa, permitindo análise hierárquica por UF e município."),
               
               
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
-                  actionLink("link_fef", "Contribuição, Aporte e Fluxo Líquido ao Fundo de Equalização Fiscal (FEF)")
-              ),
-              div(class = "tab-explanation", "Simulação do valor da contribuição estadual ao FEF, dos aportes recebidos e do fluxo líquido estimado, com base nas decisões de adesão."),
-              
-              
-              div(class = "tab-link-line",
-                  span(class = "arrow", HTML("▸")),
-                  actionLink("link_impacto", "Impacto Financeiro do PROPAG: Simulações com e sem Adesão")
+                  actionLink("link_impacto", "C1. Impacto Financeiro do PROPAG: Simulações com e sem Adesão")
               ),
               div(class = "tab-explanation", "Comparativo da situação financeira e do endividamento do estado em cenários com e sem adesão ao PROPAG."),
               
 
               div(class = "tab-link-line",
                   span(class = "arrow", HTML("▸")),
-                  actionLink("link_fin1", "Cenário Financeiro e Simulações de Investimento em EPT e Fundo FEF")
+                  actionLink("link_fin1", "C2. Cenário Financeiro e Simulações de Investimento em EPT e Fundo FEF")
               ),
               div(class = "tab-explanation", "Projeções de investimento e impacto fiscal no 1º e 5º ano, considerando os aportes à Educação Profissional Técnica (EPT) e ao Fundo de Equalização Fiscal (FEF)."),
+              
+              
+              div(class = "tab-link-line",
+                  span(class = "arrow", HTML("▸")),
+                  actionLink("link_fef", "C3. Contribuição, Aporte e Fluxo Líquido - Visualização Comparativa")
+              ),
+              div(class = "tab-explanation", "Simulação do valor da contribuição estadual ao FEF, dos aportes recebidos e do fluxo líquido estimado, com base nas decisões de adesão."),
               
               
               div(class = "tab-link-line",
@@ -1039,7 +1039,7 @@ tags$div(
 ###############################################################################################################
 # Replace the demographic tab with this standardized version
 tabPanel(
-  "A. Transição Demográfica",
+  "A1. Transição Demográfica",
   
   fluidPage(
     h3("Transição Demográfica: Projeções Populacionais por Faixa Etária",
@@ -1234,7 +1234,7 @@ tabPanel("A2. EPT e População",
 ###############################################################################################################            
 
 
-tabPanel("Situação - Meta 11 (vigente)",
+tabPanel("B1. Oferta EPT (Futuro)",
          fluidPage(
            h3("Evolução da Oferta de EPT por UF", style = "color: #1f5673; font-weight: bold;"),
            fluidRow(
@@ -1273,7 +1273,7 @@ tabPanel("Situação - Meta 11 (vigente)",
 ###############################################################################################################     
 
 
-tabPanel("Situação - Meta 11a",
+tabPanel("B2. Oferta EPT (Planificação)",
          fluidPage(
            h3("Meta 11a – Comparação das Definições", style = "color: #1f5673; font-weight: bold;"),
            
@@ -1345,7 +1345,7 @@ tabPanel("Situação - Meta 11a",
 # TAB  5  ENRLMMENT TAB ENRLMMENT TAB ENRLMMENT TAB ENRLMMENT TAB  ENRLMMENT TAB ENRLMMENT TAB ENRLMMENT TAB  
 ###############################################################################################################  
 
-tabPanel("Detalhe da Oferta",
+tabPanel("B3. Oferta EPT (Redes)",
          fluidPage(
            h3("Detalhe da Oferta - Censo Escolar EPT", 
               style = "color: #1f5673; font-weight: bold;"),
@@ -2511,28 +2511,28 @@ server <- function(input, output, session) {
   
 # 3  
   observeEvent(input$link_meta11, {
-    updateTabsetPanel(session, "tab_selection", selected = "Situação - Meta 11 (vigente)")
+    updateTabsetPanel(session, "tab_selection", selected = "B1. Oferta EPT (Futuro)")
   })
 # 4  
   observeEvent(input$link_expansao, {
-    updateTabsetPanel(session, "tab_selection", selected = "Situação - Meta 11a")
+    updateTabsetPanel(session, "tab_selection", selected = "B2. Oferta EPT (Planificacão")
   })
 
   # 5  
   observeEvent(input$link_oferta, {
-    updateTabsetPanel(session, "tab_selection", selected = "Detalhe da Oferta")
+    updateTabsetPanel(session, "tab_selection", selected = "B3. Oferta EPT (Redes)")
   })    
       
   observeEvent(input$link_impacto, {
-    updateTabsetPanel(session, "tab_selection", selected = "Finance 1b")
+    updateTabsetPanel(session, "tab_selection", selected = "C1. Financiamento PROPAG (opções)")
   })
   
   observeEvent(input$link_fef, {
-    updateTabsetPanel(session, "tab_selection", selected = "Retorno FEF por opções")
+    updateTabsetPanel(session, "tab_selection", selected = "C2. Retorno FEF por opções")
   })
   
   observeEvent(input$link_fin1, {
-    updateTabsetPanel(session, "tab_selection", selected = "Tema Financiero")
+    updateTabsetPanel(session, "tab_selection", selected = "C3. Financiamento (Comparativa)")
   })
   
   observeEvent(input$link_escassez, {
