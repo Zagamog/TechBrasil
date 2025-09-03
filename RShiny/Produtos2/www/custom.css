@@ -362,3 +362,34 @@ body {
 .checkbox-dark-panel h4 {
     color: #f5f5f5 !important;
 }
+
+
+
+
+/* ======= TAB WRAPPER CLASSES ======= */
+/* For tabs WITHOUT sidebar */
+.tab-simple-layout {
+  font-size: 16px !important;
+}
+
+.tab-simple-layout label {
+  font-size: 16px !important;
+}
+
+/* For tabs WITH sidebar - force larger fonts to compensate */
+.tab-sidebar-layout {
+  font-size: 18px !important;
+}
+
+.tab-sidebar-layout .sidebar {
+  font-size: 18px !important;
+}
+
+.tab-sidebar-layout .sidebar label,
+.tab-sidebar-layout .sidebar .control-label {
+  font-size: 18px !important;
+}
+
+.tab-sidebar-layout .main-panel {
+  font-size: 16px !important;
+}

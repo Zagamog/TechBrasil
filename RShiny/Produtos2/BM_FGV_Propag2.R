@@ -913,12 +913,12 @@ tags$div(
     
     tabsetPanel(id = "tab_selection", selected = "Introdução",
 
-###############################################################################################################
-# TAB  0  INTRODUCTION #### # TAB  0  INTRODUCTION ##### TAB  0  INTRODUCTION ##### TAB  0  INTRODUCTION ##### TAB  0 
-###############################################################################################################
-            tabPanel(
-              "Introdução",
-              tags$style(HTML("
+                ###############################################################################################################
+                # TAB  0  INTRODUCTION #### # TAB  0  INTRODUCTION ##### TAB  0  INTRODUCTION ##### TAB  0  INTRODUCTION ##### TAB  0 
+                ###############################################################################################################
+                tabPanel(
+                  "Introdução",
+                  tags$style(HTML("
     .tab-pane[data-value='Introdução'] {
       background-color: #f9f9f9 !important;
       color: #222 !important;
@@ -964,123 +964,134 @@ tags$div(
       color: #3E4A89;
     }
   ")),
-              # 0
-              div(class = "intro-heading",
-                  "Introdução: Ferramenta customizada pela UF – Análise e Simulação sobre o PROPAG"
-              ),
-              
-             
-              # 1
-              div(class = "tab-link-line",
-                  span(class = "arrow", HTML("▸")),
-                  actionLink("link_demo", "A1. Transição Demográfica: Projeções Populacionais por Faixa Etária")
-              ),
-              div(class = "tab-explanation", "Análise das mudanças no perfil etário da população brasileira (2000-2070) por região e estado, 
+                  
+                  # 0 - Heading
+                  div(class = "intro-heading",
+                      "Introdução: Ferramenta customizada pela UF – Análise e Simulação sobre o PROPAG"
+                  ),
+                  
+                  # Two-column layout starts here
+                  fluidRow(
+                    # LEFT COLUMN — A, B, C1, C2
+                    column(
+                      width = 6,
+                      
+                      # 1
+                      div(class = "tab-link-line",
+                          span(class = "arrow", HTML("▸")),
+                          actionLink("link_demo", "A1. Transição Demográfica: Projeções Populacionais por Faixa Etária")
+                      ),
+                      div(class = "tab-explanation", "Análise das mudanças no perfil etário da população brasileira (2000-2070) por região e estado, 
                   identificando pontos de transição demográfica relevantes para o planejamento do EPT."),
-              
-              # 2
-              div(class = "tab-link-line",
-                  span(class = "arrow", HTML("▸")),
-                  actionLink("link_ept", "A2. EPT e População: População 15-19 anos e Matrículas EPT/Ensino Médio")
-              ),
-              div(class = "tab-explanation", "Análise comparativa entre população de 15-19 anos e matrículas na Educação Profissional Técnica (EPT) e 
+                      
+                      # 2
+                      div(class = "tab-link-line",
+                          span(class = "arrow", HTML("▸")),
+                          actionLink("link_ept", "A2. EPT e População: População 15-19 anos e Matrículas EPT/Ensino Médio")
+                      ),
+                      div(class = "tab-explanation", "Análise comparativa entre população de 15-19 anos e matrículas na Educação Profissional Técnica (EPT) e 
                   Ensino Médio (2007-2035), incluindo acompanhamento das metas do PNE Meta 11 por estado e região."),
-              
-              # 3 (was C1)
-              div(class = "tab-link-line",
-                  span(class = "arrow", HTML("▸")),
-                  actionLink("link_impacto", "B1. Impacto Financeiro do PROPAG: Simulações com e sem Adesão")
-              ),
-              div(class = "tab-explanation", "Situação do endividamento e do fluxos financieros relevantes do estado em cenários com e sem adesão ao PROPAG."),
-              
-              # 4 (was C2)
-              div(class = "tab-link-line",
-                  span(class = "arrow", HTML("▸")),
-                  actionLink("link_fef", "B2. Cenário Financeiro e Simulações de Investimento em EPT e Fundo FEF")
-              ),
-              div(class = "tab-explanation", "Simulação do valor da contribuição estadual ao Fundo de Equalização Fiscal (FEF), dos aportes 
+                      
+                      # 3 (was C1)
+                      div(class = "tab-link-line",
+                          span(class = "arrow", HTML("▸")),
+                          actionLink("link_impacto", "B1. Impacto Financeiro do PROPAG: Simulações com e sem Adesão")
+                      ),
+                      div(class = "tab-explanation", "Situação do endividamento e do fluxos financieros relevantes do estado em cenários com e sem adesão ao PROPAG."),
+                      
+                      # 4 (was C2)
+                      div(class = "tab-link-line",
+                          span(class = "arrow", HTML("▸")),
+                          actionLink("link_fef", "B2. Cenário Financeiro e Simulações de Investimento em EPT e Fundo FEF")
+                      ),
+                      div(class = "tab-explanation", "Simulação do valor da contribuição estadual ao Fundo de Equalização Fiscal (FEF), dos aportes 
                   recebidos e do fluxo líquido estimado, com base nas decisões de adesão."),
-              
-              # 5 (was C3)
-              div(class = "tab-link-line",
-                  span(class = "arrow", HTML("▸")),
-                  actionLink("link_finuf", "B3. Contribuição, Aporte e Fluxo Líquido - Visualização Comparativa")
-              ),
-              div(class = "tab-explanation", "Situação do endividamento e do fluxos financieros - visualiazação comparativa de conjunto de UFs"),
-              
-              # 6 (was B1)
-              div(class = "tab-link-line",
-                  span(class = "arrow", HTML("▸")),
-                  actionLink("link_meta11pro", "C1. Oferta EPT e Meta PNE Projeção: Oferta de EPT versus a Meta 11 do PNE")
-              ),
-              div(class = "tab-explanation", "Comparação da oferta de educação técnica em relação à Meta 11 do PNE 
+                      
+                      # 5 (was C3)
+                      div(class = "tab-link-line",
+                          span(class = "arrow", HTML("▸")),
+                          actionLink("link_finuf", "B3. Contribuição, Aporte e Fluxo Líquido - Visualização Comparativa")
+                      ),
+                      div(class = "tab-explanation", "Situação do endividamento e do fluxos financieros - visualiazação comparativa de conjunto de UFs"),
+                      
+                      # 6 (was B1)
+                      div(class = "tab-link-line",
+                          span(class = "arrow", HTML("▸")),
+                          actionLink("link_meta11pro", "C1. Oferta EPT e Meta PNE Projeção: Oferta de EPT versus a Meta 11 do PNE")
+                      ),
+                      div(class = "tab-explanation", "Comparação da oferta de educação técnica em relação à Meta 11 do PNE 
                   vigente ou PNE aplicado para PROPAG (prenchido pelo usuario"),
-              
-              # 7 (was B2)
-              div(class = "tab-link-line",
-                  span(class = "arrow", HTML("▸")),
-                  actionLink("link_meta11pla", "C2. Oferta EPT e Meta PNE Planificação: Matrículas para atingir a Meta PNE")
-              ),
-              div(class = "tab-explanation", "Projeção da expansão de matrículas na EPT requerido por ano alvo de Meta (publicado p preenchido por usuario) 
-                  por simulações de ano"),
-              
-              # 8 (was B3)
-              div(class = "tab-link-line",
-                  span(class = "arrow", HTML("▸")),
-                  actionLink("link_ofertadet", "C3. Detalhe da Oferta - Análise de Matrículas EPT por Eixo e Curso")
-              ),
-              div(class = "tab-explanation", "Dados detalhados do Censo Escolar 2023-2024 com matrículas em EPT ,
+                      
+                      # 7 (was B2)
+                      div(class = "tab-link-line",
+                          span(class = "arrow", HTML("▸")),
+                          actionLink("link_meta11pla", "C2. Oferta EPT e Meta PNE Planificação: Matrículas para atingir a Meta PNE")
+                      ),
+                      div(class = "tab-explanation", "Projeção da expansão de matrículas na EPT requerido por ano alvo de Meta (publicado p preenchido por usuario) 
+                  por simulações de ano")
+                    ),
+                    
+                    # RIGHT COLUMN — C3, C4, D1, D2, D3, E1, E2
+                    column(
+                      width = 6,
+                      
+                      # 8 (was B3)
+                      div(class = "tab-link-line",
+                          span(class = "arrow", HTML("▸")),
+                          actionLink("link_ofertadet", "C3. Detalhe da Oferta - Análise de Matrículas EPT por Eixo e Curso")
+                      ),
+                      div(class = "tab-explanation", "Dados detalhados do Censo Escolar 2023-2024 com matrículas em EPT ,
                   segmentados por eixo tecnológico, curso e dependência administrativa, permitindo análise hierárquica por UF e município."),
-              
-              # 9 (was B4)
-              div(class = "tab-link-line",
-                  span(class = "arrow", HTML("▸")),
-                  actionLink("link_modelo", "C4. Modelo Econometrico de Matrícula - Análise de Matrículas EPT por Rede e UF")
-              ),
-              div(class = "tab-explanation", "Modelo econométrico básico, segmentado por setor econômico e dependência administrativa, 
+                      
+                      # 9 (was B4)
+                      div(class = "tab-link-line",
+                          span(class = "arrow", HTML("▸")),
+                          actionLink("link_modelo", "C4. Modelo Econometrico de Matrícula - Análise de Matrículas EPT por Rede e UF")
+                      ),
+                      div(class = "tab-explanation", "Modelo econométrico básico, segmentado por setor econômico e dependência administrativa, 
                   permitindo análise de efectos por UF e rede."),
-             
-               # 10
-              div(class = "tab-link-line",
-                  span(class = "arrow", HTML("▸")),
-                  actionLink("link_dinamismo", "D1. Demanda EPT: Dinamismo Econômico")
-              ),
-              div(class = "tab-explanation", "Análise do dinamismo econômico municipal baseado no crescimento do PIB per capita, identificando 
+                      
+                      # 10
+                      div(class = "tab-link-line",
+                          span(class = "arrow", HTML("▸")),
+                          actionLink("link_dinamismo", "D1. Demanda EPT: Dinamismo Econômico")
+                      ),
+                      div(class = "tab-explanation", "Análise do dinamismo econômico municipal baseado no crescimento do PIB per capita, identificando 
                   municípios em expansão ou queda econômica."),
-              
-              # 11
-              div(class = "tab-link-line",
-                  span(class = "arrow", HTML("▸")),
-                  actionLink("link_arranjo", "D2. Demanda EPT: Arranjos Produtivos Laborais")
-              ),
-              div(class = "tab-explanation", "Identificação de Arranjos Produtivos Laborais (APL) baseados em especialização ocupacional (CBO), 
+                      
+                      # 11
+                      div(class = "tab-link-line",
+                          span(class = "arrow", HTML("▸")),
+                          actionLink("link_arranjo", "D2. Demanda EPT: Arranjos Produtivos Laborais")
+                      ),
+                      div(class = "tab-explanation", "Identificação de Arranjos Produtivos Laborais (APL) baseados em especialização ocupacional (CBO), 
                               mapeando concentrações de emprego formal por ocupação."),
-              
-              # 12
-              div(class = "tab-link-line",
-                  span(class = "arrow", HTML("▸")),
-                  actionLink("link_informal", "D3. Demanda EPT: Mercado Formal e Informal")
-              ),
-              div(class = "tab-explanation", "Análise da distribuição de emprego formal e informal por município, classificando territórios em decis 
+                      
+                      # 12
+                      div(class = "tab-link-line",
+                          span(class = "arrow", HTML("▸")),
+                          actionLink("link_informal", "D3. Demanda EPT: Mercado Formal e Informal")
+                      ),
+                      div(class = "tab-explanation", "Análise da distribuição de emprego formal e informal por município, classificando territórios em decis 
                   baseado na proporção de vínculos formais em relação ao total de vínculos."),
-              
-              # 13
-              div(class = "tab-link-line",
-                  span(class = "arrow", HTML("▸")),
-                  actionLink("link_oferta_demanda", "E1. Oferta e Demanda EPT")
-              ),
-              div(class = "tab-explanation", "Conexão gerado por IA entre oferta educacional (matrículas EPT por eixo, área e curso) e demanda laboral 
+                      
+                      # 13
+                      div(class = "tab-link-line",
+                          span(class = "arrow", HTML("▸")),
+                          actionLink("link_oferta_demanda", "E1. Oferta e Demanda EPT")
+                      ),
+                      div(class = "tab-explanation", "Conexão gerado por IA entre oferta educacional (matrículas EPT por eixo, área e curso) e demanda laboral 
                   (vínculos por ocupação CBO), identificando correspondências entre cursos técnicos e ocupações."),
-              
-              # 14
-              div(class = "tab-link-line",
-                  span(class = "arrow", HTML("▸")),
-                  actionLink("link_escassez", "E2. Demanda e Escassez de Profissionais Técnicos no Brasil")
-              ),
-              div(class = "tab-explanation", "Diagnóstico da escassez de profissionais técnicos por curso e UF com base nos dados de mercado de trabalho (RAIS/CAGED).")
-              
-             ),
-			  
+                      
+                      # 14
+                      div(class = "tab-link-line",
+                          span(class = "arrow", HTML("▸")),
+                          actionLink("link_escassez", "E2. Demanda e Escassez de Profissionais Técnicos no Brasil")
+                      ),
+                      div(class = "tab-explanation", "Diagnóstico da escassez de profissionais técnicos por curso e UF com base nos dados de mercado de trabalho (RAIS/CAGED).")
+                    )
+                  )
+                ),
 			              
 
 ###############################################################################################################
@@ -1089,12 +1100,12 @@ tags$div(
 # Replace the demographic tab with this standardized version
 tabPanel(
   "A1. Transição Demográfica",
-  
+  div(class = "tab-simple-layout",  # Wrapper class
   fluidPage(
     h3("Transição Demográfica: Projeções Populacionais por Faixa Etária",
        style = "color: #1f5673; font-weight: bold;"),
     
-    div(class = "topbar-info",  # Changed from "checkbox-dark-panel"
+    div(class = "topbar-info",  
         
         # Instructions row
         fluidRow(
@@ -1162,9 +1173,7 @@ tabPanel(
         )
     ),
     
-    # Rest of the code remains the same...
-    
-    # Note section
+
     fluidRow(
       column(
         width = 12,
@@ -1183,38 +1192,40 @@ tabPanel(
       )
     )
   )
-),
+)),
 
 ###############################################################################################################
 # TAB  2 UI FOR EPT ENROLLMENT ANALYSIS TAB POP EPT # TAB  2 UI FOR EPT ENROLLMENT ANALYSIS TAB POP EPT 
 ###############################################################################################################
 
 tabPanel("A2. EPT e População",
+     
          fluidPage(
            h3("População 15-19 anos e Matrículas EPT/Ensino Médio", 
-              style = "color: #1f5673; font-weight: bold;"),
+              style = "color: #1f5673; font-weight: bold; font-size: 24px;"),  # Add font-size
            
            div(class = "topbar-info",
-               style = "color: black !important;",
-               p("Esta análise compara a população elegível (15-19 anos) com as matrículas na Educação Profissional Técnica (EPT) e Ensino Médio (2007-2035).", 
-                 style = "color: black !important;"),
-               p("Inclui acompanhamento das metas do PNE Meta 11 por estado e região, permitindo configurar cenários alternativos.", 
-                 style = "color: black !important;"),
-               p("Use os controles abaixo para explorar diferentes localizações e configurar metas personalizadas para análise.", 
-                 style = "color: black !important;")
-           ),
+               div(style = "margin-top: 5px; margin-bottom: 10px; color: #333; text-align: justify; font-size: 20px;", 
+              tagList(
+                     tags$strong("Instruções: "),
+               "Esta análise compara a população elegível (15-19 anos) com as matrículas na Educação Profissional Técnica (EPT) e Ensino Médio (2007-2035). Inclui
+               acompanhamento das metas do PNE Meta 11 por estado e região, permitindo configurar cenários alternativos. Use os controles 
+                 abaixo para explorar diferentes localizações e configurar metas personalizadas para análise.", 
+                ))),
            
            sidebarLayout(
              sidebarPanel(
                width = 3,
-               style = "color: black;",
+               style = "color: black; font-size: 16px;",  # Add font-size here
                
-               h4("Controles de Análise", style = "color: #1f5673;"),
+               h4("Controles de Análise", style = "color: #1f5673; font-size: 18px;"),
                
-               div(style = "color: black;",
+               div(style = "color: black; font-size: 18px;",  # Add font-size
+                   tags$label("Selecionar Localização(ões):", 
+                              style = "font-weight: bold; color: #333; font-size: 16px;"),  # Match Tab A1
                    pickerInput(
                      "ept_localInput",
-                     "Selecionar Localização(ões):",
+                     label = NULL,
                      choices = sort(unique(ept_combined_data$LOCAL)),
                      selected = "Piauí",
                      multiple = TRUE,
@@ -1222,18 +1233,25 @@ tabPanel("A2. EPT e População",
                    )
                ),
                
-               div(style = "color: black;",
+               div(style = "color: black; font-size: 18px;",  # Add font-size
+                   tags$label("Escolher Tipo de Dados:", 
+                              style = "font-weight: bold; color: #333; font-size: 16px;"),  # Match Tab A1
                    radioButtons(
                      "ept_dataType",
-                     "Escolher Tipo de Dados:",
+                     label = NULL,
                      choices = list("Números Absolutos" = "numbers", "Percentagens" = "percentages"),
                      selected = "numbers"
                    )
                ),
                
-               div(style = "color: black;", uiOutput("ept_variableInput")),
+               div(style = "color: black; font-size: 18px;", 
+                   tags$label("Selecionar Variável(eis):", 
+                              style = "font-weight: bold; color: #333; font-size: 16px;"),
+                   uiOutput("ept_variableInput")),
                
-               div(style = "color: black;",
+               div(style = "color: black; font-size: 18px;",
+                   tags$label("Opções de Visualização:", 
+                              style = "font-weight: bold; color: #333; font-size: 16px;"),
                    checkboxInput(
                      "ept_showMeta",
                      "Mostrar Linhas de Meta PNE 11",
@@ -1243,29 +1261,30 @@ tabPanel("A2. EPT e População",
                
                conditionalPanel(
                  condition = "input.ept_showMeta",
-                 style = "color: black;",
+                 style = "color: black; font-size: 16px;",
                  hr(),
-                 h4("Configuração de Metas", style = "color: #1f5673;"),
+                 h4("Configuração de Metas", style = "color: #1f5673; font-size: 18px;"),
                  p("Meta Targets (para localizações selecionadas):", 
-                   style = "font-weight: bold; color: black;"),
-                 div(style = "color: black;", uiOutput("ept_metaTargetsUI"))
+                   style = "font-weight: bold; color: black; font-size: 16px;"),
+                 div(style = "color: black; font-size: 16px;", uiOutput("ept_metaTargetsUI"))
                ),
                
                hr(),
-               h5("Resumo da Seleção:", style = "color: #1f5673;"),
-               div(style = "color: black;", uiOutput("ept_summary"))
+               h5("Resumo da Seleção:", style = "color: #1f5673; font-size: 16px;"),
+               div(style = "color: black; font-size: 16px;", uiOutput("ept_summary"))
              ),
              
              mainPanel(
                width = 9,
-               h4("Evolução Populacional e de Matrículas EPT/EM", style = "color: #1f5673;"),
+               style = "font-size: 18px;",  # Add font-size to mainPanel
+               h4("Evolução Populacional e de Matrículas EPT/EM", 
+                  style = "color: #1f5673; font-size: 20px;"),  # Increase header size
                withSpinner(plotlyOutput("ept_linePlot", height = "600px")),
                
                br(),
                
-               # Enhanced source attribution
                div(style = "text-align: center; margin-top: 15px; padding: 10px; background-color: #f9f9f9; border-radius: 5px;",
-                   HTML("<p style='font-size: 12px; color: #666; margin: 0;'>
+                   HTML("<p style='font-size: 14px; color: #666; margin: 0;'>
                     <strong>Fontes:</strong> 
                     <a href='https://www.ibge.gov.br/estatisticas/sociais/populacao/9109-projecao-da-populacao.html' 
                     target='_blank' style='color: #1f5673;'>Projeções Populacionais IBGE</a> | 
@@ -1276,11 +1295,11 @@ tabPanel("A2. EPT e População",
              )
            )
          )
-),    
+), 
 
 
 ###############################################################################################################
-# TAB  7 with 0 start  ### UI -FINANCE 1b  ############# UI -FINANCE 1b  ############# UI -FINANCE 1b  ############# UI -FINANCE 1b  
+# TAB   with 0 start  ### UI -FINANCE 1b  ############# UI -FINANCE 1b  ############# UI -FINANCE 1b  ############# UI -FINANCE 1b  
 ###############################################################################################################  
 tabPanel(
   "B1. Financiamento PROPAG (opções)",
