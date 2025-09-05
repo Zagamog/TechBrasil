@@ -29,17 +29,18 @@
 
 % Part text styling
 \renewcommand*\l@part[2]{%
-\ifnum \c@tocdepth >-2
-  \addpenalty{-\@highpenalty}%
-  \vskip 0em
-  \begingroup
-    \parindent \z@ \rightskip \@pnumwidth
-    \leavevmode\colorbox{accent!15}{\vtop{\hsize=\dimexpr\textwidth\relax
-      \strut\color{fgacc}\bfseries\sffamily\uppercase{#1}%
-      \nobreak\hfill\nobreak\hb@xt@\@pnumwidth{\hss #2}\strut}}\par
-    \penalty\@highpenalty
-  \endgroup
-\fi}
+	\ifnum \c@tocdepth >-2
+	\addpenalty{-\@highpenalty}%
+	\vskip 0em
+	\begingroup
+	\parindent \z@ \rightskip \@pnumwidth
+	\leavevmode\colorbox{accent!15}{\vtop{\hsize=\dimexpr\textwidth\relax
+			\strut\color{fgacc}\bfseries\sffamily\uppercase{#1}%
+			\nobreak\hfill\nobreak\hb@xt@\@pnumwidth{\hss #2}\strut}}\par
+	\penalty\@highpenalty
+	\endgroup
+	\fi}
+
 
 % Chapter text styling
 \renewcommand*\l@chapter[2]{%

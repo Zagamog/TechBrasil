@@ -1,0 +1,28 @@
+\providecommand{\backcover}{
+	% Force clear everything
+	\clearpage
+	\cleardoublepage
+	% Kill any headers/footers
+	\pagestyle{empty}
+	\thispagestyle{empty}
+	% Clear any pending marks
+	\markboth{}{}
+	% Start a new page group
+	\begingroup
+	% Remove all margins
+	\newgeometry{left=0cm,top=0cm,right=0cm,bottom=0cm}
+	% Clear again to ensure clean slate
+	\clearpage
+	
+	% Now create the orange page with TikZ
+	\begin{tikzpicture}[remember picture,overlay]
+		\fill[bgacc] (current page.south west) rectangle (current page.north east);
+	\end{tikzpicture}
+	
+	% End the page
+	\clearpage
+	\endgroup
+	% Restore settings
+	\restoregeometry
+	\nopagecolor
+}
