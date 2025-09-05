@@ -32,84 +32,84 @@
 \tableofcontents
 \clearpage
 
-% Part 0 Separator and Introduction  --------------------------------------------------------------
 \newpage
-\part{Introdução}
+\part{Introdução e Contexto}
+
 \chapter{Introdução} \label{ch:intro}
 %\addcontentsline{toc}{section}{Introdução}
 \input{sections/part0/Introdução}
 \clearpage  % for vertical line text
 
-% Blank Page----------------------------------------------------------------------------------------
 \newpage
 \thispagestyle{empty}
 \mbox{}
 
-
-% Part 1 Separator and Chapter 2===========================================================
-\part{Contexto sobre EPT}
 \chapter{População para EPT} \label{ch:popu}
 \input{sections/part1/População}
 
-% Blank Page----------------------------------------------------------------------------------------
+\newpage
+\thispagestyle{empty}
+%\mbox{}
+
+-------------------------------------------------
+\newpage
+\chapter{Cenários de Financiamento no PROPAG}\label{ch:cen_fin}
+\input{sections/part1/Cenários}
+\clearpage
+
+\newpage
+\thispagestyle{empty}
+\mbox{}
+
+\part{Oferta e Demanda da EPT}
+
+
+\chapter{Oferta de EPT e Meta PNE} \label{ch:metas_pne}
+\input{sections/part1/MetasPNE}
+
 \newpage
 \thispagestyle{empty}
 \mbox{}
 
 
-\chapter{Redes de EPT} \label{ch:popu}
+\chapter{Oferta de EPT - Redes e Cursos} 
 \input{sections/part1/RedesEPT}
 
 \newpage
 \thispagestyle{empty}
 \mbox{}
 
-
-
-% Chapter 3  --------------------------------------------------------------
 \newpage
-\chapter{Crecimento Econômico Regional}\label{ch:cre_econ}
+\chapter{Demanda para EPT }
 \input{sections/part1/CrecimentoEconômico}
 
-% Chapter 4  --------------------------------------------------------------
+
 \newpage
-\chapter{Cenários de Financiamento no PROPAG}\label{ch:cen_fin}
-\input{sections/part1/Cenários}
-\clearpage
-
-% Part 2 Separator and Chapter 5===========================================================
-\part{Oferta e Demanda da EPT}
-\chapter{Metas PNE} \label{ch:metas_pne}
-\input{sections/part1/MetasPNE}
-
-
-% Chapter 6  --------------------------------------------------------------
-\newpage
-\chapter{Demanda para Técnicos} \label{ch:metas_pne}
+\chapter{Oerta e Demanda conectada } 
 \input{sections/part1/Metodología}
 \newpage
 \input{sections/part1/Resultados}
 \clearpage
 
-
-%\part{Esquema\\  Plano de Aplicação}
-% Chapter 7---------------------------------------------------------------------
-%\chapter{Estrutura de Plano de Aplicação} \label{ch:commodo}
-%\input{sections/part2/EstruturaPlano}
-% Chapter 8---------------------------------------------------------
-%\newpage
-%\chapter{Protocolo de Preparação} \label{ch:etiam}
-%\input{sections/part2/Protocolo}
-%\clearpage
-
-
-%----------------------------------------------------------------------------------------
 \part{Apêndice}
+
+\newpage
+\chapter{Normativas e relacionados}
+\input{sections/part2/Anexo}
+
 \newpage
 \listoffigures
 \listoftables
 %----------------------------------------------------------------------------------------
 \newpage
 \printbibliography[title={Referências}]
+\clearpage
+
+\newpage
+\thispagestyle{empty}
+\mbox{}
+
+\backcover
+
 
 \end{document}

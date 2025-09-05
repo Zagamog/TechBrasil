@@ -170,6 +170,20 @@ ept_local_colors <- c(
   "Amazonia_Legal" = "#8B4513"
 )
 
+# Define user-friendly names for EPT variables
+ept_vars_friendly <- c(
+  "Matrículas EPT para PROPAG - Integrado, Concomitante ou Subseqente" = "QT_MAT_PROF_TEC_PROPAG",
+  "Matrículas Técnicas - Integrado e Concomitante" = "QT_MAT_TEC_NUM2", 
+  "Matrículas Técnicas - só Integrado" = "QT_MAT_TEC_NUM3"
+)
+
+# Define user-friendly names for Meta11a options
+meta11a_choices_friendly <- c(
+  "Opção 1: Integrado, Concomitante, Subsequente" = "Meta11a_opcao1",
+  "Opção 2: Integrado e Concomitante" = "Meta11a_opcao2",
+  "Opção 3: Integrado" = "Meta11a_opcao3"
+)
+
 ##################################################################
 ## DATA FOR FINANCE 
 ##################################################################
@@ -970,6 +984,20 @@ tags$div(
                       "Introdução: Ferramenta customizada pela UF – Análise e Simulação sobre o PROPAG"
                   ),
                   
+                  
+                  # Add navigation instruction with color coding explanation
+                  div(style = "text-align: center; margin-bottom: 20px; padding: 15px; background-color: #e8f4fd; border-radius: 5px; border: 1px solid #b3d9ff;",
+                      HTML("<strong>Navegação:</strong> Acesse as análises clicando nos links abaixo ou nas abas coloridas acima.<br>"),
+                      HTML("<span style='font-size: 15px; line-height: 1.8;'>"),
+                      HTML("As abas seguem código de cores por tema: "),
+                      HTML("<span style='color: #3f4788; font-weight: bold;'>■ Azul</span> = Demografia | "),
+                      HTML("<span style='color: #f98e09; font-weight: bold;'>■ Laranja</span> = Finanças | "),
+                      HTML("<span style='color: #2db27d; font-weight: bold;'>■ Verde</span> = Oferta EPT | "),
+                      HTML("<span style='color: #B4DD2C; font-weight: bold;'>■ Verde-Lima</span> = Demanda EPT | "),
+                      HTML("<span style='color: #450a69; font-weight: bold;'>■ Roxo</span> = Conexão Oferta-Demanda"),
+                      HTML("</span>")
+                  ),
+                  
                   # Two-column layout starts here
                   fluidRow(
                     # LEFT COLUMN — A, B, C1, C2
@@ -992,14 +1020,14 @@ tags$div(
                       div(class = "tab-explanation", "Análise comparativa entre população de 15-19 anos e matrículas na Educação Profissional Técnica (EPT) e 
                   Ensino Médio (2007-2035), incluindo acompanhamento das metas do PNE Meta 11 por estado e região."),
                       
-                      # 3 (was C1)
+                      # 3 
                       div(class = "tab-link-line",
                           span(class = "arrow", HTML("▸")),
                           actionLink("link_impacto", "B1. Impacto Financeiro do PROPAG: Simulações com e sem Adesão")
                       ),
                       div(class = "tab-explanation", "Situação do endividamento e do fluxos financieros relevantes do estado em cenários com e sem adesão ao PROPAG."),
                       
-                      # 4 (was C2)
+                      # 4 
                       div(class = "tab-link-line",
                           span(class = "arrow", HTML("▸")),
                           actionLink("link_fef", "B2. Cenário Financeiro e Simulações de Investimento em EPT e Fundo FEF")
@@ -1007,7 +1035,7 @@ tags$div(
                       div(class = "tab-explanation", "Simulação do valor da contribuição estadual ao Fundo de Equalização Fiscal (FEF), dos aportes 
                   recebidos e do fluxo líquido estimado, com base nas decisões de adesão."),
                       
-                      # 5 (was C3)
+                      # 5 
                       div(class = "tab-link-line",
                           span(class = "arrow", HTML("▸")),
                           actionLink("link_finuf", "B3. Contribuição, Aporte e Fluxo Líquido - Visualização Comparativa")
@@ -1299,13 +1327,18 @@ tabPanel("A2. EPT e População",
 
 
 ###############################################################################################################
-# TAB   with 0 start  ### UI -FINANCE 1b  ############# UI -FINANCE 1b  ############# UI -FINANCE 1b  ############# UI -FINANCE 1b  
+# TAB  3  with 0 start  ### UI -FINANCE 1b  ############# UI -FINANCE 1b  ############# UI -FINANCE 1b  ############# UI -FINANCE 1b  
 ###############################################################################################################  
 tabPanel(
-  "B1. Financiamento PROPAG (opções)",
+  "B1. Financiamento PROPAG",
   fluidPage(
-    h3("Conteúdo em desenvolvimento: Finance 1b",
-       style = "color: #1f5673; font-weight: bold;"),
+    
+    div(class = "topbar-info",
+        div(style = "margin-top: 0px; margin-bottom: 0px; color: #333; text-align: justify; font-size: 20px;", 
+            tagList(
+              tags$strong(""),
+              
+            ))),
     
     # JS: enforce single selection per group
     tags$head(
@@ -1359,7 +1392,9 @@ tabPanel(
                 "Você pode começar por qualquer uma das quatro escolhas: ",
                 tags$span(class = "highlighted-note", 
                           "(i) Abatimento (0%, 10% ou 20%) ; (ii) Aporte ao FEF (1%, 1.5% ou 2%); (iii) Investimento Direto (cinco opções);
-                                     (iv) Taxa de juro (0%, 1% ou 2%)")
+                                     (iv) Taxa de juro (0%, 1% ou 2%)"),
+                "Depois, você pode escolher a variavel financiero que você quer - saldo de dívida, aporte para o FED, investimento
+                direito para EPT e juros pagos; você escolha as opções que quer comparar e o periodo cuberto entre 2025 e 2054."
               )
             )
           )
@@ -1381,7 +1416,7 @@ tabPanel(
             fluidRow(
               column(
                 width = 3,
-                tags$label("(iv) Taxa de Juros:",
+                tags$label("(i) Taxa de Juros:",
                            style = "font-weight: bold; display: block;"),
                 prettyCheckboxGroup(
                   inputId  = "choice_J",
@@ -1401,7 +1436,7 @@ tabPanel(
               
               column(
                 width = 3,
-                tags$label("(i) Amortização Inicial",
+                tags$label("(ii) Amortização Inicial",
                            style = "font-weight: bold; display: block;"),
                 prettyCheckboxGroup(
                   inputId  = "choice_A",
@@ -1419,7 +1454,7 @@ tabPanel(
               ),
               column(
                 width = 2,
-                tags$label("(ii) Contribuição para FEF:",
+                tags$label("(iii) Contribuição para FEF:",
                            style = "font-weight: bold; display: block;"),
                 prettyCheckboxGroup(
                   inputId  = "choice_G",
@@ -1437,7 +1472,7 @@ tabPanel(
               ),
               column(
                 width = 3,
-                tags$label("(iii) Investimento Direto:",
+                tags$label("(iv) Investimento Direto:",
                            style = "font-weight: bold; display: block;"),
                 # UI  (group III – Investimento Direto)
                 prettyCheckboxGroup(
@@ -1563,9 +1598,9 @@ tabPanel(
 
 
 ###############################################################################################################
-# TAB  8 with 0 start  ### UI - FEF # TAB  7 with 0 start  ### UI - FE # TAB  7 with 0 start  ### UI - FE
+# TAB  4 with 0 start  ### UI - FEF # TAB 4  with 0 start  ### UI - FE # TAB  4 with 0 start  ### UI - FE
 ###############################################################################################################  
-tabPanel("B2. Retorno FEF por opções",
+tabPanel("B2. Retorno FEF",
          fluidPage(
            useShinyjs(),
            div(class = "checkbox-dark-panel",
@@ -1679,12 +1714,22 @@ tabPanel("B2. Retorno FEF por opções",
 
 
 ###############################################################################################################
-# TAB 9   Finance Multi-State Finance Multi-State Finance Multi-State Finance Multi-State Finance Multi-State
+# TAB 5   Finance Multi-State Finance Multi-State Finance Multi-State Finance Multi-State Finance Multi-State
 ###############################################################################################################    
 tabPanel("B3. Financiamento (Comparativo)",
          fluidPage(
            h3("Visualização Financeira do PROPAG", style = "color: #1f5673; font-weight: bold;"),
+   
+           div(class = "topbar-info",
+               div(style = "margin-top: 5px; margin-bottom: 10px; color: #333; text-align: justify; font-size: 20px;", 
+                   tagList(
+                     tags$strong("Instruções: "),
+                     "Esta análise simplesemente permite visualização de fluxos do PROPAG numa maneira conjunta de todas UFs. Selecione a variavel
+                     financiera e automaticamente aparece el gráfico correspondiente e a tabela com os dados. 
+                     ", 
+                   ))),
            
+                   
            fluidRow(
              column(6,
                     selectizeInput(
@@ -1700,83 +1745,141 @@ tabPanel("B3. Financiamento (Comparativo)",
            plotOutput("tab1_fin_plot", height = "600px"),
            br(),
            h3("Tabela 1: Variáveis Financeiras", style = "color: #1f5673; font-weight: bold; margin-top: 30px;"),
-           DT::dataTableOutput("tab1_fin_table"),
+           div(class = "checkbox-dark-panel",
+              tags$style(HTML("
+               #tab1_fin_table thead { background-color: #34495e !important; }
+               #tab1_fin_table thead th { 
+                background-color: #34495e !important; 
+                color: #ffffff !important; 
+}
+             ")),     
+               
+                    DT::dataTableOutput("tab1_fin_table")),
+           
            br(), br(),
-           div(
-             style = "font-size: 12px; color: #999; text-align: center; padding: 10px;",
-             HTML(
-               "<strong>Para dúvidas ou consultas:</strong><br>
-               Envie mensagem para:<br>
-               <strong>Equipe FGV/DGPE:</strong> <a href='mailto:blix@fgv.br' style='color:#999;'>blix@fgv.br</a><br>
-               <strong>Equipe BM:</strong> <a href='mailto:blax@worldbank.org' style='color:#999;'>blax@worldbank.org</a>"
-             )
-           )
          )
 ),
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            
 ###############################################################################################################
-# TAB  3 META 11 VIGENTE ORIGINAL # TAB  3 META 11 VIGENTE ORIGINAL# TAB  3 META 11 VIGENTE ORIGINAL
+# TAB  6 META 11 VIGENTE ORIGINAL # TAB  3 META 11 VIGENTE ORIGINAL# TAB  3 META 11 VIGENTE ORIGINAL
 ###############################################################################################################            
-
-
 tabPanel("C1. Oferta EPT (Futuro)",
-         fluidPage(
-           h3("Evolução da Oferta de EPT por UF", style = "color: #1f5673; font-weight: bold;"),
-           fluidRow(
-             column(4,
-                    selectizeInput("oferta_uf", "Selecionar UF ou Brasil:",
-                                   choices = c("Brasil", sort(unique(meta11a_opcoes$NM_UF))),
-                                   selected = "Rio Grande do Norte")
-             ),
-             column(4,
-                    selectizeInput("meta_target_type", "Tipo de Meta:",
-                                   choices = list("Meta PNE 11 (3x2013)" = "pne11", 
-                                                  "Meta Definida" = "custom"),
-                                   selected = "pne11"),
-                    conditionalPanel(
-                      condition = "input.meta_target_type == 'custom'",
-                      style = "margin-top: 10px;",
-                      numericInput("custom_meta_value", "Valor Meta:", 
-                                   value = NA, min = 0, step = 1000, width = "100%")
-                    )
-             ),
-             column(4,
-                    selectizeInput("oferta_ept_var", "Variável EPT:",
-                                   choices = ept_vars,
-                                   selected = "QT_MAT_PROF_TEC_PROPAG")
+         div(class = "tab-simple-layout",  #
+             fluidPage(
+               h3("Evolução da Oferta de EPT por UF", 
+                  style = "color: #1f5673; font-weight: bold;"),
+               
+               div(class = "topbar-info",
+                   fluidRow(
+                     column(
+                       width = 12,
+                       div(
+                         style = "margin-top: 5px; margin-bottom: 10px; color: #333; text-align: justify; font-size: 20px;",
+                         tagList(
+                           tags$strong("Instruções: "),
+                           "Esta análise compara a oferta de educação técnica em relação à meta vigente do PNE. Seleccione
+                           a UF, tipo de meta (PNE vigente ou meta preenchida) e a definição da Matriculas EPT desejada - 
+                           com tres opções - como definido por PROPAG - integrado, concomitante e subsequente (EJA);
+                           integrado e susequente ou só integrado."
+                         )
+                       )
+                     )
+                   ),
+                   
+                   fluidRow(
+                     column(
+                       width = 4,
+                       tags$label("Selecionar UF ou Brasil:",
+                                  style = "font-weight: bold; color: #333; font-size: 16px;"),
+                       selectizeInput("oferta_uf", 
+                                      label = NULL,  # Remove label from input
+                                      choices = c("Brasil", sort(unique(meta11a_opcoes$NM_UF))),
+                                      selected = "Rio Grande do Norte")
+                     ),
+                     
+                     column(
+                       width = 4,
+                       tags$label("Tipo de Meta:",
+                                  style = "font-weight: bold; color: #333; font-size: 16px;"),
+                       selectizeInput("meta_target_type", 
+                                      label = NULL,  # Remove label from input
+                                      choices = list("Opção A: Meta PNE 11 vigente" = "pne11", 
+                                                     "Opção B: Meta Definida" = "custom"),
+                                      selected = "pne11"),
+                       tags$small("Selecione Opção A (PNE 11 vigente) ou Opção B (Meta definida por você)", 
+                                  style = "color: #666; display: block; margin-top: 5px;font-size: 16px"),
+                       conditionalPanel(
+                         condition = "input.meta_target_type == 'custom'",
+                         style = "margin-top: 10px;",
+                         numericInput("custom_meta_value", "Valor Meta:", 
+                                      value = NA, min = 0, step = 1000, width = "100%")
+                       )
+                     ),
+                     
+                     column(
+                       width = 4,
+                       tags$label("Variável EPT:",
+                                  style = "font-weight: bold; color: #333; font-size: 16px;"),
+                       selectizeInput("oferta_ept_var", 
+                                      label = NULL,  # Remove label from input
+                                      choices = ept_vars_friendly,
+                                      selected = "QT_MAT_PROF_TEC_PROPAG")
+                     )
+                   )
+               ),
+               
+               fluidRow(
+                 column(12,
+                        plotOutput("oferta_ept_plot", height = "500px")
+                 )
+               ),
+               
+               br(),
+               
+               fluidRow(
+                 column(12,
+                        h3("Tabela de Dados (2007–2024)", 
+                           style = "color: #1f5673; font-weight: bold;"),
+                        div(class = "checkbox-dark-panel",
+                            tags$style(HTML("
+          #oferta_ept_table thead { 
+            background-color: #34495e !important; 
+          }
+          #oferta_ept_table thead th { 
+            background-color: #34495e !important; 
+            color: #ffffff !important;
+            border-bottom: 2px solid #4f5f6f !important;
+          }
+          #oferta_ept_table tbody td {
+            color: #ffffff !important;
+          }
+        ")),
+                            DTOutput("oferta_ept_table")
+                        )
+                 )
+               )
              )
-           ),
-           plotOutput("oferta_ept_plot", height = "500px"),
-           br(),
-           h3("Tabela de Dados (2007–2024)", style = "color: #1f5673; font-weight: bold;"),
-           DTOutput("oferta_ept_table")
          )
-),            
-            
+),
 ###############################################################################################################
-# TAB  4 META 11 NOVA $$$### # TAB  4 META 11 NOVA $$$### # TAB  4 META 11 NOVA $$$### # TAB  4 META 11 NOVA $$$###
+# TAB  7 META 11 NOVA $$$### # TAB  7 META 11 NOVA $$$### # TAB  7 META 11 NOVA $$$### # TAB  7 META 11 NOVA $$$###
 ###############################################################################################################     
-
 
 tabPanel("C2. Oferta EPT (Planificação)",
          fluidPage(
            h3("Meta 11a – Comparação das Definições", style = "color: #1f5673; font-weight: bold;"),
-           
+            div(class = "topbar-info",
+               div(style = "margin-top: 5px; margin-bottom: 10px; color: #333; text-align: justify; font-size: 20px;", 
+                   tagList(
+                     tags$strong("Instruções: "),
+                     "Esta é uma continuação da aba anterior. Aqui, você pode escolher a UF, escolher o Meta 11 (predefinido como 
+                     50% da matrícula do Ensino Médio) ou especificar seu próprio Meta 11 (para qualquer uma das três definições de EPT,
+                     como antes). Se você escolher o Meta 11 predefinido, também precisará definir a projeção de crescimento do
+                     Ensino Médio: igual ao anterior, menor que o anterior ou maior que o anterior, movendo a escala indicada. 
+                     Por fim, escolha o ano em que a meta do Meta 11 deverá ser atingida. O gráfico mostrará o aumento anual que você 
+                     precisará planejar para atingir a meta. Você pode revisar qualquer uma das opções acima para uma exploração 
+                     interativa de diferentes opções.", 
+                   ))),
            fluidRow(
              column(3,
                     # Top row: UF selector
@@ -1816,9 +1919,9 @@ tabPanel("C2. Oferta EPT (Planificação)",
                     checkboxGroupInput(
                       inputId = "meta11a_nova_definicoes",
                       label = "Escolher definições para comparar:",
-                      choices = c("Meta11a_opcao1", "Meta11a_opcao2", "Meta11a_opcao3"),
+                      choices = meta11a_choices_friendly,  # Use the named vector
                       selected = c("Meta11a_opcao1", "Meta11a_opcao2", "Meta11a_opcao3"),
-                      inline = TRUE
+                      inline = FALSE  # Changed to FALSE since the labels are long
                     )
              ),
              column(3,
@@ -1842,23 +1945,24 @@ tabPanel("C2. Oferta EPT (Planificação)",
          )
 ),
 ###############################################################################################################
-# TAB  5  ENRLMMENT TAB ENRLMMENT TAB ENRLMMENT TAB ENRLMMENT TAB  ENRLMMENT TAB ENRLMMENT TAB ENRLMMENT TAB  
+# TAB  8  ENRLMMENT TAB ENRLMMENT TAB ENRLMMENT TAB ENRLMMENT TAB  ENRLMMENT TAB ENRLMMENT TAB ENRLMMENT TAB  
 ###############################################################################################################  
+
+
 
 tabPanel("C3. Oferta EPT (Redes)",
          fluidPage(
            h3("Detalhe da Oferta - Censo Escolar EPT", 
               style = "color: #1f5673; font-weight: bold;"),
-           
            div(class = "topbar-info",
-               style = "color: black !important;",
-               p("Este painel apresenta dados detalhados de matrículas em educação profissional técnica por eixo tecnológico e curso.", 
-                 style = "color: black !important;"),
-               p("Dados do Censo Escolar 2023-2024 com informações por dependência administrativa e modalidades de ensino.", 
-                 style = "color: black !important;"),
-               p("Use os filtros hierárquicos para navegar entre níveis geográficos e dependências administrativas.",
-                 style = "color: black !important;")
-           ),
+               div(style = "margin-top: 5px; margin-bottom: 10px; color: #333; text-align: justify; font-size: 20px;", 
+                   tagList(
+                     tags$strong("Instruções: "),
+                     "Este painel apresenta dados detalhados de matrículas em educação profissional técnica por eixo tecnológico e curso.
+          Dados do Censo Escolar 2023-2024 com informações por dependência administrativa e modalidades de ensino.
+          Use os filtros hierárquicos para navegar entre níveis geográficos e dependências administrativas. Este aplicativo fornece ao servidor a capacidade de obter 
+           estatísticas de inscrição por qualquer divisão de rede de serviço e hierarquia geográfica.",
+                   ))),
            
            sidebarLayout(
              # UI - Remove intermediate/immediate region pickers
@@ -1911,8 +2015,23 @@ tabPanel("C3. Oferta EPT (Redes)",
                fluidRow(
                  column(12,
                         h4("1a - Matrículas por Eixo Tecnológico", style = "color: #1f5673;"),
+                        div(class = "checkbox-dark-panel",
+                            tags$style(HTML("
+          #censo_table_eixo thead { 
+            background-color: #34495e !important; 
+          }
+          #censo_table_eixo thead th { 
+            background-color: #34495e !important; 
+            color: #ffffff !important;
+            border-bottom: 2px solid #4f5f6f !important;
+          }
+          #censo_table_eixo tbody td {
+            color: #ffffff !important;
+          }
+        ")),            
                         withSpinner(DTOutput("censo_table_eixo"))
                  )
+                 ) 
                ),
                
                br(),
@@ -1921,7 +2040,22 @@ tabPanel("C3. Oferta EPT (Redes)",
                fluidRow(
                  column(12,
                         h4("1b - Matrículas por Curso", style = "color: #1f5673;"),
+                        div(class = "checkbox-dark-panel",
+                            tags$style(HTML("
+          #censo_table_curso thead { 
+            background-color: #34495e !important; 
+          }
+          #censo_table_curso thead th { 
+            background-color: #34495e !important; 
+            color: #ffffff !important;
+            border-bottom: 2px solid #4f5f6f !important;
+          }
+          #censo_table_curso tbody td {
+            color: #ffffff !important;
+          }
+        ")),  
                         withSpinner(DTOutput("censo_table_curso"))
+                        )    
                  )
                )
              )
@@ -1932,22 +2066,22 @@ tabPanel("C3. Oferta EPT (Redes)",
 
 
 ###############################################################################################################
-# TAB  6 with 0 start   RESIDUALS MODEL 
+# TAB  9 with 0 start   RESIDUALS MODEL 
 ###############################################################################################################  
 
-tabPanel("C4. Oferta EPT: Modelo Matricula",
+tabPanel("C4. Oferta EPT (Modelo)",
          
-         h3("Análise de Residuais - Desempenho Institucional EPT", style = "color: #1f5673; font-weight: bold;"),
+         h3("Modelo Econométrico de Matrículas EPT - Análise de Desempenho", 
+            style = "color: #1f5673; font-weight: bold;"),
          
          div(class = "topbar-info",
-             style = "color: black !important;",
-             p("Este painel analiza o desempenho institucional em EPT através de residuais do modelo econométrico.", 
-               style = "color: black !important;"),
-             p("Residuais positivos indicam desempenho acima do esperado; negativos indicam desempenho abaixo do esperado.", 
-               style = "color: black !important;"),
-             p("Use os filtros para comparar estados em programas específicos e acompanhar evolução temporal.", 
-               style = "color: black !important;")
-         ),
+             div(style = "margin-top: 5px; margin-bottom: 10px; color: #333; text-align: justify; font-size: 20px;", 
+                 tagList(
+                   tags$strong("Instruções: "),
+                   "Este modelo econométrico prevê matrículas EPT baseado em PIB per capita e alinhamento setorial. ",
+                   "Residuais positivos (direita) indicam desempenho acima do esperado; negativos (esquerda) abaixo do esperado. ",
+                   "Selecione ano, rede, setor e estados para análise comparativa."
+                 ))),
          
          sidebarLayout(
            sidebarPanel(
@@ -2014,7 +2148,16 @@ tabPanel("C4. Oferta EPT: Modelo Matricula",
              br(),
              
              h4("Dados dos Estados Selecionados", style = "color: #1f5673;"),
+             div(class = "checkbox-dark-panel",
+                 tags$style(HTML("
+                #tab_resiTable thead { background-color: #34495e !important; }
+                #tab_resiTable thead th { 
+                background-color: #34495e !important; 
+                 color: #ffffff !important; 
+                 }
+             ")),     
              withSpinner(DTOutput("tab_resiTable"))
+           )
            )
          )
 ),
@@ -2030,15 +2173,15 @@ tabPanel("C4. Oferta EPT: Modelo Matricula",
              h3("Dinamismo Econômico Municipal - Índice de Crescimento", style = "color: #1f5673; font-weight: bold;"),
              
              div(class = "topbar-info",
-                 style = "color: black !important;",
-                 p("Este painel permite explorar o dinamismo econômico municipal com base no crescimento do PIB per capita.", 
-                   style = "color: black !important;"),
-                 p("O índice combina dois períodos: 2002-2011 (peso 1.0) e 2012-2021 (peso 1.5), classificando municípios em decis.", 
-                   style = "color: black !important;"),
-                 p("Use os filtros hierárquicos para navegar entre níveis geográficos e identificar regiões prioritárias para investimento EPT.", 
-                   style = "color: black !important;")
+                 div(style = "margin-top: 5px; margin-bottom: 10px; color: #333; text-align: justify; font-size: 20px;", 
+                     tagList(
+                       tags$strong("Instruções: "),
+                       "Este painel permite explorar o dinamismo econômico municipal com base no crescimento do PIB per capita. ", 
+                       "O índice combina dois períodos: 2002-2011 (peso 1.0) e 2012-2021 (peso 1.5), classificando municípios em decis. ", 
+                       "Use os filtros hierárquicos para navegar entre níveis geográficos e identificar regiões prioritárias para investimento EPT."
+                     )
+                 )
              ),
-             
              sidebarLayout(
                sidebarPanel(
                  width = 3,
@@ -2101,7 +2244,22 @@ tabPanel("C4. Oferta EPT: Modelo Matricula",
                  fluidRow(
                    column(12,
                           h4("Municípios na Região Selecionada", style = "color: #1f5673;"),
-                          withSpinner(DTOutput("dyn_table"))
+                          div(class = "checkbox-dark-panel",
+                              tags$style(HTML("
+          #dyn_table thead { 
+            background-color: #34495e !important; 
+          }
+          #dyn_table thead th { 
+            background-color: #34495e !important; 
+            color: #ffffff !important;
+            border-bottom: 2px solid #4f5f6f !important;
+          }
+          #dyn_table tbody td {
+            color: #ffffff !important;
+          }
+        ")),
+                              withSpinner(DTOutput("dyn_table"))
+                          )
                    )
                  )
                )
@@ -2120,14 +2278,13 @@ tabPanel("C4. Oferta EPT: Modelo Matricula",
              h3("Arranjos Produtivos Locais - Base CBO", style = "color: #1f5673; font-weight: bold;"),
              
              div(class = "topbar-info",
-                 style = "color: black !important;",
-                 p("Este painel permite explorar os Arranjos Produtivos Locais (APLs) identificados com base em especialização ocupacional (CBO).", 
-                   style = "color: black !important;"),
-                 p("APLs são determinados por localização geográfica (QL ≥ 1,25) e persistência nos anos 2023-2024.", 
-                   style = "color: black !important;"),
-                 p("Use os filtros hierárquicos para navegar entre níveis geográficos e ajustar critérios de especialização.", 
-                   style = "color: black !important;")
-             ),
+                 div(style = "margin-top: 5px; margin-bottom: 10px; color: #333; text-align: justify; font-size: 20px;", 
+                     tagList(
+                       tags$strong("Instruções: "),
+                       "Este painel identifica Arranjos Produtivos Locais baseados em especialização ocupacional (CBO), usando quociente locacional (QL≥1) com mínimo de 30 vínculos. ",
+                       "A análise mapeia concentrações de emprego formal persistentes (2023-2024) e sugere cursos técnicos correspondentes via similaridade semântica. ",
+                       "Use os filtros hierárquicos para navegar entre UF, regiões e municípios, ajustando critérios de especialização conforme necessário."
+                     ))),
              
              sidebarLayout(
                sidebarPanel(
@@ -2233,17 +2390,18 @@ tabPanel("D3. Demanda EPT (Informalidade)",
          fluidPage(
            h3("EPT e Informalidade - Análise de Oportunidades de Formalização", 
               style = "color: #1f5673; font-weight: bold;"),
-           
            div(class = "topbar-info",
-               style = "color: black !important;",
-               p("Este painel permite explorar oportunidades de formalização do emprego por meio da análise da educação profissional técnica.", 
-                 style = "color: black !important;"),
-               p("Emprego é classificado em decis (1 a 10) com base no volume de vínculos por município dentro do estado selecionado.", 
-                 style = "color: black !important;"),
-               p("Use os filtros hierárquicos para navegar entre níveis geográficos e identificar prioridades para investimento EPT.",
-                 style = "color: black !important;")
-           ),
-           
+               div(style = "margin-top: 5px; margin-bottom: 10px; color: #333; text-align: justify; font-size: 20px;", 
+                   tagList(
+                     tags$strong("Instruções: "),
+                     "Este painel analisa a estrutura do emprego formal e informal por município, usando dados RAIS (vínculos formais) expandidos com fatores de 
+          estimação da PNAD-C para capturar emprego total. ",
+                     "Municípios são classificados em decis (1-10) baseados na taxa de formalização dentro de cada estado e setor econômico, organizados pela
+          Classificação Brasileira de Ocupações (CBO). ",
+                     "Decil 10 indica alta formalização; decil 1 indica alta informalidade - sinalizando oportunidades para expansão EPT. ",
+                     "Use os filtros para identificar territórios e setores onde a qualificação técnica pode apoiar melhoria
+          de produtividade através do aprimoramento de competências profissionais."
+                   ))), 
            sidebarLayout(
              sidebarPanel(
                width = 3,
@@ -2345,7 +2503,22 @@ tabPanel("D3. Demanda EPT (Informalidade)",
                fluidRow(
                  column(12,
                         h4("Detalhamento por Município/Região", style = "color: #1f5673;"),
-                        withSpinner(DTOutput("informality_table"))
+                        div(class = "checkbox-dark-panel",
+                            tags$style(HTML("
+          #informality_table thead { 
+            background-color: #34495e !important; 
+          }
+          #informality_table thead th { 
+            background-color: #34495e !important; 
+            color: #ffffff !important;
+            border-bottom: 2px solid #4f5f6f !important;
+          }
+          #informality_table tbody td {
+            color: #ffffff !important;
+          }
+        ")),
+            withSpinner(DTOutput("informality_table"))
+                        )
                  )
                )
              )
@@ -2358,10 +2531,23 @@ tabPanel("D3. Demanda EPT (Informalidade)",
 ############################################################################################################### 
 
 tabPanel("E1. Oferta e Demanda EPT",
-         h4("Oferta e Demanda EPT", style = "color: #1f5673;"),
+         h3("Oferta e Demanda EPT", 
+           style = "color: #1f5673; font-weight: bold;"),
          fluidPage(
            useShinyjs(),
            tags$head(includeCSS("www/custom.css")),
+           div(class = "topbar-info",
+               div(style = "margin-top: 5px; margin-bottom: 10px; color: #333; text-align: justify; font-size: 20px;", 
+                   tagList(
+                     tags$strong("Instruções: "),
+                     "Este painel conecta oferta educacional (cursos EPT) com demanda laboral (ocupações) através de análise computacional de similaridade textual. ",
+                     "O sistema compara descrições de ocupações do QBQ (Quadro Básico de Qualificações) com descrições de cursos do CNCT (Catálogo Nacional de Cursos Técnicos) usando duas técnicas: TF-IDF (frequência de termos) e embeddings semânticos (vetores de significado). ",
+                     "A pontuação final combina ambas métricas para identificar correspondências entre cursos e ocupações. ",
+                     tags$strong("Importante: "),
+                     "A conexão curso-ocupação ocorre apenas no nível mais detalhado (tabela 1c). As tabelas 1a e 1b mostram agregações hierárquicas, mas somente seleções na tabela 1c ativam as correspondências na coluna direita. ",
+                     "Selecione 'Oferta→Demanda' para ver ocupações correspondentes aos cursos, ou 'Demanda→Oferta' para identificar cursos para ocupações. ",
+                     "Ajuste o limite de proximidade (0-1) para controlar precisão - valores menores exigem maior similaridade."
+                   ))),
            
            div(class = "checkbox-dark-panel",
                fluidRow(
@@ -2494,12 +2680,16 @@ tabPanel("E2. Escassez de Profissionais Técnicos",
                    
                    #  titlePanel("🔎 Explore a Demanda e Escassez de Profissionais Técnicos no Brasil"),
                    
-                   div(class = "topbar-info", #Suhas orientou usar checkbox-dark-panels, mas Fábio prefere "topbar-info"
-                       p("Este painel permite explorar a demanda e escassez de profissionais técnicos no Brasil, por estado, eixo e curso, com base nos dados do CAGED e da RAIS."),
-                       p("As ocupações são associadas aos cursos técnicos correspondentes, permitindo observar a movimentação do mercado de trabalho agregados no nível do curso técnico específico."),
-                       p("O indicador principal de escassez é o diferencial salarial entre admitidos e desligados. Valor alto sinaliza escassez e valores baixos sinalizam abundância de trabalhadores."),
-                       p("De forma complementar, a taxa de rotatividade e a participação da ocupação no total de vínculos na UF também são utilizadas: se o diferencial salarial se torna menor (indicando maior pressão salarial), a taxa de rotatividade é crescente e as ocupações para as quais o curso forma têm historicamente muitos vínculos, acende-se um alerta de escassez.")
-                   ),
+      div(class = "topbar-info",
+     div(style = "margin-top: 5px; margin-bottom: 10px; color: #333; text-align: justify; font-size: 20px;", 
+     tagList(
+       tags$strong("Instruções: "),
+         "Este painel permite explorar a demanda e escassez de profissionais técnicos no Brasil, por estado, eixo e curso, com base nos dados
+          do CAGED e da RAIS. As ocupações são associadas aos cursos técnicos correspondentes, permitindo observar a movimentação do mercado de trabalho agregados no nível do curso técnico específico.
+          O indicador principal de escassez é o diferencial salarial entre admitidos e desligados. Valor alto sinaliza escassez e valores baixos sinalizam abundância de trabalhadores.
+          De forma complementar, a taxa de rotatividade e a participação da ocupação no total de vínculos na UF também são utilizadas: se o diferencial salarial se torna menor (indicando maior pressão salarial), a taxa de rotatividade é crescente 
+          e as ocupações para as quais o curso forma têm historicamente muitos vínculos, acende-se um alerta de escassez.",
+                           ))),
                    
                    fluidRow(
                      column(2, class = "input-box",
@@ -2595,36 +2785,36 @@ server <- function(input, output, session) {
   
  # 3
   observeEvent(input$link_impacto, {
-    updateTabsetPanel(session, "tab_selection", selected = "C1. Financiamento PROPAG (opções)")
+    updateTabsetPanel(session, "tab_selection", selected = "B1. Financiamento PROPAG")
   })
   
   # 4
   observeEvent(input$link_fef, {
-    updateTabsetPanel(session, "tab_selection", selected = "C2. Retorno FEF por opções")
+    updateTabsetPanel(session, "tab_selection", selected = "B2. Retorno FEF")
   })
   
   # 5
   observeEvent(input$link_finuf, {
-    updateTabsetPanel(session, "tab_selection", selected = "C3. Financiamento (Comparativa)")
+    updateTabsetPanel(session, "tab_selection", selected = "B3. Financiamento (Comparativo)")
   })
 
 # 6  
-  observeEvent(input$link_meta11pro1, {
-    updateTabsetPanel(session, "tab_selection", selected = "B1. Oferta EPT (Futuro)")
+  observeEvent(input$link_meta11pro, {
+    updateTabsetPanel(session, "tab_selection", selected = "C1. Oferta EPT (Futuro)")
   })
 # 7  
   observeEvent(input$link_meta11pla, {
-    updateTabsetPanel(session, "tab_selection", selected = "B2. Oferta EPT (Planificacão")
+    updateTabsetPanel(session, "tab_selection", selected = "C2. Oferta EPT (Planificação)")
   })
 
   # 8  
   observeEvent(input$link_ofertadet, {
-    updateTabsetPanel(session, "tab_selection", selected = "B3. Oferta EPT (Redes)")
+    updateTabsetPanel(session, "tab_selection", selected = "C3. Oferta EPT (Redes)")
   })    
  
   # 9
     observeEvent(input$link_modelo, {
-    updateTabsetPanel(session, "tab_selection", selected = "B4. Oferta EPT (Modelo)")
+    updateTabsetPanel(session, "tab_selection", selected = "C4. Oferta EPT (Modelo)")
   })    
 
   
@@ -3124,6 +3314,1317 @@ output$demo_variableInput <- renderUI({
       "</div>"
     ))
   })
+  
+  
+  
+  ##############################################################################################################################
+  ###  TAB 3 of 0 COUNT  FINANCIALS TAB 1b  FINANCIALS  TAB 1b  FINANCIALS  TAB 1b  FINANCIALS TAB 1b  FINANCIALS  TAB 1b  FINANCIALS  TAB 1b  FINANCIALS 
+  ##############################################################################################################################
+  
+  # Label → value maps (must match UI)
+  # mappings used to rebuild widgets
+  ##  Choices exactly like the UI (add I5 if you now have 1.5%)
+  # exact maps as in the UI
+  all_choices <- list(
+    A = c("Sem abatimento"  = "A1",
+          "10% abatimento" = "A2",
+          "20% abatimento" = "A3"),
+    G = c("1%"   = "G1",
+          "1.5%" = "G2",
+          "2%"   = "G3"),
+    I = c("0%"   = "I1",
+          "0.5%" = "I2",
+          "1%"   = "I3",
+          "1.5%" = "I4",
+          "2%"   = "I5"),
+    J = c("0%" = "J1",
+          "1%" = "J2",
+          "2%" = "J3",
+          "4% (Não Adere)" = "J4")
+  )
+  
+  pretty_opts <- list(
+    A = list(fill=TRUE,bigger=TRUE,status="info",    icon=icon("check")),
+    G = list(fill=TRUE,bigger=TRUE,status="primary", icon=icon("check")),
+    I = list(fill=TRUE,bigger=TRUE,status="success", icon=icon("check")),
+    J = list(fill=TRUE,bigger=TRUE,status="danger",  icon=icon("check"))
+  )
+  
+  # if you still don't have the 'valid' column, this just returns all matches
+  valid_codes <- function(dim, sel){
+    df <- dfcen_val
+    for (nm in names(sel)) {
+      if (length(sel[[nm]]) > 0) {
+        df <- df[df[[nm]] %in% sel[[nm]], , drop = FALSE]
+      }
+    }
+    sort(unique(df[[dim]]))
+  }
+  
+  ## ------------ dynamic update ---------------------
+  observeEvent(
+    list(input$choice_A, input$choice_G, input$choice_I, input$choice_J),
+    {
+      sel <- list(A = input$choice_A,
+                  G = input$choice_G,
+                  I = input$choice_I,
+                  J = input$choice_J)
+      
+      # ----- 1) J4 chosen first → lock A/G/I and keep only J4 -----
+      if (identical(sel$J, "J4")) {
+        sel$A <- sel$G <- sel$I <- character(0)
+        session$sendCustomMessage("toggleAGI", TRUE)
+        
+        updatePrettyCheckboxGroup(session, "choice_J",
+                                  choices       = all_choices$J["4% (Não Adere)"],
+                                  selected      = "J4", inline = TRUE,
+                                  prettyOptions = pretty_opts$J
+        )
+        # clear the others
+        for(id in c("choice_A","choice_G","choice_I")){
+          updatePrettyCheckboxGroup(session, id,
+                                    choices       = all_choices[[substr(id,8,8)]],
+                                    selected      = character(0), inline = TRUE,
+                                    prettyOptions = pretty_opts[[substr(id,8,8)]]
+          )
+        }
+        return(invisible(NULL))
+      } else {
+        session$sendCustomMessage("toggleAGI", FALSE)
+      }
+      
+      # ----- 2) If ANY of A/G/I is selected, DROP J4 immediately -----
+      somePicked <- any(lengths(sel[c("A","G","I")]) > 0)
+      if (somePicked) {
+        j_keep <- all_choices$J[names(all_choices$J) != "4% (Não Adere)"]
+      } else {
+        j_keep <- all_choices$J
+      }
+      updatePrettyCheckboxGroup(session, "choice_J",
+                                choices       = j_keep,
+                                selected      = intersect(sel$J, j_keep),
+                                inline        = TRUE,
+                                prettyOptions = pretty_opts$J
+      )
+      
+      # ----- 3) Normal filtering for A/G/I (J already updated) -----
+      for (dim in c("A","G","I")) {
+        others <- sel[names(sel) != dim]
+        ok   <- if (all(lengths(others) > 0)) valid_codes(dim, others) else all_choices[[dim]]
+        keep <- all_choices[[dim]][ all_choices[[dim]] %in% ok ]
+        
+        updatePrettyCheckboxGroup(session,
+                                  inputId       = paste0("choice_", dim),
+                                  choices       = keep,
+                                  selected      = intersect(sel[[dim]], keep),
+                                  inline        = TRUE,
+                                  prettyOptions = pretty_opts[[dim]]
+        )
+      }
+    },
+    ignoreInit = TRUE
+  )
+  
+  # VALID TABLE FOR MODAL
+  ## ---- lookups used to print human labels ----
+  labA <- c(A1 = "Sem abatimento",
+            A2 = "10% abatimento",
+            A3 = "20% abatimento",
+            ND1 = "NA")
+  
+  labG <- c(G1 = "1%", G2 = "1,5%", G3 = "2%", ND1 = "NA")
+  labI <- c(I1 = "0%", I2 = "0,5%", I3 = "1%", I4 = "1,5%", I5 = "2%", ND1 = "NA")
+  labJ <- c(J1 = "0%", J2 = "1%", J3 = "2%", J4 = "4% (Não Adere)")
+  
+  # OPTIONAL: give each valid row a friendly name (first column)
+  op_names <- c("II-A","II-B","II-C","III-A","III-B","III-C","IV-A","IV-B","ND")
+  
+  ## valid_set MUST contain columns A,G,I,J in codes.
+  valid_set <- subset(dfcen_val, valid, select = c(A,G,I,J))
+  ################TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+  valid_tbl <- valid_set |>
+    dplyr::mutate(
+      Opção          = op_names,
+      Amortização    = labA[A],
+      `Contribuição p/ FEF` = labG[G],
+      `Invest. Direto`       = labI[I],
+      Juros          = labJ[J]
+    ) |>
+    dplyr::select(Opção, Amortização, `Contribuição p/ FEF`, `Invest. Direto`, Juros)
+  
+  ## ---- tiny CSS just for the table (uses your dark panel bg) ----
+  valid_css <- "
+<style>
+#tbl-valid thead th{
+  background:#1f5673; color:#fff; text-align:center; padding:6px 10px; border:1px solid #4e6f84;
+}
+#tbl-valid tbody td{
+  color:#f5f5f5; padding:6px 10px; border:1px solid #4e6f84;
+}
+#tbl-valid tbody tr:nth-child(even){ background:rgba(255,255,255,.05); }
+#tbl-valid tbody tr:nth-child(odd){  background:rgba(255,255,255,.02); }
+</style>
+"
+
+## ---- build the html table without extra pkgs ----
+make_table_html <- function(df){
+  hdr <- paste0("<tr>", paste0(sprintf("<th>%s</th>", names(df)), collapse=""), "</tr>")
+  rows <- apply(df, 1, function(r){
+    paste0("<tr>", paste0(sprintf("<td>%s</td>", r), collapse=""), "</tr>")
+  })
+  paste0(
+    '<table id="tbl-valid" style="width:100%; border-collapse:collapse;">',
+    "<thead>", hdr, "</thead>",
+    "<tbody>", paste0(rows, collapse=""), "</tbody></table>"
+  )
+}
+
+valid_html <- paste0(valid_css, make_table_html(valid_tbl))
+
+## ---- helpers -----------------------------------------------------------
+# helper for null/empty
+`%||%` <- function(x, y) if (is.null(x) || length(x) == 0) y else x
+
+## -------- reactive pickers ------------------------------------------------
+RKT_picked <- reactive({
+  list(A = input$choice_A,
+       G = input$choice_G,
+       I = input$choice_I,
+       J = input$choice_J)
+})
+
+# find matching valid row or NULL
+RKT_sel_row <- reactive({
+  s <- RKT_picked()
+  if (any(lengths(s) == 0)) return(NULL)
+  hit <- dfcen_val[dfcen_val$valid &
+                     dfcen_val$A == s$A &
+                     dfcen_val$G == s$G &
+                     dfcen_val$I == s$I &
+                     dfcen_val$J == s$J, ]
+  if (nrow(hit)) hit[1, ] else NULL
+})
+
+## -------- state needed to rollback & block UI -----------------------------
+rv <- reactiveValues(
+  last_ok    = list(A=character(0), G=character(0), I=character(0), J=character(0)),
+  last_dim   = NULL,
+  lock_dim   = NULL        # which dim we need to rollback
+)
+modal_shown <- reactiveVal(FALSE)
+
+observeEvent(input$choice_A, { rv$last_dim <- "A" }, ignoreInit = TRUE)
+observeEvent(input$choice_G, { rv$last_dim <- "G" }, ignoreInit = TRUE)
+observeEvent(input$choice_I, { rv$last_dim <- "I" }, ignoreInit = TRUE)
+observeEvent(input$choice_J, { rv$last_dim <- "J" }, ignoreInit = TRUE)
+
+## -------- main logic ------------------------------------------------------
+observeEvent(RKT_picked(), {
+  
+  sel <- RKT_picked()
+  
+  # 1) “Não Adere” rule: picking J4 clears A/G/I immediately
+  if (identical(sel$J, "J4") &&
+      any(lengths(sel[c("A","G","I")]) > 0)) {
+    sel$A <- sel$G <- sel$I <- character(0)
+    updatePrettyCheckboxGroup(session, "choice_A", selected = character(0))
+    updatePrettyCheckboxGroup(session, "choice_G", selected = character(0))
+    updatePrettyCheckboxGroup(session, "choice_I", selected = character(0))
+  }
+  
+  # 2) If still incomplete **but not yet dead**, just close any open modal
+  if (any(lengths(sel) == 0) && modal_shown()) {
+    removeModal(); modal_shown(FALSE)
+    shinyjs::enable(selector = ".pcg")
+  }
+  
+  # 3) Check “partial validity” by filtering against ALL valid rows
+  vp <- dfcen_val[dfcen_val$valid, ]        # start with the 9 valid rows
+  for (dim in names(sel)) {
+    if (length(sel[[dim]]) > 0) {
+      vp <- vp[ vp[[dim]] %in% sel[[dim]] , , drop = FALSE ]
+    }
+  }
+  if (nrow(vp) == 0) {
+    # there is no valid row that matches the current partial sel → invalid
+    rv$lock_dim <- rv$last_dim %||% names(sel)[which.max(vapply(sel, length, 0))]
+    shinyjs::disable(selector = ".pcg")
+    
+    ##  -- inside your observeEvent(RKT_picked(), { … }) once you know it's invalid:
+    
+    # 1) detect the “culprit” dimension (where no valid codes remain)
+    bad_dims <- names(sel)[
+      vapply(names(sel), function(dim) {
+        # consider everything *but* this dim
+        others <- sel[names(sel) != dim]
+        # if zero codes remain valid for 'dim', that's bad
+        length(valid_codes(dim, others)) == 0L
+      }, logical(1))
+    ]
+    bad_dim <- bad_dims[1]  # first offending dimension
+    
+    # 2) pull our human‐label maps and dimension name
+    maps     <- list(A=labA, G=labG, I=labI, J=labJ)
+    dim_names<- c(A="Amortização", G="Contribuição p/ FEF",
+                  I="Invest. Direto", J="Juros")
+    bad_map   <- maps[[bad_dim]]
+    bad_label <- dim_names[bad_dim]
+    
+    # 3) what they *just* picked (in red)
+    bad_code  <- sel[[bad_dim]]
+    bad_text  <- bad_map[bad_code]
+    
+    # 4) what *would* be valid here (in green)
+    ok_codes  <- valid_codes(bad_dim, sel[names(sel)!=bad_dim])
+    ok_text   <- bad_map[ok_codes]
+    
+    # 5) craft the little hint HTML
+    hint_html <- sprintf(
+      "<p>Você escolheu <strong style='color:#e74c3c'>%s</strong> para <em>%s</em>,<br/>
+           mas apenas <strong style='color:#27ae60'>%s</strong> %s válidas.</p>",
+      bad_text,
+      bad_label,
+      paste(ok_text, collapse = ", "),
+      if (length(ok_text)>1) "são" else "é"
+    )
+    
+    # 6) show the modal (with your existing valid_html table below)
+    showModal(modalDialog(
+      title = HTML("💥 Combinação inválida"),
+      tagList(
+        HTML("Essa escolha não é permitida pelo <b>PROPAG</b>.<br>",
+             "Ajuste os percentuais para atender uma combinação válida."),
+        HTML(hint_html),
+        HTML(valid_html)
+      ),
+      easyClose = FALSE,
+      footer = actionButton("invalid_ok", "OK", class="btn-primary"),
+      size = "l"
+    ))
+    
+    
+    session$onFlushed(function(){
+      runjs("
+        var dlg = $('#shiny-modal .modal-dialog');
+        if(!dlg.hasClass('ui-draggable')){
+          dlg.draggable({ handle: '.modal-header' });
+          dlg.css('cursor','move');
+        }
+      ")
+    }, once = TRUE)
+    modal_shown(TRUE)
+    return()
+  }
+  
+  # 4) If full combo chosen and matches one valid row, store it & close modal
+  if (all(lengths(sel) == 1)) {
+    hit <- vp[ vp$A == sel$A & vp$G == sel$G &
+                 vp$I == sel$I & vp$J == sel$J , , drop = FALSE]
+    if (nrow(hit) == 1) {
+      rv$last_ok <- sel
+      if (modal_shown()) {
+        removeModal(); modal_shown(FALSE)
+        shinyjs::enable(selector = ".pcg")
+      }
+      return()
+    }
+  }
+  
+  # otherwise: still incomplete but not dead → do nothing (wait next pick)
+}, ignoreInit = TRUE)
+
+## -------- user clicks OK on modal ----------------------------------------
+observeEvent(input$invalid_ok, {
+  removeModal()
+  modal_shown(FALSE)
+  
+  # rollback culprit group to last valid
+  dim <- rv$lock_dim %||% "A"
+  id  <- paste0("choice_", dim)
+  updatePrettyCheckboxGroup(
+    session, inputId = id,
+    selected = rv$last_ok[[dim]] %||% character(0)
+  )
+  
+  # re-enable UI
+  shinyjs::enable(selector = ".pcg")
+})
+
+
+# (Optional) simple summary text
+## ---- CSS once in UI (or put in your custom.css) ---------------------------
+tags$head(tags$style(HTML("
+.scenario-box{
+  border:1px solid #cc0000;          /* red frame (change if you want)       */
+  padding:14px 18px;
+  width:260px;
+  margin-left:auto;                  /* keep it at the right column          */
+  color:#fff;                        /* works on your dark panel             */
+  background:rgba(255,255,255,.05);  /* light transparent fill               }
+.scenario-box h4{
+  margin:0 0 8px 0;
+  font-weight:700;
+  text-align:center;
+}
+.scenario-box .lbl {font-weight:600;}
+")))
+
+## helper to pull pretty name for a row in dfcen_val (assumes column 'valid')
+row_to_name <- function(r){
+  # r is a 1-row data.frame
+  key <- paste(r$A,r$G,r$I,r$J, sep = "_")
+  key_vec <- paste(valid_set$A,valid_set$G,valid_set$I,valid_set$J, sep="_")
+  op_names[ match(key, key_vec) ]
+}
+
+## ---- choice summary card --------------------------------------------------
+output$choice_summary <- renderUI({
+  r <- RKT_sel_row()          # from your earlier code; NULL if incomplete/invalid
+  if (is.null(r)) return(NULL)
+  
+  opcao <- row_to_name(r)
+  htmltools::div(class="scenario-box",
+                 htmltools::h4(sprintf("Opção : %s", opcao)),
+                 htmltools::div(span(class="lbl","Amortização: "), labA[r$A]),
+                 htmltools::div(span(class="lbl","Contribuição ao FEF: "), labG[r$G]),
+                 htmltools::div(span(class="lbl","Investimento Direto: "), labI[r$I]),
+                 htmltools::div(span(class="lbl","Juros: "), labJ[r$J])
+  )
+})
+
+
+observe({
+  session$sendCustomMessage("toggleAGI", "J4" %in% input$choice_J)
+})
+
+# 1) what the user has chosen, NULL until valid:
+RKT_scenario_name <- reactive({
+  # Case: J4 (Não Adere) overrides all other choices
+  if ("J4" %in% input$choice_J) {
+    return("ND")
+  }
+  
+  # Fallback to the existing logic
+  r <- RKT_sel_row()
+  req(r)
+  row_to_name(r)  # e.g. "II-A", "III-B", … or "ND"
+})
+
+
+# 2) pull the right df from the list
+RKT_scenario_data <- reactive({
+  nm <- RKT_scenario_name()
+  df_list[[nm]]
+})
+
+# 3) filter to the chosen UF
+RKT_uf_data <- reactive({
+  df <- RKT_scenario_data()
+  req(input$uf_select)
+  df[df$NM_UF == input$uf_select, ]
+})
+
+
+### 4) Pivot into long form for the ggplot ###
+RKT_plot_data <- reactive({
+  df <- RKT_uf_data()
+  req(input$var_select)
+  years <- 2025:2054
+  sel_cols <- paste0(input$var_select, years)
+  df %>%
+    select(all_of(sel_cols)) %>%
+    setNames(years) %>%
+    pivot_longer(
+      cols      = everything(),
+      names_to  = "Ano",
+      values_to = "Valor"
+    ) %>%
+    mutate(Ano = as.integer(Ano))
+})
+
+
+RKT_plot_data_compare <- reactive({
+  req(input$var_select, input$uf_select)
+  
+  var     <- input$var_select
+  year_bounds <- input$year_range
+  years       <- seq(year_bounds[1], year_bounds[2])
+  
+  selcols <- paste0(var, years)
+  
+  main_op <- RKT_scenario_name()
+  cmp_op  <- input$compare_with %||% ""
+  
+  safe_named_scenario_label <- function(key) {
+    if (!is.null(key) && nzchar(key) && key %in% names(named_scenarios)) {
+      named_scenarios[[key]]
+    } else {
+      paste("Cenário", key %||% "ND")
+    }
+  }
+  label_main <- safe_named_scenario_label(main_op)
+  label_cmp  <- safe_named_scenario_label(cmp_op)
+  
+  df_sel <- RKT_scenario_data() %>%
+    filter(NM_UF == input$uf_select) %>%
+    select(all_of(selcols)) %>%
+    setNames(years) %>%
+    pivot_longer(cols = everything(), names_to = "Ano", values_to = "Valor") %>%
+    mutate(
+      Ano        = as.integer(Ano),
+      UF         = input$uf_select,
+      fill_key   = UF,
+      fill_label = label_main    # 👈 Add this
+    )
+  
+  if (input$compare_with == "") return(df_sel)
+  
+  df_cmp <- df_list[[cmp_op]] %>%
+    filter(NM_UF == input$uf_select) %>%
+    select(all_of(selcols)) %>%
+    setNames(years) %>%
+    pivot_longer(cols = everything(), names_to = "Ano", values_to = "Valor") %>%
+    mutate(
+      Ano        = as.integer(Ano),
+      UF         = input$uf_select,
+      fill_key   = paste0(UF, "_compare"),
+      fill_label = label_cmp     # 👈 Add this
+    )
+  
+  bind_rows(df_sel, df_cmp)
+})
+
+RKT_plot_title <- reactive({
+  req(input$uf_select, RKT_scenario_name())
+  
+  uf      <- input$uf_select
+  main_op <- RKT_scenario_name()
+  cmp_op  <- input$compare_with
+  
+  main_row <- valid_tbl[valid_tbl$Opção == main_op, ]
+  main_desc <- if (nrow(main_row) == 1) {
+    paste0("Cenário ", main_op, " [", 
+           main_row$Amortização, ", ",
+           main_row$`Contribuição p/ FEF`, ", ",
+           main_row$`Invest. Direto`, ", ",
+           main_row$Juros, "]")
+  } else {
+    paste0("Cenário ", main_op)
+  }
+  
+  if (!nzchar(cmp_op)) {
+    paste0("Gráfico: UF ", uf, " — ", main_desc)
+  } else {
+    cmp_row <- valid_tbl[valid_tbl$Opção == cmp_op, ]
+    cmp_desc <- if (nrow(cmp_row) == 1) {
+      paste0("Cenário ", cmp_op, " [", 
+             cmp_row$Amortização, ", ",
+             cmp_row$`Contribuição p/ FEF`, ", ",
+             cmp_row$`Invest. Direto`, ", ",
+             cmp_row$Juros, "]")
+    } else {
+      paste0("Cenário ", cmp_op)
+    }
+    
+    paste0("Gráfico: UF ", uf, " — ", main_desc, " comparado com ", cmp_desc)
+  }
+})
+
+# render the bar chart
+
+output$PloTab1b <- renderPlot({
+  
+  pd <- RKT_plot_data_compare()
+  req(nrow(pd) > 0)
+  
+  # Color palette: full (original + comparison-shaded)
+  all_colors <- c(
+    uf_colors,
+    setNames(uf_colors_compare, paste0(names(uf_colors), "_compare"))
+  )
+  
+  # Check if comparison is active
+  is_comparing <- any(grepl("_compare$", pd$fill_key))
+  
+  # Base ggplot
+  gp2b <- ggplot(pd, aes(
+    x    = factor(Ano),
+    y    = Valor,
+    fill = fill_key
+  )) +
+    geom_col(position = position_dodge(width = 0.9), width = 0.8) +
+    scale_y_continuous(labels = scales::comma) +
+    labs(
+      x     = "Ano",
+      y     = switch(input$var_select,
+                     Saldo   = "Saldo da Dívida",
+                     ApoFEF  = "Aporte ao FEF",
+                     InvDir  = "Investimento Direto",
+                     JurPag  = "Juros Pagos"),
+      title = RKT_plot_title()
+    ) +
+    theme_minimal() +
+    theme(
+      legend.position = if (is_comparing) c(0.95, 0.95) else "none",
+      axis.text.x     = element_text(size = 16, angle = 90, vjust = 0.5,color="blue"),
+      axis.text.y     = element_text(size = 16,color="blue"),
+      axis.title.x    = element_text(size = 16, color="blue", face = "bold"),
+      axis.title.y    = element_text(size = 16,color="blue", face = "bold"),
+      plot.title      = element_text(size = 22, face = "bold", hjust = 0.5, color = "#1f5673")
+    )
+  
+  # Conditional labels:
+  
+  # Compute appropriate label text colors based on brightness of fill color
+  text_colors <- sapply(pd$fill_key, function(key) {
+    col_hex <- all_colors[[key]]
+    rgb_vals <- hex2RGB(col_hex)@coords
+    luminance <- sum(rgb_vals * c(0.299, 0.587, 0.114))  # perceptual brightness
+    if (luminance > 0.6) "black" else "white"
+  })
+  
+  # Calculate number of years selected
+  n_years <- length(unique(pd$Ano))
+  
+  # Adjust text size based on range
+  label_size <- case_when(
+    n_years <= 10 ~ 8,       # Very large if only a few years
+    n_years <= 20 ~ 6,     # Medium-large for mid-range
+    TRUE          ~ 4.5      # Default for full range
+  )
+  
+  gp2b <- gp2b +
+    geom_text(
+      aes(label = paste0(scales::comma(Valor / 1e6), " mi")),
+      position = position_dodge(width = 0.9),
+      color    = text_colors,
+      size     = label_size,
+      fontface = "bold",
+      angle    = if (is_comparing) 90 else 0,
+      vjust    = if (is_comparing) 1.2 else 1.2,  # same vertical reference point (but for rotated text, this pulls it downward)
+      hjust    = if (is_comparing) 1.1 else 0.5   # shift right slightly so it doesn't clip left edge
+    )
+  
+  legend_labels <- setNames(pd$fill_label, pd$fill_key)
+  
+  gp2b <- gp2b +
+    scale_fill_manual(
+      values = all_colors,
+      labels = legend_labels,
+      name = "Leyenda"
+    )+
+    theme(
+      legend.title = element_text(size = 16, face = "bold"),  # 👈 title size
+      legend.text  = element_text(size = 14))   
+  
+  
+  gp2b
+})
+
+##################################################################################################################################
+#####  TAB 4 OF 0 COUNT FINANCE FEF #%&*&*& #####  TAB 8INANCE FEF #%&*&*&#####  TAB FINANCE FEF #%&*&*&#####  TAB FINANCE FEF #%&*&*&#####  TAB 
+##################################################################################################################################
+
+# Track current mode
+current_mode <- reactiveVal("uniform")
+
+# Apply initial toggle states on startup
+observe({
+  mode <- current_mode()
+  
+  for (op in opcoes) {
+    toggleState(id = paste0("chk_all_", op), condition = (mode == "uniform"))
+    for (uf in sg_ufs) {
+      toggleState(id = paste0("chk_", op, "_", uf), condition = (mode == "per_uf"))
+    }
+  }
+})
+
+
+# Watch for mode switch
+observeEvent(input$selection_mode, {
+  isolate({
+    # Only show modal if we've already initialized current_mode once
+    if (!is.null(current_mode()) && input$selection_mode != current_mode()) {
+      showModal(modalDialog(
+        title = "Mudar Modo de Seleção?",
+        "Essa ação limpará as seleções atuais. Deseja continuar?",
+        easyClose = FALSE,
+        footer = tagList(
+          modalButton("Cancelar"),
+          actionButton("confirm_mode_change", "Sim, mudar", class = "btn-danger")
+        )
+      ))
+    } else {
+      # If first load or same selection — just set mode silently
+      current_mode(input$selection_mode)
+    }
+  })
+})
+
+
+# Confirmed switch
+observeEvent(input$confirm_mode_change, {
+  removeModal()
+  new_mode <- isolate(input$selection_mode)
+  current_mode(new_mode)
+  
+  # 1. Clear all checkboxes
+  for (op in opcoes) {
+    updateCheckboxInput(session, paste0("chk_all_", op), value = FALSE)
+    for (uf in sg_ufs) {
+      updateCheckboxInput(session, paste0("chk_", op, "_", uf), value = FALSE)
+    }
+  }
+  
+  # 2. Disable/enable controls after DOM is flushed
+  session$onFlushed(function() {
+    if (new_mode == "uniform") {
+      # Enable 'Todos' checkboxes, disable individual ones
+      for (op in opcoes) {
+        shinyjs::enable(paste0("chk_all_", op))
+        for (uf in sg_ufs) {
+          shinyjs::disable(paste0("chk_", op, "_", uf))
+        }
+      }
+    } else {
+      # Disable 'Todos' checkboxes, enable individual ones
+      for (op in opcoes) {
+        shinyjs::disable(paste0("chk_all_", op))
+        for (uf in sg_ufs) {
+          shinyjs::enable(paste0("chk_", op, "_", uf))
+        }
+      }
+    }
+  }, once = TRUE)
+})
+
+
+# Uniform: handle “Todos” row selection
+observe({
+  for (op in opcoes) {
+    local({
+      op_local <- op
+      observeEvent(input[[paste0("chk_all_", op_local)]], {
+        req(current_mode() == "uniform")
+        selected <- isTRUE(input[[paste0("chk_all_", op_local)]])
+        for (other_op in setdiff(opcoes, op_local)) {
+          updateCheckboxInput(session, paste0("chk_all_", other_op), value = FALSE)
+          for (uf in sg_ufs) {
+            updateCheckboxInput(session, paste0("chk_", other_op, "_", uf), value = FALSE)
+          }
+        }
+        for (uf in sg_ufs) {
+          updateCheckboxInput(session, paste0("chk_", op_local, "_", uf), value = selected)
+        }
+      }, ignoreInit = TRUE)
+    })
+  }
+})
+
+# Per-UF: column logic
+observe({
+  for (uf in sg_ufs) {
+    for (op in opcoes) {
+      local({
+        uf_local <- uf
+        op_local <- op
+        id <- paste0("chk_", op_local, "_", uf_local)
+        observeEvent(input[[id]], {
+          if (current_mode() == "per_uf" && isTRUE(input[[id]])) {
+            for (other_op in setdiff(opcoes, op_local)) {
+              updateCheckboxInput(session, paste0("chk_", other_op, "_", uf_local), value = FALSE)
+            }
+          }
+        }, ignoreInit = TRUE)
+      })
+    }
+  }
+})
+
+
+# Track current mode
+current_mode <- reactiveVal("uniform")
+
+# Apply initial toggle states on startup
+observe({
+  mode <- current_mode()
+  
+  for (op in opcoes) {
+    toggleState(id = paste0("chk_all_", op), condition = (mode == "uniform"))
+    for (uf in sg_ufs) {
+      toggleState(id = paste0("chk_", op, "_", uf), condition = (mode == "per_uf"))
+    }
+  }
+})
+
+
+# Watch for mode switch
+observeEvent(input$selection_mode, {
+  isolate({
+    # Only show modal if we've already initialized current_mode once
+    if (!is.null(current_mode()) && input$selection_mode != current_mode()) {
+      showModal(modalDialog(
+        title = "Mudar Modo de Seleção?",
+        "Essa ação limpará as seleções atuais. Deseja continuar?",
+        easyClose = FALSE,
+        footer = tagList(
+          modalButton("Cancelar"),
+          actionButton("confirm_mode_change", "Sim, mudar", class = "btn-danger")
+        )
+      ))
+    } else {
+      # If first load or same selection — just set mode silently
+      current_mode(input$selection_mode)
+    }
+  })
+})
+
+
+# Confirmed switch
+observeEvent(input$confirm_mode_change, {
+  removeModal()
+  new_mode <- isolate(input$selection_mode)
+  current_mode(new_mode)
+  
+  # 1. Clear all checkboxes
+  for (op in opcoes) {
+    updateCheckboxInput(session, paste0("chk_all_", op), value = FALSE)
+    for (uf in sg_ufs) {
+      updateCheckboxInput(session, paste0("chk_", op, "_", uf), value = FALSE)
+    }
+  }
+  
+  # 2. Disable/enable controls after DOM is flushed
+  session$onFlushed(function() {
+    if (new_mode == "uniform") {
+      # Enable 'Todos' checkboxes, disable individual ones
+      for (op in opcoes) {
+        shinyjs::enable(paste0("chk_all_", op))
+        for (uf in sg_ufs) {
+          shinyjs::disable(paste0("chk_", op, "_", uf))
+        }
+      }
+    } else {
+      # Disable 'Todos' checkboxes, enable individual ones
+      for (op in opcoes) {
+        shinyjs::disable(paste0("chk_all_", op))
+        for (uf in sg_ufs) {
+          shinyjs::enable(paste0("chk_", op, "_", uf))
+        }
+      }
+    }
+  }, once = TRUE)
+})
+
+
+# Uniform: handle “Todos” row selection
+observe({
+  for (op in opcoes) {
+    local({
+      op_local <- op
+      observeEvent(input[[paste0("chk_all_", op_local)]], {
+        req(current_mode() == "uniform")
+        selected <- isTRUE(input[[paste0("chk_all_", op_local)]])
+        for (other_op in setdiff(opcoes, op_local)) {
+          updateCheckboxInput(session, paste0("chk_all_", other_op), value = FALSE)
+          for (uf in sg_ufs) {
+            updateCheckboxInput(session, paste0("chk_", other_op, "_", uf), value = FALSE)
+          }
+        }
+        for (uf in sg_ufs) {
+          updateCheckboxInput(session, paste0("chk_", op_local, "_", uf), value = selected)
+        }
+      }, ignoreInit = TRUE)
+    })
+  }
+})
+
+# Per-UF: column logic
+observe({
+  for (uf in sg_ufs) {
+    for (op in opcoes) {
+      local({
+        uf_local <- uf
+        op_local <- op
+        id <- paste0("chk_", op_local, "_", uf_local)
+        observeEvent(input[[id]], {
+          if (current_mode() == "per_uf" && isTRUE(input[[id]])) {
+            for (other_op in setdiff(opcoes, op_local)) {
+              updateCheckboxInput(session, paste0("chk_", other_op, "_", uf_local), value = FALSE)
+            }
+          }
+        }, ignoreInit = TRUE)
+      })
+    }
+  }
+})
+
+
+# Create a reactive that returns a named vector: names = sg_uf, values = chosen option
+RKT_fef_choices <- reactive({ 
+  mode <- current_mode()
+  selected <- character(length(sg_ufs))
+  names(selected) <- sg_ufs
+  
+  if (mode == "uniform") {
+    # Check which chk_all_* is selected
+    for (op in opcoes) {
+      if (isTRUE(input[[paste0("chk_all_", op)]])) {
+        selected[] <- op
+        break
+      }
+    }
+  } else {
+    for (uf in sg_ufs) {
+      for (op in opcoes) {
+        if (isTRUE(input[[paste0("chk_", op, "_", uf)]])) {
+          selected[uf] <- op
+          break
+        }
+      }
+    }
+  }
+  selected
+})
+
+
+uf_map <- df_censo_UF |>
+  dplyr::select(sg_uf = SG_UF, NM_UF) |>
+  dplyr::distinct()
+
+
+
+RKT_fef_all_options <- reactive({
+  purrr::map_dfr(df_choices$opcao, function(op_label) {
+    df_base <- df_list[[op_label]]
+    if (is.null(df_base)) return(NULL)
+    
+    # Select required columns — NM_UF must be present and consistent with uf_map
+    df_base_min <- df_base |>
+      dplyr::select(NM_UF, Distr_FEF, dplyr::matches("^ApoFEF"))
+    
+    # Join on NM_UF with known-clean uf_map
+    df_joined <- dplyr::left_join(df_base_min, uf_map, by = "NM_UF")
+    
+    if (any(is.na(df_joined$sg_uf))) {
+      unmatched <- df_joined$NM_UF[is.na(df_joined$sg_uf)]
+      warning("Could not match all NM_UF values to sg_uf for option ", op_label,
+              ". Unmatched: ", paste(unique(unmatched), collapse = ", "))
+    }
+    
+    df_joined$opcao <- op_label
+    df_joined
+  })
+})
+
+
+RKT_fef_table <- reactive({
+  choices <- RKT_fef_choices()
+  all_df <- RKT_fef_all_options()
+  
+  if (is.null(all_df)) return(NULL)
+  
+  mode <- current_mode()
+  
+  if (mode == "uniform") {
+    op_code <- unique(choices)
+    if (length(op_code) != 1 || !nzchar(op_code)) return(NULL)
+    
+    op_label <- df_choices$opcao[match(toupper(op_code), toupper(opcoes))]
+    return(dplyr::filter(all_df, opcao == op_label))
+  } else {
+    choice_df <- tibble::tibble(
+      sg_uf = names(choices),
+      op_code = choices
+    ) |>
+      dplyr::filter(nzchar(op_code)) |>
+      dplyr::mutate(opcao = df_choices$opcao[match(toupper(op_code), toupper(opcoes))]) |>
+      dplyr::select(sg_uf, opcao, op_code)      |>
+      dplyr::filter(nzchar(op_code)) |>
+      dplyr::mutate(opcao = df_choices$opcao[match(toupper(op_code), toupper(opcoes))])
+    
+    # Join only on sg_uf and opcao — NM_UF will come cleanly from all_df
+    dplyr::inner_join(all_df, choice_df, by = c("sg_uf","opcao"))
+  }
+})
+
+
+RKT_fef_total_by_year <- reactive({
+  df <- RKT_fef_table()
+  req(df)
+  
+  # Select ApoFEF columns
+  cols <- grep("^ApoFEF", names(df), value = TRUE)
+  
+  total <- colSums(df[, cols, drop = FALSE], na.rm = TRUE)
+  
+  # Convert to tibble with year extracted from column names
+  tibble::tibble(
+    year = as.integer(sub("ApoFEF", "", names(total))),
+    total_fef = as.numeric(total)
+  )
+})
+
+RKT_fef_liq_flow_by_uf <- reactive({
+  df <- RKT_fef_table()
+  total <- RKT_fef_total_by_year()
+  
+  req(df, total)
+  
+  # Step 1: Identify all ApoFEF columns
+  fef_cols <- grep("^ApoFEF", names(df), value = TRUE)
+  years <- as.integer(sub("ApoFEF", "", fef_cols))
+  
+  # Step 2: Get total FEF per year as a named vector
+  total_vec <- setNames(total$total_fef, paste0("ApoFEF", total$year))
+  
+  # Step 3: Prepare starting df with core identity and ApoFEF columns
+  liq_df <- df[, c("sg_uf", "NM_UF", "opcao", "Distr_FEF", fef_cols)]
+  
+  # Step 4: Add LiqFEF columns
+  for (col in fef_cols) {
+    year <- sub("ApoFEF", "", col)
+    total_amt <- total_vec[[col]]
+    liq_df[[paste0("LiqFEF", year)]] <- (liq_df$Distr_FEF * total_amt) - df[[col]]
+  }
+  
+  liq_df
+})
+
+
+# Tab2: Prepare data for plotting
+RKT_fef_plot_data <- reactive({
+  df <- RKT_fef_liq_flow_by_uf()
+  req(df)
+  
+  uf_input <- input$uf_select
+  year_bounds <- input$year_range
+  df_uf <- dplyr::filter(df, NM_UF == uf_input)
+  
+  # Gather and filter by year range
+  df_long <- df_uf |>
+    tidyr::pivot_longer(
+      cols = matches("^(ApoFEF|LiqFEF)\\d+"),
+      names_to = "var",
+      values_to = "value"
+    ) |>
+    dplyr::mutate(
+      type = dplyr::if_else(stringr::str_starts(var, "ApoFEF"), "ApoFEF", "LiqFEF"),
+      year = as.integer(stringr::str_remove(var, "^(ApoFEF|LiqFEF)"))
+    ) |>
+    dplyr::filter(year >= year_bounds[1], year <= year_bounds[2])  # 👈 filtra aqui
+  
+  df_long
+})
+
+RKT_plot_title_tab2 <- reactive({
+  req(input$uf_select, input$year_range, RKT_fef_table())
+  
+  uf_code <- input$uf_select
+  df <- RKT_fef_table()
+  
+  # Buscar o nome da UF e sua opção
+  row <- df |>
+    dplyr::filter(NM_UF == uf_code) |>
+    dplyr::select(NM_UF, opcao) |>
+    dplyr::distinct()
+  
+  uf_name <- unique(row$NM_UF)
+  uf_op   <- unique(row$opcao)
+  
+  uf_name <- uf_name %||% uf_code
+  uf_op   <- uf_op   %||% "ND"
+  
+  paste0("UF: ", uf_name,
+         " — Opção: ", uf_op,
+         " — Anos: ", input$year_range[1], "–", input$year_range[2],
+         " — Aporte e Fluxo Líquido do FEF")
+})
+
+
+output$plotab2 <- renderPlot({
+  df <- RKT_fef_plot_data()
+  req(nrow(df) > 0)
+  
+  # Define colors manually
+  fill_colors <- c("ApoFEF" = "#fbb4ae", "LiqFEF" = "#FF4D4D")
+  
+  # Create label column
+  df$label <- paste0(scales::comma(df$value / 1e6), " mi")
+  
+  df$hjust <- dplyr::case_when(
+    df$value >= 0 ~ 1.2,  # slightly above the bar (negative = upward in y)
+    df$value <  0 ~  -0.2   # slightly below the bar
+  )
+  
+  # Consistent horizontal centering of rotated text
+  df$vjust <- 0.5 # center
+  
+  dodge_width <- 0.75
+  pos_dodge <- position_dodge(width = dodge_width)
+  
+  # Font size can be adjusted for year range
+  n_years <- length(unique(df$year))
+  text_size <- dplyr::case_when(
+    n_years <= 10 ~ 10,
+    n_years <= 20 ~ 8,
+    TRUE          ~ 6
+  )
+  
+  # Main ggplot
+  ggplot(df, aes(x = factor(year), y = value, fill = type)) +
+    geom_col(position = pos_dodge, width = dodge_width) +
+    geom_text(
+      aes(label = label, hjust = hjust),
+      position = pos_dodge,
+      color= "black",
+      size = text_size,
+      angle = 90,
+      vjust    = 0.5,
+      fontface = "bold"
+    ) +
+    scale_color_identity()+
+    scale_fill_manual(values = fill_colors,
+                      labels = c("ApoFEF" = "Aporte FEF", "LiqFEF" = "Fluxo Líquido")) +
+    scale_y_continuous(labels = scales::comma_format(big.mark = ".", decimal.mark = ",")) +
+    labs(
+      x = "Ano", y = "Valor (R$)", fill = NULL,
+      title = RKT_plot_title_tab2()
+    ) +
+    theme_minimal() +
+    theme(
+      legend.position = "right",
+      axis.text.x     = element_text(size = 16, angle = 90, vjust = 0.5, color = "blue"),
+      axis.text.y     = element_text(size = 16, color = "blue"),
+      axis.title.x    = element_text(size = 16, color = "blue", face = "bold"),
+      axis.title.y    = element_text(size = 16, color = "blue", face = "bold"),
+      plot.title      = element_text(size = 22, face = "bold", hjust = 0.5, color = "#1f5673")
+    )
+})
+
+##############################################################################################################################
+### TAB 9  OF 0 COUNT TAB 9 TAB * FINANCE 3 ###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3 
+##############################################################################################################################
+
+output$tab1_fin_plot <- renderPlot({
+  library(patchwork)
+  
+  req(input$fin_variable)
+  
+  `%||%` <- function(a, b) if (!is.null(a)) a else b
+  
+  df <- propag_ept_financeiro
+  df$valor <- suppressWarnings(as.numeric(gsub(",", "", df[[input$fin_variable]])))
+  
+  uf_endividado <- c("MG", "SP", "RJ", "RS")
+  
+  df_endividado <- df[df$UF %in% uf_endividado, ]
+  df_geral <- df[!df$UF %in% uf_endividado, ]
+  
+  df_geral <- df_geral[order(df_geral$Estado), ]
+  df_endividado <- df_endividado[order(df_endividado$Estado), ]
+  
+  plot_label <- var_labels[[input$fin_variable]] %||% input$fin_variable
+  
+  # ----- CONDITIONAL Y-AXIS SETTINGS -----
+  if (input$fin_variable == "saldo_mar25") {
+    y_limits_geral <- c(0, 22e9)
+    y_breaks_geral <- seq(0, 22e9, by = 1e9)
+    
+    y_limits_divida <- c(0, 375e9)
+    y_breaks_divida <- seq(0, 375e9, by = 100e9)
+    
+  } else if (input$fin_variable == "amort_extr") {
+    y_limits_geral <- c(0, 5e9)
+    y_breaks_geral <- seq(0, 5e9, by = 0.5e9)
+    
+    y_limits_divida <- c(0, 75e9)
+    y_breaks_divida <- seq(0, 75e9, by = 5e9)
+    
+  }  else if (input$fin_variable == "EPT_1ano_cen01") {
+    y_limits_geral <- c(0, 120e6)
+    y_breaks_geral <- seq(0, 120e6, by = 20e6)
+    
+    y_limits_divida <- c(0, 1.75e9)
+    y_breaks_divida <- seq(0, 1.75e9, by = 250e6)
+  }  
+  
+  else if (input$fin_variable == "EPT_1ano_cen02") {
+    y_limits_geral <- c(0, 200e6)
+    y_breaks_geral <- seq(0, 200e6, by = 25e6)
+    
+    y_limits_divida <- c(0, 3.5e9)
+    y_breaks_divida <- seq(0, 3.5e9, by = 500e6)
+  }
+  
+  
+  else if (input$fin_variable == "EPT_5ano_cen01") {
+    y_limits_geral <- c(0, 600e6)
+    y_breaks_geral <- seq(0, 600e6, by = 100e6)
+    
+    y_limits_divida <- c(0, 85e8)
+    y_breaks_divida <- seq(0, 85e8, by = 1e9)
+  }
+  
+  else if (input$fin_variable == "EPT_5ano_cen02") {
+    y_limits_geral <- c(0, 1000e6)
+    y_breaks_geral <- seq(0, 1000e6, by = 100e6)
+    
+    y_limits_divida <- c(0, 175e8)
+    y_breaks_divida <- seq(0, 175e8, by = 1e9)
+  }
+  
+  else if (input$fin_variable == "FEF_1ano_liq_cen01") {
+    y_limits_geral <- c(-2.5e9, 800e6)
+    y_breaks_geral <- seq(-2.5e9, 800e6, by = 500e6)
+    
+    y_limits_divida <- y_limits_geral
+    y_breaks_divida <- y_breaks_geral
+    
+  } 
+  
+  else if (input$fin_variable == "FEF_1ano_liq_cen02") {
+    y_limits_geral <- c(-5e9, 1200e6)
+    y_breaks_geral <- seq(-5e9, 1200e6, by = 500e6)
+    
+    y_limits_divida <- y_limits_geral
+    y_breaks_divida <- y_breaks_geral
+    
+  } 
+  
+  else if (input$fin_variable == "FEF_5ano_liq_cen01") {
+    y_limits_geral <- c(-11.37e9, 3800e6)
+    y_breaks_geral <- seq(-11.37e9, 3800e6, by = 1000e6)
+    
+    y_limits_divida <- y_limits_geral
+    y_breaks_divida <- y_breaks_geral
+    
+  } 
+  
+  else if (input$fin_variable == "FEF_5ano_liq_cen02") {
+    y_limits_geral <- c(-22.8e9, 7500e6)
+    y_breaks_geral <- seq(-22.8e9, 7500e6, by = 1000e6)
+    
+    y_limits_divida <- y_limits_geral
+    y_breaks_divida <- y_breaks_geral
+    
+  } 
+  
+  
+  else {
+    y_min <- min(df$valor, na.rm = TRUE)
+    y_max <- max(df$valor, na.rm = TRUE)
+    y_limits_geral <- c(y_min, y_max)
+    y_breaks_geral <- waiver()
+    y_limits_divida <- c(y_min, y_max)
+    y_breaks_divida <- waiver()
+  }
+  
+  # ----- PLOTS -----
+  # Plot for general states (in millions)
+  p_geral <- ggplot(df_geral, aes(x = factor(Estado, levels = df_geral$Estado), y = valor, fill = UF)) +
+    geom_col() +
+    geom_text(
+      aes(label = paste0(format(round(valor / 1e6), big.mark = ".", decimal.mark = ",", scientific = FALSE), " M")),
+      angle = 90, vjust = 0.2, hjust=-0.1, size = 5, color = "blue",fontface = "bold"
+    ) +
+    scale_y_continuous(
+      limits = y_limits_geral,
+      breaks = y_breaks_geral,
+      labels = scales::label_number(scale_cut = scales::cut_short_scale())
+    ) +
+    scale_fill_manual(values = uf_colors_bySG)+
+    labs(title = paste("Demais Estados –", plot_label), x = "Estado", y = "Valor (R$)") +
+    theme_minimal(base_size = 14) +
+    theme(
+      plot.title = element_text(face = "bold", color = "#1f5673"),
+      axis.text.x = element_text(angle = 45, hjust = 1),
+      legend.position = "none"
+    )
+  
+  # Plot for indebted states (in billions)
+  p_divida <- ggplot(df_endividado, aes(x = factor(Estado, levels = df_endividado$Estado), y = valor, fill = UF)) +
+    geom_col() +
+    geom_text(
+      aes(label = paste0(format(round(valor / 1e6), big.mark = ".", decimal.mark = ",", scientific = FALSE), " M")),
+      angle = 90, vjust = 0.2, hjust=-0.1, size = 7, color = "blue",fontface = "bold"
+    ) +
+    scale_y_continuous(
+      limits = y_limits_divida,
+      breaks = y_breaks_divida,
+      labels = scales::label_number(scale_cut = scales::cut_short_scale())
+    ) +
+    scale_fill_manual(values = uf_colors_bySG)+
+    labs(title = "Estados com Alta Dívida", x = "Estado", y = "Valor (R$)") +
+    theme_minimal(base_size = 14) +
+    theme(
+      plot.title = element_text(face = "bold", color = "#1f5673"),
+      axis.text.x = element_text(angle = 45, hjust = 1),
+      legend.position = "none",
+      panel.background = element_rect(fill = "antiquewhite", color = NA)
+    )
+  
+  
+  p_geral + p_divida + plot_layout(ncol = 2, widths = c(2, 1))
+})
+
+
+h3("Tabela 1: Variáveis Financeiras", style = "color: #1f5673; font-weight: bold; margin-top: 30px;")
+output$tab1_fin_table <- DT::renderDataTable({
+  df <- financeiro_dt_all
+  # Drop unused column
+  df <- df[, !(names(df) %in% c("fef_share_pct"))]
+  
+  # Identifica colunas numéricas (exceto UF/Estado)
+  data_cols <- setdiff(names(df), c("UF", "Estado"))
+  
+  # Formata para exibição: números com separador de milhar
+  df[data_cols] <- lapply(df[data_cols], function(x) {
+    if (is.numeric(x)) format(round(x, 0), big.mark = ".", decimal.mark = ",") else x
+  })
+  
+  DT::datatable(
+    df,
+    extensions = 'Buttons',
+    options = list(
+      pageLength = 30,
+      scrollX = TRUE,
+      scrollY = "600px",
+      autoWidth = FALSE,
+      dom = 'Bfrtip',
+      buttons = list(
+        list(extend = "copy", text = "Copiar"),
+        list(extend = "csv", filename = "Tabela_Financeira_PROPAG", text = "CSV"),
+        list(extend = "excel", filename = "Tabela_Financeira_PROPAG", text = "Excel"),
+        list(
+          extend = "pdf",
+          filename = "Tabela_Financeira_PROPAG",
+          text = "PDF",
+          orientation = "landscape",
+          pageSize = "A4",
+          messageTop = "Tabela 1: Variáveis Financeiras"
+        )
+      ),
+      columnDefs = list(
+        list(className = 'dt-nowrap', targets = "_all")
+      )
+    ),
+    rownames = FALSE,
+    class = "stripe nowrap display"
+  )
+})
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   
 
@@ -3801,7 +5302,7 @@ output$demo_variableInput <- renderUI({
   
   
   ##############################################################################################################################
-  ###  TAB 6 of 0 COUNT   RESIDUALS ENROLLMENT PREDICTION LINEAR OLS RESIDUALS
+  ###  TAB 9 of 0 COUNT   RESIDUALS ENROLLMENT PREDICTION LINEAR OLS RESIDUALS
   ##############################################################################################################################
   
   
@@ -3921,1303 +5422,6 @@ output$demo_variableInput <- renderUI({
   })
   
   
-  ##############################################################################################################################
-  ###  TAB 7 of 0 COUNT  FINANCIALS TAB 1b  FINANCIALS  TAB 1b  FINANCIALS  TAB 1b  FINANCIALS TAB 1b  FINANCIALS  TAB 1b  FINANCIALS  TAB 1b  FINANCIALS 
-  ##############################################################################################################################
-  
-  # Label → value maps (must match UI)
-  # mappings used to rebuild widgets
-  ##  Choices exactly like the UI (add I5 if you now have 1.5%)
-  # exact maps as in the UI
-  all_choices <- list(
-    A = c("Sem abatimento"  = "A1",
-          "10% abatimento" = "A2",
-          "20% abatimento" = "A3"),
-    G = c("1%"   = "G1",
-          "1.5%" = "G2",
-          "2%"   = "G3"),
-    I = c("0%"   = "I1",
-          "0.5%" = "I2",
-          "1%"   = "I3",
-          "1.5%" = "I4",
-          "2%"   = "I5"),
-    J = c("0%" = "J1",
-          "1%" = "J2",
-          "2%" = "J3",
-          "4% (Não Adere)" = "J4")
-  )
-  
-  pretty_opts <- list(
-    A = list(fill=TRUE,bigger=TRUE,status="info",    icon=icon("check")),
-    G = list(fill=TRUE,bigger=TRUE,status="primary", icon=icon("check")),
-    I = list(fill=TRUE,bigger=TRUE,status="success", icon=icon("check")),
-    J = list(fill=TRUE,bigger=TRUE,status="danger",  icon=icon("check"))
-  )
-  
-  # if you still don't have the 'valid' column, this just returns all matches
-  valid_codes <- function(dim, sel){
-    df <- dfcen_val
-    for (nm in names(sel)) {
-      if (length(sel[[nm]]) > 0) {
-        df <- df[df[[nm]] %in% sel[[nm]], , drop = FALSE]
-      }
-    }
-    sort(unique(df[[dim]]))
-  }
-  
-  ## ------------ dynamic update ---------------------
-  observeEvent(
-    list(input$choice_A, input$choice_G, input$choice_I, input$choice_J),
-    {
-      sel <- list(A = input$choice_A,
-                  G = input$choice_G,
-                  I = input$choice_I,
-                  J = input$choice_J)
-      
-      # ----- 1) J4 chosen first → lock A/G/I and keep only J4 -----
-      if (identical(sel$J, "J4")) {
-        sel$A <- sel$G <- sel$I <- character(0)
-        session$sendCustomMessage("toggleAGI", TRUE)
-        
-        updatePrettyCheckboxGroup(session, "choice_J",
-                                  choices       = all_choices$J["4% (Não Adere)"],
-                                  selected      = "J4", inline = TRUE,
-                                  prettyOptions = pretty_opts$J
-        )
-        # clear the others
-        for(id in c("choice_A","choice_G","choice_I")){
-          updatePrettyCheckboxGroup(session, id,
-                                    choices       = all_choices[[substr(id,8,8)]],
-                                    selected      = character(0), inline = TRUE,
-                                    prettyOptions = pretty_opts[[substr(id,8,8)]]
-          )
-        }
-        return(invisible(NULL))
-      } else {
-        session$sendCustomMessage("toggleAGI", FALSE)
-      }
-      
-      # ----- 2) If ANY of A/G/I is selected, DROP J4 immediately -----
-      somePicked <- any(lengths(sel[c("A","G","I")]) > 0)
-      if (somePicked) {
-        j_keep <- all_choices$J[names(all_choices$J) != "4% (Não Adere)"]
-      } else {
-        j_keep <- all_choices$J
-      }
-      updatePrettyCheckboxGroup(session, "choice_J",
-                                choices       = j_keep,
-                                selected      = intersect(sel$J, j_keep),
-                                inline        = TRUE,
-                                prettyOptions = pretty_opts$J
-      )
-      
-      # ----- 3) Normal filtering for A/G/I (J already updated) -----
-      for (dim in c("A","G","I")) {
-        others <- sel[names(sel) != dim]
-        ok   <- if (all(lengths(others) > 0)) valid_codes(dim, others) else all_choices[[dim]]
-        keep <- all_choices[[dim]][ all_choices[[dim]] %in% ok ]
-        
-        updatePrettyCheckboxGroup(session,
-                                  inputId       = paste0("choice_", dim),
-                                  choices       = keep,
-                                  selected      = intersect(sel[[dim]], keep),
-                                  inline        = TRUE,
-                                  prettyOptions = pretty_opts[[dim]]
-        )
-      }
-    },
-    ignoreInit = TRUE
-  )
-  
-  # VALID TABLE FOR MODAL
-  ## ---- lookups used to print human labels ----
-  labA <- c(A1 = "Sem abatimento",
-            A2 = "10% abatimento",
-            A3 = "20% abatimento",
-            ND1 = "NA")
-  
-  labG <- c(G1 = "1%", G2 = "1,5%", G3 = "2%", ND1 = "NA")
-  labI <- c(I1 = "0%", I2 = "0,5%", I3 = "1%", I4 = "1,5%", I5 = "2%", ND1 = "NA")
-  labJ <- c(J1 = "0%", J2 = "1%", J3 = "2%", J4 = "4% (Não Adere)")
-  
-  # OPTIONAL: give each valid row a friendly name (first column)
-  op_names <- c("II-A","II-B","II-C","III-A","III-B","III-C","IV-A","IV-B","ND")
-  
-  ## valid_set MUST contain columns A,G,I,J in codes.
-  valid_set <- subset(dfcen_val, valid, select = c(A,G,I,J))
-  ################TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
-  valid_tbl <- valid_set |>
-    dplyr::mutate(
-      Opção          = op_names,
-      Amortização    = labA[A],
-      `Contribuição p/ FEF` = labG[G],
-      `Invest. Direto`       = labI[I],
-      Juros          = labJ[J]
-    ) |>
-    dplyr::select(Opção, Amortização, `Contribuição p/ FEF`, `Invest. Direto`, Juros)
-  
-  ## ---- tiny CSS just for the table (uses your dark panel bg) ----
-  valid_css <- "
-<style>
-#tbl-valid thead th{
-  background:#1f5673; color:#fff; text-align:center; padding:6px 10px; border:1px solid #4e6f84;
-}
-#tbl-valid tbody td{
-  color:#f5f5f5; padding:6px 10px; border:1px solid #4e6f84;
-}
-#tbl-valid tbody tr:nth-child(even){ background:rgba(255,255,255,.05); }
-#tbl-valid tbody tr:nth-child(odd){  background:rgba(255,255,255,.02); }
-</style>
-"
-
-## ---- build the html table without extra pkgs ----
-make_table_html <- function(df){
-  hdr <- paste0("<tr>", paste0(sprintf("<th>%s</th>", names(df)), collapse=""), "</tr>")
-  rows <- apply(df, 1, function(r){
-    paste0("<tr>", paste0(sprintf("<td>%s</td>", r), collapse=""), "</tr>")
-  })
-  paste0(
-    '<table id="tbl-valid" style="width:100%; border-collapse:collapse;">',
-    "<thead>", hdr, "</thead>",
-    "<tbody>", paste0(rows, collapse=""), "</tbody></table>"
-  )
-}
-
-valid_html <- paste0(valid_css, make_table_html(valid_tbl))
-
-  ## ---- helpers -----------------------------------------------------------
-  # helper for null/empty
-  `%||%` <- function(x, y) if (is.null(x) || length(x) == 0) y else x
-  
-  ## -------- reactive pickers ------------------------------------------------
-  RKT_picked <- reactive({
-    list(A = input$choice_A,
-         G = input$choice_G,
-         I = input$choice_I,
-         J = input$choice_J)
-  })
-  
-  # find matching valid row or NULL
- RKT_sel_row <- reactive({
-    s <- RKT_picked()
-    if (any(lengths(s) == 0)) return(NULL)
-    hit <- dfcen_val[dfcen_val$valid &
-                       dfcen_val$A == s$A &
-                       dfcen_val$G == s$G &
-                       dfcen_val$I == s$I &
-                       dfcen_val$J == s$J, ]
-    if (nrow(hit)) hit[1, ] else NULL
-  })
-  
-  ## -------- state needed to rollback & block UI -----------------------------
-  rv <- reactiveValues(
-    last_ok    = list(A=character(0), G=character(0), I=character(0), J=character(0)),
-    last_dim   = NULL,
-    lock_dim   = NULL        # which dim we need to rollback
-  )
-  modal_shown <- reactiveVal(FALSE)
-  
-  observeEvent(input$choice_A, { rv$last_dim <- "A" }, ignoreInit = TRUE)
-  observeEvent(input$choice_G, { rv$last_dim <- "G" }, ignoreInit = TRUE)
-  observeEvent(input$choice_I, { rv$last_dim <- "I" }, ignoreInit = TRUE)
-  observeEvent(input$choice_J, { rv$last_dim <- "J" }, ignoreInit = TRUE)
-  
-  ## -------- main logic ------------------------------------------------------
-  observeEvent(RKT_picked(), {
-    
-    sel <- RKT_picked()
-    
-    # 1) “Não Adere” rule: picking J4 clears A/G/I immediately
-    if (identical(sel$J, "J4") &&
-        any(lengths(sel[c("A","G","I")]) > 0)) {
-      sel$A <- sel$G <- sel$I <- character(0)
-      updatePrettyCheckboxGroup(session, "choice_A", selected = character(0))
-      updatePrettyCheckboxGroup(session, "choice_G", selected = character(0))
-      updatePrettyCheckboxGroup(session, "choice_I", selected = character(0))
-    }
-    
-    # 2) If still incomplete **but not yet dead**, just close any open modal
-    if (any(lengths(sel) == 0) && modal_shown()) {
-      removeModal(); modal_shown(FALSE)
-      shinyjs::enable(selector = ".pcg")
-    }
-    
-    # 3) Check “partial validity” by filtering against ALL valid rows
-    vp <- dfcen_val[dfcen_val$valid, ]        # start with the 9 valid rows
-    for (dim in names(sel)) {
-      if (length(sel[[dim]]) > 0) {
-        vp <- vp[ vp[[dim]] %in% sel[[dim]] , , drop = FALSE ]
-      }
-    }
-    if (nrow(vp) == 0) {
-      # there is no valid row that matches the current partial sel → invalid
-      rv$lock_dim <- rv$last_dim %||% names(sel)[which.max(vapply(sel, length, 0))]
-      shinyjs::disable(selector = ".pcg")
-      
-      ##  -- inside your observeEvent(RKT_picked(), { … }) once you know it's invalid:
-      
-      # 1) detect the “culprit” dimension (where no valid codes remain)
-      bad_dims <- names(sel)[
-        vapply(names(sel), function(dim) {
-          # consider everything *but* this dim
-          others <- sel[names(sel) != dim]
-          # if zero codes remain valid for 'dim', that's bad
-          length(valid_codes(dim, others)) == 0L
-        }, logical(1))
-      ]
-      bad_dim <- bad_dims[1]  # first offending dimension
-      
-      # 2) pull our human‐label maps and dimension name
-      maps     <- list(A=labA, G=labG, I=labI, J=labJ)
-      dim_names<- c(A="Amortização", G="Contribuição p/ FEF",
-                    I="Invest. Direto", J="Juros")
-      bad_map   <- maps[[bad_dim]]
-      bad_label <- dim_names[bad_dim]
-      
-      # 3) what they *just* picked (in red)
-      bad_code  <- sel[[bad_dim]]
-      bad_text  <- bad_map[bad_code]
-      
-      # 4) what *would* be valid here (in green)
-      ok_codes  <- valid_codes(bad_dim, sel[names(sel)!=bad_dim])
-      ok_text   <- bad_map[ok_codes]
-      
-      # 5) craft the little hint HTML
-      hint_html <- sprintf(
-        "<p>Você escolheu <strong style='color:#e74c3c'>%s</strong> para <em>%s</em>,<br/>
-           mas apenas <strong style='color:#27ae60'>%s</strong> %s válidas.</p>",
-        bad_text,
-        bad_label,
-        paste(ok_text, collapse = ", "),
-        if (length(ok_text)>1) "são" else "é"
-      )
-      
-      # 6) show the modal (with your existing valid_html table below)
-      showModal(modalDialog(
-        title = HTML("💥 Combinação inválida"),
-        tagList(
-          HTML("Essa escolha não é permitida pelo <b>PROPAG</b>.<br>",
-               "Ajuste os percentuais para atender uma combinação válida."),
-          HTML(hint_html),
-          HTML(valid_html)
-        ),
-        easyClose = FALSE,
-        footer = actionButton("invalid_ok", "OK", class="btn-primary"),
-        size = "l"
-      ))
-    
-  
-      session$onFlushed(function(){
-        runjs("
-        var dlg = $('#shiny-modal .modal-dialog');
-        if(!dlg.hasClass('ui-draggable')){
-          dlg.draggable({ handle: '.modal-header' });
-          dlg.css('cursor','move');
-        }
-      ")
-      }, once = TRUE)
-      modal_shown(TRUE)
-      return()
-    }
-    
-    # 4) If full combo chosen and matches one valid row, store it & close modal
-    if (all(lengths(sel) == 1)) {
-      hit <- vp[ vp$A == sel$A & vp$G == sel$G &
-                   vp$I == sel$I & vp$J == sel$J , , drop = FALSE]
-      if (nrow(hit) == 1) {
-        rv$last_ok <- sel
-        if (modal_shown()) {
-          removeModal(); modal_shown(FALSE)
-          shinyjs::enable(selector = ".pcg")
-        }
-        return()
-      }
-    }
-    
-    # otherwise: still incomplete but not dead → do nothing (wait next pick)
-  }, ignoreInit = TRUE)
-
-  ## -------- user clicks OK on modal ----------------------------------------
-  observeEvent(input$invalid_ok, {
-    removeModal()
-    modal_shown(FALSE)
-    
-    # rollback culprit group to last valid
-    dim <- rv$lock_dim %||% "A"
-    id  <- paste0("choice_", dim)
-    updatePrettyCheckboxGroup(
-      session, inputId = id,
-      selected = rv$last_ok[[dim]] %||% character(0)
-    )
-    
-    # re-enable UI
-    shinyjs::enable(selector = ".pcg")
-  })
-  
-
-  # (Optional) simple summary text
-  ## ---- CSS once in UI (or put in your custom.css) ---------------------------
-  tags$head(tags$style(HTML("
-.scenario-box{
-  border:1px solid #cc0000;          /* red frame (change if you want)       */
-  padding:14px 18px;
-  width:260px;
-  margin-left:auto;                  /* keep it at the right column          */
-  color:#fff;                        /* works on your dark panel             */
-  background:rgba(255,255,255,.05);  /* light transparent fill               }
-.scenario-box h4{
-  margin:0 0 8px 0;
-  font-weight:700;
-  text-align:center;
-}
-.scenario-box .lbl {font-weight:600;}
-")))
-
-  ## helper to pull pretty name for a row in dfcen_val (assumes column 'valid')
-  row_to_name <- function(r){
-    # r is a 1-row data.frame
-    key <- paste(r$A,r$G,r$I,r$J, sep = "_")
-    key_vec <- paste(valid_set$A,valid_set$G,valid_set$I,valid_set$J, sep="_")
-    op_names[ match(key, key_vec) ]
-  }
-  
-  ## ---- choice summary card --------------------------------------------------
-  output$choice_summary <- renderUI({
-    r <- RKT_sel_row()          # from your earlier code; NULL if incomplete/invalid
-    if (is.null(r)) return(NULL)
-    
-    opcao <- row_to_name(r)
-    htmltools::div(class="scenario-box",
-                   htmltools::h4(sprintf("Opção : %s", opcao)),
-                   htmltools::div(span(class="lbl","Amortização: "), labA[r$A]),
-                   htmltools::div(span(class="lbl","Contribuição ao FEF: "), labG[r$G]),
-                   htmltools::div(span(class="lbl","Investimento Direto: "), labI[r$I]),
-                   htmltools::div(span(class="lbl","Juros: "), labJ[r$J])
-    )
-  })
-  
-
-  observe({
-    session$sendCustomMessage("toggleAGI", "J4" %in% input$choice_J)
-  })
-  
-  # 1) what the user has chosen, NULL until valid:
-  RKT_scenario_name <- reactive({
-    # Case: J4 (Não Adere) overrides all other choices
-    if ("J4" %in% input$choice_J) {
-      return("ND")
-    }
-    
-    # Fallback to the existing logic
-    r <- RKT_sel_row()
-    req(r)
-    row_to_name(r)  # e.g. "II-A", "III-B", … or "ND"
-  })
-  
-
-  # 2) pull the right df from the list
-  RKT_scenario_data <- reactive({
-    nm <- RKT_scenario_name()
-    df_list[[nm]]
-  })
-  
-  # 3) filter to the chosen UF
-  RKT_uf_data <- reactive({
-    df <- RKT_scenario_data()
-    req(input$uf_select)
-    df[df$NM_UF == input$uf_select, ]
-  })
-  
-  
-  ### 4) Pivot into long form for the ggplot ###
-  RKT_plot_data <- reactive({
-    df <- RKT_uf_data()
-    req(input$var_select)
-    years <- 2025:2054
-    sel_cols <- paste0(input$var_select, years)
-    df %>%
-      select(all_of(sel_cols)) %>%
-      setNames(years) %>%
-      pivot_longer(
-        cols      = everything(),
-        names_to  = "Ano",
-        values_to = "Valor"
-      ) %>%
-      mutate(Ano = as.integer(Ano))
-  })
-  
-
-  RKT_plot_data_compare <- reactive({
-    req(input$var_select, input$uf_select)
-    
-    var     <- input$var_select
-    year_bounds <- input$year_range
-    years       <- seq(year_bounds[1], year_bounds[2])
-    
-    selcols <- paste0(var, years)
-    
-    main_op <- RKT_scenario_name()
-    cmp_op  <- input$compare_with %||% ""
-    
-    safe_named_scenario_label <- function(key) {
-      if (!is.null(key) && nzchar(key) && key %in% names(named_scenarios)) {
-        named_scenarios[[key]]
-      } else {
-        paste("Cenário", key %||% "ND")
-      }
-    }
-    label_main <- safe_named_scenario_label(main_op)
-    label_cmp  <- safe_named_scenario_label(cmp_op)
-    
-    df_sel <- RKT_scenario_data() %>%
-      filter(NM_UF == input$uf_select) %>%
-      select(all_of(selcols)) %>%
-      setNames(years) %>%
-      pivot_longer(cols = everything(), names_to = "Ano", values_to = "Valor") %>%
-      mutate(
-        Ano        = as.integer(Ano),
-        UF         = input$uf_select,
-        fill_key   = UF,
-        fill_label = label_main    # 👈 Add this
-      )
-    
-    if (input$compare_with == "") return(df_sel)
-    
-    df_cmp <- df_list[[cmp_op]] %>%
-      filter(NM_UF == input$uf_select) %>%
-      select(all_of(selcols)) %>%
-      setNames(years) %>%
-      pivot_longer(cols = everything(), names_to = "Ano", values_to = "Valor") %>%
-      mutate(
-        Ano        = as.integer(Ano),
-        UF         = input$uf_select,
-        fill_key   = paste0(UF, "_compare"),
-        fill_label = label_cmp     # 👈 Add this
-      )
-    
-    bind_rows(df_sel, df_cmp)
-  })
-
-  RKT_plot_title <- reactive({
-    req(input$uf_select, RKT_scenario_name())
-    
-    uf      <- input$uf_select
-    main_op <- RKT_scenario_name()
-    cmp_op  <- input$compare_with
-    
-    main_row <- valid_tbl[valid_tbl$Opção == main_op, ]
-    main_desc <- if (nrow(main_row) == 1) {
-      paste0("Cenário ", main_op, " [", 
-             main_row$Amortização, ", ",
-             main_row$`Contribuição p/ FEF`, ", ",
-             main_row$`Invest. Direto`, ", ",
-             main_row$Juros, "]")
-    } else {
-      paste0("Cenário ", main_op)
-    }
-    
-    if (!nzchar(cmp_op)) {
-      paste0("Gráfico: UF ", uf, " — ", main_desc)
-    } else {
-      cmp_row <- valid_tbl[valid_tbl$Opção == cmp_op, ]
-      cmp_desc <- if (nrow(cmp_row) == 1) {
-        paste0("Cenário ", cmp_op, " [", 
-               cmp_row$Amortização, ", ",
-               cmp_row$`Contribuição p/ FEF`, ", ",
-               cmp_row$`Invest. Direto`, ", ",
-               cmp_row$Juros, "]")
-      } else {
-        paste0("Cenário ", cmp_op)
-      }
-      
-      paste0("Gráfico: UF ", uf, " — ", main_desc, " comparado com ", cmp_desc)
-    }
-  })
-  
-  # render the bar chart
-
-  output$PloTab1b <- renderPlot({
-    
-    pd <- RKT_plot_data_compare()
-    req(nrow(pd) > 0)
-    
-    # Color palette: full (original + comparison-shaded)
-    all_colors <- c(
-      uf_colors,
-      setNames(uf_colors_compare, paste0(names(uf_colors), "_compare"))
-    )
-    
-    # Check if comparison is active
-    is_comparing <- any(grepl("_compare$", pd$fill_key))
-    
-    # Base ggplot
-    gp2b <- ggplot(pd, aes(
-      x    = factor(Ano),
-      y    = Valor,
-      fill = fill_key
-    )) +
-      geom_col(position = position_dodge(width = 0.9), width = 0.8) +
-      scale_y_continuous(labels = scales::comma) +
-      labs(
-        x     = "Ano",
-        y     = switch(input$var_select,
-                       Saldo   = "Saldo da Dívida",
-                       ApoFEF  = "Aporte ao FEF",
-                       InvDir  = "Investimento Direto",
-                       JurPag  = "Juros Pagos"),
-        title = RKT_plot_title()
-      ) +
-      theme_minimal() +
-      theme(
-        legend.position = if (is_comparing) c(0.95, 0.95) else "none",
-        axis.text.x     = element_text(size = 16, angle = 90, vjust = 0.5,color="blue"),
-        axis.text.y     = element_text(size = 16,color="blue"),
-        axis.title.x    = element_text(size = 16, color="blue", face = "bold"),
-        axis.title.y    = element_text(size = 16,color="blue", face = "bold"),
-        plot.title      = element_text(size = 22, face = "bold", hjust = 0.5, color = "#1f5673")
-      )
-    
-    # Conditional labels:
-    
-    # Compute appropriate label text colors based on brightness of fill color
-    text_colors <- sapply(pd$fill_key, function(key) {
-      col_hex <- all_colors[[key]]
-      rgb_vals <- hex2RGB(col_hex)@coords
-      luminance <- sum(rgb_vals * c(0.299, 0.587, 0.114))  # perceptual brightness
-      if (luminance > 0.6) "black" else "white"
-    })
-    
-    # Calculate number of years selected
-    n_years <- length(unique(pd$Ano))
-    
-    # Adjust text size based on range
-    label_size <- case_when(
-      n_years <= 10 ~ 8,       # Very large if only a few years
-      n_years <= 20 ~ 6,     # Medium-large for mid-range
-      TRUE          ~ 4.5      # Default for full range
-    )
-
-    gp2b <- gp2b +
-      geom_text(
-        aes(label = paste0(scales::comma(Valor / 1e6), " mi")),
-        position = position_dodge(width = 0.9),
-        color    = text_colors,
-        size     = label_size,
-        fontface = "bold",
-        angle    = if (is_comparing) 90 else 0,
-        vjust    = if (is_comparing) 1.2 else 1.2,  # same vertical reference point (but for rotated text, this pulls it downward)
-        hjust    = if (is_comparing) 1.1 else 0.5   # shift right slightly so it doesn't clip left edge
-      )
-
-    legend_labels <- setNames(pd$fill_label, pd$fill_key)
-    
-    gp2b <- gp2b +
-      scale_fill_manual(
-        values = all_colors,
-        labels = legend_labels,
-        name = "Leyenda"
-      )+
-      theme(
-        legend.title = element_text(size = 16, face = "bold"),  # 👈 title size
-        legend.text  = element_text(size = 14))   
-    
-    
-    gp2b
-  })
-  
-  ##################################################################################################################################
-  #####  TAB 8 OF 0 COUNT FINANCE FEF #%&*&*& #####  TAB 8INANCE FEF #%&*&*&#####  TAB FINANCE FEF #%&*&*&#####  TAB FINANCE FEF #%&*&*&#####  TAB 
-  ##################################################################################################################################
-
-  # Track current mode
-  current_mode <- reactiveVal("uniform")
-  
-  # Apply initial toggle states on startup
-  observe({
-    mode <- current_mode()
-    
-    for (op in opcoes) {
-      toggleState(id = paste0("chk_all_", op), condition = (mode == "uniform"))
-      for (uf in sg_ufs) {
-        toggleState(id = paste0("chk_", op, "_", uf), condition = (mode == "per_uf"))
-      }
-    }
-  })
-  
-  
-  # Watch for mode switch
-  observeEvent(input$selection_mode, {
-    isolate({
-      # Only show modal if we've already initialized current_mode once
-      if (!is.null(current_mode()) && input$selection_mode != current_mode()) {
-        showModal(modalDialog(
-          title = "Mudar Modo de Seleção?",
-          "Essa ação limpará as seleções atuais. Deseja continuar?",
-          easyClose = FALSE,
-          footer = tagList(
-            modalButton("Cancelar"),
-            actionButton("confirm_mode_change", "Sim, mudar", class = "btn-danger")
-          )
-        ))
-      } else {
-        # If first load or same selection — just set mode silently
-        current_mode(input$selection_mode)
-      }
-    })
-  })
-  
-  
-  # Confirmed switch
-  observeEvent(input$confirm_mode_change, {
-    removeModal()
-    new_mode <- isolate(input$selection_mode)
-    current_mode(new_mode)
-    
-    # 1. Clear all checkboxes
-    for (op in opcoes) {
-      updateCheckboxInput(session, paste0("chk_all_", op), value = FALSE)
-      for (uf in sg_ufs) {
-        updateCheckboxInput(session, paste0("chk_", op, "_", uf), value = FALSE)
-      }
-    }
-    
-    # 2. Disable/enable controls after DOM is flushed
-    session$onFlushed(function() {
-      if (new_mode == "uniform") {
-        # Enable 'Todos' checkboxes, disable individual ones
-        for (op in opcoes) {
-          shinyjs::enable(paste0("chk_all_", op))
-          for (uf in sg_ufs) {
-            shinyjs::disable(paste0("chk_", op, "_", uf))
-          }
-        }
-      } else {
-        # Disable 'Todos' checkboxes, enable individual ones
-        for (op in opcoes) {
-          shinyjs::disable(paste0("chk_all_", op))
-          for (uf in sg_ufs) {
-            shinyjs::enable(paste0("chk_", op, "_", uf))
-          }
-        }
-      }
-    }, once = TRUE)
-  })
-  
-
-  # Uniform: handle “Todos” row selection
-  observe({
-    for (op in opcoes) {
-      local({
-        op_local <- op
-        observeEvent(input[[paste0("chk_all_", op_local)]], {
-          req(current_mode() == "uniform")
-          selected <- isTRUE(input[[paste0("chk_all_", op_local)]])
-          for (other_op in setdiff(opcoes, op_local)) {
-            updateCheckboxInput(session, paste0("chk_all_", other_op), value = FALSE)
-            for (uf in sg_ufs) {
-              updateCheckboxInput(session, paste0("chk_", other_op, "_", uf), value = FALSE)
-            }
-          }
-          for (uf in sg_ufs) {
-            updateCheckboxInput(session, paste0("chk_", op_local, "_", uf), value = selected)
-          }
-        }, ignoreInit = TRUE)
-      })
-    }
-  })
-  
-  # Per-UF: column logic
-  observe({
-    for (uf in sg_ufs) {
-      for (op in opcoes) {
-        local({
-          uf_local <- uf
-          op_local <- op
-          id <- paste0("chk_", op_local, "_", uf_local)
-          observeEvent(input[[id]], {
-            if (current_mode() == "per_uf" && isTRUE(input[[id]])) {
-              for (other_op in setdiff(opcoes, op_local)) {
-                updateCheckboxInput(session, paste0("chk_", other_op, "_", uf_local), value = FALSE)
-              }
-            }
-          }, ignoreInit = TRUE)
-        })
-      }
-    }
-  })
-  
-  
-  # Track current mode
-  current_mode <- reactiveVal("uniform")
-  
-  # Apply initial toggle states on startup
-  observe({
-    mode <- current_mode()
-    
-    for (op in opcoes) {
-      toggleState(id = paste0("chk_all_", op), condition = (mode == "uniform"))
-      for (uf in sg_ufs) {
-        toggleState(id = paste0("chk_", op, "_", uf), condition = (mode == "per_uf"))
-      }
-    }
-  })
-  
-  
-  # Watch for mode switch
-  observeEvent(input$selection_mode, {
-    isolate({
-      # Only show modal if we've already initialized current_mode once
-      if (!is.null(current_mode()) && input$selection_mode != current_mode()) {
-        showModal(modalDialog(
-          title = "Mudar Modo de Seleção?",
-          "Essa ação limpará as seleções atuais. Deseja continuar?",
-          easyClose = FALSE,
-          footer = tagList(
-            modalButton("Cancelar"),
-            actionButton("confirm_mode_change", "Sim, mudar", class = "btn-danger")
-          )
-        ))
-      } else {
-        # If first load or same selection — just set mode silently
-        current_mode(input$selection_mode)
-      }
-    })
-  })
-  
-  
-  # Confirmed switch
-  observeEvent(input$confirm_mode_change, {
-    removeModal()
-    new_mode <- isolate(input$selection_mode)
-    current_mode(new_mode)
-    
-    # 1. Clear all checkboxes
-    for (op in opcoes) {
-      updateCheckboxInput(session, paste0("chk_all_", op), value = FALSE)
-      for (uf in sg_ufs) {
-        updateCheckboxInput(session, paste0("chk_", op, "_", uf), value = FALSE)
-      }
-    }
-    
-    # 2. Disable/enable controls after DOM is flushed
-    session$onFlushed(function() {
-      if (new_mode == "uniform") {
-        # Enable 'Todos' checkboxes, disable individual ones
-        for (op in opcoes) {
-          shinyjs::enable(paste0("chk_all_", op))
-          for (uf in sg_ufs) {
-            shinyjs::disable(paste0("chk_", op, "_", uf))
-          }
-        }
-      } else {
-        # Disable 'Todos' checkboxes, enable individual ones
-        for (op in opcoes) {
-          shinyjs::disable(paste0("chk_all_", op))
-          for (uf in sg_ufs) {
-            shinyjs::enable(paste0("chk_", op, "_", uf))
-          }
-        }
-      }
-    }, once = TRUE)
-  })
-  
-  
-  # Uniform: handle “Todos” row selection
-  observe({
-    for (op in opcoes) {
-      local({
-        op_local <- op
-        observeEvent(input[[paste0("chk_all_", op_local)]], {
-          req(current_mode() == "uniform")
-          selected <- isTRUE(input[[paste0("chk_all_", op_local)]])
-          for (other_op in setdiff(opcoes, op_local)) {
-            updateCheckboxInput(session, paste0("chk_all_", other_op), value = FALSE)
-            for (uf in sg_ufs) {
-              updateCheckboxInput(session, paste0("chk_", other_op, "_", uf), value = FALSE)
-            }
-          }
-          for (uf in sg_ufs) {
-            updateCheckboxInput(session, paste0("chk_", op_local, "_", uf), value = selected)
-          }
-        }, ignoreInit = TRUE)
-      })
-    }
-  })
-  
-  # Per-UF: column logic
-  observe({
-    for (uf in sg_ufs) {
-      for (op in opcoes) {
-        local({
-          uf_local <- uf
-          op_local <- op
-          id <- paste0("chk_", op_local, "_", uf_local)
-          observeEvent(input[[id]], {
-            if (current_mode() == "per_uf" && isTRUE(input[[id]])) {
-              for (other_op in setdiff(opcoes, op_local)) {
-                updateCheckboxInput(session, paste0("chk_", other_op, "_", uf_local), value = FALSE)
-              }
-            }
-          }, ignoreInit = TRUE)
-        })
-      }
-    }
-  })
-  
-
-  # Create a reactive that returns a named vector: names = sg_uf, values = chosen option
-  RKT_fef_choices <- reactive({ 
-    mode <- current_mode()
-    selected <- character(length(sg_ufs))
-    names(selected) <- sg_ufs
-    
-    if (mode == "uniform") {
-      # Check which chk_all_* is selected
-      for (op in opcoes) {
-        if (isTRUE(input[[paste0("chk_all_", op)]])) {
-          selected[] <- op
-          break
-        }
-      }
-    } else {
-      for (uf in sg_ufs) {
-        for (op in opcoes) {
-          if (isTRUE(input[[paste0("chk_", op, "_", uf)]])) {
-            selected[uf] <- op
-            break
-          }
-        }
-      }
-    }
-    selected
-  })
-  
-  
-  uf_map <- df_censo_UF |>
-    dplyr::select(sg_uf = SG_UF, NM_UF) |>
-    dplyr::distinct()
-  
-  
-  
-  RKT_fef_all_options <- reactive({
-    purrr::map_dfr(df_choices$opcao, function(op_label) {
-      df_base <- df_list[[op_label]]
-      if (is.null(df_base)) return(NULL)
-      
-      # Select required columns — NM_UF must be present and consistent with uf_map
-      df_base_min <- df_base |>
-        dplyr::select(NM_UF, Distr_FEF, dplyr::matches("^ApoFEF"))
-      
-      # Join on NM_UF with known-clean uf_map
-      df_joined <- dplyr::left_join(df_base_min, uf_map, by = "NM_UF")
-      
-      if (any(is.na(df_joined$sg_uf))) {
-        unmatched <- df_joined$NM_UF[is.na(df_joined$sg_uf)]
-        warning("Could not match all NM_UF values to sg_uf for option ", op_label,
-                ". Unmatched: ", paste(unique(unmatched), collapse = ", "))
-      }
-      
-      df_joined$opcao <- op_label
-      df_joined
-    })
-  })
-  
-  
-  RKT_fef_table <- reactive({
-    choices <- RKT_fef_choices()
-    all_df <- RKT_fef_all_options()
-    
-    if (is.null(all_df)) return(NULL)
-    
-    mode <- current_mode()
-    
-    if (mode == "uniform") {
-      op_code <- unique(choices)
-      if (length(op_code) != 1 || !nzchar(op_code)) return(NULL)
-      
-      op_label <- df_choices$opcao[match(toupper(op_code), toupper(opcoes))]
-      return(dplyr::filter(all_df, opcao == op_label))
-    } else {
-      choice_df <- tibble::tibble(
-        sg_uf = names(choices),
-        op_code = choices
-      ) |>
-        dplyr::filter(nzchar(op_code)) |>
-        dplyr::mutate(opcao = df_choices$opcao[match(toupper(op_code), toupper(opcoes))]) |>
-        dplyr::select(sg_uf, opcao, op_code)      |>
-        dplyr::filter(nzchar(op_code)) |>
-        dplyr::mutate(opcao = df_choices$opcao[match(toupper(op_code), toupper(opcoes))])
-      
-      # Join only on sg_uf and opcao — NM_UF will come cleanly from all_df
-      dplyr::inner_join(all_df, choice_df, by = c("sg_uf","opcao"))
-    }
-  })
-  
-  
-  RKT_fef_total_by_year <- reactive({
-    df <- RKT_fef_table()
-    req(df)
-
-    # Select ApoFEF columns
-    cols <- grep("^ApoFEF", names(df), value = TRUE)
-
-    total <- colSums(df[, cols, drop = FALSE], na.rm = TRUE)
-
-    # Convert to tibble with year extracted from column names
-    tibble::tibble(
-      year = as.integer(sub("ApoFEF", "", names(total))),
-      total_fef = as.numeric(total)
-    )
-  })
-
-  RKT_fef_liq_flow_by_uf <- reactive({
-    df <- RKT_fef_table()
-    total <- RKT_fef_total_by_year()
-    
-    req(df, total)
-    
-    # Step 1: Identify all ApoFEF columns
-    fef_cols <- grep("^ApoFEF", names(df), value = TRUE)
-    years <- as.integer(sub("ApoFEF", "", fef_cols))
-    
-    # Step 2: Get total FEF per year as a named vector
-    total_vec <- setNames(total$total_fef, paste0("ApoFEF", total$year))
-    
-    # Step 3: Prepare starting df with core identity and ApoFEF columns
-    liq_df <- df[, c("sg_uf", "NM_UF", "opcao", "Distr_FEF", fef_cols)]
-    
-    # Step 4: Add LiqFEF columns
-    for (col in fef_cols) {
-      year <- sub("ApoFEF", "", col)
-      total_amt <- total_vec[[col]]
-      liq_df[[paste0("LiqFEF", year)]] <- (liq_df$Distr_FEF * total_amt) - df[[col]]
-    }
-    
-    liq_df
-  })
-  
-
-  # Tab2: Prepare data for plotting
-  RKT_fef_plot_data <- reactive({
-    df <- RKT_fef_liq_flow_by_uf()
-    req(df)
-    
-    uf_input <- input$uf_select
-    year_bounds <- input$year_range
-    df_uf <- dplyr::filter(df, NM_UF == uf_input)
-    
-    # Gather and filter by year range
-    df_long <- df_uf |>
-      tidyr::pivot_longer(
-        cols = matches("^(ApoFEF|LiqFEF)\\d+"),
-        names_to = "var",
-        values_to = "value"
-      ) |>
-      dplyr::mutate(
-        type = dplyr::if_else(stringr::str_starts(var, "ApoFEF"), "ApoFEF", "LiqFEF"),
-        year = as.integer(stringr::str_remove(var, "^(ApoFEF|LiqFEF)"))
-      ) |>
-      dplyr::filter(year >= year_bounds[1], year <= year_bounds[2])  # 👈 filtra aqui
-    
-    df_long
-  })
-  
-  RKT_plot_title_tab2 <- reactive({
-    req(input$uf_select, input$year_range, RKT_fef_table())
-    
-    uf_code <- input$uf_select
-    df <- RKT_fef_table()
-    
-    # Buscar o nome da UF e sua opção
-    row <- df |>
-      dplyr::filter(NM_UF == uf_code) |>
-      dplyr::select(NM_UF, opcao) |>
-      dplyr::distinct()
-    
-    uf_name <- unique(row$NM_UF)
-    uf_op   <- unique(row$opcao)
-    
-    uf_name <- uf_name %||% uf_code
-    uf_op   <- uf_op   %||% "ND"
-    
-    paste0("UF: ", uf_name,
-           " — Opção: ", uf_op,
-           " — Anos: ", input$year_range[1], "–", input$year_range[2],
-           " — Aporte e Fluxo Líquido do FEF")
-  })
-  
-
-  output$plotab2 <- renderPlot({
-    df <- RKT_fef_plot_data()
-    req(nrow(df) > 0)
-    
-    # Define colors manually
-    fill_colors <- c("ApoFEF" = "#fbb4ae", "LiqFEF" = "#FF4D4D")
-    
-    # Create label column
-    df$label <- paste0(scales::comma(df$value / 1e6), " mi")
-    
-    df$hjust <- dplyr::case_when(
-      df$value >= 0 ~ 1.2,  # slightly above the bar (negative = upward in y)
-      df$value <  0 ~  -0.2   # slightly below the bar
-    )
-    
-    # Consistent horizontal centering of rotated text
-    df$vjust <- 0.5 # center
-    
-    dodge_width <- 0.75
-    pos_dodge <- position_dodge(width = dodge_width)
-    
-    # Font size can be adjusted for year range
-    n_years <- length(unique(df$year))
-    text_size <- dplyr::case_when(
-      n_years <= 10 ~ 10,
-      n_years <= 20 ~ 8,
-      TRUE          ~ 6
-    )
-
-    # Main ggplot
-    ggplot(df, aes(x = factor(year), y = value, fill = type)) +
-      geom_col(position = pos_dodge, width = dodge_width) +
-      geom_text(
-        aes(label = label, hjust = hjust),
-        position = pos_dodge,
-        color= "black",
-        size = text_size,
-        angle = 90,
-        vjust    = 0.5,
-        fontface = "bold"
-      ) +
-      scale_color_identity()+
-      scale_fill_manual(values = fill_colors,
-                        labels = c("ApoFEF" = "Aporte FEF", "LiqFEF" = "Fluxo Líquido")) +
-      scale_y_continuous(labels = scales::comma_format(big.mark = ".", decimal.mark = ",")) +
-      labs(
-        x = "Ano", y = "Valor (R$)", fill = NULL,
-        title = RKT_plot_title_tab2()
-      ) +
-      theme_minimal() +
-      theme(
-        legend.position = "right",
-        axis.text.x     = element_text(size = 16, angle = 90, vjust = 0.5, color = "blue"),
-        axis.text.y     = element_text(size = 16, color = "blue"),
-        axis.title.x    = element_text(size = 16, color = "blue", face = "bold"),
-        axis.title.y    = element_text(size = 16, color = "blue", face = "bold"),
-        plot.title      = element_text(size = 22, face = "bold", hjust = 0.5, color = "#1f5673")
-      )
-  })
-  
-  ##############################################################################################################################
-  ### TAB 9  OF 0 COUNT TAB 9 TAB * FINANCE 3 ###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3###  FINANCE 3 
-  ##############################################################################################################################
-  
-  output$tab1_fin_plot <- renderPlot({
-    library(patchwork)
-    
-    req(input$fin_variable)
-    
-    `%||%` <- function(a, b) if (!is.null(a)) a else b
-    
-    df <- propag_ept_financeiro
-    df$valor <- suppressWarnings(as.numeric(gsub(",", "", df[[input$fin_variable]])))
-    
-    uf_endividado <- c("MG", "SP", "RJ", "RS")
-    
-    df_endividado <- df[df$UF %in% uf_endividado, ]
-    df_geral <- df[!df$UF %in% uf_endividado, ]
-    
-    df_geral <- df_geral[order(df_geral$Estado), ]
-    df_endividado <- df_endividado[order(df_endividado$Estado), ]
-    
-    plot_label <- var_labels[[input$fin_variable]] %||% input$fin_variable
-    
-    # ----- CONDITIONAL Y-AXIS SETTINGS -----
-    if (input$fin_variable == "saldo_mar25") {
-      y_limits_geral <- c(0, 22e9)
-      y_breaks_geral <- seq(0, 22e9, by = 1e9)
-      
-      y_limits_divida <- c(0, 375e9)
-      y_breaks_divida <- seq(0, 375e9, by = 100e9)
-      
-    } else if (input$fin_variable == "amort_extr") {
-      y_limits_geral <- c(0, 5e9)
-      y_breaks_geral <- seq(0, 5e9, by = 0.5e9)
-      
-      y_limits_divida <- c(0, 75e9)
-      y_breaks_divida <- seq(0, 75e9, by = 5e9)
-      
-    }  else if (input$fin_variable == "EPT_1ano_cen01") {
-      y_limits_geral <- c(0, 120e6)
-      y_breaks_geral <- seq(0, 120e6, by = 20e6)
-      
-      y_limits_divida <- c(0, 1.75e9)
-      y_breaks_divida <- seq(0, 1.75e9, by = 250e6)
-    }  
-    
-    else if (input$fin_variable == "EPT_1ano_cen02") {
-      y_limits_geral <- c(0, 200e6)
-      y_breaks_geral <- seq(0, 200e6, by = 25e6)
-      
-      y_limits_divida <- c(0, 3.5e9)
-      y_breaks_divida <- seq(0, 3.5e9, by = 500e6)
-    }
-    
-    
-    else if (input$fin_variable == "EPT_5ano_cen01") {
-      y_limits_geral <- c(0, 600e6)
-      y_breaks_geral <- seq(0, 600e6, by = 100e6)
-      
-      y_limits_divida <- c(0, 85e8)
-      y_breaks_divida <- seq(0, 85e8, by = 1e9)
-    }
-    
-    else if (input$fin_variable == "EPT_5ano_cen02") {
-      y_limits_geral <- c(0, 1000e6)
-      y_breaks_geral <- seq(0, 1000e6, by = 100e6)
-      
-      y_limits_divida <- c(0, 175e8)
-      y_breaks_divida <- seq(0, 175e8, by = 1e9)
-    }
-    
-    else if (input$fin_variable == "FEF_1ano_liq_cen01") {
-      y_limits_geral <- c(-2.5e9, 800e6)
-      y_breaks_geral <- seq(-2.5e9, 800e6, by = 500e6)
-      
-      y_limits_divida <- y_limits_geral
-      y_breaks_divida <- y_breaks_geral
-      
-    } 
-    
-    else if (input$fin_variable == "FEF_1ano_liq_cen02") {
-      y_limits_geral <- c(-5e9, 1200e6)
-      y_breaks_geral <- seq(-5e9, 1200e6, by = 500e6)
-      
-      y_limits_divida <- y_limits_geral
-      y_breaks_divida <- y_breaks_geral
-      
-    } 
-    
-    else if (input$fin_variable == "FEF_5ano_liq_cen01") {
-      y_limits_geral <- c(-11.37e9, 3800e6)
-      y_breaks_geral <- seq(-11.37e9, 3800e6, by = 1000e6)
-      
-      y_limits_divida <- y_limits_geral
-      y_breaks_divida <- y_breaks_geral
-      
-    } 
-    
-    else if (input$fin_variable == "FEF_5ano_liq_cen02") {
-      y_limits_geral <- c(-22.8e9, 7500e6)
-      y_breaks_geral <- seq(-22.8e9, 7500e6, by = 1000e6)
-      
-      y_limits_divida <- y_limits_geral
-      y_breaks_divida <- y_breaks_geral
-      
-    } 
-    
-    
-    else {
-      y_min <- min(df$valor, na.rm = TRUE)
-      y_max <- max(df$valor, na.rm = TRUE)
-      y_limits_geral <- c(y_min, y_max)
-      y_breaks_geral <- waiver()
-      y_limits_divida <- c(y_min, y_max)
-      y_breaks_divida <- waiver()
-    }
-    
-    # ----- PLOTS -----
-    # Plot for general states (in millions)
-    p_geral <- ggplot(df_geral, aes(x = factor(Estado, levels = df_geral$Estado), y = valor, fill = UF)) +
-      geom_col() +
-      geom_text(
-        aes(label = paste0(format(round(valor / 1e6), big.mark = ".", decimal.mark = ",", scientific = FALSE), " M")),
-        angle = 90, vjust = 0.2, hjust=-0.1, size = 5, color = "blue",fontface = "bold"
-      ) +
-      scale_y_continuous(
-        limits = y_limits_geral,
-        breaks = y_breaks_geral,
-        labels = scales::label_number(scale_cut = scales::cut_short_scale())
-      ) +
-      scale_fill_manual(values = uf_colors_bySG)+
-      labs(title = paste("Demais Estados –", plot_label), x = "Estado", y = "Valor (R$)") +
-      theme_minimal(base_size = 14) +
-      theme(
-        plot.title = element_text(face = "bold", color = "#1f5673"),
-        axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = "none"
-      )
-    
-    # Plot for indebted states (in billions)
-    p_divida <- ggplot(df_endividado, aes(x = factor(Estado, levels = df_endividado$Estado), y = valor, fill = UF)) +
-      geom_col() +
-      geom_text(
-        aes(label = paste0(format(round(valor / 1e6), big.mark = ".", decimal.mark = ",", scientific = FALSE), " M")),
-        angle = 90, vjust = 0.2, hjust=-0.1, size = 7, color = "blue",fontface = "bold"
-      ) +
-      scale_y_continuous(
-        limits = y_limits_divida,
-        breaks = y_breaks_divida,
-        labels = scales::label_number(scale_cut = scales::cut_short_scale())
-      ) +
-      scale_fill_manual(values = uf_colors_bySG)+
-      labs(title = "Estados com Alta Dívida", x = "Estado", y = "Valor (R$)") +
-      theme_minimal(base_size = 14) +
-      theme(
-        plot.title = element_text(face = "bold", color = "#1f5673"),
-        axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = "none",
-        panel.background = element_rect(fill = "antiquewhite", color = NA)
-      )
-    
-    
-    p_geral + p_divida + plot_layout(ncol = 2, widths = c(2, 1))
-  })
-  
-  
-  h3("Tabela 1: Variáveis Financeiras", style = "color: #1f5673; font-weight: bold; margin-top: 30px;")
-  output$tab1_fin_table <- DT::renderDataTable({
-    df <- financeiro_dt_all
-    # Drop unused column
-    df <- df[, !(names(df) %in% c("fef_share_pct"))]
-    
-    # Identifica colunas numéricas (exceto UF/Estado)
-    data_cols <- setdiff(names(df), c("UF", "Estado"))
-    
-    # Formata para exibição: números com separador de milhar
-    df[data_cols] <- lapply(df[data_cols], function(x) {
-      if (is.numeric(x)) format(round(x, 0), big.mark = ".", decimal.mark = ",") else x
-    })
-    
-    DT::datatable(
-      df,
-      extensions = 'Buttons',
-      options = list(
-        pageLength = 30,
-        scrollX = TRUE,
-        scrollY = "600px",
-        autoWidth = FALSE,
-        dom = 'Bfrtip',
-        buttons = list(
-          list(extend = "copy", text = "Copiar"),
-          list(extend = "csv", filename = "Tabela_Financeira_PROPAG", text = "CSV"),
-          list(extend = "excel", filename = "Tabela_Financeira_PROPAG", text = "Excel"),
-          list(
-            extend = "pdf",
-            filename = "Tabela_Financeira_PROPAG",
-            text = "PDF",
-            orientation = "landscape",
-            pageSize = "A4",
-            messageTop = "Tabela 1: Variáveis Financeiras"
-          )
-        ),
-        columnDefs = list(
-          list(className = 'dt-nowrap', targets = "_all")
-        )
-      ),
-      rownames = FALSE,
-      class = "stripe nowrap display"
-    )
-  })
   
 ################################################################################################################
 ## TAB 10   ECONOMIC DYNAMISM TAB REACTIVES AND OUTPUTS

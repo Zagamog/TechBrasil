@@ -25,7 +25,6 @@ body {
 
 
 /* ======= TAB COLORS (Organized Viridis Palette by Theme) ======= */
-/* ======= TAB COLORS (Organized Viridis Palette by Theme) ======= */
 .nav-tabs > li > a {
   color: white !important;
   font-weight: bold !important;
@@ -189,6 +188,22 @@ body {
 .modal-header {
     background-color: #34495E !important;
     color: white !important;
+}
+
+/* Force modal title to be white */
+.modal-header .modal-title {
+    color: white !important;
+}
+
+.modal-header h4,
+.modal-header h5 {
+    color: white !important;
+}
+
+/* If Bootstrap uses a close button, keep it visible */
+.modal-header .close {
+    color: white !important;
+    opacity: 1 !important;
 }
 
 /* ======= INFO ICONS ======= */
@@ -363,6 +378,15 @@ body {
     color: #f5f5f5 !important;
 }
 
+/* DataTable headers in dark panels */
+.checkbox-dark-panel table.dataTable thead {
+    background-color: #34495e !important;
+}
+
+.checkbox-dark-panel table.dataTable thead th {
+    color: #ffffff !important;
+    border-bottom: 2px solid #4f5f6f !important;
+}
 
 
 
@@ -392,4 +416,16 @@ body {
 
 .tab-sidebar-layout .main-panel {
   font-size: 16px !important;
+}
+
+
+/* Fix table text in modals */
+.modal-content table,
+.modal-content table th,
+.modal-content table td {
+    color: white !important;
+}
+
+.modal-content table {
+    background-color: transparent;
 }
