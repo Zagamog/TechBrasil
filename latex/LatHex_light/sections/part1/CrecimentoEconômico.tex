@@ -302,3 +302,32 @@ A escala reduzida demanda abordagem integrada da rede estadual de EPT. Municípi
 Estes exemplos demonstram que o painel de dinamismo econômico oferece instrumentos analíticos multidimensionais - composição setorial, distribuição territorial e vocações produtivas - para fundamentar escolhas estratégicas contextualizadas às realidades específicas de cada unidade federativa.
 
 \section{Mercado laboral formal e informal} 
+
+
+Uma limitação importante das análises de emprego baseadas na RAIS é que essa base cobre apenas os vínculos formais de trabalho — ou seja, aqueles registrados por empresas e empregadores perante o sistema administrativo do Ministério do Trabalho. Isso permite análises detalhadas por ocupação (CBO) e município, mas deixa de fora uma parcela relevante da força de trabalho que atua na informalidade.
+
+Para complementar essa lacuna, utilizamos a Pesquisa Nacional por Amostra de Domicílios Contínua (PNAD-C), que é representativa até o nível da Unidade da Federação (UF) e cobre tanto ocupações formais quanto informais. A PNAD-C, no entanto, emprega uma classificação distinta de ocupações — os códigos \textit{COD} utilizados em pesquisas domiciliares — que não são idênticos à Classificação Brasileira de Ocupações (CBO) usada na RAIS.
+
+Para compatibilizar as duas bases, realizamos um processo de correspondência entre COD e CBO. Esse mapeamento foi feito em múltiplos níveis (1 a 4 dígitos), usando combinações de heurísticas e técnicas de \textit{semantic matching} apoiadas por modelos de linguagem (IA). Quando não havia correspondência direta em nível de quatro dígitos, adotamos classificações em níveis superiores (família, subgrupo, grupo primário ou grande grupo). O resultado foi uma tabela de equivalência que permite projetar taxas de formalidade da PNAD-C sobre os totais de vínculos da RAIS, obtendo assim estimativas municipais de emprego total (formal + informal).
+
+A principal hipótese adotada é que a taxa de formalidade estimada pela PNAD-C para uma ocupação em cada UF pode ser aplicada proporcionalmente aos municípios dessa mesma UF, aproveitando a granularidade da RAIS como censo administrativo. Em casos de categorias com inconsistências ou ausência de correspondência, utilizamos ajustes por participação relativa de ocupações no total estadual (shares) ou projeções por níveis agregados da CBO/COD.
+
+Esse procedimento resulta em dois conjuntos de dados principais — para 2023 e 2024 — que permitem analisar a distribuição da formalidade e informalidade do emprego técnico-profissional no nível municipal, com detalhamento por ocupação. Essa é uma primeira aproximação, sujeita a refinamento em análises futuras conduzidas em nível estadual ou regional. Ainda assim, a combinação RAIS–PNAD-C já oferece uma base valiosa para não negligenciar a dimensão do emprego informal no planejamento da expansão da Educação Profissional e Tecnológica (EPT).
+
+\subsection{EPT e Informalidade – Oportunidades de Formalização}
+
+O Painel C6 integra informações da RAIS e da PNAD-C para estimar o emprego formal e informal por município, considerando a estrutura ocupacional da CBO. A partir da taxa de formalidade observada na PNAD-C para cada UF e ocupação, projetamos os vínculos totais de emprego sobre os vínculos formais registrados na RAIS, permitindo assim obter estimativas municipais de formalidade e informalidade.  
+
+O painel apresenta dois componentes principais. À esquerda, um mapa temático classifica os municípios em decis de formalização (1 a 10), onde valores baixos indicam maior peso do emprego informal e valores altos indicam maior formalização. À direita, uma tabela detalha os municípios selecionados, com vínculos formais, vínculos totais estimados, taxa de formalidade e decil correspondente.  
+
+Os filtros permitem explorar diferentes dimensões: seleção de ano (2023 ou 2024), métricas de mapa (vínculos formais ou totais), recortes geográficos (UF, regiões intermediárias e imediatas, municípios) e níveis ocupacionais (do grande grupo ao nível de família da CBO). A interação entre mapa e tabela possibilita identificar territórios e segmentos onde a qualificação técnica pode ter papel estratégico no apoio à transição da informalidade para empregos formais.  
+
+\begin{figure}[htbp!]
+	\centering
+	\includegraphics[width=1\textwidth]{images/6b_INF.png}
+	\caption{Painel C6: Formalidade e informalidade no emprego técnico (2024)}
+	\label{fig:6b_INF}
+\end{figure}
+
+
+O ponto mais relevante desse exercício não é apenas mapear a informalidade, mas indicar o \textbf{potencial de transformação}. Muitos empregos hoje classificados como informais não exigem diploma de EPT de nível médio, mas podem tornar-se mais produtivos quando ocupados por trabalhadores com essa formação. Esse ganho de produtividade tende a elevar salários, melhorar padrões de vida e fortalecer as economias locais. O painel, portanto, funciona como um guia para identificar territórios e ocupações onde a expansão da EPT pode ter maior impacto — convertendo postos informais em empregos mais estruturados, em linha com os objetivos centrais do PROPAG.

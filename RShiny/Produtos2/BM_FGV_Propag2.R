@@ -2010,7 +2010,17 @@ tabPanel("C3. Oferta EPT (Redes)",
              
              mainPanel(
                width = 9,
+               # NEW - Stacked Bar Chart Section
+               fluidRow(
+                 column(12,
+                        h4("Visualização de Matrículas EPT por Modalidade", style = "color: #1f5673;"),
+                        
+                        withSpinner(plotlyOutput("censo_stacked_plot", height = "500px"))
+                 )
+               ),
                
+               br(),
+               hr(),
                # Table 1a - Eixo Level
                fluidRow(
                  column(12,
@@ -5140,8 +5150,9 @@ output$tab1_fin_table <- DT::renderDataTable({
   })
   
   ##############################################################################################################
-  ## TAB 5 OF 0 COUNT ## TAB 5  0 COUNT ## TAB 5 
+  ## TAB 8 OF 0 COUNT ## TAB 8  0 COUNT ## TAB 8 
   ##############################################################################################################
+  
   
   observeEvent(input$censo_uf, {
     if (is.null(input$censo_uf) || length(input$censo_uf) == 0) {
@@ -5170,7 +5181,7 @@ output$tab1_fin_table <- DT::renderDataTable({
     return(paste(uf_text, "-", mun_count, "municípios"))
   })
   
-  # --- Main Reactive (unchanged) ---
+  # --- Main Reactive for Tables - FILTER OUT Curso Normal ---
   rkt_censo_filtered <- reactive({
     req(input$censo_year)
     req(input$censo_uf)
@@ -5181,17 +5192,51 @@ output$tab1_fin_table <- DT::renderDataTable({
     data <- df_censo_combined %>%
       filter(ANO == input$censo_year) %>%
       filter(NM_UF %in% input$censo_uf) %>%
-      filter(TP_DEPENDENCIA %in% input$censo_dependencia)
+      filter(TP_DEPENDENCIA %in% input$censo_dependencia) %>%
+      # FILTER OUT Curso Normal/Magistério
+      filter(!grepl("Normal|Magistério|Magisterio", NO_AREA_CURSO_PROFISSIONAL, ignore.case = TRUE))
     
     if (!is.null(input$censo_municipio) && length(input$censo_municipio) > 0) {
       data <- data %>% filter(NM_MUN %in% input$censo_municipio)
     }
     
+    # RECALCULATE TOTAL WITHOUT NORMAL/MAGISTÉRIO
+    data <- data %>%
+      mutate(QT_MAT_CURSO_TEC_TOTNOMAG = QT_MAT_CURSO_TEC_CT + 
+               QT_MAT_CURSO_TEC_CONC + 
+               QT_MAT_TEC_SUBS + 
+               QT_MAT_TEC_EJA)
+    
     return(data)
   })
   
-  # --- Table 1a with responsive total row and user messaging ---
-  # --- Table 1a - Fixed with unique column names ---
+  # --- NEW Reactive for Plot - FILTER OUT Curso Normal ---
+  rkt_ept_redeplot <- reactive({
+    req(input$censo_year)
+    req(input$censo_uf)
+    req(length(input$censo_uf) > 0)
+    
+    data <- df_censo_combined %>%
+      filter(ANO == input$censo_year) %>%
+      filter(NM_UF %in% input$censo_uf) %>%
+      # FILTER OUT Curso Normal/Magistério
+      filter(!grepl("Normal|Magistério|Magisterio", NO_AREA_CURSO_PROFISSIONAL, ignore.case = TRUE))
+    
+    if (!is.null(input$censo_municipio) && length(input$censo_municipio) > 0) {
+      data <- data %>% filter(NM_MUN %in% input$censo_municipio)
+    }
+    
+    # RECALCULATE TOTAL WITHOUT NORMAL/MAGISTÉRIO
+    data <- data %>%
+      mutate(QT_MAT_CURSO_TEC_TOTNOMAG = QT_MAT_CURSO_TEC_CT + 
+               QT_MAT_CURSO_TEC_CONC + 
+               QT_MAT_TEC_SUBS + 
+               QT_MAT_TEC_EJA)
+    
+    return(data)
+  })
+
+
   output$censo_table_eixo <- renderDT({
     # Simple validation
     if (is.null(input$censo_uf) || length(input$censo_uf) == 0 ||
@@ -5204,7 +5249,8 @@ output$tab1_fin_table <- DT::renderDataTable({
     data <- df_censo_combined %>%
       filter(ANO == input$censo_year) %>%
       filter(NM_UF %in% input$censo_uf) %>%
-      filter(TP_DEPENDENCIA %in% input$censo_dependencia)
+      filter(TP_DEPENDENCIA %in% input$censo_dependencia) %>%
+      filter(!grepl("Ensino Médio - Curso Normal", NO_AREA_CURSO_PROFISSIONAL, ignore.case = TRUE))
     
     # Apply municipality filter if selected
     if (!is.null(input$censo_municipio) && length(input$censo_municipio) > 0) {
@@ -5226,14 +5272,14 @@ output$tab1_fin_table <- DT::renderDataTable({
     }
     title_content <- paste(uf_text, "-", mun_count, "municípios")
     
-    # Aggregate by eixo with UNIQUE column names
+    # Aggregate by eixo - use simple names first
     eixo_data <- data %>%
       group_by(Eixo = NO_AREA_CURSO_PROFISSIONAL) %>%
       summarise(
         Cursos = sum(QT_CURSO_TEC, na.rm = TRUE),
-        Matriculas_Total = sum(QT_MAT_CURSO_TEC, na.rm = TRUE),
+        Matriculas_Total = sum(QT_MAT_CURSO_TEC_CT + QT_MAT_CURSO_TEC_CONC + 
+                                 QT_MAT_TEC_SUBS + QT_MAT_TEC_EJA, na.rm = TRUE),
         Integrado = sum(QT_MAT_CURSO_TEC_CT, na.rm = TRUE),
-        Normal_Magisterio = sum(QT_MAT_CURSO_TEC_NM, na.rm = TRUE),
         Concomitante = sum(QT_MAT_CURSO_TEC_CONC, na.rm = TRUE),
         Subsequente = sum(QT_MAT_TEC_SUBS, na.rm = TRUE),
         EJA_Nivel_Medio = sum(QT_MAT_TEC_EJA, na.rm = TRUE),
@@ -5241,13 +5287,12 @@ output$tab1_fin_table <- DT::renderDataTable({
       ) %>%
       arrange(desc(Matriculas_Total))
     
-    # Add total row with same column structure
+    # Add total row with matching column names
     total_row <- data.frame(
       Eixo = paste("TOTAL -", title_content),
       Cursos = sum(eixo_data$Cursos),
       Matriculas_Total = sum(eixo_data$Matriculas_Total),
       Integrado = sum(eixo_data$Integrado),
-      Normal_Magisterio = sum(eixo_data$Normal_Magisterio),
       Concomitante = sum(eixo_data$Concomitante),
       Subsequente = sum(eixo_data$Subsequente),
       EJA_Nivel_Medio = sum(eixo_data$EJA_Nivel_Medio)
@@ -5255,9 +5300,9 @@ output$tab1_fin_table <- DT::renderDataTable({
     
     final_data <- bind_rows(total_row, eixo_data)
     
-    # Rename columns for display (after data creation to avoid conflicts)
-    names(final_data) <- c("Eixo", "Cursos", "Matrículas Total", "Integrado", 
-                           "Normal/Magistério", "Concomitante", "Subsequente", "EJA Nível Médio")
+    # NOW rename columns for display
+    names(final_data) <- c("Eixo", "Cursos", "Matrículas Total EPT", 
+                           "Integrado", "Concomitante", "Subsequente", "EJA Nível Médio")
     
     datatable(final_data, rownames = FALSE, extensions = 'Buttons',
               options = list(pageLength = 15, scrollX = TRUE, dom = 'Bfrtip',
@@ -5265,30 +5310,39 @@ output$tab1_fin_table <- DT::renderDataTable({
                              selection = 'multiple'))
   })
   
+  # --- Table 1b - WITH modality columns, using recalculated total ---
   output$censo_table_curso <- renderDT({
-    data <- rkt_censo_filtered()
+    data <- rkt_censo_filtered()  # This already has QT_MAT_CURSO_TEC_TOTNOMAG
     selected_rows <- input$censo_table_eixo_rows_selected
     
     req(nrow(data) > 0)
-    req(!is.null(selected_rows) && length(selected_rows) > 0)  # Require selection
+    req(!is.null(selected_rows) && length(selected_rows) > 0)
     
     # Get eixo data to find selected eixos
     eixo_list <- data %>%
       group_by(Eixo = NO_AREA_CURSO_PROFISSIONAL) %>%
-      summarise(`Matrículas Total` = sum(QT_MAT_CURSO_TEC, na.rm = TRUE), .groups = "drop") %>%
+      summarise(`Matrículas Total` = sum(QT_MAT_CURSO_TEC_TOTNOMAG, na.rm = TRUE), .groups = "drop") %>%
       arrange(desc(`Matrículas Total`))
     
-    # Adjust for total row (subtract 1 from selection indices)
-    selected_eixos <- eixo_list$Eixo[selected_rows - 1]  # -1 because total row is first
+    # Adjust for total row
+    selected_eixos <- eixo_list$Eixo[selected_rows - 1]
     selected_eixos <- selected_eixos[!is.na(selected_eixos)]
     
     if (length(selected_eixos) == 0) return(NULL)
     
+    # Updated to use recalculated total
     curso_data <- data %>%
       filter(NO_AREA_CURSO_PROFISSIONAL %in% selected_eixos) %>%
       group_by(Eixo = NO_AREA_CURSO_PROFISSIONAL, Curso = NO_CURSO_EDUC_PROFISSIONAL) %>%
-      summarise(`Matrículas Total` = sum(QT_MAT_CURSO_TEC, na.rm = TRUE), .groups = "drop") %>%
-      arrange(Eixo, desc(`Matrículas Total`))
+      summarise(
+        `Matrículas Total EPT` = sum(QT_MAT_CURSO_TEC_TOTNOMAG, na.rm = TRUE),  # USING NEW TOTAL
+        Integrado = sum(QT_MAT_CURSO_TEC_CT, na.rm = TRUE),
+        Concomitante = sum(QT_MAT_CURSO_TEC_CONC, na.rm = TRUE),
+        Subsequente = sum(QT_MAT_TEC_SUBS, na.rm = TRUE),
+        `EJA Nível Médio` = sum(QT_MAT_TEC_EJA, na.rm = TRUE),
+        .groups = "drop"
+      ) %>%
+      arrange(Eixo, desc(`Matrículas Total EPT`))
     
     datatable(curso_data, rownames = FALSE, extensions = 'Buttons',
               caption = htmltools::tags$caption(
@@ -5298,8 +5352,110 @@ output$tab1_fin_table <- DT::renderDataTable({
               options = list(pageLength = 15, scrollX = TRUE, dom = 'Bfrtip',
                              buttons = c('copy', 'csv', 'excel')))
   })
+  output$censo_stacked_plot <- renderPlotly({
+    data <- rkt_ept_redeplot()
+    req(nrow(data) > 0)
+    
+    # Aggregate by Dependency for ALL eixos
+    plot_data <- data %>%
+      group_by(Dependencia = case_when(
+        TP_DEPENDENCIA == "1" ~ "Federal",
+        TP_DEPENDENCIA == "2" ~ "Estadual", 
+        TP_DEPENDENCIA == "3" ~ "Municipal",
+        TP_DEPENDENCIA == "4" ~ "Privada",
+        TRUE ~ "Outro"
+      )) %>%
+      summarise(
+        Total = sum(QT_MAT_CURSO_TEC_TOTNOMAG, na.rm = TRUE),
+        Integrado = sum(QT_MAT_CURSO_TEC_CT, na.rm = TRUE),
+        Concomitante = sum(QT_MAT_CURSO_TEC_CONC, na.rm = TRUE),
+        Subsequente = sum(QT_MAT_TEC_SUBS, na.rm = TRUE),
+        `EJA Nível Médio` = sum(QT_MAT_TEC_EJA, na.rm = TRUE),
+        .groups = "drop"
+      )
+    
+    # Calculate total for percentage
+    total_matriculas <- sum(plot_data$Total)
+    
+    # Pivot longer for plotting
+    plot_long <- plot_data %>%
+      pivot_longer(cols = c(Total, Integrado, Concomitante, Subsequente, `EJA Nível Médio`),
+                   names_to = "Modalidade",
+                   values_to = "Matriculas")
+    
+    # Calculate percentage for each modality (sum across all dependencies)
+    modalidade_totals <- plot_long %>%
+      group_by(Modalidade) %>%
+      summarise(Total_Modalidade = sum(Matriculas)) %>%
+      mutate(Percentage = round((Total_Modalidade / total_matriculas) * 100, 1))
+    
+    # Add percentage to plot data
+    plot_long <- plot_long %>%
+      left_join(modalidade_totals, by = "Modalidade")
+    
+    # Use plotly's standard colors
+    dep_colors <- c("Federal" = "#1f77b4",    # Blue
+                    "Estadual" = "#ff7f0e",   # Orange
+                    "Municipal" = "#2ca02c",  # Green
+                    "Privada" = "#d62728")    # Red
+    
+    # Factor to control order
+    plot_long$Modalidade <- factor(plot_long$Modalidade, 
+                                   levels = c("Total", "Integrado", "Concomitante", 
+                                              "Subsequente", "EJA Nível Médio"))
+    
+    # Create the plot WITHOUT text labels on bars
+    p <- plot_ly(plot_long, 
+                 x = ~Modalidade, 
+                 y = ~Matriculas,
+                 color = ~Dependencia,
+                 colors = dep_colors,
+                 type = 'bar',
+                 text = ~paste("Dependência:", Dependencia, 
+                               "<br>Modalidade:", Modalidade,
+                               "<br>Matrículas:", format(Matriculas, big.mark = ".", decimal.mark = ","),
+                               "<br>Percentual do Total:", Percentage, "%"),
+                 hovertemplate = "%{text}<extra></extra>",
+                 hoverlabel = list(font = list(size = 14)),
+                 textposition = "none")  %>%  # This removes the text labels on bars
+      layout(barmode = 'stack',
+             title = list(text = "Matrículas EPT por Modalidade e Dependência Administrativa",
+                          font = list(color = "#1f5673", size = 20)),
+             xaxis = list(
+               title = list(text = "Modalidade", font = list(size = 16)),
+               tickfont = list(size = 14)
+             ),
+             yaxis = list(
+               title = list(text = "Número de Matrículas EPT", font = list(size = 16)),
+               tickformat = ",.0f",
+               tickfont = list(size = 14)
+             ),
+             legend = list(
+               title = list(text = "Dependência", font = list(size = 16)),
+               font = list(size = 14)
+             ),
+             hovermode = 'closest',
+             margin = list(l = 80, r = 80, t = 100, b = 100),
+             annotations = list())  # Clear any auto-generated annotations
+    
+    # Add percentage labels above each bar stack
+    for(i in 1:nrow(modalidade_totals)) {
+      p <- p %>% add_annotations(
+        x = modalidade_totals$Modalidade[i],
+        y = modalidade_totals$Total_Modalidade[i],
+        text = paste0("<b>", modalidade_totals$Percentage[i], "%</b>"),
+        xref = "x",
+        yref = "y",
+        showarrow = FALSE,
+        yshift = 20,
+        font = list(size = 18, color = "#1f5673")
+      )
+    }
+    
+    return(p)
+  })
   
-  
+
   
   ##############################################################################################################################
   ###  TAB 9 of 0 COUNT   RESIDUALS ENROLLMENT PREDICTION LINEAR OLS RESIDUALS
@@ -5391,13 +5547,18 @@ output$tab1_fin_table <- DT::renderDataTable({
   })
   
   # Table output with Brazilian formatting
+  # Table output with Brazilian formatting - SORTED BY RESIDUALS DESCENDING
   output$tab_resiTable <- renderDT({
     df_table <- rkt_residuals_filtered()
     req(nrow(df_table) > 0)
     
     df_display <- df_table %>%
-      select(Estado = NM_UF, Residual = residual, `PIB per Capita` = pib_per_capita,
-             `Alinhamento Setorial` = sector_alignment, `Matrículas` = QT_MAT_CURSO_TEC) %>%
+      arrange(desc(residual)) %>%  # ADD THIS LINE - Sort by residuals descending
+      select(Estado = NM_UF, 
+             Residual = residual, 
+             `PIB per Capita` = pib_per_capita,
+             `Alinhamento Setorial` = sector_alignment, 
+             `Matrículas` = QT_MAT_CURSO_TEC) %>%
       mutate(
         Residual = format(round(Residual, 3), decimal.mark = ","),
         `PIB per Capita` = format(round(`PIB per Capita`, 1), big.mark = ".", decimal.mark = ","),
@@ -5405,9 +5566,11 @@ output$tab1_fin_table <- DT::renderDataTable({
         `Matrículas` = format(`Matrículas`, big.mark = ".", decimal.mark = ",")
       )
     
-    datatable(df_display, options = list(pageLength = 15), rownames = FALSE)
+    datatable(df_display, 
+              options = list(pageLength = 15, 
+                             order = list(list(1, 'desc'))),  # Also set default sort on Residual column
+              rownames = FALSE)
   })
-  
   # Summary output
   output$tab_resi_summary <- renderUI({
     df_summary <- rkt_residuals_filtered()

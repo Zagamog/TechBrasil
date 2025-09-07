@@ -1,30 +1,26 @@
-\section{Panorama Atual sobre EPT no Brasil} 
+\section{Panorama Atual sobre EPT no Brasil}
 
+O Painel C3 permite observar a distribuição das matrículas em Educação Profissional Técnica de Nível Médio (EPTNM) entre as quatro dependências administrativas — Estadual, Federal, Municipal e Privada (incluído o Sistema S). Além dessa comparação geral, a interação do painel possibilita detalhar os dados em diferentes níveis de agregação: das matrículas totais de cada unidade da federação até a distribuição por eixos tecnológicos e, em seguida, por cursos específicos. Assim, o usuário pode explorar tanto padrões amplos de oferta quanto a composição interna da EPT em cada estado. 
 
-Neste capítulo apresentamos um panorama nacional sobre as matrículas por tipos de dependência Estadual, Federal, Municipal e Privada (incluído o Sistema S).  Fica evidenciado que o Brasil possui quatro redes robustas que lideram as ofertas, variando sua participação dependendo de cada Estado. No simulador interativo na internet é possível acessar e pesquisar por  UF:
+O painel evidencia a variação da participação relativa das redes de ensino, tanto entre os estados quanto dentro de um mesmo estado. Essa heterogeneidade pode ser explorada em detalhe por meio dos filtros interativos que permitem desagregar a informação por unidade da federação e pelos municípios de cada UF. No exemplo apresentado, é selecionada a UF da Bahia. O gráfico mostra os dados para 2024, mas também é possível escolher os dados de 2023 para comparação e avaliação das mudanças entre os dois anos.
+
 \href{https://datanalytics.worldbank.org/content/6604f317-d487-436a-b6b6-792369b341f0}{https://datanalytics.worldbank.org/Plataforma Interativo PROPAG}  
 
+\begin{figure}[htbp!]
+	\centering
+	\includegraphics[width=1\textwidth]{images/5a_MaTec.png}
+	\caption{Painel C3: Matrículas em Cursos Técnicos por Tipo e Dependência (Censo Escolar 2024)} 
+	\label{fig:5a_MaTec}
+\end{figure}
 
+A Figura \ref{fig:5a_MaTec} apresenta um exemplo de exploração do Painel C3 para a Bahia, detalhando as matrículas por tipo de curso e dependência administrativa. Observa-se que a rede estadual concentra a maior parte das matrículas, seguida pela rede privada, enquanto a participação das redes federal e municipal é proporcionalmente menor. Quanto às modalidades, a maior parte das vagas está organizada em cursos subsequentes e integrados. Esse tipo de análise pode ser replicado para qualquer UF, permitindo também avançar no detalhamento para eixos tecnológicos e cursos específicos. O padrão, no entanto, não é uniforme: varia significativamente entre os estados e também entre municípios dentro de um mesmo estado. A Figura \ref{fig:5b_MaTec} resume essa variação, mostrando a distribuição das dependências em todas as unidades da federação.
 
 \begin{figure}[htbp!]
 	\centering
-	\includegraphics[width=1\textwidth]{images/3a_MaTec.png}
-	\caption{Aba C: Matricula Técnicas por tipo} 
-	\label{fig:3a_MaTec}
+	\includegraphics[width=1\textwidth]{images/5b_MaTec.png}
+	\caption{Variação das Matrículas em Cursos Técnicos por UF e Dependência (Censo Escolar 2024)} 
+	\label{fig:5b_MaTec}
 \end{figure}
-
-
-Este  primeiro gráfico \ref{fig:3a_MaTec} apresenta o cenário da oferta da EPT por meio das diversas redes de ensino. As redes estaduais são as maiores ofertantes, seguidas pela oferta da rede privada (incluindo o Sistema S) e indicam uma evolução da Rede Federal com a expansão dos Institutos Federais (IFs).
-
-O próximo gráfico  \ref{fig:3b_MaTec} na sequência apresenta uma panorâmica das Matrículas de Educação Profissional Técnica (EPT) por Unidade da Federação e a participação de cada rede. Novamente as redes estaduais e a rede privada, com variáveis por UF, lideram também o [\textcolor{red}{MARINA ou TEXTO ACABOU}]
-
-\begin{figure}[htbp!]
-	\centering
-	\includegraphics[width=1\textwidth]{images/3b_MaTec.png}
-	\caption{Aba C: Matriculas em Curso Técnico por tipo} 
-	\label{fig:3b_MaTec}
-\end{figure}
-
 
 \section{Política de coordenação entre redes}
 
@@ -34,4 +30,86 @@ A EPT no Brasil já conta com uma estrutura instalada de instituições pública
 
 Como parceiros que já ofertam cerca de 21\% das matrículas de EPT no Brasil destacam-se as Escolas Privadas e Confessionais; o Sistema S, nome do conjunto das organizações criadas pelos setores produtivos (indústria, comércio, agricultura, transportes, cooperativas e microempresas), voltadas para qualificação profissional, pesquisa e assistências técnica e social com mais de 500 escolas em 3.431 unidades e, ainda, 2.264 Instituições Privadas de Ensino Superior (IPES).
 
-O PROPAG apresenta uma oportunidade na perspectiva de  priorização e potencialização de todas as estruturas das diversas redes e parceiros para focar os investimentos na ampliação das matrículas e nas condições de ensino-aprendizagem dos estudantes da EPT. É uma oportunidade histórica para cada Estado e para o país formação de uma grande geração de técnicos de nível médio antes da transição demográfica estrutural em curso.
+O PROPAG apresenta uma oportunidade na perspectiva de priorização e potencialização de todas as estruturas das diversas redes e parceiros para focar os investimentos na ampliação das matrículas e nas condições de ensino-aprendizagem dos estudantes da EPT. É uma oportunidade histórica para cada Estado e para o país na formação de uma grande geração de técnicos de nível médio antes da transição demográfica estrutural em curso.
+
+\subsection{Modelo de previsão – especificação e variáveis}
+
+Para identificar oportunidades de expansão da EPT, estimamos um modelo de previsão que utiliza a série histórica de matrículas em cursos técnicos de 2007 a 2024. O modelo relaciona as matrículas estaduais ao nível de renda (PIB per capita) e ao grau de alinhamento setorial entre a oferta formativa da EPT e a estrutura produtiva de cada estado. Como os dados de PIB per capita estão disponíveis apenas até 2021, o modelo utiliza esse horizonte para estimar a associação com renda, enquanto o alinhamento setorial e os efeitos fixos permitem projetar o período mais recente. 
+
+O alinhamento setorial é construído a partir de séries municipais de agregados econômicos, que fornecem a participação relativa de quatro setores — agricultura, indústria, serviços e administração pública — no valor adicionado local. Ainda que a intensidade de uso de recursos humanos varie entre setores (por exemplo, a indústria tende a empregar relativamente menos pessoas que os serviços), espera-se que a oferta de cursos técnicos guarde proporcionalidade com a relevância setorial na economia local. Para capturar essa relação, definimos uma variável de alinhamento que compara a participação da EPT no setor com a participação desse setor na economia estadual.
+
+A partir dessa linha de base, comparamos valores observados e previstos para cada combinação de setor, estado e rede, obtendo os resíduos do modelo. Quando surgem desvios marcados entre o observado e o previsto, esses resultados podem indicar tendências específicas que merecem análise detalhada. O painel interativo permite acompanhar essa dinâmica de 2007 a 2024, mostrando como os resíduos evoluem ao longo do tempo e possibilitando a comparação entre estados, setores e redes. Esses valores atípicos oferecem pistas que podem ser exploradas com conhecimento local e análises complementares.
+
+\textbf{Especificação.}
+Seja $Y_{itsd}$ o total de matrículas em EPT no estado $i$, ano $t$, setor $s$ e dependência $d$. Estimamos:
+\[
+\underbrace{\log Y_{itsd}}_{\text{matrículas (log)}} \;=\;
+\beta_1\,\underbrace{\log(\text{PIBpc}_{it})}_{\text{nível de renda}}
+\;+\;
+\beta_2\,\underbrace{\text{Align}_{itsd}}_{\text{alinhamento setorial}}
+\;+\;
+\alpha_s \,+\, \alpha_i \,+\, \alpha_d \,+\, \alpha_t
+\;+\; \varepsilon_{itsd},
+\]
+com erros-padrão agrupados por estado ($i$).
+
+\textbf{Variáveis e índices.}
+\begin{itemize}
+	\item $Y_{itsd}$: matrículas em cursos técnicos (Censo Escolar) por UF $i$, ano $t$, setor $s$ e dependência $d$; no modelo usamos $\log Y_{itsd}$.
+	\item $\text{PIBpc}_{it}$: PIB per capita do estado $i$ no ano $t$ (IBGE); usamos $\log(\text{PIBpc}_{it})$.
+	\item $\text{Align}_{itsd}$: \textbf{alinhamento setorial} definido como
+	\[
+	\text{Align}_{itsd}
+	\;=\;
+	\frac{\text{participação da EPT no setor } s \text{ dentro do estado } i \text{ e dep. } d}
+	{\text{participação do setor } s \text{ no VA total do estado } i}.
+	\]
+	Valor $=1$ indica alinhamento perfeito; $>1$ sobre-representação da EPT no setor; $<1$ sub-representação.
+	\item $\alpha_s$, $\alpha_i$, $\alpha_d$, $\alpha_t$: efeitos fixos para setor econômico, estado, dependência administrativa e ano, respectivamente.
+	\item $\varepsilon_{itsd}$: \textbf{resíduo}. No Painel C4, pontos à direita ($\hat\varepsilon>0$) indicam desvios positivos; à esquerda, negativos. O tamanho do marcador é proporcional ao nível de matrículas.
+\end{itemize}
+
+\noindent
+\textit{Nota}: A base analítica resulta da junção de (i) matrículas por curso/eixo (INEP), (ii) mapeamento de eixos/áreas para setores econômicos, e (iii) contas setoriais do PIB estadual (IBGE). O modelo de referência é estimado por Mínimos Quadrados com efeitos fixos (pacote \texttt{fixest}), com erros agrupados por UF. Versões futuras com dados em nível municipal poderiam dispor de graus de liberdade suficientes para especificações dinâmicas, como modelos autorregressivos vetoriais, superando a limitação atual de não tratar a correlação serial entre anos.
+
+\textbf{Resultados}
+
+\begin{table}[!htbp] \centering 
+	\caption{Resultados do Modelo de Predição de Matrículas em Cursos Técnicos (2007–2024)} 
+	\label{tab:modelo_ept}
+	\footnotesize
+	\begin{tabular}{@{\extracolsep{5pt}}lc} 
+		\\[-1.8ex]\hline 
+		\hline \\[-1.8ex] 
+		Variáveis explicativas & Estimativas (Erro-padrão) \\ 
+		\hline \\[-1.8ex] 
+		$\log(\text{PIB per capita})$ & 0,328 \;\; (0,377) \\ 
+		Alinhamento setorial & 0,886$^{***}$ \;\; (0,039)  \\ 
+		\hline \\[-1.8ex] 
+		Efeitos fixos & Setor econômico, UF, dependência administrativa, ano \\ 
+		$R^2$ ajustado / $R^2$ (within) & 0,899 \;\;/\;\; 0,751 \\ 
+		Número de observações & 3.754 \\ 
+		RMSE & 0,539 \\
+		Estatística $F$ (gl = 2, 3710) & 16.478 \;\; ($p<0,001$) \\
+		\hline 
+		\hline \\[-1.8ex] 
+	\end{tabular} 
+\end{table}
+
+\subsection{Exploração dos resíduos}
+
+A Figura \ref{fig:TabC4_1a} apresenta os resíduos do modelo de previsão de matrículas em EPT por setor, rede e unidade da federação.
+
+\begin{figure}[htbp!]
+	\centering
+	\includegraphics[width=1\textwidth]{images/TabC4_1a.png}
+	\caption{Resíduos do modelo de matrículas em EPT}
+	\label{fig:TabC4_1a}
+\end{figure}
+
+ O painel interativo permite selecionar diferentes combinações de setor e rede, bem como todos os estados, e acompanhar a evolução anual por meio do controle deslizante de anos. Dessa forma, é possível observar trajetórias ao longo do tempo e realizar comparações entre estados, setores e tipos de dependência. 
+ O caso da Agricultura na rede Estadual, discutido a seguir, ilustra como o gráfico pode revelar padrões persistentes de desvios em relação ao previsto. Entre 2011 e 2021, os resíduos para Agricultura na rede Estadual mostram uma trajetória de crescimento, com estados como Piauí, Bahia, Tocantins e Paraná consolidando-se de forma recorrente acima do previsto. Ao final do período, observa-se que esses estados mantêm desvios positivos robustos, sugerindo expansão das matrículas além do esperado em relação ao PIB per capita e ao alinhamento setorial, enquanto outros permanecem mais próximos do valor ajustado.
+
+
+
+Em síntese, o Capítulo 5 mostra como a análise das matrículas por rede, eixo e curso, associada ao modelo de previsão e à exploração dos resíduos, permite identificar padrões e oportunidades de expansão da EPT em cada estado. Esses resultados dialogam diretamente com o contexto demográfico discutido no Capítulo 2, ao evidenciar a necessidade de planejar a oferta de cursos técnicos em sintonia com a transição etária e a demanda educacional projetada até 2035. Ao mesmo tempo, preparam o terreno para o Capítulo 6, que explora os Arranjos Produtivos Locais e a dinâmica econômica regional como dimensões adicionais para orientar as políticas de expansão da EPT.
