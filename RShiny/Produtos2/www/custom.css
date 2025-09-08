@@ -429,3 +429,18 @@ body {
 .modal-content table {
     background-color: transparent;
 }
+
+
+/* Last set of CSS table headaches I hope */
+
+.dark-dt thead { 
+  background-color: #34495e !important; 
+}
+.dark-dt thead th { 
+  background-color: #34495e !important; 
+  color: #ffffff !important;
+  border-bottom: 2px solid #4f5f6f !important;
+}
+.dark-dt tbody td {
+  color: #ffffff !important;
+}

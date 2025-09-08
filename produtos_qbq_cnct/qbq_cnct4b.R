@@ -18,6 +18,9 @@ library(stopwords)
 # Load the course file
 load("D:/Country/Brazil/TechBrazil/working/mec_outros/df_cnct2025b.rda")
 
+## Save to excel for screenshot of content for report
+openxlsx::write.xlsx(df_cnct2025b, file="D:/Country/Brazil/TechBrazil/working/mec_outros/df_cnct2025b.xlsx")
+
 # Load qbq file
 load("D:/Country/Brazil/TechBrazil/working/qbq/qbq_ocup_cmento1.rda")
 
@@ -114,6 +117,13 @@ qbq_ocup_cmento1 <- qbq_ocup_cmento1 %>%
     )
   ) %>%
   select(CodCBO, ocup_blob)
+
+qbq_ocup_cmento1_extr <- qbq_ocup_cmento1 %>% select(cbo_familia,`Ocupação`,PerfilOcupacional) 
+qbq_ocup_cmento1_extr <- qbq_ocup_cmento1_extr[220,]
+
+## Save to excel for screenshot of content for report
+openxlsx::write.xlsx(qbq_ocup_cmento1_extr, file="D:/Country/Brazil/TechBrazil/working/qbq/qbq_ocup_cmento1_extr.xlsx")
+
 
 # Save as Python-compatible pickle
 py_save_object(qbq_ocup_cmento1, "D:/Country/Brazil/TechBrazil/working/qbq/qbq_ocup_cmento1_blob.pkl")

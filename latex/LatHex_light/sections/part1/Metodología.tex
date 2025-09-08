@@ -1,6 +1,60 @@
 \section{Carreras e Cursos - CNCT e QBQ}
 
 
+Nesta seção descrevemos o processo de vinculação entre os cursos do \textbf{CNCT} e as ocupações da \textbf{CBO}, etapa essencial para relacionar a oferta de Educação Profissional Técnica (EPT) às demandas do mercado de trabalho. O objetivo é aproximar, de forma empírica e sistemática, a estrutura de cursos técnicos às ocupações registradas, fornecendo subsídios para análises de aderência e lacunas.
+
+\textbf{Etapa 1 – Preparação dos textos de cursos e ocupações.}
+Foram construídos \textit{blobs} textuais para cada curso do CNCT e cada ocupação da CBO, concatenando informações de denominação, área/eixo tecnológico, perfis e campos de atuação. Essa etapa cria descrições mais completas, capazes de capturar a diversidade de termos usados nos documentos de referência.
+
+A correspondência entre os cursos técnicos do Catálogo Nacional de Cursos Técnicos (CNCT) e as ocupações do Quadro Brasileiro de Qualificações (QBQ) constitui a base para análises de oferta e demanda de EPT. Os dois lados utilizam estruturas de informação distintas: de um lado, o CNCT descreve cursos, perfis profissionais e campos de atuação; do outro, o QBQ detalha ocupações, atribuições e competências requeridas. A seguir, apresentamos um exemplo de cada lado, que serve como referência para o processo de alinhamento.
+
+\begin{figure}[htbp!]
+	\centering
+	\includegraphics[width=0.95\textwidth]{images/7a_cnct_ex.png}
+	\caption{Exemplo de entrada do Catálogo Nacional de Cursos Técnicos (CNCT)}
+	\label{fig:7a_cnct_ex}
+\end{figure}
+
+\begin{figure}[htbp!]
+	\centering
+	\includegraphics[width=0.95\textwidth]{images/7a_qbq_ex.png}
+	\caption{Exemplo de entrada do Quadro Brasileiro de Qualificações (QBQ)}
+	\label{fig:7a_qbq_ex}
+\end{figure}
+
+Esses exemplos ilustram o ponto de partida do trabalho de correspondência: o texto descritivo do curso no CNCT (perfil profissional, eixo e campo de atuação) precisa ser alinhado com a descrição das ocupações no QBQ (tarefas, competências e ambientes de trabalho). A seguir, detalhamos a metodologia adotada para realizar essa correspondência de forma sistemática, combinando técnicas de TF–IDF e embeddings semânticos.
+
+
+\textbf{Etapa 2 – Representações TF-IDF.}
+Com base em tokenização e remoção de palavras-vazias, foram calculados vetores de TF–IDF (Term Frequency–Inverse Document Frequency) para cada curso e ocupação, priorizando as 100 palavras de maior peso por documento. Essa técnica, bastante utilizada em análise de textos, atribui maior peso a termos que aparecem com frequência em um documento, mas são relativamente raros no conjunto total, destacando assim palavras distintivas. O procedimento fornece um sinal estatístico sobre a especificidade de cada curso ou ocupação e constitui uma base objetiva para medir similaridade textual. Para uma introdução acessível ao uso de TF–IDF e outros métodos em ciências sociais, ver \parencite{grimmer_roberts}
+
+\textbf{Etapa 3 – Representações semânticas.}
+Paralelamente, cada curso foi codificado em um vetor de embeddings semânticos por meio do modelo multilingue \texttt{intfloat/multilingual-e5-large}, armazenado no índice Pinecone. Esse vetor captura proximidades contextuais em espaço vetorial de alta dimensão, permitindo que cursos semanticamente similares a determinadas ocupações se aproximem mesmo quando não compartilham termos exatos.
+
+\textbf{Etapa 4 – Combinação híbrida.}
+Para cada par curso–ocupação calcularam-se duas medidas: (i) similaridade de cosseno entre os vetores TF–IDF e (ii) similaridade semântica entre os embeddings. As duas métricas foram combinadas multiplicativamente para formar um escore híbrido. Esse procedimento prioriza pares que são ao mesmo tempo tecnicamente próximos e semanticamente coerentes, reduzindo falsos positivos que surgiriam em cada abordagem isolada.
+
+\textbf{Etapa 5 – Resultados.}
+A partir desse escore híbrido foi criado um indicador de proximidade, que pode ser manipulado interativamente no painel da aplicação. O usuário pode definir o número de correspondências mais próximas (por exemplo, top–5 ou top–10) ou ajustar o limite mínimo de proximidade por meio de um controle deslizante. Esse recurso permite explorar diferentes níveis de rigor na correspondência, até o ponto em que os vínculos deixam de ser considerados plausíveis.
+
+
+\textit{Nota:} Esse procedimento representa uma aproximação sistemática entre CNCT e CBO. A implementação permite comparações em diferentes níveis de agregação (eixo, área, curso versus grandes grupos, famílias ou subgrupos ocupacionais), que podem ser ajustadas conforme a necessidade analítica em cada UF. Importante destacar que, por se tratar de resultados gerados com técnicas de inteligência artificial, correspondências ocasionais inesperadas podem ocorrer; por isso, a revisão humana é necessária para validar a plausibilidade dos vínculos sugeridos.
+
+\begin{figure}[htbp!]
+	\centering
+	\includegraphics[width=1\textwidth]{images/7a_cnct_qbq.png}
+	\caption{Painel de correspondência CNCT--CBO}
+	\label{fig:7a_cnct_qbq}
+\end{figure}
+
+O painel ilustrado na Figura \ref{fig:7a_cnct_qbq} permite explorar as correspondências tanto no sentido \textbf{oferta $\rightarrow$ demanda} (CNCT $\rightarrow$ CBO) quanto no sentido inverso \textbf{demanda $\rightarrow$ oferta} (CBO $\rightarrow$ CNCT).  
+
+No fluxo \textbf{CNCT $\rightarrow$ CBO}, o usuário seleciona um \textit{eixo tecnológico}, cujas matrículas em 2023 e 2024 são exibidas à esquerda. Em seguida, pode-se detalhar a seleção para a \textit{área tecnológica} e, por fim, para cursos específicos. Ao clicar em um curso, são mostradas à direita as ocupações mais próximas, acompanhadas do número de vínculos formais observados. A lista de correspondências pode ser ajustada interativamente pelo controle deslizante de proximidade ou pelo número de correspondências (top–5, top–10, etc.). A análise pode ser feita para o Brasil como um todo ou para um estado específico.  
+
+No fluxo \textbf{CBO $\rightarrow$ CNCT}, o usuário parte da classificação ocupacional: seleciona um \textit{grande grupo} (1 dígito), depois a \textit{família} (4 dígitos) e, por fim, uma ocupação de 6 dígitos, com vínculos formais da RAIS em 2023 e 2024. Ao clicar em uma ocupação, a tabela à direita exibe os cursos CNCT associados, com suas respectivas matrículas.  
+
+Esse arranjo bidirecional oferece uma ferramenta exploratória que conecta a oferta educacional ao mercado de trabalho formal, permitindo análises adaptáveis à escala estadual ou nacional.
+
 \section{Metodologia para determinar escassez} 
 
 Com o objetivo de buscar indícios de escassez de força de trabalho especializada, Nascimento \parencite{nascimento_2011} utiliza dados do Caged e da Rais para verificar o comportamento mensal do mercado formal de trabalho para ocupações técnico-científicas. O autor se vale dos diferenciais salariais entre admitidos e desligados e da evolução das taxas de rotatividade como indicadores de escassez. Esse método foi replicado, com a mesma finalidade, por Sousa e Nascimento \parencite{sousa_nascimento_2012} e por Nascimento \parencite{nascimento_2012}.\footnote{Nascimento \parencite{nascimento_2011} usa o método para identificar focos de escassez de pessoal técnico-científico no Brasil, enquanto que as duas obras citadas na sequência o fazem para outros recortes. Sousa e Nascimento \parencite{sousa_nascimento_2012} focam nas carreiras técnico-científicas no setor de telecomunicações no Brasil; Nascimento \parencite{nascimento_2012} observa os postos de trabalho altamente demandantes de competências relacionadas à engenharia e ao design nas oito maiores regiões metropolitanas do país.}
@@ -108,3 +162,6 @@ As limitações apontadas não invalidam as vantagens já enumeradas do painel d
 	\item Lista priorizada de cursos/áreas por UF para pactuação (com indicação do tipo de oferta e redes preferenciais);
 	\item Insumos para metas anuais (vagas/matrículas) e para os dois cenários financeiros (com/sem Propag), a serem detalhados nos capítulos seguintes.
 \end{enumerate}
+
+
+

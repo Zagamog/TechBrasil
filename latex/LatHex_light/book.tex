@@ -1,5 +1,5 @@
 \usepackage{lipsum}
-
+\usepackage{pdfpages} 
 \begin{document}
 \renewcommand{\figurename}{Figura}
 \renewcommand{\tablename}{Tabela}
@@ -94,6 +94,8 @@
 \part{Apêndice}
 
 \newpage
+\backgroundbarvisiblefalse  % Turn off the vertical bar for Annex
+\backgroundtitlevisiblefalse % Turn off the rotated text
 \chapter{Normativas e relacionados}
 \input{sections/part2/Anexo}
 
@@ -104,6 +106,10 @@
 \newpage
 \printbibliography[title={Referências}]
 \clearpage
+
+\newpage
+\thispagestyle{empty}
+\mbox{}
 
 \newpage
 \thispagestyle{empty}

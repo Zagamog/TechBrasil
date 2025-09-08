@@ -1,39 +1,36 @@
-O objetivo deste relatório é fornecer bases analíticas com evidências empíricas como um de vários insumos para o desenvolvimento de políticas de Educação Profissional e Tecnológica (EPT) no contexto do PROPAG. A \href{https://datanalytics.worldbank.org/content/6604f317-d487-436a-b6b6-792369b341f0}{Plataforma Analítica Juros por Educação do BM--FGV} organiza estas análises em cinco dimensões fundamentais: (A) contexto demográfico e populacional; (B) cenários financeiros e simulações do PROPAG; (C) oferta atual e projetada de EPT; (D) demanda por formação técnica com base no desenvolvimento econômico regional; e (E) análise integrada entre oferta e demanda. A ferramenta permite ao usuário explorar dados detalhados de sua unidade federativa, realizar comparações entre estados e regiões, e simular diferentes cenários de adesão ao programa, oferecendo assim um conjunto robusto de informações para a definição de políticas sobre a expansão da EPT como fator importante para aumentar a produtividade do trabalhador no Brasil.
+
+Este relatório apresenta a \href{https://datanalytics.worldbank.org/content/6604f317-d487-436a-b6b6-792369b341f0}{Plataforma Analítica PROPAG - Juros por Educação} e contextualiza suas funcionalidades. O documento detalha a fundamentação técnica e a motivação por trás de cada módulo analítico da ferramenta. Este documento serve como guia de referência para gestores públicos, detalhando como a plataforma organiza evidências empíricas em cinco dimensões fundamentais: (A) contexto demográfico e populacional; (B) cenários financeiros e simulações do PROPAG; (C) oferta atual e projetada de EPT; (D) demanda por formação técnica com base no desenvolvimento econômico regional; e (E) análise integrada entre oferta e demanda. Ao explicar a lógica e metodologia subjacente a cada módulo, este relatório orienta o usuário a explorar plenamente os dados de sua unidade federativa, realizar comparações entre estados e regiões, e simular diferentes cenários de adesão ao programa, fornecendo assim bases analíticas robustas para a tomada de decisão sobre políticas de expansão da EPT como estratégia para aumentar a produtividade do trabalhador no Brasil.
+
 
 \begin{center}
-	\textbf{\textcolor{orange}{Plataforma Interativo na Internet:}}\\
-	\href{https://datanalytics.worldbank.org/content/6604f317-d487-436a-b6b6-792369b341f0}{https://datanalytics.worldbank.org/Plataforma-Interativo-PROPAG}
+	\textbf{\textcolor{orange}{Plataforma Interativa na Internet:}}\\
+	\href{https://datanalytics.worldbank.org/content/6604f317-d487-436a-b6b6-792369b341f0}{https://datanalytics.worldbank.org/Plataforma-Interativa-PROPAG}
 \end{center}
 
 \section{Navegação da Plataforma}
 
-A plataforma está estruturada em \textbf{múltiplas abas temáticas}, cada uma voltada a um aspecto crítico para a tomada de decisão. A interface principal, ilustrada na Figura~\ref{fig:intro_page}, apresenta todas as dimensões de análise organizadas de forma intuitiva.
+A plataforma está estruturada em \textbf{múltiplas painéis  temáticas}, cada uma voltada a um aspecto crítico para a tomada de decisão. A interface principal, ilustrada na Figura~\ref{fig:intro_page}, apresenta todas as dimensões de análise organizadas de forma intuitiva.
 
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=\textwidth]{images/1a_IntroPage.png}
-	\caption{Página inicial da Plataforma Analítica Juros por Educação - Interface de navegação com links diretos para todas as análises disponíveis}
+	\caption{Página inicial da Plataforma Interativa PROPAG - Interface de navegação com links diretos para todas as análises disponíveis}
 	\label{fig:intro_page}
 \end{figure}
 
 
-As análises disponíveis na plataforma incluem:
-
+As análises disponíveis na plataforma estão organizadas em cinco dimensões fundamentais:
 \begin{itemize}
-	\item \textbf{Cenário Financeiro e Simulações:} estima o espaço fiscal gerado pela adesão ao PROPAG e os aportes mínimos em EPT e no Fundo de Equalização Fiscal (FEF).
+	\item \textbf{Transição Demográfica:} analisa as projeções populacionais por faixa etária (2000-2070) e a evolução da população em idade escolar (15-19 anos), identificando janelas de oportunidade demográfica para expansão da EPT antes da transição estrutural em curso.
 	
-	\item \textbf{Impacto Financeiro com e sem Adesão:} compara a trajetória da dívida estadual em diferentes cenários.
+	\item \textbf{Cenário Financeiro e Simulações do PROPAG:} estima o espaço fiscal gerado pela adesão ao programa, simulando trajetórias de endividamento, contribuições ao Fundo de Equalização Federativa (FEF) e fluxos financeiros com e sem adesão, permitindo visualização comparativa entre estados.
 	
-	\item \textbf{Retorno do FEF por Opções:} mostra como as escolhas de opção de adesão afetam o saldo líquido estadual.
+	\item \textbf{Oferta de EPT e Metas do PNE:} avalia a situação atual e projetada das matrículas em EPT em relação à Meta 11 do PNE, com análises detalhadas por eixo tecnológico, curso, rede e município, incluindo modelos econométricos para identificar padrões e oportunidades de expansão.
 	
-	\item \textbf{Projeções de Oferta e Meta 11 do PNE:} avalia a situação da matrícula em EPT em relação à meta nacional de triplicar o acesso.
+	\item \textbf{Demanda por Formação Técnica:} mapeia o dinamismo econômico municipal, identifica Arranjos Produtivos Locais (APL) baseados em especialização ocupacional, e analisa a distribuição do mercado de trabalho formal e informal como indicadores de demanda por profissionais técnicos.
 	
-	\item \textbf{Expansão de Matrículas e Novo PNE (2025--2035):} explora cenários para a próxima década de políticas educacionais.
-	
-	\item \textbf{Demanda e Escassez de Profissionais Técnicos:} cruza dados do mercado de trabalho (RAIS/CAGED) com a oferta de EPT para mapear gargalos regionais.
+	\item \textbf{Oferta e Demanda Integradas:} conecta a oferta educacional (cursos e matrículas EPT) com a demanda laboral (ocupações CBO), diagnosticando escassez de profissionais técnicos por curso e região, permitindo alinhar a expansão da EPT com as necessidades do mercado de trabalho.
 \end{itemize}
-
-Além disso, a plataforma inclui \textbf{módulos demográficos} que permitem ao gestor compreender como a dinâmica etária afeta a demanda futura por educação, saúde e serviços sociais.
 
 
 Com isso, a \textbf{Plataforma Analítica Juros por Educação do BM--FGV} funciona como um verdadeiro \textit{laboratório de simulação e análise}: o administrador estadual pode visualizar a situação do seu estado, comparar cenários de adesão ou não adesão ao PROPAG e planejar a aplicação dos recursos de forma estratégica, alinhando sustentabilidade fiscal, expansão da EPT e enfrentamento dos desafios demográficos.
@@ -46,3 +43,31 @@ A partir da página inicial, os usuários podem:
 \end{itemize}
 
 \vspace{1cm}
+
+\section{Documentos de Normativas}
+
+
+% In your Introdução.tex file:
+
+
+Documentos de normativas e explicação do STN e MEC estão disponíveis pela internet. Reproduzimos para conveniência de acesso no Anexo.
+
+\begin{itemize}
+\item \textbf{Lei Complementar nº 212, de 13 de janeiro de 2025} \href{https://www.planalto.gov.br/ccivil_03/LEIS/LCP/Lcp212.htm}{(Lei 212 no sitio Planalto.gov.br)}  Institui o Programa de Pleno Pagamento de Dívidas dos Estados - PROPAG - com a parte conhecida como Juros por Educação. O PROPAG estabelece um regime especial de revisão dos termos das dívidas dos Estados com a União, condicionado a investimentos em educação profissional técnica de nível médio e outras áreas prioritárias.\hyperref[anexo:lei_propag]{\textcolor{red}{[Ver documento completo no Anexo]}}
+
+\vspace{2em}
+
+\item \textbf{Decreto nº 12.433, de 14 de abril de 2025} 
+\href{https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/decreto/d12433.htm}{(Decreto 12.433 no sítio Planalto.gov.br)} 
+Regulamenta a Lei Complementar nº 212/2025, que institui o Programa de Pleno Pagamento de Dívidas dos Estados - PROPAG. Estabelece os procedimentos operacionais do programa e institui o Programa Juros por Educação (Art. 68), destinado a criar condições estruturais de incremento de produtividade e novas oportunidades educacionais e profissionais à população por meio do cumprimento das metas de expansão de matrículas da educação profissional técnica de nível médio.
+\hyperref[anexo:decreto_propag]{\textcolor{red}{[Ver documento completo no Anexo]}}
+
+\vspace{2em}
+
+
+
+\end{itemize}
+
+
+
+
