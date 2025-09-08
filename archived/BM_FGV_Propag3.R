@@ -3502,7 +3502,7 @@ valid_html <- paste0(valid_css, make_table_html(valid_tbl))
     req(input$uf1)
     h4(paste("⚠️ Relação de Cursos com Maior Escassez -", input$uf1), id = "ranking_uf_title")
   })
-  
+###############################
   # Renderiza a tabela de ranking da UF
   output$ranking_uf <- renderTable({
     req(input$uf1)
