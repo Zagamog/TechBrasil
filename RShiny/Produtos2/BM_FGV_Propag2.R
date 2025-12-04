@@ -820,7 +820,6 @@ df_raisCodCBO_wide <- df_raisCodCBO %>%
 ###UI  UI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UI
 ## UI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UI
 # UI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI UIUI U
-# UI drop-in replacement (only the ui object)
 ui <- dashboardPage(
 
 #  Using Shiny dashboard template but some modifications, here dispensing with sidebar and header
@@ -896,6 +895,80 @@ tags$head(
       tags$script(src = "https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js")
     ),
 
+
+########### MOBILE BLOCKER
+## ---- Aviso para acesso móvel (UI apenas) ----
+# ---- Mobile blocker (Português) ----
+tags$head(tags$style(HTML("
+  .mobile-blocker{position:fixed; inset:0; display:none; z-index:20000;
+    align-items:center; justify-content:center; padding:24px;
+    background:rgba(15,23,42,.92); pointer-events:auto;}
+  .mobile-blocker .mbox{max-width:640px; width:100%;
+    background:#fee2e2; border:1px solid #fca5a5; border-radius:14px;
+    padding:22px 20px; text-align:center; box-shadow:0 12px 28px rgba(0,0,0,.35);}
+  .mobile-blocker h2{margin:6px 0 8px; font-weight:800;}
+  .mobile-blocker p{margin:0; font-size:16px;}
+  .mobile-blocker .rowbtn{margin-top:14px; display:flex; gap:10px; justify-content:center;}
+  .mobile-blocker .ack, .mobile-blocker .skip{
+    border:0; padding:8px 14px; border-radius:8px; cursor:pointer;}
+  .mobile-blocker .ack{background:#ef4444; color:#fff;}
+  .mobile-blocker .skip{background:#20313d; color:#e8eef5; border:1px solid #355468;}
+  body.no-scroll{overflow:hidden;}
+"))),
+
+
+# overlay markup (outside head)
+div(
+  id = "mobile-blocker", class = "mobile-blocker", tabindex = "0",
+  div(class="mbox",
+      tags$span(style="font-size:28px;display:inline-block;", "❗"),
+      h2("Esta ferramenta foi desenvolvida para uso em computador."),
+      p("Por favor, acesse em um notebook ou desktop."),
+      div(class="rowbtn",
+          tags$button(
+            class="ack",
+            onclick="
+              document.getElementById('mobile-blocker').style.display='none';
+              document.body.classList.remove('no-scroll');
+              localStorage.setItem('propag_mobile_dismiss','1');
+            ",
+            "Entendi"
+          ),
+          tags$button(
+            class="skip",
+            onclick="
+              document.getElementById('mobile-blocker').style.display='none';
+              document.body.classList.remove('no-scroll');
+              localStorage.setItem('propag_mobile_dismiss','1');
+            ",
+            "Continuar assim mesmo"
+          )
+      )
+  )
+),
+
+# detector script (in head)
+tags$head(tags$script(HTML("
+  function showMobileBlocker(){
+    try {
+      if(localStorage.getItem('propag_mobile_dismiss')==='1'){ return; }
+    } catch(e) {}
+    var isSmall = window.matchMedia('(max-width: 991.98px)').matches; // ~Bootstrap md
+    var isUA    = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    var show    = isSmall || isUA;
+    var el = document.getElementById('mobile-blocker');
+    if(!el) return;
+    el.style.display = show ? 'flex' : 'none';
+    if(show){ document.body.classList.add('no-scroll'); } else { document.body.classList.remove('no-scroll'); }
+    if(window.Shiny){ Shiny.setInputValue('is_mobile', show, {priority:'event'}); }
+  }
+  window.addEventListener('load', showMobileBlocker, {once:true});
+  window.addEventListener('resize', showMobileBlocker);
+"))),
+
+
+
+
 ###############################################################################################################
 #      # Header title area    # Header title area    # Header title area    # Header title area    # Header title area
 ###############################################################################################################
@@ -919,7 +992,7 @@ tags$div(
           span("Inteligência Artificial", style = "color: #ffcc00;"),
           " – desenvolvida por uma equipe do",
           span("Banco Mundial", style = "color: #ffcc00;"),
-          " e ",
+          " com apoio da ",
           span("FGV/DGPE", style = "color: #ffcc00;")
         )
       )
@@ -1589,6 +1662,7 @@ tabPanel(
   
   
   fluidRow(
+    
     column(12,
            plotOutput("PloTab1b",height = "600px", width = "100%")
     )
@@ -2285,6 +2359,35 @@ tabPanel("C4. Oferta EPT (Modelo)",
   tabPanel("D2. Demanda EPT: APLs",
            
            fluidPage(
+             
+             
+             tags$style(HTML("
+/* Scope to the DT with id 'apl_table' only */
+#apl_table table.dataTable thead th,
+#apl_table table.dataTable thead td {
+  background-color: #20313d !important;   /* dark header */
+  color: #e8eef5 !important;               /* light text */
+  border-color: #2b3b48 !important;
+}
+
+/* When columns are sortable, DT adds these classes—cover them too */
+#apl_table table.dataTable thead th.sorting,
+#apl_table table.dataTable thead th.sorting_asc,
+#apl_table table.dataTable thead th.sorting_desc {
+  background-color: #20313d !important;
+  background-image: none !important;
+  color: #e8eef5 !important;
+}
+
+/* Optional: keep search + length controls readable in this block */
+#apl_table .dataTables_filter input,
+#apl_table .dataTables_length select {
+  background: #0f1b22 !important;
+  color: #e8eef5 !important;
+  border: 1px solid #355468 !important;
+}
+")),
+             
              h3("Arranjos Produtivos Locais - Base CBO", style = "color: #1f5673; font-weight: bold;"),
              
              div(class = "topbar-info",
@@ -2379,12 +2482,12 @@ tabPanel("C4. Oferta EPT (Modelo)",
                  ),
                  
                  br(),
-                 
+                 div(class = "checkbox-dark-panel",
                  fluidRow(
                    column(12,
                           h4("APLs na Região Selecionada", style = "color: #1f5673;"),
                           withSpinner(DTOutput("apl_table"))
-                   )
+                   ))
                  )
                )
              )
