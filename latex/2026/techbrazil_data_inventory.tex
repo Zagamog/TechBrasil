@@ -1,0 +1,408 @@
+\documentclass[10pt]{article}
+\usepackage[left=1.5cm,right=1.5cm,top=1.5cm,bottom=1.5cm,landscape]{geometry}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage[table]{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{tikz}
+\usetikzlibrary{shapes.arrows,positioning,arrows.meta}
+\usepackage{fancyhdr}
+
+\definecolor{inputred}{RGB}{180,0,0}
+\definecolor{outputblue}{RGB}{0,0,180}
+\definecolor{awsorange}{RGB}{255,153,0}
+\definecolor{sectionblue}{RGB}{31,86,115}
+\definecolor{panelblue}{RGB}{31,86,115}
+\definecolor{tabA}{RGB}{66,133,244}
+\definecolor{tabB}{RGB}{255,152,0}
+\definecolor{tabC}{RGB}{52,168,83}
+\definecolor{tabD}{RGB}{154,205,50}
+\definecolor{tabE}{RGB}{156,39,176}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\fancyhead[L]{\small TechBrazil / PROPAG Data Inventory}
+\fancyhead[R]{\small \today}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\title{\textbf{TechBrazil / PROPAG Data Inventory}\\[0.3em]\large Ferramenta de Apoio Analítico -- Plano de Aplicação\\[0.3em]\normalsize Inventário de Dados por Aba do Aplicativo Shiny}
+\author{Suhas Parandekar}
+\date{\today}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+\section*{Aplicativo Principal: BM\_FGV\_Propag2.R}
+
+Aplicativo Shiny com 15 abas organizadas por código de cores temático:
+
+\begin{tabular}{lll}
+\textcolor{tabA}{$\blacksquare$} \textbf{Azul} & A1--A2 & Demografia \\
+\textcolor{tabB}{$\blacksquare$} \textbf{Laranja} & B1--B3 & Finanças PROPAG \\
+\textcolor{tabC}{$\blacksquare$} \textbf{Verde} & C1--C4 & Oferta EPT \\
+\textcolor{tabD}{$\blacksquare$} \textbf{Verde-Lima} & D1--D3 & Demanda EPT \\
+\textcolor{tabE}{$\blacksquare$} \textbf{Roxo} & E1--E2 & Conexão Oferta-Demanda \\
+\end{tabular}
+
+\vspace{0.5em}
+\noindent\textbf{Bucket S3:} \texttt{techbrazildata} (us-east-1) | \textbf{Estrutura:} \texttt{rawdata/} (dados brutos) $\rightarrow$ \texttt{working/} (dados processados)
+
+\vspace{1em}
+\hrule
+\vspace{0.8em}
+
+%==============================================================================
+% PANEL A1
+%==============================================================================
+\subsection*{\textcolor{tabA}{$\blacksquare$} Aba A1: Transição Demográfica -- Projeções Populacionais por Faixa Etária}
+
+\noindent\textbf{Descrição:} Análise das mudanças no perfil etário da população brasileira (2000--2070) por região e estado, identificando pontos de transição demográfica (crossover 0-14 vs 60+).
+
+\begin{center}
+\small
+\begin{tabular}{p{3.5cm}p{4.5cm}p{5cm}p{9cm}}
+\toprule
+\textbf{Objeto Shiny} & \textbf{Script Fonte} & \textbf{Dados Brutos (S3)} & \textbf{Variáveis Principais} \\
+\midrule
+\texttt{pop01\_70b} & \texttt{prelims/população/} \newline \texttt{br\_pop1a.R} & \texttt{rawdata/ibge/} \newline \texttt{projecoes\_2024\_tab3\_} \newline \texttt{grupos\_etarios\_especificos.xlsx} & ANO, SIGLA, LOCAL, POP\_T, 0-14\_T, 15-17\_T, 18-21\_T, 15-59\_T, 60+\_T, P\_* (proporções), Crossover\_Flag/Value \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Agregações Criadas:} Amazônia Legal (9 UFs), Nordeste\_r (8 UFs excl. MA), Centro-Oeste\_r (3 UFs excl. MT)
+
+\vspace{0.8em}
+\hrule
+\vspace{0.8em}
+
+%==============================================================================
+% PANEL A2
+%==============================================================================
+\subsection*{\textcolor{tabA}{$\blacksquare$} Aba A2: EPT e População -- População 15-19 anos e Matrículas EPT/Ensino Médio}
+
+\noindent\textbf{Descrição:} Comparação entre população de 15-19 anos e matrículas na EPT/Ensino Médio, com acompanhamento das metas do PNE Meta 11.
+
+\begin{center}
+\small
+\begin{tabular}{p{3.5cm}p{4.5cm}p{5cm}p{9cm}}
+\toprule
+\textbf{Objeto Shiny} & \textbf{Script Fonte} & \textbf{Dados Brutos (S3)} & \textbf{Variáveis Principais} \\
+\midrule
+\texttt{pop01\_70b} & (mesmo que A1) & (mesmo que A1) & 15-17\_T, 18-21\_T $\rightarrow$ cálculo 15-19\_T \\
+\texttt{meta11a\_opcoes} & \texttt{prelims/mec/} \newline \texttt{Censo\_UF\_garabed1b.R} & \texttt{working/mec\_inep/} \newline \texttt{df\_censo\_UF.rda} \newline \texttt{Tecnico\_FormaR\_Garabed1.rda} & ANO, SG\_UF, NM\_UF, QT\_MAT\_PROF\_TEC\_PROPAG, QT\_MAT\_MED, Meta11a\_opcao1/2/3 \\
+\texttt{df\_codes\_ibge} & \texttt{prelims/mapas/} \newline \texttt{codes\_ibge.R} & \texttt{working/ibge/} \newline \texttt{df\_pibmunis.rda} & CO\_5RGRANDE, NM\_5RGRANDE, CO\_UF, SG\_UF, NM\_UF, CO\_MUN, NM\_MUN, CO\_RGIMED, CO\_RGINTM \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Derivações no Shiny:} \texttt{ept\_combined\_data} (join pop + enrollment), \texttt{PCT\_MAT\_EPT}, \texttt{PCT\_MAT\_MED}, \texttt{ept\_meta11\_df} (meta = 3x 2013)
+
+\vspace{0.8em}
+\hrule
+\vspace{0.8em}
+
+%==============================================================================
+% PANELS B1-B3
+%==============================================================================
+\subsection*{\textcolor{tabB}{$\blacksquare$} Abas B1--B3: Financiamento PROPAG -- Simulações e Cenários}
+
+\noindent\textbf{Descrição:} Simulação do impacto financeiro do PROPAG com diferentes cenários de adesão, abatimento, FEF e investimento em EPT.
+
+\begin{center}
+\small
+\begin{tabular}{p{3.5cm}p{4.5cm}p{5cm}p{9cm}}
+\toprule
+\textbf{Objeto Shiny} & \textbf{Script Fonte} & \textbf{Dados Brutos} & \textbf{Variáveis Principais} \\
+\midrule
+\texttt{df\_2a, df\_2b, df\_2c} \newline \texttt{df\_3a, df\_3b, df\_3c} \newline \texttt{df\_4a, df\_4b, df\_nd} & \texttt{produtos\_avila\_vidal/} \newline \texttt{avila\_vidal01.R} & \texttt{rawdata/fgv/} \newline \texttt{fgv\_fin2b.xlsx} \newline (9 sheets, dados FGV/Vidal) & NM\_UF, DIVIDA, Distr\_FEF, Valor\_Abat, Saldo2025--2054, ApoFEF2025--2054, InvDir2025--2054, JurPag2025--2054 \\
+\texttt{dfcen\_val} & \texttt{produtos\_avila\_vidal/} \newline \texttt{avila\_vidal01.R} & (gerado internamente) & A (abatimento), G (FEF), I (investimento), J (juros), valid, opcao \\
+\texttt{propag\_ept\_financeiro} & (arquivo .rds externo) & Scraping portal PROPAG & UF, Estado, saldo\_mar25, amort\_extr, FEF\_*, EPT\_* \\
+\texttt{df\_censo\_UF} & \texttt{produtos\_censo/} \newline \texttt{matriculas1UF.R} & \texttt{rawdata/mec\_inep/} \newline Microdados Censo Escolar & SG\_UF, NM\_UF, ANO, QT\_MAT\_* (múltiplas variáveis de matrícula) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Cenários:} II-A/B/C (Juros 0\%), III-A/B/C (Juros 1\%), IV-A/B (Juros 2\%), ND (Não Adere, 4\%)
+
+\vspace{0.8em}
+\hrule
+\vspace{0.8em}
+
+%==============================================================================
+% PANELS C1-C4
+%==============================================================================
+\subsection*{\textcolor{tabC}{$\blacksquare$} Abas C1--C4: Oferta EPT -- Projeção, Planificação, Redes e Modelo}
+
+\noindent\textbf{Descrição:} Análise da oferta de EPT vs Meta 11, projeção de matrículas necessárias, e modelo econométrico de fatores determinantes.
+
+\begin{center}
+\small
+\begin{tabular}{p{3.5cm}p{4.5cm}p{5cm}p{9cm}}
+\toprule
+\textbf{Objeto Shiny} & \textbf{Script Fonte} & \textbf{Dados Brutos (S3)} & \textbf{Variáveis Principais} \\
+\midrule
+\texttt{meta11a\_opcoes} & (mesmo que A2) & (mesmo que A2) & Meta11a\_opcao1/2/3 para projeções \\
+\texttt{df\_censo\_UF} & \texttt{produtos\_censo/} \newline \texttt{matriculas1UF.R} & Microdados Censo Escolar \newline 2007--2024 & Agregações por UF, ano, dependência administrativa \\
+\texttt{df\_pibmunis} & \texttt{prelims/municipios/} \newline \texttt{TB\_municipios1a.R} & \texttt{working/sqlite/} \newline \texttt{TB\_municipios.sqlite} & PIB por município 2002--2021 (43 variáveis) \\
+\texttt{df\_residuals\_ols} & \texttt{produtos\_rais/} \newline \texttt{modelo\_ept3a.R} & Modelo OLS com efeitos fixos & Resíduos do modelo, fitted values, variáveis explicativas \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.8em}
+\hrule
+\vspace{0.8em}
+
+%==============================================================================
+% PANELS D1-D3
+%==============================================================================
+\subsection*{\textcolor{tabD}{$\blacksquare$} Abas D1--D3: Demanda EPT -- Dinamismo Econômico, APLs e Informalidade}
+
+\noindent\textbf{Descrição:} Análise da demanda por EPT baseada em dinamismo econômico municipal, arranjos produtivos locais (APLs) e formalidade do emprego.
+
+\begin{center}
+\small
+\begin{tabular}{p{3.5cm}p{4.5cm}p{5cm}p{9cm}}
+\toprule
+\textbf{Objeto Shiny} & \textbf{Script Fonte} & \textbf{Dados Brutos (S3)} & \textbf{Variáveis Principais} \\
+\midrule
+\texttt{MUN\_dyna02\_21} & \texttt{prelims/municipios/} \newline \texttt{econ\_dynam1a.R} & \texttt{working/ibge/} \newline \texttt{df\_pibmunis.rda} & dynamism\_index, dynamism\_decile, period1/2\_avg\_growth, pop\_weighted\_contribution \\
+\texttt{dft\_apl\_MUN\_final} & \texttt{produtos\_rais/} \newline \texttt{rais\_apo2MUNI.R} & RAIS vínculos por CBO \newline e município & CO\_MUN6, cbo\_4dig, persist, E\_mun\_cbo, LQ (Location Quotient) \\
+\texttt{apl\_matri\_UF} \newline \texttt{apl\_matri\_MUN} & \texttt{produtos\_rais/} \newline \texttt{rais\_apo3UF.R} \newline \texttt{rais\_apo3MUNI.R} & Censo Escolar + RAIS & Matching cursos EPT com ocupações APL \\
+\texttt{qbq\_ocup\_cmento1} & \texttt{prelims/qbq/} \newline \texttt{qbq3a.R} & QBQ (Quadro Brasileiro de Qualificações) & cbo\_4dig, cbo\_familia, ocupação normalizada \\
+\texttt{df\_cbocod\_mun23} \newline \texttt{df\_cbocod\_mun24} & \texttt{produtos\_rais/} \newline \texttt{rais\_apo4a.R} & RAIS vínculos municipais & Emprego formal por CBO e município \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Índice de Dinamismo:} Média ponderada de crescimento PIB pc: período 1 (2002-2011, peso 1.0) + período 2 (2012-2021, peso 1.5)
+
+\vspace{0.8em}
+\hrule
+\vspace{0.8em}
+
+%==============================================================================
+% PANEL C3 DETAIL
+%==============================================================================
+\subsection*{\textcolor{tabC}{$\blacksquare$} Aba C3 Detalhe: Oferta EPT por Eixo e Curso}
+
+\begin{center}
+\small
+\begin{tabular}{p{3.5cm}p{4.5cm}p{5cm}p{9cm}}
+\toprule
+\textbf{Objeto Shiny} & \textbf{Script Fonte} & \textbf{Dados Brutos (S3)} & \textbf{Variáveis Principais} \\
+\midrule
+\texttt{df\_censo\_supl\_tec23} \newline \texttt{df\_censo\_supl\_tec24} & \texttt{prelims/mec/} \newline \texttt{prepara\_censo\_escolar\_tecnico.R} & Microdados Censo Escolar \newline Suplemento Técnico & CO\_MUN, ANO, TP\_DEPENDENCIA, NO\_AREA\_CURSO, NO\_CURSO\_EDUC\_PROFISSIONAL, QT\_MAT\_CURSO\_TEC\_* \\
+\texttt{df\_censo\_notin\_cnct} & \texttt{prelims/qbq/} \newline \texttt{qbq2a.R} & Cursos não mapeados no CNCT & Cursos do Censo sem correspondência CNCT \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.8em}
+\hrule
+\vspace{0.8em}
+
+%==============================================================================
+% PANELS E1-E2
+%==============================================================================
+\subsection*{\textcolor{tabE}{$\blacksquare$} Abas E1--E2: Conexão Oferta-Demanda EPT e Escassez de Profissionais}
+
+\noindent\textbf{Descrição:} Matching entre cursos EPT (CNCT) e ocupações (CBO) usando IA; diagnóstico de escassez de profissionais técnicos.
+
+\begin{center}
+\small
+\begin{tabular}{p{3.5cm}p{4.5cm}p{5cm}p{9cm}}
+\toprule
+\textbf{Objeto Shiny} & \textbf{Script Fonte} & \textbf{Dados Brutos (S3)} & \textbf{Variáveis Principais} \\
+\midrule
+\texttt{df\_mat\_uf} \newline \texttt{df\_mat\_eixo} \newline \texttt{df\_mat\_area} \newline \texttt{df\_mat\_curso} & \texttt{prelims/qbq/} \newline \texttt{qbq2a.R} & Censo Escolar agregado & Matrículas por UF, Eixo, Área, Curso \\
+\texttt{df\_exarcu} & \texttt{prelims/qbq/} \newline \texttt{qbq2a.R} & CNCT catalogue & IDX\_EIXCUR, Eixo, Area, Denominação do Curso \\
+\texttt{rais\_cbo6\_uf23} \newline \texttt{rais\_cbo6\_uf24} & \texttt{prelims/rais/} \newline \texttt{rais2a.R} & RAIS microdados & Emprego por CBO 6-dígitos e UF \\
+\texttt{cnct\_qbq\_matches2} \newline \texttt{qbq\_cnct\_matches2} & \texttt{produtos\_qbq\_cnct/} \newline \texttt{qbq\_cnct6a.R} & GPT-4 semantic matching & Curso $\leftrightarrow$ Ocupação (score similaridade) \\
+\texttt{caged\_rais\_cnct\_} \newline \texttt{2020\_2024\_shiny} & \texttt{prelims/caged/} \newline \texttt{2.preprocess\_caged\_} \newline \texttt{rais\_shiny.R} & CAGED + RAIS 2020--2024 & Fluxos admissão/desligamento, salários, rotatividade por curso \\
+\texttt{df\_ranking\_cursos\_} \newline \texttt{caged\_rais} & (mesmo script acima) & (derivado) & Ranking de escassez por UF e curso \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Indicadores de Escassez:} dif\_sal\_adm\_des\_pc (gap salarial), tx\_rotatividade, estoque\_liquido, tipologia\_escassez
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+%==============================================================================
+% DATA FLOW DIAGRAM
+%==============================================================================
+\section*{Fluxo de Dados Resumido}
+
+\begin{center}
+\begin{tikzpicture}[
+    node distance=0.6cm and 1.2cm,
+    box/.style={rectangle, draw, rounded corners, minimum width=2.8cm, minimum height=0.8cm, align=center, font=\scriptsize},
+    rawbox/.style={box, fill=red!15},
+    scriptbox/.style={box, fill=yellow!20},
+    outputbox/.style={box, fill=blue!15},
+    shinybox/.style={box, fill=green!15},
+    arrow/.style={-{Stealth[length=2mm]}, thick}
+]
+
+% Row 1: Raw Sources
+\node[rawbox] (ibge) {IBGE\\Pop, PIB, Geocodes};
+\node[rawbox, right=of ibge] (inep) {INEP\\Censo Escolar};
+\node[rawbox, right=of inep] (mte) {MTE\\RAIS, CAGED};
+\node[rawbox, right=of mte] (mec) {MEC\\CNCT, QBQ};
+\node[rawbox, right=of mec] (fgv) {FGV\\PROPAG Fin};
+
+% Row 2: Scripts
+\node[scriptbox, below=of ibge] (s1) {br\_pop1a.R\\TB\_municipios1a.R\\codes\_ibge.R};
+\node[scriptbox, below=of inep] (s2) {matriculas1UF.R\\Censo\_UF\_garabed1b.R\\prepara\_censo\_*.R};
+\node[scriptbox, below=of mte] (s3) {rais2a.R\\rais\_apo*.R\\preprocess\_caged\_*.R};
+\node[scriptbox, below=of mec] (s4) {qbq2a.R\\qbq3a.R\\qbq\_cnct6a.R};
+\node[scriptbox, below=of fgv] (s5) {avila\_vidal01.R};
+
+% Row 3: Outputs
+\node[outputbox, below=of s1] (o1) {pop01\_70b.rda\\df\_pibmunis.rda\\df\_codes\_ibge.rda};
+\node[outputbox, below=of s2] (o2) {df\_censo\_UF.rda\\meta11a\_opcoes.rda\\df\_censo\_supl\_tec*.rda};
+\node[outputbox, below=of s3] (o3) {rais\_cbo6\_uf*.rda\\caged\_rais\_cnct\_*.rda\\MUN\_dyna02\_21.rda};
+\node[outputbox, below=of s4] (o4) {df\_mat\_*.rda\\*\_matches2.rda\\qbq\_ocup\_cmento1.rda};
+\node[outputbox, below=of s5] (o5) {df\_2a--4b.rda\\df\_nd.rda\\dfcen\_val.rda};
+
+% Row 4: Shiny
+\node[shinybox, below=1.5cm of o3] (shiny) {\textbf{BM\_FGV\_Propag2.R}\\15 Abas Interativas};
+
+% Arrows
+\draw[arrow] (ibge) -- (s1);
+\draw[arrow] (inep) -- (s2);
+\draw[arrow] (mte) -- (s3);
+\draw[arrow] (mec) -- (s4);
+\draw[arrow] (fgv) -- (s5);
+
+\draw[arrow] (s1) -- (o1);
+\draw[arrow] (s2) -- (o2);
+\draw[arrow] (s3) -- (o3);
+\draw[arrow] (s4) -- (o4);
+\draw[arrow] (s5) -- (o5);
+
+\draw[arrow] (o1) -- (shiny);
+\draw[arrow] (o2) -- (shiny);
+\draw[arrow] (o3) -- (shiny);
+\draw[arrow] (o4) -- (shiny);
+\draw[arrow] (o5) -- (shiny);
+
+\end{tikzpicture}
+\end{center}
+
+\newpage
+
+%==============================================================================
+% COMPLETE DATA OBJECT LIST
+%==============================================================================
+\section*{Lista Completa de Objetos de Dados (37 arquivos .rda)}
+
+\footnotesize
+\setlength{\LTleft}{0pt}
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.3}
+
+\begin{longtable}{p{4.5cm}p{5.5cm}p{4.5cm}p{7cm}}
+\toprule
+\textbf{Arquivo .rda} & \textbf{Script Criador} & \textbf{S3 Path} & \textbf{Abas que Usam} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Arquivo .rda} & \textbf{Script Criador} & \textbf{S3 Path} & \textbf{Abas que Usam} \\
+\midrule
+\endhead
+\midrule
+\multicolumn{4}{r}{\textit{Continua...}} \\
+\endfoot
+\bottomrule
+\endlastfoot
+
+\multicolumn{4}{l}{\cellcolor{tabA!20}\textbf{DEMOGRAFIA}} \\
+pop01\_70b.rda & prelims/população/br\_pop1a.R & working/ibge/ & A1, A2 \\
+
+\multicolumn{4}{l}{\cellcolor{tabA!20}\textbf{CÓDIGOS GEOGRÁFICOS}} \\
+df\_codes\_ibge.rda & prelims/mapas/codes\_ibge.R & working/ibge/ & A2, D1, D2, D3 \\
+
+\multicolumn{4}{l}{\cellcolor{tabB!20}\textbf{FINANÇAS PROPAG}} \\
+df\_2a.rda, df\_2b.rda, df\_2c.rda & produtos\_avila\_vidal/avila\_vidal01.R & working/fgv/ & B1, B2, B3 \\
+df\_3a.rda, df\_3b.rda, df\_3c.rda & produtos\_avila\_vidal/avila\_vidal01.R & working/fgv/ & B1, B2, B3 \\
+df\_4a.rda, df\_4b.rda & produtos\_avila\_vidal/avila\_vidal01.R & working/fgv/ & B1, B2, B3 \\
+df\_nd.rda & produtos\_avila\_vidal/avila\_vidal01.R & working/fgv/ & B1, B2, B3 \\
+dfcen\_val.rda & produtos\_avila\_vidal/avila\_vidal01.R & working/fgv/ & B1, B2, B3 \\
+
+\multicolumn{4}{l}{\cellcolor{tabC!20}\textbf{CENSO ESCOLAR / META 11}} \\
+df\_censo\_UF.rda & produtos\_censo/matriculas1UF.R & working/mec\_inep/ & B1, C1, C2, C3 \\
+meta11a\_opcoes.rda & prelims/mec/Censo\_UF\_garabed1b.R & working/mec\_inep/ & A2, C1, C2 \\
+df\_censo\_supl\_tec23.rda & prelims/mec/prepara\_censo\_escolar\_tecnico.R & working/mec\_inep/ & C3, E1 \\
+df\_censo\_supl\_tec24.rda & prelims/mec/prepara\_censo\_escolar\_tecnico.R & working/mec\_inep/ & C3, E1 \\
+df\_censo\_notin\_cnct.rda & prelims/qbq/qbq2a.R & working/mec\_inep/ & C3 \\
+
+\multicolumn{4}{l}{\cellcolor{tabC!20}\textbf{PIB E ECONOMIA}} \\
+df\_pibmunis.rda & prelims/municipios/TB\_municipios1a.R & working/ibge/ & C4, D1 \\
+df\_residuals\_ols.rda & produtos\_rais/modelo\_ept3a.R & working/rais/ & C4 \\
+
+\multicolumn{4}{l}{\cellcolor{tabD!20}\textbf{DINAMISMO E APLs}} \\
+MUN\_dyna02\_21.rda & prelims/municipios/econ\_dynam1a.R & working/ibge/ & D1 \\
+dft\_apl\_MUN\_final.rda & produtos\_rais/rais\_apo2MUNI.R & working/rais/indices/ & D2 \\
+apl\_matri\_UF.rda & produtos\_rais/rais\_apo3UF.R & working/rais/indices/ & D2 \\
+apl\_matri\_MUN.rda & produtos\_rais/rais\_apo3MUNI.R & working/rais/indices/ & D2 \\
+qbq\_ocup\_cmento1.rda & prelims/qbq/qbq3a.R & working/qbq/ & D2 \\
+
+\multicolumn{4}{l}{\cellcolor{tabD!20}\textbf{INFORMALIDADE}} \\
+df\_cbocod\_mun23.rda & produtos\_rais/rais\_apo4a.R & working/rais/ & D3 \\
+df\_cbocod\_mun24.rda & produtos\_rais/rais\_apo4a.R & working/rais/ & D3 \\
+
+\multicolumn{4}{l}{\cellcolor{tabE!20}\textbf{MATCHING OFERTA-DEMANDA}} \\
+df\_mat\_uf.rda & prelims/qbq/qbq2a.R & working/mec\_inep/ & E1 \\
+df\_mat\_eixo.rda & prelims/qbq/qbq2a.R & working/mec\_inep/ & E1 \\
+df\_mat\_area.rda & prelims/qbq/qbq2a.R & working/mec\_inep/ & E1 \\
+df\_mat\_curso.rda & prelims/qbq/qbq2a.R & working/mec\_inep/ & E1 \\
+df\_exarcu.rda & prelims/qbq/qbq2a.R & working/mec\_inep/ & E1 \\
+rais\_cbo6\_uf23.rda & prelims/rais/rais2a.R & working/rais/ & E1 \\
+rais\_cbo6\_uf24.rda & prelims/rais/rais2a.R & working/rais/ & E1 \\
+cnct\_qbq\_matches2.rda & produtos\_qbq\_cnct/qbq\_cnct6a.R & working/qbq/ & E1 \\
+qbq\_cnct\_matches2.rda & produtos\_qbq\_cnct/qbq\_cnct6a.R & working/qbq/ & E1 \\
+
+\multicolumn{4}{l}{\cellcolor{tabE!20}\textbf{ESCASSEZ PROFISSIONAIS}} \\
+caged\_rais\_cnct\_2020\_2024\_shiny.rda & prelims/caged/2.preprocess\_caged\_rais\_shiny.R & working/mintraemp/ & E2 \\
+df\_ranking\_cursos\_caged\_rais.rda & prelims/caged/2.preprocess\_caged\_rais\_shiny.R & working/mintraemp/ & E2 \\
+
+\end{longtable}
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\section*{Estrutura do Repositório}
+
+\begin{verbatim}
+TechBrazil/
+├── RShiny/
+│   └── Produtos2/
+│       └── BM_FGV_Propag2.R          # Aplicativo Shiny principal (7400+ linhas)
+├── prelims/                           # Scripts de preparação de dados
+│   ├── caged/                         # CAGED/RAIS preprocessing
+│   ├── mapas/                         # Códigos geográficos IBGE
+│   ├── mec/                           # Censo Escolar, CNCT
+│   ├── municipios/                    # PIB, dinamismo econômico
+│   ├── pnad/                          # PNAD (não usado no Shiny principal)
+│   ├── população/                     # Projeções populacionais IBGE
+│   ├── qbq/                           # QBQ ocupações, matching
+│   └── rais/                          # Downloads e processamento RAIS
+├── produtos_*/                        # Scripts de produtos específicos
+│   ├── produtos_avila_vidal/          # Simulações financeiras FGV
+│   ├── produtos_censo/                # Agregações Censo Escolar
+│   ├── produtos_fundeb/               # Cálculos FUNDEB
+│   ├── produtos_qbq_cnct/             # Matching CNCT-CBO com IA
+│   └── produtos_rais/                 # APLs, modelo econométrico
+└── working/                           # Dados processados (espelhado no S3)
+\end{verbatim}
+
+\end{document}

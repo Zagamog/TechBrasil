@@ -1,0 +1,80 @@
+\documentclass[10pt]{article}
+\usepackage[left=1.5cm,right=1.5cm,top=1.5cm,bottom=1.5cm]{geometry}
+\usepackage{booktabs}
+\usepackage[table]{xcolor}
+\usepackage{enumitem}
+
+\definecolor{tabA}{RGB}{66,133,244}
+\definecolor{tabB}{RGB}{255,152,0}
+\definecolor{tabC}{RGB}{52,168,83}
+\definecolor{tabD}{RGB}{154,205,50}
+\definecolor{tabE}{RGB}{156,39,176}
+
+\title{\textbf{TechBrazil / PROPAG Data Inventory}\\[0.3em]\Large Executive Summary}
+\author{Suhas Parandekar}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section*{Overview}
+\vspace{-0.5em}
+The \textbf{BM\_FGV\_Propag2.R} Shiny application is a 15-tab analytical tool supporting Brazil's PROPAG and ``Juros por Educação'' initiative, connecting labor market demand with technical education supply for evidence-based state investment plans.
+
+\section*{Data Architecture}
+
+\begin{center}
+\begin{tabular}{lcp{8cm}}
+\toprule
+\textbf{Category} & \textbf{Files} & \textbf{Primary Sources} \\
+\midrule
+\textcolor{tabA}{$\blacksquare$} Demographics (A1-A2) & 2 & IBGE population projections 2000-2070 \\
+\textcolor{tabB}{$\blacksquare$} PROPAG Finance (B1-B3) & 10 & FGV/Vidal simulations, PROPAG portal \\
+\textcolor{tabC}{$\blacksquare$} EPT Supply (C1-C4) & 7 & INEP School Census 2007-2024 \\
+\textcolor{tabD}{$\blacksquare$} EPT Demand (D1-D3) & 7 & RAIS employment, IBGE PIB \\
+\textcolor{tabE}{$\blacksquare$} Supply-Demand Match (E1-E2) & 11 & CNCT, QBQ, CAGED/RAIS, GPT-4 matching \\
+\midrule
+\textbf{Total} & \textbf{37} & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Key Data Flows}
+\vspace{-0.5em}
+\small
+\begin{enumerate}[nosep,leftmargin=*]
+\item \textbf{Population:} IBGE projections $\rightarrow$ \texttt{br\_pop1a.R} $\rightarrow$ age cohorts with demographic crossover
+\item \textbf{Census:} School Census microdata $\rightarrow$ \texttt{matriculas1UF.R} $\rightarrow$ PNE Meta 11 tracking
+\item \textbf{Finance:} FGV/Vidal Excel $\rightarrow$ \texttt{avila\_vidal01.R} $\rightarrow$ 9 PROPAG scenarios
+\item \textbf{Labor:} RAIS/CAGED $\rightarrow$ multiple scripts $\rightarrow$ APLs, dynamism, shortage indicators
+\item \textbf{AI Match:} CNCT+CBO $\rightarrow$ \texttt{qbq\_cnct6a.R} (GPT-4) $\rightarrow$ 218 courses $\leftrightarrow$ occupations
+\end{enumerate}
+
+\section*{Repository Structure}
+\vspace{-0.5em}
+\small
+\texttt{prelims/} -- Data prep scripts | \texttt{produtos\_*/} -- Product scripts | \texttt{RShiny/Produtos2/} -- Main app (7,400+ lines) | \texttt{working/} $\rightarrow$ S3 \texttt{techbrazildata}
+
+\section*{Critical Dependencies}
+\vspace{-0.5em}
+\begin{itemize}[nosep,leftmargin=*]
+\item \textbf{Geographic backbone:} \texttt{df\_codes\_ibge.rda} -- 33 variables linking all datasets
+\item \textbf{Enrollment core:} \texttt{meta11a\_opcoes.rda}, \texttt{df\_censo\_UF.rda} feed multiple tabs
+\item \textbf{Labor market:} RAIS 2023-24 at CBO-6 digit; \textbf{AI matching:} GPT-4 embeddings (0.3 threshold)
+\end{itemize}
+
+\section*{Data Quality Notes}
+\vspace{-0.5em}
+\begin{itemize}[nosep,leftmargin=*]
+\item AWS S3 integration with secure credential management via \texttt{dotenv}
+\item Economic dynamism: recent period (2012-2021) weighted 1.5x vs early period 1.0x
+\item Shortage indicators combine salary differential, turnover, and employment stock
+\item Meta 11: 3 options (PROPAG, Integrated+Concomitant, Integrated only)
+\end{itemize}
+
+\vfill
+\hrule
+\vspace{0.5em}
+\small\textit{Full inventory: 6 pages with detailed variable lists, S3 paths, and data lineage diagrams.}
+
+\end{document}
