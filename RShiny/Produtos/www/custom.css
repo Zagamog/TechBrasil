@@ -1,0 +1,183 @@
+/* ======= GENERAL STYLING ======= */
+body {
+    background-color: #2b3e50 !important;
+    color: #ffffff !important;
+}
+
+/* ======= SIDEBAR ======= */
+.sidebar {
+    background-color: #1a252f !important;
+    color: #ffffff !important;
+}
+
+.sidebar .form-group {
+    padding: 0px;
+}
+
+.sidebar input,
+.sidebar select,
+.sidebar .shiny-bound-input:not(button) {
+    background-color: #34495e !important;
+    color: #ffffff !important;
+    border: 1px solid #4f5f6f !important;
+    padding: 0px;
+}
+
+
+/* ======= TAB COLORS (Viridis Palette) ======= */
+.nav-tabs > li > a {
+    color: white !important;
+    font-weight: bold !important;
+    border-radius: 5px 5px 0 0;
+    font-size: inherit;
+}
+
+/* Specifically target the first tab when active */
+.nav-tabs > li:nth-child(1).active > a {
+    background-color: #482878 !important; /* desired purple */
+}
+
+
+
+
+.nav-tabs > li:nth-child(1) a { background-color: #482878 !important; }
+.nav-tabs > li:nth-child(2) a { background-color: #3E4A89 !important; }
+.nav-tabs > li:nth-child(3) a { background-color: #31678E !important; }
+.nav-tabs > li:nth-child(4) a { background-color: #1F9E89 !important; }
+.nav-tabs > li:nth-child(5) a { background-color: #6DCD59 !important; }
+.nav-tabs > li:nth-child(6) a { background-color: #B4DD2C !important; }
+.nav-tabs > li:nth-child(7) a { background-color: #FDE725 !important; }
+.nav-tabs > li:nth-child(8) a { background-color: #440154 !important; }
+
+.nav-tabs > li.active > a {
+    background-color: #6DCD59 !important;
+    color: #ffffff !important;
+    border: 3px solid red !important;
+    font-weight: bold;
+}
+
+
+.nav-tabs > li > a:hover {
+    background-color: #8E24AA !important;
+    color: #FFFFFF !important;
+}
+
+/* ======= DATA TABLE STYLING ======= */
+.dataTables_wrapper {
+    background-color: #2b3e50 !important;
+    color: #ffffff !important;
+    margin: 0px !important;
+}
+
+.dt-buttons {
+    margin-bottom: 10px;
+}
+
+.dt-buttons button {
+    background-color: #007bff !important;
+    border: none;
+    color: white;
+    font-weight: bold;
+    padding: 5px 10px;
+    margin-right: 5px;
+}
+
+.dt-buttons button:hover {
+    background-color: #0056b3 !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    background-color: #6A1B9A !important;
+    color: white !important;
+    border-radius: 5px;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background-color: #8E24AA !important;
+}
+
+/* ======= SLIDER INPUT ======= */
+.irs-bar {
+    background: #6A1B9A !important;
+    border-top: 1px solid #8E24AA !important;
+    border-bottom: 1px solid #8E24AA !important;
+}
+
+.irs-slider {
+    background: #FFEB3B !important;
+    border: 1px solid #FBC02D !important;
+}
+
+.irs-grid-text {
+    color: #FFFFFF !important;
+}
+
+/* ======= CHECKBOX & RADIO BUTTONS ======= */
+.checkbox label, .radio label {
+    color: #FFFFFF !important;
+}
+
+.checkbox input[type="checkbox"]:checked + label::before,
+.radio input[type="radio"]:checked + label::before {
+    background-color: #4CAF50 !important;
+}
+
+/* ======= CUSTOM SCROLLBAR ======= */
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-track {
+    background: #2C3E50;
+}
+::-webkit-scrollbar-thumb {
+    background: #6A1B9A;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #8E24AA;
+}
+
+/* ======= MODAL POPUPS ======= */
+.modal-content {
+    background-color: #2C3E50 !important;
+    color: white !important;
+}
+.modal-header {
+    background-color: #34495E !important;
+    color: white !important;
+}
+
+/* ======= INFO ICONS ======= */
+.info-circle {
+    color: #F39C12;
+    font-size: 16px;
+    margin-left: 5px;
+}
+.info-circle:hover {
+    color: #E67E22;
+}
+
+/* ======= FONT AND HEADER BAR OVERRIDES ======= */
+.sidebar-inputs .form-group {
+    width: 100% !important;
+}
+.selectize-control {
+    width: 100% !important;
+}
+#dynamic-font-scaling {
+    font-size: 14px;
+}
+.btn, .dt-button, .selectize-input, .dataTables_filter input, .dataTables_length select {
+    font-size: inherit !important;
+}
+
+/* Fix header bar layout (top bar with title + hamburger menu) */
+/* ======= HEADER BAR FIX ======= */
+/*.main-header {
+  background-color: #1f5673 !important;
+} */
+/*.main-header .logo {
+  display: none !important;
+}
+*/
+
