@@ -1,0 +1,47 @@
+ [1] "Ano"                                                                                                                                                 
+
+ 
+ [7] "Código do Município"                                                                                                                                 
+ [8] "Nome do Município"                                                                                                                                   
+
+A
+ [2] "Código da Grande Região"                                                                                                                             
+ [3] "Nome da Grande Região"                                                                                                                               
+ 
+ B
+ [4] "Código da Unidade da Federação"                                                                                                                      
+ [5] "Sigla da Unidade da Federação"                                                                                                                       
+ [6] "Nome da Unidade da Federação"                                                                                                                        
+ 
+ C
+ [9] "Região Metropolitana"                                                                                                                                
+
+D
+[10] "Código da Mesorregião"                                                                                                                               
+[11] "Nome da Mesorregião"                                                                                                                                 
+
+E
+[12] "Código da Microrregião"                                                                                                                              
+[13] "Nome da Microrregião"                                                                                                                                
+
+F
+[14] "Código da Região Geográfica Imediata"                                                                                                                
+[15] "Nome da Região Geográfica Imediata"                                                                                                                  
+
+G
+[17] "Código da Região Geográfica Intermediária"                                                                                                           
+[18] "Nome da Região Geográfica Intermediária"                                                                                                             
+
+H
+[20] "Código Concentração Urbana"                                                                                                                          
+[21] "Nome Concentração Urbana"                                                                                                                            
+
+I
+[23] "Código Arranjo Populacional"                                                                                                                         
+[24] "Nome Arranjo Populacional"                                                                                                                           
+
+J
+[27] "Código da Região Rural"                                                                                                                              
+[28] "Nome da Região Rural"                                                                                                                                
+
+
