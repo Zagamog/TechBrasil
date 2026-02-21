@@ -1,0 +1,186 @@
+---
+title: "qbq_cnct_pipeline"
+author: "Suhas"
+date: "2026-02-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Pipeline de Matching Semântico QBQ-CNCT
+
+### Finalidade
+
+Este pipeline cria o mapeamento entre **ocupações CBO** (da RAIS/QBQ) e
+**cursos técnicos CNCT** (do Catálogo Nacional de Cursos Técnicos). Os arquivos
+de saída `qbq_cnct_matches2.rda` e `cnct_qbq_matches2.rda` são usados pelo
+aplicativo Shiny (Abas D2 e E1) e pelos scripts de análise APL
+(`rais_apo_03MUNI.R`, `rais_apo_03UF.R`).
+
+O matching utiliza uma abordagem híbrida combinando:
+1. **Similaridade semântica** — embeddings multilíngues (intfloat/multilingual-e5-large)
+   armazenados no banco de dados vetorial Pinecone
+2. **Similaridade TF-IDF** — correspondência por frequência de termos como baseline
+3. **Score combinado** — combinação ponderada dos scores semântico e TF-IDF
+
+### Saídas pré-computadas no S3
+
+Um novo desenvolvedor **NÃO precisa** re-executar este pipeline. As saídas
+pré-computadas estão disponíveis no S3 (bucket `techbrazildata`):
+
+```
+working/qbq/qbq_cnct_matches2.rda   ← Ocupação → cursos (usado pelo Shiny E1, rais_apo_03*.R)
+working/qbq/cnct_qbq_matches2.rda   ← Curso → ocupações (usado pelo Shiny E1)
+working/qbq/qbq_cnct_matches.csv    ← Scores brutos antes da filtragem
+working/qbq/cnct_qbq_matches.csv    ← Scores brutos antes da filtragem
+```
+
+Só re-executar se: (a) o catálogo CNCT for atualizado, (b) os dados QBQ de
+ocupações mudarem, ou (c) quiser melhorar a qualidade do matching.
+
+### Visão geral do pipeline
+
+```
+ETAPA 1: PREPARAÇÃO DOS DADOS
+  cnct1a.py           → Processar CSV do catálogo CNCT, criar códigos hierárquicos IDX_EIXARECUR
+                        Saída: working/mec_outros/df_cnct2025a.pkl/.rds/.csv
+
+  qbq_cnct1b.py       → Alinhar CBOs dos cursos CNCT com CBOs das ocupações QBQ
+                        Juntar hierarquia CBO (Grande Grupo → Família)
+                        Saída: working/qbq/df_censo_cbo_matched.pkl/.xlsx
+
+ETAPA 2: GERAÇÃO DE EMBEDDINGS E BANCO VETORIAL
+  qbq_cnct2a.py       → Criar índice Pinecone "cnct-qbq" (1024 dimensões, cosseno)
+                        Gerar embeddings dos perfis de cursos CNCT e ocupações QBQ
+                        usando intfloat/multilingual-e5-large (CUDA/GPU)
+                        Upsert no Pinecone com namespaces por Eixo/Grande Grupo
+
+  qbq_cnct2b.py       → Consultas de teste no Pinecone para verificar qualidade
+
+ETAPA 3: BASELINE TF-IDF
+  qbq_cnct3a.py       → Calcular vetores TF-IDF para cursos e ocupações
+                        Saída: working/qbq/tfidf_vectors_cnct.pkl
+                               working/qbq/tfidf_vectors_qbq.pkl
+                               working/qbq/df_cnct_cbo_resultado_completo.xlsx
+
+ETAPA 4: PREPARAÇÃO DE BLOBS DE TEXTO
+  qbq_cnct4b.R        → Concatenar campos do curso CNCT em um único bloco de texto
+                        por curso (Denominação + Perfil + Campo de Atuação)
+                        Exportar como pickle para embedding em Python
+                        Saída: working/qbq/df_cnct2025b_blob.pkl
+                               working/qbq/qbq_ocup_cmento1_blob.pkl
+
+ETAPA 5: MATCHING COMBINADO
+  qbq_cnct5a.py       → Upsert dos blobs de cursos no Pinecone namespace "curso"
+                        e blobs de ocupações QBQ no namespace "ocupacao"
+
+  qbq_cnct5b.py       → Matching CURSO → OCUPAÇÃO:
+                        Para cada curso CNCT, buscar top 50 ocupações QBQ no Pinecone
+                        Combinar score semântico com score TF-IDF
+                        Saída: working/qbq/cnct_qbq_matches.csv/.pkl
+                        (218 cursos × 50 matches = ~10.900 linhas)
+
+  qbq_cnct5c.py       → Matching OCUPAÇÃO → CURSO (direção reversa):
+                        Para cada ocupação QBQ, buscar top 20 cursos CNCT no Pinecone
+                        Combinar score semântico com score TF-IDF
+                        Saída: working/qbq/qbq_cnct_matches.csv/.pkl
+                        (1.899 ocupações × 20 matches)
+
+  qbq_cnct5c.R        → Upload dos CSVs ao S3
+
+ETAPA 6: ENRIQUECIMENTO E SAÍDA FINAL
+  qbq_cnct_06a.R      → Juntar matches com labels de Eixo Tecnológico (de df_exarcu.rda)
+                        Filtrar para 171 cursos válidos (de 218 brutos)
+                        Padronizar CodCBO como character
+                        Saída: working/qbq/qbq_cnct_matches2.rda  ← FINAL
+                               working/qbq/cnct_qbq_matches2.rda  ← FINAL
+```
+
+### Dependências externas
+
+- **Pinecone**: Banco de dados vetorial para busca de vizinhos mais próximos
+  - Índice: "cnct-qbq", 1024 dimensões, métrica cosseno, AWS us-east-1
+  - Chave API no arquivo .env
+- **intfloat/multilingual-e5-large**: Modelo de embeddings open-source do HuggingFace
+  - 1024 dimensões, multilíngue (suporte a português)
+  - Executa localmente em GPU (CUDA)
+- **Pacotes Python**: sentence-transformers, pinecone-client, pandas, scikit-learn,
+  tqdm, pyreadr, boto3
+
+### Estruturas de dados principais
+
+**qbq_cnct_matches2.rda** (Ocupação → Curso):
+```
+CodCBO           — Código CBO da ocupação, 6 dígitos (character)
+IDX_EIXARECUR    — Código hierárquico do curso, 6 dígitos (EECCNN)
+Denominação do Curso — Nome do curso técnico
+Eixo Tecnológico — Eixo tecnológico (13 categorias)
+Área Tecnológica — Área tecnológica dentro do eixo
+final_score      — Score combinado de similaridade
+semantic         — Similaridade semântica (cosseno dos embeddings)
+tfidf            — Similaridade TF-IDF
+```
+
+**cnct_qbq_matches2.rda** (Curso → Ocupação):
+Mesma estrutura, mas organizado por curso, com top 50 ocupações por curso.
+
+### Interpretação dos scores
+
+- `semantic`: Similaridade cosseno dos embeddings multilíngues (0-1).
+  Baseado na sobreposição de significado entre perfil ocupacional e descrição do curso.
+- `tfidf`: Similaridade cosseno TF-IDF (0-1).
+  Baseado na sobreposição de palavras-chave.
+- `final_score`: Combinação ponderada. Maior = melhor match.
+
+### Estrutura do código IDX_EIXARECUR
+
+O código de 6 dígitos codifica a hierarquia do CNCT:
+```
+  EE  CC  NN
+  ↓   ↓   ↓
+  Eixo Tecnológico (01-13)
+      Área Tecnológica (01-nn por Eixo)
+          Curso (01-nn por Área)
+
+Exemplo: 010101 = Eixo 01, Área 01, Curso 01
+```
+
+### Reprodução a partir do zero
+
+1. Garantir que o CSV do catálogo CNCT esteja em `rawdata/mec_outros/catalogo_cnct.csv`
+2. Garantir que dados QBQ existam: `working/qbq/qbq_ocup_cmento1.rda` (de qbq_03a.R)
+3. Configurar ambiente Python com os pacotes necessários
+4. Configurar `.env` com chave API do Pinecone
+5. Executar scripts na ordem: cnct1a.py → qbq_cnct1b.py → 2a → 3a → 4b.R → 5a → 5b → 5c.py → 5c.R → 06a.R
+6. Tempo total estimado: ~2-4 horas (geração de embeddings intensiva em GPU)
+
+### Validação humana dos matches
+
+Para controle de qualidade, foram gerados formulários PDF para revisão humana
+dos resultados do matching semântico:
+
+- **relatorio_cnct_cbo_positivo.pdf** — Matches com score alto (confirmação humana)
+- **relatorio_cnct_cbo_negativo.pdf** — Matches com score baixo ou incerto (validação)
+- **relatorio_cnct_cbo_prova.pdf** — Versão de teste do formulário
+
+Cada página mostra um par curso-CBO com:
+- Perfil do Curso (CNCT): descrição, competências, campo de atuação
+- CBO correspondido: código, nome e descrição completa do perfil ocupacional
+- Checkboxes: "CBO deve ficar" (manter) / "CBO não fica aqui" (remover)
+
+Estes formulários foram gerados em LaTeX e permitem que especialistas em
+educação profissional validem se as correspondências geradas por IA são
+adequadas. Os resultados da validação podem ser usados para refinar os
+limiares de score ou retreinar o matching.
+
+### Observações
+
+- Todos os scripts Python têm caminhos absolutos `D:/Country/Brazil/TechBrazil/`
+  que devem ser atualizados para caminhos relativos se re-executados em outro ambiente
+- O arquivo `.env` com chaves API está em `D:/AdvancedR/knowbankedu/openai/.env`
+  (fora do diretório do projeto por segurança)
+- O tier gratuito do Pinecone tem limites de vetores — pode necessitar tier pago
+  para o dataset completo
+- O script 2b é apenas para testes, não faz parte do pipeline de produção
