@@ -43,6 +43,8 @@ D:\Country\Brazil\TechBrazil\prelims\rais\rais_01a.R -- D2, D3, E1
 
 D:\Country\Brazil\TechBrazil\prelims\qbq\qbq_03a.R -- D2, D3, E1
 
+D:\Country\Brazil\TechBrazil\prelims\qbq\qbq_04a.R -- D2, D3, E1
+
 D:\Country\Brazil\TechBrazil\prelims\rais\rais_02a.R -- D2, D3, E1
 
 D:\Country\Brazil\TechBrazil\produtos_rais\rais_apo_01a.R -- D2

@@ -559,12 +559,10 @@ load("qbq_ocup_cmento1.rda")
 # Colunas: cbo_4dig, cbo_familia, short_name
 if (file.exists("cbo_short_names.rda")) {
   load("cbo_short_names.rda")  # → cbo_short_names
-  message("✅ cbo_short_names.rda carregado (", nrow(cbo_short_names), " famílias)")
 } else {
   # Fallback: usar nomes completos
   cbo_short_names <- unique(qbq_ocup_cmento1[, c("cbo_4dig", "cbo_familia")])
   cbo_short_names$short_name <- cbo_short_names$cbo_familia
-  message("⚠️ cbo_short_names.rda não encontrado — usando nomes completos")
 }
 
 gpkg_local_path <- "sf_regioes.gpkg"
@@ -1055,7 +1053,7 @@ ui <- dashboardPage(
     
     tags$div(
       style = "padding: 10px 20px; font-size: 24px; font-weight: bold; color: #0000ff;",
-      HTML('Faça adesão ao <span style="color: #FFD700; text-shadow: 1px 1px #333;">Propag</span> !')
+      HTML('Aproveite ao máximo o <span style="color: #FFD700; text-shadow: 1px 1px #333;">Propag</span> com bom planejamento!')
     ),
     
     
@@ -4836,7 +4834,7 @@ output$tab1_fin_plot <- renderPlot({
 
 
 h3("Tabela 1: Variáveis Financeiras", style = "color: #1f5673; font-weight: bold; margin-top: 30px;")
-output$tab1_fin_table <- DT::renderDataTable({
+output$tab1_fin_table <- DT::renderDT(server = FALSE, {
   df <- financeiro_dt_all
   # Drop unused column
   df <- df[, !(names(df) %in% c("fef_share_pct"))]
@@ -4859,16 +4857,17 @@ output$tab1_fin_table <- DT::renderDataTable({
       autoWidth = FALSE,
       dom = 'Bfrtip',
       buttons = list(
-        list(extend = "copy", text = "Copiar"),
-        list(extend = "csv", filename = "Tabela_Financeira_PROPAG", text = "CSV"),
-        list(extend = "excel", filename = "Tabela_Financeira_PROPAG", text = "Excel"),
+        list(extend = "copy", text = "Copiar", exportOptions = list(modifier = list(page = "all"))),
+        list(extend = "csv", filename = "Tabela_Financeira_PROPAG", text = "CSV", exportOptions = list(modifier = list(page = "all"))),
+        list(extend = "excel", filename = "Tabela_Financeira_PROPAG", text = "Excel", exportOptions = list(modifier = list(page = "all"))),
         list(
           extend = "pdf",
           filename = "Tabela_Financeira_PROPAG",
           text = "PDF",
           orientation = "landscape",
           pageSize = "A4",
-          messageTop = "Tabela 1: Variáveis Financeiras"
+          messageTop = "Tabela 1: Variáveis Financeiras",
+          exportOptions = list(modifier = list(page = "all"))
         )
       ),
       columnDefs = list(
@@ -5012,7 +5011,7 @@ output$oferta_ept_plot <- renderPlot({
 })
 
 
-output$oferta_ept_table <- DT::renderDT({
+output$oferta_ept_table <- DT::renderDT(server = FALSE, {
   req(input$oferta_uf, input$oferta_ept_var)
   
   # Passo 1: Dados observados de meta11a_opcoes (EPT e ENSINO_MEDIO)
@@ -5068,16 +5067,17 @@ output$oferta_ept_table <- DT::renderDT({
       pageLength = 50,
       dom = 'Bfrtip',
       buttons = list(
-        list(extend = "copy", text = "Copiar"),
-        list(extend = "csv", filename = "Tabela_EPT", text = "CSV"),
-        list(extend = "excel", filename = "Tabela_EPT", text = "Excel"),
+        list(extend = "copy", text = "Copiar", exportOptions = list(modifier = list(page = "all"))),
+        list(extend = "csv", filename = "Tabela_EPT", text = "CSV", exportOptions = list(modifier = list(page = "all"))),
+        list(extend = "excel", filename = "Tabela_EPT", text = "Excel", exportOptions = list(modifier = list(page = "all"))),
         list(
           extend = "pdf",
           filename = "Tabela_EPT",
           text = "PDF",
           orientation = "landscape",
           pageSize = "A4",
-          messageTop = "Tabela Transposta de Matrículas"
+          messageTop = "Tabela Transposta de Matrículas",
+          exportOptions = list(modifier = list(page = "all"))
         )
       ),
       scrollX = TRUE
@@ -5989,7 +5989,7 @@ output$dyn_map <- renderLeaflet({
 })
 
 # Saída de tabela - COM TODOS OS 4 SETORES (AGRO, INDÚSTRIA, SERVIÇOS, ADMIN)
-output$dyn_table <- renderDT({
+output$dyn_table <- renderDT(server = FALSE, {
   data <- rkt_filtered_dynamism_data()
   req(nrow(data) > 0)
   
@@ -6012,15 +6012,29 @@ output$dyn_table <- renderDT({
   # Sort by dynamism index
   table_data <- table_data[order(-`Índice Dinamismo`)]
   
+  # Construir título e nome de arquivo descritivos
+  uf_dyn_sel <- if (is.null(input$uf_dyn)) "Brasil" else if (length(input$uf_dyn) == 1) input$uf_dyn else paste0(length(input$uf_dyn), "UFs")
+  geo_dyn_detail <- if (!is.null(input$rgimed_dyn) && length(input$rgimed_dyn) == 1) {
+    paste0(uf_dyn_sel, "_", input$rgimed_dyn)
+  } else if (!is.null(input$rgintm_dyn) && length(input$rgintm_dyn) == 1) {
+    paste0(uf_dyn_sel, "_", input$rgintm_dyn)
+  } else { uf_dyn_sel }
+  d1_export_title <- paste0("PROPAG - Dinamismo Econômico Municipal — ", geo_dyn_detail)
+  d1_export_filename <- paste0("PROPAG_Dinamismo_", gsub("[^A-Za-z0-9_]", "", geo_dyn_detail))
+  
   datatable(table_data, rownames = FALSE, extensions = 'Buttons',
             options = list(
               pageLength = 15, 
               scrollX = TRUE, 
               dom = 'Bfrtip',
               buttons = list(
-                list(extend = "copy", text = "Copiar"),
-                list(extend = "csv", filename = "Dinamismo_Municipal_Completo", text = "CSV"),
-                list(extend = "excel", filename = "Dinamismo_Municipal_Completo", text = "Excel")
+                list(extend = "copy", text = "Copiar", exportOptions = list(modifier = list(page = "all"))),
+                list(extend = "csv", filename = d1_export_filename, text = "CSV", exportOptions = list(modifier = list(page = "all"))),
+                list(extend = "excel", filename = d1_export_filename, text = "Excel", exportOptions = list(modifier = list(page = "all"))),
+                list(extend = "pdf", filename = d1_export_filename, text = "PDF", 
+                     orientation = "landscape", pageSize = "A4",
+                     title = d1_export_title,
+                     exportOptions = list(modifier = list(page = "all")))
               ),
               columnDefs = list(
                 list(width = '30px', targets = 0),   # UF
@@ -6430,7 +6444,7 @@ output$apl_map <- renderLeaflet({
 
 # Table output
 # Tabela aprimorada com nomes de colunas atualizados
-output$apl_table <- renderDT({
+output$apl_table <- renderDT(server = FALSE, {
   if (input$apl_analysis_mode == "apl_only") {
     # APL Mode
     level <- rkt_apl_aggregation_level()
@@ -6454,6 +6468,34 @@ output$apl_table <- renderDT({
     }
     level_for_export <- level  # Store for export filename
     
+    # Construir título e nome de arquivo descritivos
+    uf_sel <- if (length(input$uf_apl) == 1) {
+      input$uf_apl
+    } else {
+      paste0(length(input$uf_apl), "UFs")
+    }
+    
+    # Apenas incluir sub-região se for seleção única
+    geo_detail <- if (!is.null(input$mun_apl) && length(input$mun_apl) == 1) {
+      paste0(uf_sel, "_", input$mun_apl)
+    } else if (!is.null(input$rgimed_apl) && length(input$rgimed_apl) == 1) {
+      paste0(uf_sel, "_", input$rgimed_apl)
+    } else if (!is.null(input$rgintm_apl) && length(input$rgintm_apl) == 1) {
+      paste0(uf_sel, "_", input$rgintm_apl)
+    } else {
+      uf_sel
+    }
+    
+    level_label <- switch(level,
+                          "municipal" = "Municipal",
+                          "rgimed" = "Região Imediata",
+                          "rgintm" = "Região Intermediária", 
+                          "uf" = "UF"
+    )
+    export_title <- paste0("PROPAG - APLs por ", level_label, " — ", geo_detail)
+    export_filename <- paste0("PROPAG_APL_", toupper(level_for_export), "_", 
+                              gsub("[^A-Za-z0-9_]", "", geo_detail))
+    
   } else {
     # Modo de Correspondência de Cursos - mostrar alinhamento APL vs Curso
     course_data <- rkt_course_data()
@@ -6463,11 +6505,23 @@ output$apl_table <- renderDT({
     req(nrow(apl_data) > 0)
     
     # Criar análise de correspondência
+    # Agregar APLs por ocupação (evitar duplicatas municipais)
+    apl_agg <- apl_data[, .(
+      LQ = max(LQ, na.rm = TRUE),
+      E_mun_cbo = sum(E_mun_cbo, na.rm = TRUE)
+    ), by = .(cbo_4dig, cbo_familia)]
+    
+    # Agregar cursos por ocupação (evitar duplicatas)
+    course_agg <- course_data[, .(
+      nome_curso_clean = paste(unique(nome_curso_clean), collapse = "; "),
+      QT_MAT_CURSO_TEC_TOT = sum(QT_MAT_CURSO_TEC_TOT, na.rm = TRUE)
+    ), by = .(cbo_4dig)]
+    
     matching_data <- merge(
-      apl_data[, .(cbo_4dig, cbo_familia, LQ, E_mun_cbo)],
-      course_data[, .(cbo_4dig, nome_curso_clean, QT_MAT_CURSO_TEC_TOT)],
+      apl_agg,
+      course_agg,
       by = "cbo_4dig",
-      all.x = TRUE  # Keep all APLs, show which have courses
+      all.x = TRUE
     )
     
     # Criar indicador de correspondência
@@ -6481,6 +6535,12 @@ output$apl_table <- renderDT({
     
     colnames(table_data) <- c("Ocupação APL", "QL", "Emprego APL", "Curso Técnico", "Matrículas", "Status Match")
     level_for_export <- "matching"
+    uf_sel <- if (length(input$uf_apl) == 1) input$uf_apl else paste0(length(input$uf_apl), "UFs")
+    geo_detail <- if (!is.null(input$mun_apl) && length(input$mun_apl) == 1) {
+      paste0(uf_sel, "_", input$mun_apl)
+    } else { uf_sel }
+    export_title <- paste0("PROPAG - Correspondência APL-Cursos — ", geo_detail)
+    export_filename <- paste0("PROPAG_APL_CURSOS_", gsub("[^A-Za-z0-9_]", "", geo_detail))
   }
   
   datatable(
@@ -6493,9 +6553,13 @@ output$apl_table <- renderDT({
       scrollX = TRUE,
       dom = 'Bfrtip',
       buttons = list(
-        list(extend = "copy", text = "Copiar"),
-        list(extend = "csv", filename = paste0("APL_", toupper(level_for_export)), text = "CSV"),
-        list(extend = "excel", filename = paste0("APL_", toupper(level_for_export)), text = "Excel")
+        list(extend = "copy", text = "Copiar", exportOptions = list(modifier = list(page = "all"))),
+        list(extend = "csv", filename = export_filename, text = "CSV", exportOptions = list(modifier = list(page = "all"))),
+        list(extend = "excel", filename = export_filename, text = "Excel", exportOptions = list(modifier = list(page = "all"))),
+        list(extend = "pdf", filename = export_filename, text = "PDF",
+             orientation = "landscape", pageSize = "A4",
+             title = export_title,
+             exportOptions = list(modifier = list(page = "all")))
       ),
       columnDefs = if ("Alta (QL≥5)" %in% colnames(table_data)) {
         # Encontrar índices das colunas de prioridade (0-indexed)
@@ -6835,7 +6899,7 @@ output$informality_map <- renderLeaflet({
 
 
 # Data table rendering (FIXED - arrange before select)
-output$informality_table <- renderDT({
+output$informality_table <- renderDT(server = FALSE, {
   dt_data <- rkt_filtered_dt()
   req(nrow(dt_data) > 0)
   
@@ -6853,15 +6917,30 @@ output$informality_table <- renderDT({
     select(UF, Município, `Vínculos Formais`, `Vínculos Totais`, 
            `Taxa Formalidade (%)`, Decil)
   
+  uf_inf_sel <- if (is.null(input$informality_uf)) "Brasil" else if (length(input$informality_uf) == 1) input$informality_uf else paste0(length(input$informality_uf), "UFs")
+  geo_inf_detail <- if (!is.null(input$informality_municipio) && length(input$informality_municipio) == 1) {
+    paste0(uf_inf_sel, "_", input$informality_municipio)
+  } else if (!is.null(input$informality_reg_imed) && length(input$informality_reg_imed) == 1) {
+    paste0(uf_inf_sel, "_", input$informality_reg_imed)
+  } else if (!is.null(input$informality_reg_inter) && length(input$informality_reg_inter) == 1) {
+    paste0(uf_inf_sel, "_", input$informality_reg_inter)
+  } else { uf_inf_sel }
+  e1_export_title <- paste0("PROPAG - Formalidade EPT por Município — ", geo_inf_detail)
+  e1_export_filename <- paste0("PROPAG_Formalidade_", gsub("[^A-Za-z0-9_]", "", geo_inf_detail))
+  
   datatable(table_data, rownames = FALSE, extensions = 'Buttons',
             options = list(
               pageLength = 15, 
               scrollX = TRUE, 
               dom = 'Bfrtip',
               buttons = list(
-                list(extend = "copy", text = "Copiar"),
-                list(extend = "csv", filename = "EPT_Informalidade", text = "CSV"),
-                list(extend = "excel", filename = "EPT_Informalidade", text = "Excel")
+                list(extend = "copy", text = "Copiar", exportOptions = list(modifier = list(page = "all"))),
+                list(extend = "csv", filename = e1_export_filename, text = "CSV", exportOptions = list(modifier = list(page = "all"))),
+                list(extend = "excel", filename = e1_export_filename, text = "Excel", exportOptions = list(modifier = list(page = "all"))),
+                list(extend = "pdf", filename = e1_export_filename, text = "PDF",
+                     orientation = "landscape", pageSize = "A4",
+                     title = e1_export_title,
+                     exportOptions = list(modifier = list(page = "all")))
               ),
               columnDefs = list(
                 list(width = '40px', targets = 0),   # UF
