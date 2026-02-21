@@ -2455,6 +2455,10 @@ ui <- dashboardPage(
                            
                            tags$style(HTML("
 /* Scope to the DT with id 'apl_table' only */
+#apl_table table.dataTable {
+  font-size: 14px !important;
+}
+
 #apl_table table.dataTable thead th,
 #apl_table table.dataTable thead td {
   background-color: #20313d !important;   /* dark header */
@@ -2483,19 +2487,35 @@ ui <- dashboardPage(
   white-space: normal !important;
   word-wrap: break-word !important;
   max-width: 300px;
-  font-size: 14px;
-  line-height: 2.0;
+  line-height: 2.2;
 }
 
 #apl_table .apl-tag {
   display: inline-block;
-  padding: 2px 8px;
+  padding: 3px 8px;
   margin: 2px 3px;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
-  border: 1px solid rgba(255,255,255,0.4);
   line-height: 1.4;
+}
+
+#apl_table .apl-tag-alta {
+  background: #e74c3c;
+  color: white;
+  border: 1px solid #c0392b;
+}
+
+#apl_table .apl-tag-media {
+  background: #f39c12;
+  color: white;
+  border: 1px solid #d68910;
+}
+
+#apl_table .apl-tag-padrao {
+  background: #27ae60;
+  color: white;
+  border: 1px solid #1e8449;
 }
 ")),
                            
@@ -6145,7 +6165,7 @@ rkt_apl_dynamic_data <- reactive({
              group_by(SG_UF, NM_RGIINTM, NM_RGIMED, cat) %>%
              slice_head(n = n_top) %>%
              summarise(
-               txt = paste0('<span class="apl-tag">', display_name, " (", formatC(E_total, format="d", big.mark="."), ")", '</span>', collapse = " "),
+               txt = paste0('<span class="apl-tag apl-tag-', cat, '">', display_name, " (", formatC(E_total, format="d", big.mark="."), ")", '</span>', collapse = " "),
                .groups = 'drop'
              ) %>%
              pivot_wider(names_from = cat, values_from = txt, values_fill = "")
@@ -6166,6 +6186,7 @@ rkt_apl_dynamic_data <- reactive({
              ) %>%
              left_join(priority_lists, by = c("SG_UF", "NM_RGIINTM", "NM_RGIMED")) %>%
              mutate(across(c(alta, media, padrao), ~ replace_na(.x, ""))) %>%
+             select(SG_UF, NM_RGIINTM, NM_RGIMED, n_apls, n_municipios, avg_lq, total_emp, alta, media, padrao) %>%
              arrange(desc(avg_lq))
          },
          "rgintm" = {
@@ -6178,7 +6199,7 @@ rkt_apl_dynamic_data <- reactive({
              arrange(desc(E_total)) %>%
              group_by(SG_UF, NM_RGIINTM, cat) %>%
              slice_head(n = n_top) %>%
-             summarise(txt = paste0('<span class="apl-tag">', display_name, " (", formatC(E_total, format="d", big.mark="."), ")", '</span>', collapse = " "), .groups = 'drop') %>%
+             summarise(txt = paste0('<span class="apl-tag apl-tag-', cat, '">', display_name, " (", formatC(E_total, format="d", big.mark="."), ")", '</span>', collapse = " "), .groups = 'drop') %>%
              pivot_wider(names_from = cat, values_from = txt, values_fill = "")
            
            for (col in c("alta", "media", "padrao")) {
@@ -6196,6 +6217,7 @@ rkt_apl_dynamic_data <- reactive({
              ) %>%
              left_join(priority_lists, by = c("SG_UF", "NM_RGIINTM")) %>%
              mutate(across(c(alta, media, padrao), ~ replace_na(.x, ""))) %>%
+             select(SG_UF, NM_RGIINTM, n_apls, n_municipios, avg_lq, total_emp, alta, media, padrao) %>%
              arrange(desc(avg_lq))
          },
          "uf" = {
@@ -6208,7 +6230,7 @@ rkt_apl_dynamic_data <- reactive({
              arrange(desc(E_total)) %>%
              group_by(SG_UF, cat) %>%
              slice_head(n = n_top) %>%
-             summarise(txt = paste0('<span class="apl-tag">', display_name, " (", formatC(E_total, format="d", big.mark="."), ")", '</span>', collapse = " "), .groups = 'drop') %>%
+             summarise(txt = paste0('<span class="apl-tag apl-tag-', cat, '">', display_name, " (", formatC(E_total, format="d", big.mark="."), ")", '</span>', collapse = " "), .groups = 'drop') %>%
              pivot_wider(names_from = cat, values_from = txt, values_fill = "")
            
            for (col in c("alta", "media", "padrao")) {
@@ -6226,6 +6248,7 @@ rkt_apl_dynamic_data <- reactive({
              ) %>%
              left_join(priority_lists, by = "SG_UF") %>%
              mutate(across(c(alta, media, padrao), ~ replace_na(.x, ""))) %>%
+             select(SG_UF, n_apls, n_municipios, avg_lq, total_emp, alta, media, padrao) %>%
              arrange(desc(avg_lq))
          }
   )
@@ -6488,9 +6511,7 @@ output$apl_table <- renderDT({
     class = "stripe display compact"
   ) %>% {
     if ("Alta (QL≥5)" %in% colnames(table_data)) {
-      formatStyle(., "Alta (QL≥5)", backgroundColor = "#e74c3c", color = "white") %>%
-        formatStyle("Média (QL 2.5-5)", backgroundColor = "#f39c12", color = "white") %>%
-        formatStyle("Padrão (QL 1.25-2.5)", backgroundColor = "#27ae60", color = "white")
+      .
     } else .
   }
 })
