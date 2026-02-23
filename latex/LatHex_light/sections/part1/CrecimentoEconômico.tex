@@ -211,15 +211,22 @@ Os cursos técnicos identificados como relevantes para os APLs são cruzados com
 
 \textbf{Interface do Painel de APLs}
 
-A Figura~\ref{fig:apl_app} apresenta a interface principal do painel interativo que permite explorar os Arranjos Produtivos Locais (APLs) identificados com base na especialização ocupacional (CBO). O usuário pode navegar pelos níveis geográficos disponíveis — Unidade da Federação (UF), Regiões Intermediárias, Regiões Imediatas e Municípios — e ajustar os critérios de identificação dos APLs utilizando os filtros de especialização local: quociente locacional (QL) e número mínimo de vínculos empregatícios. À direita, o mapa dinâmico mostra a distribuição geográfica dos APLs conforme os filtros aplicados. Abaixo, uma tabela resume os APLs encontrados na região selecionada, indicando a ocupação identificada, o município correspondente e os valores de especialização e emprego. Acesse o painel aqui: \href{https://datanalytics.worldbank.org/content/30860e91-45c8-4c91-b9f1-56355e723300}{https://datanalytics.worldbank.org/Plataforma Interativa PROPAG}.
+A Figura~\ref{fig:apl_app} apresenta a interface principal do painel interativo de Arranjos Produtivos Locais (APLs), identificados com base na especialização ocupacional (CBO). O painel opera em dois modos, selecionáveis no canto superior esquerdo: \emph{Análise de APLs}, que exibe o mapeamento das especializações locais, e \emph{Correspondência APL-Cursos}, que cruza as ocupações identificadas com cursos técnicos do CNCT. Uma caixa de seleção permite alternar entre os nomes completos das famílias CBO e versões abreviadas, facilitando a leitura da tabela.
+
+Os filtros geográficos seguem a hierarquia territorial do IBGE — UF, Regiões Intermediárias, Regiões Imediatas e Municípios — permitindo navegação progressiva até o nível local. Os filtros de especialização controlam o quociente locacional mínimo (QL, padrão 1,25) e o número mínimo de vínculos empregatícios. Um resumo da seleção exibe o nível de agregação ativo, a quantidade de APLs encontrados, o número de municípios e de ocupações (famílias CBO de 4 dígitos) abrangidos.
+
+O mapa temático à direita exibe a distribuição geográfica dos APLs por município, com escala de cores proporcional ao número de especializações identificadas em cada território. Ao passar o cursor sobre um município, um \emph{tooltip} exibe informações resumidas; ao clicar, um \emph{popup} apresenta as ocupações especializadas naquele local com os respectivos valores de QL e vínculos formais.
+
+A tabela inferior apresenta os resultados agregados por Região Imediata, exibindo para cada uma o número de APLs, municípios envolvidos, QL médio e total de vínculos formais. As ocupações são apresentadas como etiquetas coloridas organizadas em três faixas de concentração: \textcolor{red}{\textbf{Alta}} (QL $\geq$ 5), \textcolor{orange}{\textbf{Média}} (QL entre 2,5 e 5) e \textcolor{green!60!black}{\textbf{Padrão}} (QL entre 1,25 e 2,5). Cada etiqueta inclui o nome da ocupação e o número de vínculos formais entre parênteses. Os dados podem ser exportados nos formatos CSV, Excel e PDF.
+
+Acesse o painel aqui: \href{https://datanalytics.worldbank.org/content/30860e91-45c8-4c91-b9f1-56355e723300}{Plataforma Interativa PROPAG}.
 
 \begin{figure}[htbp!]
 	\centering
 	\includegraphics[width=\textwidth]{images/6b_APL.png}
-	\caption{Interface do painel interativo de APLs por CBO.}
+	\caption{Painel D2: Arranjos Produtivos Locais por CBO, com etiquetas coloridas por faixa de concentração e agregação por Região Imediata.}
 	\label{fig:apl_app}
 \end{figure}
-
 
 \section{Dinamismo Econômico Municipal} 
 
